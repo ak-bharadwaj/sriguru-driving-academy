@@ -164,16 +164,17 @@ export const LearningCard: React.FC<LearningCardProps> = ({
       {/* Draggable Active Card Stack */}
       <motion.div
         drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
+        dragConstraints={{ left: -500, right: 500 }}
+        dragElastic={0.8}
         onDragEnd={handleDragEnd}
         style={{ x: dragX, rotate, opacity }}
-        className="w-full h-full bg-surface border border-border rounded-3xl flex flex-col justify-between overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.7)] relative cursor-grab active:cursor-grabbing select-none"
+        className="w-full h-full bg-surface border border-border rounded-3xl flex flex-col justify-between overflow-hidden relative cursor-grab active:cursor-grabbing select-none"
       >
         {/* Active Card Body Grid */}
-        <div className="w-full h-full flex flex-col">
+        <div className="w-full h-full flex flex-col justify-between">
           
           {/* Top 40% illustration area: abstract road geometric scene */}
-          <div className="h-[40%] bg-gradient-to-b from-void to-primary/20 relative overflow-hidden flex items-center justify-center border-b border-border">
+          <div className="h-[35%] bg-gradient-to-b from-void to-primary/20 relative overflow-hidden flex items-center justify-center border-b border-border">
             
             {/* Absolute positioning of abstract SVGs */}
             <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -220,44 +221,70 @@ export const LearningCard: React.FC<LearningCardProps> = ({
           </div>
 
           {/* Middle Section: Staggered step-by-step lists */}
-          <div className="flex-1 p-6 overflow-y-auto scrollbar-none flex flex-col gap-4">
+          <div className="flex-1 p-5 overflow-y-auto scrollbar-none flex flex-col gap-3.5">
             <h5 className="text-[10px] font-mono text-text-3 uppercase tracking-wider">Step-By-Step Practice</h5>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2.5">
               {parsedContent.steps.map((step, sIdx) => (
                 <motion.div 
                   key={sIdx}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 * sIdx, ease: 'easeOut' }}
-                  className="flex gap-3 items-start"
+                  className="flex gap-2.5 items-start"
                 >
-                  <span className="w-5 h-5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-mono font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="w-4.5 h-4.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] font-mono font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                     {sIdx + 1}
                   </span>
-                  <p className="text-xs text-text-2 leading-relaxed font-body">{step}</p>
+                  <p className="text-[11px] text-text-2 leading-relaxed font-body">{step}</p>
                 </motion.div>
               ))}
             </div>
           </div>
 
-          {/* Bottom Strip: Warnings and Common Mistakes */}
-          <div className="border-t border-border p-4 bg-void/30 flex flex-col gap-2.5">
+          {/* Warning and Common Mistakes strip */}
+          <div className="border-t border-border p-3.5 bg-void/30 flex flex-col gap-2">
             {/* Common Mistakes */}
             <div className="flex gap-2 items-start">
               <AlertTriangle className="w-3.5 h-3.5 text-accent mt-0.5 flex-shrink-0" />
-              <div className="text-[10px] leading-relaxed">
+              <div className="text-[9px] leading-relaxed">
                 <span className="font-bold text-accent font-mono uppercase tracking-wider">Mistake Alert:</span>{' '}
                 <span className="text-text-2">{parsedContent.commonMistakes}</span>
               </div>
             </div>
             {/* Safety Warning Pill */}
-            <div className="bg-danger/5 border border-danger/10 px-3 py-2 rounded-xl flex gap-2 items-start">
+            <div className="bg-danger/5 border border-danger/10 px-2.5 py-1.5 rounded-xl flex gap-2 items-start">
               <ShieldAlert className="w-3.5 h-3.5 text-danger mt-0.5 flex-shrink-0" />
-              <div className="text-[10px] leading-relaxed text-text-2">
+              <div className="text-[9px] leading-relaxed text-text-2">
                 <span className="font-bold text-danger font-mono uppercase tracking-wider">Warning:</span>{' '}
                 {parsedContent.safetyWarning}
               </div>
             </div>
+          </div>
+
+          {/* Navigation Action Buttons (Bypasses drag for easy desktop usage) */}
+          <div className="border-t border-border p-3 bg-surface flex gap-2.5">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onSkip()
+              }}
+              className="flex-1 min-h-[40px] py-1.5 bg-void hover:bg-white/[0.02] border border-border text-text-2 hover:text-text-1 font-mono uppercase tracking-wider text-[9px] font-bold rounded-xl flex items-center justify-center gap-1 transition-all duration-200 active:scale-95 cursor-pointer"
+            >
+              <X className="w-3 h-3 text-danger" />
+              Skip Skill
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowQuiz(true)
+              }}
+              className="flex-1 min-h-[40px] py-1.5 bg-primary hover:bg-primary/95 text-white font-mono uppercase tracking-wider text-[9px] font-bold rounded-xl flex items-center justify-center gap-1 transition-all duration-200 active:scale-95 cursor-pointer"
+            >
+              <Check className="w-3 h-3 text-success" />
+              Master Skill
+            </button>
           </div>
 
         </div>

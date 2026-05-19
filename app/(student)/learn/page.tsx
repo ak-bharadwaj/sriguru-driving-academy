@@ -97,7 +97,7 @@ export default function PracticalLearnSection() {
       <div className="absolute bottom-20 right-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[140px] pointer-events-none" />
 
       {/* Main Container */}
-      <div className="max-w-4xl mx-auto px-6 pt-24 md:pt-32 flex flex-col items-center gap-8">
+      <div className="max-w-4xl mx-auto px-6 pt-32 md:pt-40 flex flex-col items-center gap-8">
         
         {/* Header Section */}
         <header className="w-full border-b border-border pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -122,7 +122,7 @@ export default function PracticalLearnSection() {
         {/* ----------------------------------------------------
             PREMIUM ROAD PROGRESS GRAPHIC
             ---------------------------------------------------- */}
-        <div className="w-full bg-surface border border-border p-5 rounded-3xl shadow-lg relative overflow-hidden flex flex-col gap-3">
+        <div className="w-full bg-surface border border-border p-5 rounded-3xl relative overflow-hidden flex flex-col gap-3">
           <div className="flex justify-between items-center text-xs font-mono text-text-2 px-1">
             <span className="flex items-center gap-1.5">
               <TrendingUp className="w-3.5 h-3.5 text-primary" />
@@ -263,7 +263,7 @@ export default function PracticalLearnSection() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="w-full max-w-md bg-surface border border-border rounded-3xl p-8 text-center flex flex-col items-center justify-between shadow-[0_20px_50px_rgba(0,0,0,0.6)] min-h-[500px]"
+              className="w-full max-w-md bg-surface border border-border rounded-3xl p-8 text-center flex flex-col items-center justify-between min-h-[500px]"
             >
               <div className="w-full flex justify-between items-center border-b border-border pb-4">
                 <span className="text-[10px] font-mono text-accent">Matrix Summary</span>
