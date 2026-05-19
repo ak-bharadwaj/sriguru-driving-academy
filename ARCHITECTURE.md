@@ -121,3 +121,56 @@
 | Instructor | Professional coaching tool  | Smooth, precise   | Split-panel workspace |
 | Admin      | Command center              | Snap, data-driven | Dense grid, stats-led |
 | Public     | Premium brand experience    | Cinematic scroll  | Full-bleed, editorial |
+
+---
+
+## RTO Exam Guidelines & Content Strategy
+
+### The Real Numbers
+- **Questions per test:** 15
+- **Pass mark:** 80% (12/15)
+- **Time limit:** 30s per question
+- **Sign questions in exam:** ~50%
+- **Question Categories:** Road signs & signals, Traffic rules & laws, Safe driving behaviour.
+- **State-specific banks:** Use AP & Telangana official Q banks (Guntur, AP).
+
+### Where to Get Accurate Content (Free Sources)
+1. **AP Transport Dept (LLR question bank):** Official government source. (aptransport.org/html/llr-question-bank.html)
+2. **Telangana Transport Dept (LLR question bank):** Similar to AP, good for overlap. (transport.telangana.gov.in/html/llr-question-bank.html)
+3. **Wikimedia Commons (Indian road signs SVG):** Extract from IRC:67 and MORTH manual. Commit to `/public/signs/`. (commons.wikimedia.org/wiki/Category:SVG_road_signs_in_India)
+4. **Wikipedia (Road signs in India):** Use as seed data reference for names, categories, and explanations per IRC:67 2022. (en.wikipedia.org/wiki/Road_signs_in_India)
+5. **driving-tests.in:** 500+ practice questions based on MORTH manual. Use to supplement official bank.
+6. **Parivahan Sarathi:** Official government portal. Mirror this interface for RTO section. (sarathi.parivahan.gov.in)
+
+### Content Build Plan
+- **Road signs (100+):** Download SVGs from Wikimedia. Use Wikipedia list for names/meanings. Categorise: Mandatory (~35), Cautionary (~40), Informatory (~30), Facility, Parking.
+- **RTO questions (400+):** Download AP official bank (400) + supplement with driving-tests.in (100+). Categorise: Signs, Signals, Rules, Parking, Emergencies, Laws, Vehicle. Add explanation to every wrong answer.
+- **Practical cards (18):** Needs instructor review before seeding (steps, mistakes, warnings).
+
+---
+
+## UI Audit & Quality Assurance Rules
+
+### 1. Prevent Generic SaaS UI
+- **Problem:** Defaults to generic grey cards, sidebars, and stat blocks.
+- **Fix:** After Session 0.5, screenshot every component and compare against Linear, Duolingo, and Apple.com. Fix generic designs before Session 1.
+
+### 2. Font Loading Consistency
+- **Problem:** Outfit + DM Sans must load correctly via `next/font` or the premium feel collapses.
+- **Fix:** In Session 0, verify fonts load in browser (DevTools → Network → filter "font"). Ensure all 3 typefaces load.
+
+### 3. Mobile Layout Resilience
+- **Problem:** Desktop-first builds break on mobile.
+- **Fix:** Test on 375px viewport after every session. Orbital nav → bottom tab bar. Split panel → stacked. Admin 3-col → 1-col.
+
+### 4. Contrast Accessibility
+- **Problem:** Dark background + dark text (`var(--color-text-3)` on `var(--color-void)`) often fails contrast.
+- **Fix:** After Session 0.5, run a contrast audit in Chrome DevTools. Adjust `text-3` if it fails 4.5:1.
+
+### 5. Premium UI Checklist
+It's not just gradients or glassmorphism. Enforce:
+- Consistent 4px spacing grid.
+- Outfit font at correct weights.
+- Amber accent used sparingly (only XP/rewards).
+- Borders at 7% opacity (not solid).
+- Visible hover states on EVERY interactive element.
