@@ -61,6 +61,107 @@ interface InstructorDashboardProps {
   initialStudents: AssignedStudent[]
 }
 
+import { useLanguageStore } from '@/store/languageStore'
+
+const PAGE_DICT = {
+  EN: {
+    instructorWorkspace: 'Instructor Workspace',
+    coachingConsole: 'Coaching Console',
+    consoleDesc: 'Review active slots, log attendance, and grade students on practical skills.',
+    viewCalendar: 'View Full Calendar',
+    activeSlots: 'Active Slots',
+    searchRoster: 'Search roster...',
+    todaysSlots: "Today's Slots",
+    noStudents: 'No matching students found.',
+    sessionToday: '📅 Session Today',
+    noSessionToday: 'No Today Session',
+    feeDue: '⚠️ Fee Due',
+    joined: 'Joined',
+    sessionsDone: 'Sessions done',
+    upcomingTest: 'Upcoming Test',
+    deselect: 'Deselect',
+    verifyAttendance: 'Verify Attendance',
+    todaysTopic: "TODAY'S TOPIC",
+    duration: 'Duration',
+    hours: 'Hours',
+    present: 'Present',
+    absent: 'Absent',
+    noActiveSession: 'No active session scheduled today.',
+    logbook: 'Logbook',
+    dailyQuickLog: 'Daily Quick Log',
+    autoSaving: 'Auto-saving',
+    logPlaceholder: 'Write driving observations (mirror checks, clutch balance, lane position, etc.)...',
+    skillSliders: 'Skill Sliders',
+    practicalScoring: 'Practical Scoring (Scale 1-10)',
+    noStudentSelected: 'No Student Selected',
+    noStudentDesc: 'Select a student from the active slot list on the left to display their logbook, verify attendance, and adjust practical score sliders.',
+  },
+  HI: {
+    instructorWorkspace: 'प्रशिक्षक कार्यक्षेत्र',
+    coachingConsole: 'कोचिंग कंसोल',
+    consoleDesc: 'सक्रिय स्लॉट की समीक्षा करें, उपस्थिति दर्ज करें, और व्यावहारिक कौशल पर छात्रों को ग्रेड दें।',
+    viewCalendar: 'पूरा कैलेंडर देखें',
+    activeSlots: 'सक्रिय स्लॉट',
+    searchRoster: 'रोस्टर खोजें...',
+    todaysSlots: "आज के स्लॉट",
+    noStudents: 'कोई छात्र नहीं मिला।',
+    sessionToday: '📅 आज का सत्र',
+    noSessionToday: 'आज कोई सत्र नहीं',
+    feeDue: '⚠️ शुल्क बकाया',
+    joined: 'शामिल हुए',
+    sessionsDone: 'सत्र पूरे हुए',
+    upcomingTest: 'आगामी टेस्ट',
+    deselect: 'चयन रद्द करें',
+    verifyAttendance: 'उपस्थिति सत्यापित करें',
+    todaysTopic: "आज का विषय",
+    duration: 'अवधि',
+    hours: 'घंटे',
+    present: 'उपस्थित',
+    absent: 'अनुपस्थित',
+    noActiveSession: 'आज कोई सक्रिय सत्र निर्धारित नहीं है।',
+    logbook: 'लॉगबुक',
+    dailyQuickLog: 'दैनिक त्वरित लॉग',
+    autoSaving: 'स्वत: सहेजा जा रहा है',
+    logPlaceholder: 'ड्राइविंग टिप्पणियां लिखें (मिरर जांच, क्लच संतुलन, लेन स्थिति, आदि)...',
+    skillSliders: 'कौशल स्लाइडर',
+    practicalScoring: 'व्यावहारिक स्कोरिंग (स्केल 1-10)',
+    noStudentSelected: 'कोई छात्र चयनित नहीं',
+    noStudentDesc: 'उनकी लॉगबुक प्रदर्शित करने, उपस्थिति सत्यापित करने और व्यावहारिक स्कोर स्लाइडर्स को समायोजित करने के लिए बाईं ओर सक्रिय स्लॉट सूची से एक छात्र का चयन करें।',
+  },
+  TE: {
+    instructorWorkspace: 'ఇన్‌స్ట్రక్టర్ వర్క్‌స్పేస్',
+    coachingConsole: 'కోచింగ్ కన్సోల్',
+    consoleDesc: 'క్రియాశీల స్లాట్‌లను సమీక్షించండి, హాజరు నమోదు చేయండి మరియు ఆచరణాత్మక నైపుణ్యాలపై విద్యార్థులకు గ్రేడ్ ఇవ్వండి.',
+    viewCalendar: 'పూర్తి క్యాలెండర్‌ను చూడండి',
+    activeSlots: 'యాక్టివ్ స్లాట్‌లు',
+    searchRoster: 'రోస్టర్‌ను శోధించండి...',
+    todaysSlots: "నేటి స్లాట్‌లు",
+    noStudents: 'సరిపోలే విద్యార్థులు కనుగొనబడలేదు.',
+    sessionToday: '📅 ఈరోజు సెషన్',
+    noSessionToday: 'ఈరోజు సెషన్ లేదు',
+    feeDue: '⚠️ ఫీజు బాకీ ఉంది',
+    joined: 'చేరారు',
+    sessionsDone: 'సెషన్స్ పూర్తయ్యాయి',
+    upcomingTest: 'రాబోయే పరీక్ష',
+    deselect: 'ఎంపికను తీసివేయండి',
+    verifyAttendance: 'హాజరును ధృవీకరించండి',
+    todaysTopic: "నేటి అంశం",
+    duration: 'వ్యవధి',
+    hours: 'గంటలు',
+    present: 'హాజరు',
+    absent: 'గైర్హాజరు',
+    noActiveSession: 'ఈరోజు ఎలాంటి యాక్టివ్ సెషన్ షెడ్యూల్ చేయబడలేదు.',
+    logbook: 'లాగ్‌బుక్',
+    dailyQuickLog: 'రోజువారీ క్విక్ లాగ్',
+    autoSaving: 'ఆటో-సేవింగ్',
+    logPlaceholder: 'డ్రైవింగ్ పరిశీలనలను వ్రాయండి (అద్దం తనిఖీలు, క్లచ్ బ్యాలెన్స్, లేన్ స్థానం మొదలైనవి)...',
+    skillSliders: 'స్కిల్ స్లైడర్లు',
+    practicalScoring: 'ప్రాక్టికల్ స్కోరింగ్ (స్కేల్ 1-10)',
+    noStudentSelected: 'ఏ విద్యార్థి ఎంపిక కాలేదు',
+    noStudentDesc: 'వారి లాగ్‌బుక్‌ను ప్రదర్శించడానికి, హాజరును ధృవీకరించడానికి మరియు ఆచరణాత్మక స్కోర్ స్లైడర్‌లను సర్దుబాటు చేయడానికి ఎడమ వైపున ఉన్న యాక్టివ్ స్లాట్ జాబితా నుండి విద్యార్థిని ఎంచుకోండి.',
+  }
+}
+
 export default function InstructorDashboardClient({ instructor, initialStudents }: InstructorDashboardProps) {
   const [students, setStudents] = useState<AssignedStudent[]>(initialStudents)
   const [searchQuery, setSearchQuery] = useState('')
@@ -69,6 +170,10 @@ export default function InstructorDashboardClient({ instructor, initialStudents 
   const [dailyNote, setDailyNote] = useState('')
   const [activeDate] = useState(() => new Date().toISOString().split('T')[0])
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  const { language } = useLanguageStore()
+  const activeLang = (language?.toUpperCase() || 'EN') as keyof typeof PAGE_DICT
+  const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
 
   const currentStudent = students.find(s => s.id === selectedStudentId)
 
@@ -206,16 +311,16 @@ export default function InstructorDashboardClient({ instructor, initialStudents 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
-              <p className="text-white/80 font-medium text-lg">Instructor Workspace</p>
-              <h1 className="text-3xl font-bold font-display mt-1">Coaching Console</h1>
-              <p className="text-white/60 text-sm mt-1 max-w-xl">Review active slots, log attendance, and grade students on practical skills.</p>
+              <p className="text-white/80 font-medium text-lg">{t.instructorWorkspace}</p>
+              <h1 className="text-3xl font-bold font-display mt-1">{t.coachingConsole}</h1>
+              <p className="text-white/60 text-sm mt-1 max-w-xl">{t.consoleDesc}</p>
             </div>
             <Link 
               href="/instructor/schedule"
               className="px-5 py-2.5 bg-white text-[rgb(var(--color-primary))] hover:bg-white/90 rounded-2xl text-sm font-bold flex items-center gap-2 shadow-lg transition-all"
             >
               <Calendar className="w-5 h-5" />
-              View Full Calendar
+              {t.viewCalendar}
             </Link>
           </div>
         </div>
@@ -244,7 +349,7 @@ export default function InstructorDashboardClient({ instructor, initialStudents 
           <div className="flex flex-col gap-6">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-2xl bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] font-bold flex items-center justify-center">1</div>
-              <h2 className="text-xl font-bold font-display text-[rgb(var(--color-text-1))]">Active Slots</h2>
+              <h2 className="text-xl font-bold font-display text-[rgb(var(--color-text-1))]">{t.activeSlots}</h2>
             </div>
             
             <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-5 shadow-sm flex flex-col gap-4 backdrop-blur-md">
@@ -254,7 +359,7 @@ export default function InstructorDashboardClient({ instructor, initialStudents 
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[rgb(var(--color-text-3))]" />
                 <input
                   type="text"
-                  placeholder="Search roster..."
+                  placeholder={t.searchRoster}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] focus:border-[rgb(var(--color-primary))] focus:ring-1 focus:ring-[rgb(var(--color-primary))] pl-11 pr-4 py-3 rounded-2xl text-sm font-medium text-[rgb(var(--color-text-1))] placeholder-[rgb(var(--color-text-3))] transition-all outline-none"
@@ -264,12 +369,12 @@ export default function InstructorDashboardClient({ instructor, initialStudents 
               {/* Roster Listings */}
               <div className="flex flex-col gap-3 max-h-[500px] overflow-y-auto scrollbar-thin pr-1">
                 <span className="text-[10px] font-mono font-bold text-[rgb(var(--color-text-3))] uppercase tracking-widest pt-2">
-                  Today's Slots ({filteredStudents.length})
+                  {t.todaysSlots} ({filteredStudents.length})
                 </span>
                 
                 {filteredStudents.length === 0 ? (
                   <div className="text-center py-12 text-[rgb(var(--color-text-3))] text-xs italic">
-                    No matching students found.
+                    {t.noStudents}
                   </div>
                 ) : (
                   filteredStudents.map((stu) => {
@@ -298,7 +403,7 @@ export default function InstructorDashboardClient({ instructor, initialStudents 
                               {stu.name}
                             </span>
                             <span className="text-[10px] text-[rgb(var(--color-text-3))] font-mono">
-                              {stu.todaySession ? '📅 Session Today' : 'No Today Session'}
+                              {stu.todaySession ? t.sessionToday : t.noSessionToday}
                             </span>
                           </div>
                         </div>
@@ -359,21 +464,21 @@ export default function InstructorDashboardClient({ instructor, initialStudents 
                           {/* Course Fee Alert */}
                           {currentStudent.feeStatus === 'PENDING' && (
                             <span className="bg-rose-500/10 text-rose-500 border border-rose-500/20 text-[10px] font-bold px-2 py-0.5 rounded-lg uppercase tracking-wide">
-                              ⚠️ Fee Due
+                              {t.feeDue}
                             </span>
                           )}
                         </h2>
                         <div className="text-xs text-[rgb(var(--color-text-3))] mt-1 flex flex-wrap items-center gap-3 font-mono">
                           <span>{currentStudent.email}</span>
                           <span>•</span>
-                          <span>Joined {currentStudent.enrollmentDate}</span>
+                          <span>{t.joined} {currentStudent.enrollmentDate}</span>
                           <span>•</span>
-                          <span>{currentStudent.totalSessions} Sessions done</span>
+                          <span>{currentStudent.totalSessions} {t.sessionsDone}</span>
                           
                           {/* Driving Test Alert */}
                           {currentStudent.drivingTests?.some(t => t.result === 'SCHEDULED') && (
                             <span className="bg-amber-500/10 text-amber-500 text-[10px] font-bold px-2 py-0.5 rounded-lg flex items-center gap-1">
-                              <AlertTriangle className="w-3.5 h-3.5" /> Upcoming Test
+                              <AlertTriangle className="w-3.5 h-3.5" /> {t.upcomingTest}
                             </span>
                           )}
                         </div>
@@ -384,7 +489,7 @@ export default function InstructorDashboardClient({ instructor, initialStudents 
                       onClick={() => setSelectedStudentId(null)}
                       className="px-4 py-2 bg-[rgb(var(--color-void))] hover:bg-[rgb(var(--color-border))]/40 border border-[rgb(var(--color-border))] text-[rgb(var(--color-text-2))] hover:text-[rgb(var(--color-text-1))] rounded-xl text-xs font-bold transition-all"
                     >
-                      Deselect
+                      {t.deselect}
                     </button>
                   </div>
 
@@ -394,16 +499,16 @@ export default function InstructorDashboardClient({ instructor, initialStudents 
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-2xl bg-emerald-500/10 text-emerald-500 font-bold flex items-center justify-center">2</div>
-                        <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))]">Verify Attendance</h3>
+                        <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))]">{t.verifyAttendance}</h3>
                       </div>
 
                       {currentStudent.todaySession ? (
                         <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] p-6 rounded-3xl flex flex-col gap-5 h-full backdrop-blur-md justify-between">
                           <div>
-                            <span className="text-[10px] font-mono font-bold text-[rgb(var(--color-primary))] uppercase tracking-widest block">TODAY'S TOPIC</span>
+                            <span className="text-[10px] font-mono font-bold text-[rgb(var(--color-primary))] uppercase tracking-widest block">{t.todaysTopic}</span>
                             <h4 className="text-lg font-bold text-[rgb(var(--color-text-1))] mt-1">{currentStudent.todaySession.topic}</h4>
                             <p className="text-xs text-[rgb(var(--color-text-3))] mt-1 font-mono flex items-center gap-1.5">
-                              <Clock className="w-3.5 h-3.5" /> Duration: {currentStudent.todaySession.durationHours} Hours
+                              <Clock className="w-3.5 h-3.5" /> {t.duration}: {currentStudent.todaySession.durationHours} {t.hours}
                             </p>
                           </div>
 
@@ -413,21 +518,21 @@ export default function InstructorDashboardClient({ instructor, initialStudents 
                               className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-500/10 uppercase tracking-wider font-mono"
                             >
                               <UserCheck className="w-4 h-4" />
-                              Present
+                              {t.present}
                             </button>
                             <button
                               onClick={() => handleAttendance(currentStudent.id, currentStudent.todaySession!.id, 'Absent')}
                               className="flex-1 py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-rose-500/10 uppercase tracking-wider font-mono"
                             >
                               <XCircle className="w-4 h-4" />
-                              Absent
+                              {t.absent}
                             </button>
                           </div>
                         </div>
                       ) : (
                         <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] p-8 rounded-3xl text-center text-[rgb(var(--color-text-3))] flex flex-col items-center justify-center h-full gap-2 backdrop-blur-md">
                           <CheckCircle2 className="w-10 h-10 text-[rgb(var(--color-text-3))] opacity-60" />
-                          <span className="text-sm italic font-mono">No active session scheduled today.</span>
+                          <span className="text-sm italic font-mono">{t.noActiveSession}</span>
                         </div>
                       )}
                     </div>
@@ -436,16 +541,16 @@ export default function InstructorDashboardClient({ instructor, initialStudents 
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-2xl bg-[rgb(var(--color-accent))]/10 text-[rgb(var(--color-accent))] font-bold flex items-center justify-center">3</div>
-                        <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))]">Logbook</h3>
+                        <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))]">{t.logbook}</h3>
                       </div>
 
                       <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] p-6 rounded-3xl flex flex-col gap-4 shadow-sm h-full backdrop-blur-md">
                         <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-[rgb(var(--color-text-2))]">Daily Quick Log</span>
-                          <span className="text-[9px] font-mono font-bold uppercase text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">Auto-saving</span>
+                          <span className="text-xs font-bold text-[rgb(var(--color-text-2))]">{t.dailyQuickLog}</span>
+                          <span className="text-[9px] font-mono font-bold uppercase text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded">{t.autoSaving}</span>
                         </div>
                         <textarea
-                          placeholder="Write driving observations (mirror checks, clutch balance, lane position, etc.)..."
+                          placeholder={t.logPlaceholder}
                           value={dailyNote}
                           onChange={handleDailyNoteChange}
                           className="w-full h-32 bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] focus:border-[rgb(var(--color-primary))] p-4 rounded-2xl text-xs font-medium text-[rgb(var(--color-text-1))] resize-none outline-none transition-all leading-relaxed"
@@ -459,12 +564,12 @@ export default function InstructorDashboardClient({ instructor, initialStudents 
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-2xl bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))] font-bold flex items-center justify-center">4</div>
-                      <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))]">Skill Sliders</h3>
+                      <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))]">{t.skillSliders}</h3>
                     </div>
 
                     <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] p-6 rounded-3xl flex flex-col gap-6 backdrop-blur-md">
                       <h4 className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-widest flex items-center gap-2 border-b border-[rgb(var(--color-border))]/60 pb-2">
-                        <Sliders className="w-4 h-4 text-[rgb(var(--color-primary))]" /> Practical Scoring (Scale 1-10)
+                        <Sliders className="w-4 h-4 text-[rgb(var(--color-primary))]" /> {t.practicalScoring}
                       </h4>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -501,9 +606,9 @@ export default function InstructorDashboardClient({ instructor, initialStudents 
                     <div className="w-16 h-16 bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-2xl flex items-center justify-center mb-6">
                       <Users className="w-8 h-8 text-[rgb(var(--color-primary))]" />
                     </div>
-                    <h2 className="text-xl font-bold font-display text-[rgb(var(--color-text-1))]">No Student Selected</h2>
+                    <h2 className="text-xl font-bold font-display text-[rgb(var(--color-text-1))]">{t.noStudentSelected}</h2>
                     <p className="text-[rgb(var(--color-text-3))] mt-2 text-sm max-w-sm">
-                      Select a student from the active slot list on the left to display their logbook, verify attendance, and adjust practical score sliders.
+                      {t.noStudentDesc}
                     </p>
                   </div>
                 </motion.div>

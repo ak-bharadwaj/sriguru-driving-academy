@@ -3,6 +3,74 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Tag, Plus, X, Trash2, Power } from 'lucide-react'
+import { useLanguageStore } from '@/store/languageStore'
+
+const PAGE_DICT = {
+  EN: {
+    pageTitle: '{t.pageTitle}',
+    pageDesc: 'Create and manage special offers and promotional banners.',
+    newPromo: '{t.newPromo}',
+    noActive: 'No Promotions Active',
+    createOne: 'Create a new promotion to boost your sales.',
+    promoCode: '{t.promoCode}',
+    disable: 'Disable',
+    enable: 'Enable',
+    deleteConfirm: 'Delete this promotion?',
+    modalTitle: '{t.newPromo}',
+    title: 'Title',
+    desc: 'Description',
+    discount: 'Discount %',
+    badge: 'Badge Label',
+    creating: 'Creating...',
+    createBtn: 'Create Promotion',
+    phTitle: 'e.g. Summer Special Offer',
+    phDesc: 'Offer details...',
+    phBadge: 'e.g. Limited Time'
+  },
+  HI: {
+    pageTitle: 'प्रचार प्रबंधक',
+    pageDesc: 'विशेष ऑफ़र और प्रचारात्मक बैनर बनाएं और प्रबंधित करें।',
+    newPromo: 'नया प्रचार',
+    noActive: 'कोई प्रचार सक्रिय नहीं है',
+    createOne: 'अपनी बिक्री बढ़ाने के लिए एक नया प्रचार बनाएं।',
+    promoCode: 'प्रोमो कोड',
+    disable: 'अक्षम करें',
+    enable: 'सक्षम करें',
+    deleteConfirm: 'क्या आप यह प्रचार हटाना चाहते हैं?',
+    modalTitle: 'नया प्रचार',
+    title: 'शीर्षक',
+    desc: 'विवरण',
+    discount: 'छूट %',
+    badge: 'बैज लेबल',
+    creating: 'बनाया जा रहा है...',
+    createBtn: 'प्रचार बनाएं',
+    phTitle: 'उदा. ग्रीष्मकालीन विशेष ऑफ़र',
+    phDesc: 'ऑफ़र विवरण...',
+    phBadge: 'उदा. सीमित समय'
+  },
+  TE: {
+    pageTitle: 'ప్రమోషన్స్ మేనేజర్',
+    pageDesc: 'ప్రత్యేక ఆఫర్‌లు మరియు ప్రచార బ్యానర్‌లను సృష్టించండి మరియు నిర్వహించండి.',
+    newPromo: 'కొత్త ప్రమోషన్',
+    noActive: 'ఎలాంటి ప్రమోషన్‌లు యాక్టివ్‌గా లేవు',
+    createOne: 'మీ అమ్మకాలను పెంచడానికి కొత్త ప్రమోషన్‌ను సృష్టించండి.',
+    promoCode: 'ప్రోమో కోడ్',
+    disable: 'నిలిపివేయి',
+    enable: 'ప్రారంభించు',
+    deleteConfirm: 'ఈ ప్రమోషన్‌ను తొలగించాలా?',
+    modalTitle: 'కొత్త ప్రమోషన్',
+    title: 'శీర్షిక',
+    desc: 'వివరణ',
+    discount: 'డిస్కౌంట్ %',
+    badge: 'బ్యాడ్జ్ లేబుల్',
+    creating: 'సృష్టిస్తోంది...',
+    createBtn: 'ప్రమోషన్‌ను సృష్టించండి',
+    phTitle: 'ఉదా. వేసవి ప్రత్యేక ఆఫర్',
+    phDesc: 'ఆఫర్ వివరాలు...',
+    phBadge: 'ఉదా. పరిమిత సమయం'
+  }
+}
+
 
 interface Promotion {
   id: string
@@ -16,6 +84,10 @@ interface Promotion {
 }
 
 export default function PromotionsPage() {
+  const { language } = useLanguageStore()
+  const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
+  const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
+
   const [promotions, setPromotions] = useState<Promotion[]>([])
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -77,7 +149,7 @@ export default function PromotionsPage() {
   }
 
   const deletePromo = async (id: string) => {
-    if (!confirm('Delete this promotion?')) return
+    if (!confirm(t.deleteConfirm)) return
     try {
       const res = await fetch(`/api/admin/offers?id=${id}`, { method: 'DELETE' })
       if (res.ok) {
@@ -94,14 +166,14 @@ export default function PromotionsPage() {
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-[rgb(var(--color-text-1))]">Promotions Manager</h1>
-            <p className="text-[rgb(var(--color-text-3))] text-sm mt-1">Create and manage special offers and promotional banners.</p>
+            <h1 className="text-3xl font-bold tracking-tight text-[rgb(var(--color-text-1))]">{t.pageTitle}</h1>
+            <p className="text-[rgb(var(--color-text-3))] text-sm mt-1">{t.pageDesc}</p>
           </div>
           <button 
             onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-colors"
           >
-            <Plus className="w-5 h-5" /> New Promotion
+            <Plus className="w-5 h-5" /> {t.newPromo}
           </button>
         </div>
 
@@ -114,8 +186,8 @@ export default function PromotionsPage() {
             <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-4">
               <Tag className="w-8 h-8 text-blue-500" />
             </div>
-            <h3 className="text-xl font-bold mb-2">No Promotions Active</h3>
-            <p className="text-[rgb(var(--color-text-3))] text-sm">Create a new promotion to boost your sales.</p>
+            <h3 className="text-xl font-bold mb-2">{t.noActive}</h3>
+            <p className="text-[rgb(var(--color-text-3))] text-sm">{t.createOne}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -138,14 +210,14 @@ export default function PromotionsPage() {
                 <div className="flex items-center gap-3 mb-6 bg-[rgb(var(--color-void))] p-3 rounded-xl">
                   <div className="text-2xl font-black text-[rgb(var(--color-text-1))]">{promo.discountPercent}%</div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] uppercase font-bold text-[rgb(var(--color-text-3))] tracking-wider">Promo Code</span>
+                    <span className="text-[10px] uppercase font-bold text-[rgb(var(--color-text-3))] tracking-wider">{t.promoCode}</span>
                     <span className="font-mono font-bold text-blue-600 dark:text-blue-400">{promo.promoCode}</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 mt-auto border-t border-[rgb(var(--color-border))] pt-4">
                   <button onClick={() => toggleActive(promo.id, promo.active)} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold transition-colors ${promo.active ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
-                    <Power className="w-4 h-4" /> {promo.active ? 'Disable' : 'Enable'}
+                    <Power className="w-4 h-4" /> {promo.active ? t.disable : t.enable}
                   </button>
                   <button onClick={() => deletePromo(promo.id)} className="p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors">
                     <Trash2 className="w-4 h-4" />
@@ -174,7 +246,7 @@ export default function PromotionsPage() {
               className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl shadow-2xl w-full max-w-md overflow-hidden"
             >
               <div className="p-6 flex justify-between items-center border-b border-[rgb(var(--color-border))]">
-                <h2 className="text-xl font-bold">New Promotion</h2>
+                <h2 className="text-xl font-bold">{t.modalTitle}</h2>
                 <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-[rgb(var(--color-border))] rounded-xl transition-colors">
                   <X className="w-5 h-5 text-slate-400" />
                 </button>
@@ -182,33 +254,33 @@ export default function PromotionsPage() {
 
               <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider">Title</label>
-                  <input required type="text" className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none" value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="e.g. Summer Special Offer" />
+                  <label className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider">{t.title}</label>
+                  <input required type="text" className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none" value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder={t.phTitle} />
                 </div>
                 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider">Description</label>
-                  <textarea required rows={3} className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none resize-none" value={form.desc} onChange={e => setForm({...form, desc: e.target.value})} placeholder="Offer details..." />
+                  <label className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider">{t.desc}</label>
+                  <textarea required rows={3} className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none resize-none" value={form.desc} onChange={e => setForm({...form, desc: e.target.value})} placeholder={t.phDesc} />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider">Discount %</label>
+                    <label className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider">{t.discount}</label>
                     <input required type="number" min="0" max="100" className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none" value={form.discountPercent} onChange={e => setForm({...form, discountPercent: e.target.value})} placeholder="e.g. 20" />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider">Promo Code</label>
+                    <label className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider">{t.promoCode}</label>
                     <input required type="text" className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-3 text-sm uppercase font-mono focus:border-blue-500 outline-none" value={form.promoCode} onChange={e => setForm({...form, promoCode: e.target.value})} placeholder="SUMMER20" />
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-1.5 mb-2">
-                  <label className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider">Badge Label</label>
-                  <input required type="text" className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none" value={form.badge} onChange={e => setForm({...form, badge: e.target.value})} placeholder="e.g. Limited Time" />
+                  <label className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider">{t.badge}</label>
+                  <input required type="text" className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none" value={form.badge} onChange={e => setForm({...form, badge: e.target.value})} placeholder={t.phBadge} />
                 </div>
 
                 <button type="submit" disabled={submitting} className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors mt-2 shadow-lg shadow-blue-500/20 disabled:opacity-50">
-                  {submitting ? 'Creating...' : 'Create Promotion'}
+                  {submitting ? t.creating : t.createBtn}
                 </button>
               </form>
             </motion.div>

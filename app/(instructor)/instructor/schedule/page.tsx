@@ -13,10 +13,115 @@ import {
   AlertCircle,
   Plus
 } from 'lucide-react'
+import { useLanguageStore } from '@/store/languageStore'
+
+const PAGE_DICT = {
+  EN: {
+    pageTitle: 'Schedule Management',
+    pageSubtitle: 'View upcoming slots, mark attendance, and manage your daily roadmap.',
+    newSession: 'New Session',
+    loadingSessions: 'Loading sessions...',
+    startSession: 'Start Session',
+    markCompleted: 'Mark Completed',
+    viewLog: 'View Log',
+    noSlotsTitle: 'No Slots Scheduled',
+    noSlotsDesc: 'You have a free block for this filter.',
+    scheduleNewSession: 'Schedule New Session',
+    studentLabel: 'Student',
+    selectStudentOpt: 'Select a student',
+    dateTimeLabel: 'Date & Time',
+    durationLabel: 'Duration (mins)',
+    lessonTypeLabel: 'Lesson Type',
+    lessonTypePlaceholder: 'e.g. Parallel Parking',
+    notesLabel: 'Notes (Optional)',
+    notesPlaceholder: 'Any specific focus areas...',
+    cancelBtn: 'Cancel',
+    scheduleSlotBtn: 'Schedule Slot',
+    markAttendanceTitle: 'Mark Attendance',
+    statusLabel: 'Status',
+    statusPresent: 'Present',
+    statusLate: 'Late',
+    statusAbsent: 'Absent',
+    completeBtn: 'Complete',
+    today: 'Today',
+    tomorrow: 'Tomorrow',
+    unknown: 'Unknown',
+    defaultTrack: 'Default Track'
+  },
+  HI: {
+    pageTitle: 'अनुसूची प्रबंधन',
+    pageSubtitle: 'आगामी स्लॉट देखें, उपस्थिति दर्ज करें, और अपने दैनिक रोडमैप का प्रबंधन करें।',
+    newSession: 'नया सत्र',
+    loadingSessions: 'सत्र लोड हो रहे हैं...',
+    startSession: 'सत्र प्रारंभ करें',
+    markCompleted: 'पूरा चिह्नित करें',
+    viewLog: 'लॉग देखें',
+    noSlotsTitle: 'कोई स्लॉट निर्धारित नहीं',
+    noSlotsDesc: 'आपके पास इस फ़िल्टर के लिए एक खाली ब्लॉक है।',
+    scheduleNewSession: 'नया सत्र निर्धारित करें',
+    studentLabel: 'छात्र',
+    selectStudentOpt: 'एक छात्र चुनें',
+    dateTimeLabel: 'दिनांक और समय',
+    durationLabel: 'अवधि (मिनट)',
+    lessonTypeLabel: 'पाठ का प्रकार',
+    lessonTypePlaceholder: 'उदाहरण: समानांतर पार्किंग',
+    notesLabel: 'नोट्स (वैकल्पिक)',
+    notesPlaceholder: 'कोई विशिष्ट फोकस क्षेत्र...',
+    cancelBtn: 'रद्द करें',
+    scheduleSlotBtn: 'स्लॉट अनुसूची',
+    markAttendanceTitle: 'उपस्थिति दर्ज करें',
+    statusLabel: 'स्थिति',
+    statusPresent: 'उपस्थित',
+    statusLate: 'देर से',
+    statusAbsent: 'अनुपस्थित',
+    completeBtn: 'पूरा करें',
+    today: 'आज',
+    tomorrow: 'कल',
+    unknown: 'अज्ञात',
+    defaultTrack: 'डिफ़ॉल्ट ट्रैक'
+  },
+  TE: {
+    pageTitle: 'షెడ్యూల్ నిర్వహణ',
+    pageSubtitle: 'రాబోయే స్లాట్‌లను వీక్షించండి, హాజరును గుర్తించండి మరియు మీ రోజువారీ రోడ్‌మ్యాప్‌ను నిర్వహించండి.',
+    newSession: 'కొత్త సెషన్',
+    loadingSessions: 'సెషన్‌లు లోడ్ అవుతున్నాయి...',
+    startSession: 'సెషన్ ప్రారంభించండి',
+    markCompleted: 'పూర్తయినట్లు గుర్తించండి',
+    viewLog: 'లాగ్ చూడండి',
+    noSlotsTitle: 'ఎలాంటి స్లాట్‌లు షెడ్యూల్ చేయబడలేదు',
+    noSlotsDesc: 'ఈ ఫిల్టర్ కోసం మీకు ఖాళీ బ్లాక్ ఉంది.',
+    scheduleNewSession: 'కొత్త సెషన్‌ను షెడ్యూల్ చేయండి',
+    studentLabel: 'విద్యార్థి',
+    selectStudentOpt: 'ఒక విద్యార్థిని ఎంచుకోండి',
+    dateTimeLabel: 'తేదీ & సమయం',
+    durationLabel: 'వ్యవధి (నిమిషాలు)',
+    lessonTypeLabel: 'పాఠం రకం',
+    lessonTypePlaceholder: 'ఉదాహరణకు: పారలల్ పార్కింగ్',
+    notesLabel: 'గమనికలు (ఐచ్ఛికం)',
+    notesPlaceholder: 'ఏదైనా నిర్దిష్ట ఫోకస్ ప్రాంతాలు...',
+    cancelBtn: 'రద్దు చేయి',
+    scheduleSlotBtn: 'స్లాట్ షెడ్యూల్',
+    markAttendanceTitle: 'హాజరును గుర్తించండి',
+    statusLabel: 'స్థితి',
+    statusPresent: 'హాజరు',
+    statusLate: 'ఆలస్యం',
+    statusAbsent: 'గైర్హాజరు',
+    completeBtn: 'పూర్తి చేయండి',
+    today: 'ఈరోజు',
+    tomorrow: 'రేపు',
+    unknown: 'తెలియదు',
+    defaultTrack: 'డిఫాల్ట్ ట్రాక్'
+  }
+}
+
 
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
 export default function InstructorSchedulePage() {
+  const { language } = useLanguageStore()
+  const activeLang = (language?.toUpperCase() || 'EN') as keyof typeof PAGE_DICT
+  const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
+
   const [activeFilter, setActiveFilter] = useState('ALL')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showAttendanceModal, setShowAttendanceModal] = useState<{sessionId: string, studentId: string} | null>(null)
@@ -103,11 +208,11 @@ export default function InstructorSchedulePage() {
     const d = new Date(s.scheduledAt)
     const now = new Date()
     let dateStr = d.toLocaleDateString()
-    if (d.toDateString() === now.toDateString()) dateStr = 'Today'
+    if (d.toDateString() === now.toDateString()) dateStr = t.today
     else {
-      const tomorrow = new Date(now)
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      if (d.toDateString() === tomorrow.toDateString()) dateStr = 'Tomorrow'
+      const tomorrowDate = new Date(now)
+      tomorrowDate.setDate(tomorrowDate.getDate() + 1)
+      if (d.toDateString() === tomorrowDate.toDateString()) dateStr = t.tomorrow
     }
     
     return {
@@ -115,17 +220,17 @@ export default function InstructorSchedulePage() {
       studentId: s.student?.id || '',
       time: d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       date: dateStr,
-      student: s.student?.name || 'Unknown',
+      student: s.student?.name || t.unknown,
       type: s.lessonType,
       status: s.status,
-      location: 'Default Track' // Backend doesn't store this directly yet
+      location: t.defaultTrack // Backend doesn't store this directly yet
     }
   })
 
   const filteredSchedule = formattedSchedule.filter((session: any) => {
     if (activeFilter === 'ALL') return true
-    if (activeFilter === 'TODAY') return session.date === 'Today'
-    if (activeFilter === 'TOMORROW') return session.date === 'Tomorrow'
+    if (activeFilter === 'TODAY') return session.date === t.today
+    if (activeFilter === 'TOMORROW') return session.date === t.tomorrow
     return session.status === activeFilter
   })
 
@@ -140,8 +245,8 @@ export default function InstructorSchedulePage() {
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
           <div>
-            <h1 className="text-2xl sm:text-3xl md:text-5xl font-display font-bold mb-2">Schedule Management</h1>
-            <p className="text-sm sm:text-base text-text-2">View upcoming slots, mark attendance, and manage your daily roadmap.</p>
+            <h1 className="text-2xl sm:text-3xl md:text-5xl font-display font-bold mb-2">{t.pageTitle}</h1>
+            <p className="text-sm sm:text-base text-text-2">{t.pageSubtitle}</p>
           </div>
           
           <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -150,7 +255,7 @@ export default function InstructorSchedulePage() {
               className="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all flex items-center gap-2 shadow-[0_4px_15px_rgba(37,99,235,0.4)] whitespace-nowrap"
             >
               <Plus className="w-4 h-4" />
-              New Session
+              {t.newSession}
             </button>
             <div className="flex flex-wrap gap-2 bg-surface p-1.5 rounded-2xl border border-border">
               {['ALL', 'TODAY', 'TOMORROW', 'COMPLETED'].map(filter => (
@@ -174,7 +279,7 @@ export default function InstructorSchedulePage() {
         <div className="relative pl-5 sm:pl-6 md:pl-8 border-l-2 border-border/50">
           
           {isLoading && (
-            <div className="py-20 text-center text-text-3">Loading sessions...</div>
+            <div className="py-20 text-center text-text-3">{t.loadingSessions}</div>
           )}
 
           {!isLoading && filteredSchedule.map((session: any, idx: number) => {
@@ -246,7 +351,7 @@ export default function InstructorSchedulePage() {
                         onClick={() => handleUpdateStatus(session.id, 'IN_PROGRESS')}
                         className="px-4 sm:px-5 py-2.5 bg-primary/10 text-primary border border-primary/20 rounded-xl text-xs sm:text-sm font-semibold hover:bg-primary hover:text-white transition-all w-full lg:w-auto"
                       >
-                        Start Session
+                        {t.startSession}
                       </button>
                       <button 
                         onClick={() => handleDelete(session.id)}
@@ -257,17 +362,17 @@ export default function InstructorSchedulePage() {
                     </>
                   )}
                   {session.status === 'IN_PROGRESS' && (
-                    <button 
-                      onClick={() => setShowAttendanceModal({ sessionId: session.id, studentId: session.studentId })}
-                      className="px-4 sm:px-5 py-2.5 bg-success/20 text-success border border-success/30 rounded-xl text-xs sm:text-sm font-semibold hover:bg-success hover:text-void shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-all w-full lg:w-auto flex items-center gap-2"
-                    >
-                      <CheckCircle2 className="w-4 h-4" />
-                      Mark Completed
-                    </button>
+                      <button 
+                        onClick={() => setShowAttendanceModal({ sessionId: session.id, studentId: session.studentId })}
+                        className="px-4 sm:px-5 py-2.5 bg-success/20 text-success border border-success/30 rounded-xl text-xs sm:text-sm font-semibold hover:bg-success hover:text-void shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-all w-full lg:w-auto flex items-center gap-2"
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                        {t.markCompleted}
+                      </button>
                   )}
                   {session.status === 'COMPLETED' && (
                     <button className="px-4 sm:px-5 py-2.5 bg-surface text-text-2 border border-border rounded-xl text-xs sm:text-sm font-semibold hover:text-white transition-all w-full lg:w-auto">
-                      View Log
+                      {t.viewLog}
                     </button>
                   )}
                 </div>
@@ -280,8 +385,8 @@ export default function InstructorSchedulePage() {
           {!isLoading && filteredSchedule.length === 0 && (
             <div className="py-20 text-center border border-border border-dashed rounded-2xl bg-surface/50 ml-4">
               <CalendarIcon className="w-12 h-12 text-text-3 mx-auto mb-4 opacity-50" />
-              <h3 className="text-lg font-semibold text-text-1 mb-2">No Slots Scheduled</h3>
-              <p className="text-text-3">You have a free block for this filter.</p>
+              <h3 className="text-lg font-semibold text-text-1 mb-2">{t.noSlotsTitle}</h3>
+              <p className="text-text-3">{t.noSlotsDesc}</p>
             </div>
           )}
 
@@ -306,19 +411,19 @@ export default function InstructorSchedulePage() {
                 <XCircle className="w-5 h-5" />
               </button>
               
-              <h2 className="text-2xl font-display font-bold text-white mb-6">Schedule New Session</h2>
+              <h2 className="text-2xl font-display font-bold text-white mb-6">{t.scheduleNewSession}</h2>
               
               <form onSubmit={handleCreateSession} className="flex flex-col gap-4">
                 
                 <div>
-                  <label className="block text-sm font-semibold text-text-2 mb-2">Student</label>
+                  <label className="block text-sm font-semibold text-text-2 mb-2">{t.studentLabel}</label>
                   <select 
                     required
                     value={newSessionData.studentId}
                     onChange={e => setNewSessionData({...newSessionData, studentId: e.target.value})}
                     className="w-full bg-void border border-border rounded-xl p-3 text-white focus:outline-none focus:border-primary"
                   >
-                    <option value="" disabled>Select a student</option>
+                    <option value="" disabled>{t.selectStudentOpt}</option>
                     {studentsData && Array.isArray(studentsData) && studentsData.map((s: any) => (
                       <option key={s.id} value={s.id}>{s.name} ({s.email})</option>
                     ))}
@@ -326,7 +431,7 @@ export default function InstructorSchedulePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-text-2 mb-2">Date & Time</label>
+                  <label className="block text-sm font-semibold text-text-2 mb-2">{t.dateTimeLabel}</label>
                   <input 
                     type="datetime-local" 
                     required
@@ -338,7 +443,7 @@ export default function InstructorSchedulePage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-text-2 mb-2">Duration (mins)</label>
+                    <label className="block text-sm font-semibold text-text-2 mb-2">{t.durationLabel}</label>
                     <input 
                       type="number" 
                       required
@@ -350,11 +455,11 @@ export default function InstructorSchedulePage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-text-2 mb-2">Lesson Type</label>
+                    <label className="block text-sm font-semibold text-text-2 mb-2">{t.lessonTypeLabel}</label>
                     <input 
                       type="text" 
                       required
-                      placeholder="e.g. Parallel Parking"
+                      placeholder={t.lessonTypePlaceholder}
                       value={newSessionData.lessonType}
                       onChange={e => setNewSessionData({...newSessionData, lessonType: e.target.value})}
                       className="w-full bg-void border border-border rounded-xl p-3 text-white focus:outline-none focus:border-primary"
@@ -363,13 +468,13 @@ export default function InstructorSchedulePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-text-2 mb-2">Notes (Optional)</label>
+                  <label className="block text-sm font-semibold text-text-2 mb-2">{t.notesLabel}</label>
                   <textarea 
                     rows={2}
                     value={newSessionData.notes}
                     onChange={e => setNewSessionData({...newSessionData, notes: e.target.value})}
                     className="w-full bg-void border border-border rounded-xl p-3 text-white focus:outline-none focus:border-primary resize-none"
-                    placeholder="Any specific focus areas..."
+                    placeholder={t.notesPlaceholder}
                   />
                 </div>
 
@@ -379,13 +484,13 @@ export default function InstructorSchedulePage() {
                     onClick={() => setShowCreateModal(false)}
                     className="px-5 py-2.5 rounded-xl text-sm font-semibold text-text-2 hover:bg-surface-2 transition-all"
                   >
-                    Cancel
+                    {t.cancelBtn}
                   </button>
                   <button 
                     type="submit"
                     className="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-all shadow-[0_4px_15px_rgba(37,99,235,0.4)]"
                   >
-                    Schedule Slot
+                    {t.scheduleSlotBtn}
                   </button>
                 </div>
 
@@ -412,20 +517,20 @@ export default function InstructorSchedulePage() {
                 <XCircle className="w-5 h-5" />
               </button>
               
-              <h2 className="text-2xl font-display font-bold text-white mb-6">Mark Attendance</h2>
+              <h2 className="text-2xl font-display font-bold text-white mb-6">{t.markAttendanceTitle}</h2>
               
               <form onSubmit={handleMarkAttendance} className="flex flex-col gap-4">
                 
                 <div>
-                  <label className="block text-sm font-semibold text-text-2 mb-2">Status</label>
+                  <label className="block text-sm font-semibold text-text-2 mb-2">{t.statusLabel}</label>
                   <select 
                     value={attendanceStatus}
                     onChange={e => setAttendanceStatus(e.target.value)}
                     className="w-full bg-void border border-border rounded-xl p-3 text-white focus:outline-none focus:border-primary"
                   >
-                    <option value="PRESENT">Present</option>
-                    <option value="LATE">Late</option>
-                    <option value="ABSENT">Absent</option>
+                    <option value="PRESENT">{t.statusPresent}</option>
+                    <option value="LATE">{t.statusLate}</option>
+                    <option value="ABSENT">{t.statusAbsent}</option>
                   </select>
                 </div>
 
@@ -435,14 +540,14 @@ export default function InstructorSchedulePage() {
                     onClick={() => setShowAttendanceModal(null)}
                     className="px-5 py-2.5 rounded-xl text-sm font-semibold text-text-2 hover:bg-surface-2 transition-all"
                   >
-                    Cancel
+                    {t.cancelBtn}
                   </button>
                   <button 
                     type="submit"
                     className="px-5 py-2.5 bg-success text-void rounded-xl text-sm font-bold hover:bg-success/90 transition-all shadow-[0_4px_15px_rgba(16,185,129,0.4)] flex items-center gap-2"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    Complete
+                    {t.completeBtn}
                   </button>
                 </div>
               </form>

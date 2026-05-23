@@ -7,12 +7,120 @@ import Link from 'next/link'
 import { useXPStore } from '@/lib/stores/xp-store'
 import { useRTOStore } from '@/lib/stores/rto-store'
 import { StudentState } from '@/lib/data/academyStore'
+import { useLanguageStore } from '@/store/languageStore'
+
+const PAGE_DICT = {
+  EN: {
+    loadingStudentProfile: 'LOADING STUDENT PROFILE...',
+    studentNotFoundTitle: 'Student Not Found',
+    studentNotFoundDesc: 'The cadet profile you are looking for does not exist or is not assigned to you.',
+    returnToRoster: 'Return to Roster',
+    backToRoster: 'Back to Roster',
+    studentProfileLabel: 'Student Profile',
+    student: 'Student',
+    idLabel: 'ID',
+    levelLabel: 'Level',
+    xpTotalLabel: 'XP Total',
+    streakLabel: 'Streak',
+    performanceOverview: 'Performance Overview',
+    submitFeedback: 'Submit Feedback',
+    drivingSkills: 'Driving Skills',
+    done: 'Done',
+    edit: 'Edit',
+    weakTheoryTopics: 'Weak Theory Topics',
+    noTheoryVulnerabilities: 'No theory vulnerabilities detected.',
+    sessionNotesFeedback: 'Session Notes & Feedback',
+    overallPerformance: 'Overall Performance',
+    yourFeedback: 'Your Feedback for the Student',
+    feedbackPlaceholder: 'Note specific maneuvers needing practice, defensive driving habits...',
+    xpBonusAuthorized: 'XP Bonus Authorized',
+    xpBonusDesc: 'Submitting this feedback will automatically award ',
+    xpBonusVal: '+150 XP',
+    xpBonusSuffix: ' to the student for completing the session.',
+    submitFeedbackAwardXp: 'Submit Feedback & Award XP',
+    feedbackSuccess: 'Session feedback and XP bonus submitted to cadet profile.',
+    feedbackFail: 'Failed to submit feedback. Try again.',
+    progressUpdateMsg: 'progress updated.',
+    progressUpdateFail: 'Failed to update progress.'
+  },
+  HI: {
+    loadingStudentProfile: 'छात्र प्रोफ़ाइल लोड हो रही है...',
+    studentNotFoundTitle: 'छात्र नहीं मिला',
+    studentNotFoundDesc: 'आप जिस कैडेट प्रोफ़ाइल की तलाश कर रहे हैं वह मौजूद नहीं है या आपको असाइन नहीं की गई है।',
+    returnToRoster: 'रोस्टर पर लौटें',
+    backToRoster: 'रोस्टर पर वापस जाएँ',
+    studentProfileLabel: 'छात्र प्रोफ़ाइल',
+    student: 'छात्र',
+    idLabel: 'आईडी',
+    levelLabel: 'स्तर',
+    xpTotalLabel: 'कुल एक्सपी',
+    streakLabel: 'स्ट्रीक',
+    performanceOverview: 'प्रदर्शन का अवलोकन',
+    submitFeedback: 'फीडबैक सबमिट करें',
+    drivingSkills: 'ड्राइविंग कौशल',
+    done: 'संपन्न',
+    edit: 'संपादित करें',
+    weakTheoryTopics: 'कमजोर थ्योरी विषय',
+    noTheoryVulnerabilities: 'कोई थ्योरी कमजोरियां नहीं पाई गईं।',
+    sessionNotesFeedback: 'सत्र नोट्स और प्रतिक्रिया',
+    overallPerformance: 'समग्र प्रदर्शन',
+    yourFeedback: 'छात्र के लिए आपकी प्रतिक्रिया',
+    feedbackPlaceholder: 'अभ्यास की आवश्यकता वाले विशिष्ट पैंतरेबाज़ी, रक्षात्मक ड्राइविंग की आदतें नोट करें...',
+    xpBonusAuthorized: 'एक्सपी बोनस अधिकृत',
+    xpBonusDesc: 'यह फीडबैक सबमिट करने से छात्र को सत्र पूरा करने के लिए स्वचालित रूप से ',
+    xpBonusVal: '+150 XP',
+    xpBonusSuffix: ' मिल जाएगा।',
+    submitFeedbackAwardXp: 'फीडबैक सबमिट करें और XP दें',
+    feedbackSuccess: 'सत्र प्रतिक्रिया और एक्सपी बोनस कैडेट प्रोफ़ाइल में सबमिट किया गया।',
+    feedbackFail: 'प्रतिक्रिया सबमिट करने में विफल। पुनः प्रयास करें।',
+    progressUpdateMsg: 'प्रगति अद्यतन।',
+    progressUpdateFail: 'प्रगति अद्यतन करने में विफल।'
+  },
+  TE: {
+    loadingStudentProfile: 'విద్యార్థి ప్రొఫైల్ లోడ్ అవుతోంది...',
+    studentNotFoundTitle: 'విద్యార్థి కనుగొనబడలేదు',
+    studentNotFoundDesc: 'మీరు వెతుకుతున్న క్యాడెట్ ప్రొఫైల్ లేదు లేదా మీకు కేటాయించబడలేదు.',
+    returnToRoster: 'రోస్టర్‌కు తిరిగి వెళ్ళు',
+    backToRoster: 'రోస్టర్‌కు తిరిగి వెళ్ళు',
+    studentProfileLabel: 'విద్యార్థి ప్రొఫైల్',
+    student: 'విద్యార్థి',
+    idLabel: 'ID',
+    levelLabel: 'స్థాయి',
+    xpTotalLabel: 'XP మొత్తం',
+    streakLabel: 'స్ట్రీక్',
+    performanceOverview: 'పనితీరు అవలోకనం',
+    submitFeedback: 'ఫీడ్‌బ్యాక్ సమర్పించండి',
+    drivingSkills: 'డ్రైవింగ్ నైపుణ్యాలు',
+    done: 'పూర్తయింది',
+    edit: 'సవరించండి',
+    weakTheoryTopics: 'బలహీనమైన థియరీ అంశాలు',
+    noTheoryVulnerabilities: 'థియరీ లోపాలు ఏవీ కనుగొనబడలేదు.',
+    sessionNotesFeedback: 'సెషన్ గమనికలు & ఫీడ్‌బ్యాక్',
+    overallPerformance: 'మొత్తం పనితీరు',
+    yourFeedback: 'విద్యార్థి కోసం మీ ఫీడ్‌బ్యాక్',
+    feedbackPlaceholder: 'సాధన అవసరమైన నిర్దిష్ట విన్యాసాలు, డిఫెన్సివ్ డ్రైవింగ్ అలవాట్లను గమనించండి...',
+    xpBonusAuthorized: 'XP బోనస్ ఆమోదించబడింది',
+    xpBonusDesc: 'ఈ ఫీడ్‌బ్యాక్‌ను సమర్పించడం వల్ల సెషన్‌ను పూర్తి చేసినందుకు విద్యార్థికి ఆటోమేటిక్‌గా ',
+    xpBonusVal: '+150 XP',
+    xpBonusSuffix: ' లభిస్తుంది.',
+    submitFeedbackAwardXp: 'ఫీడ్‌బ్యాక్ సమర్పించి XP ఇవ్వండి',
+    feedbackSuccess: 'సెషన్ ఫీడ్‌బ్యాక్ మరియు XP బోనస్ క్యాడెట్ ప్రొఫైల్‌కు సమర్పించబడింది.',
+    feedbackFail: 'ఫీడ్‌బ్యాక్ సమర్పించడంలో విఫలమైంది. మళ్ళీ ప్రయత్నించండి.',
+    progressUpdateMsg: 'పురోగతి నవీకరించబడింది.',
+    progressUpdateFail: 'పురోగతిని నవీకరించడంలో విఫలమైంది.'
+  }
+}
+
 
 interface PageProps {
   params: { id: string }
 }
 
 export default function InstructorCadetDetails({ params }: PageProps) {
+  const { language } = useLanguageStore()
+  const activeLang = (language?.toUpperCase() || 'EN') as keyof typeof PAGE_DICT
+  const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
+
   const studentId = params.id
 
   const [studentData, setStudentData] = useState<any>(null)
@@ -84,12 +192,12 @@ export default function InstructorCadetDetails({ params }: PageProps) {
         throw new Error('Failed to submit feedback')
       }
 
-      setToastMessage("Session feedback and XP bonus submitted to cadet profile.")
+      setToastMessage(t.feedbackSuccess)
       setTimeout(() => setToastMessage(null), 3000)
       setSessionNotes('')
     } catch (error) {
       console.error(error)
-      setToastMessage("Failed to submit feedback. Try again.")
+      setToastMessage(t.feedbackFail)
       setTimeout(() => setToastMessage(null), 3000)
     }
   }
@@ -105,14 +213,14 @@ export default function InstructorCadetDetails({ params }: PageProps) {
       })
       if (res.ok) {
         setSkillScores(prev => ({ ...prev, [skillName]: score }))
-        setToastMessage(`${skillName} progress updated.`)
+        setToastMessage(`${skillName} ${t.progressUpdateMsg}`)
         setTimeout(() => setToastMessage(null), 3000)
       } else {
         throw new Error('Failed to update skill')
       }
     } catch (error) {
       console.error(error)
-      setToastMessage("Failed to update progress.")
+      setToastMessage(t.progressUpdateFail)
       setTimeout(() => setToastMessage(null), 3000)
     } finally {
       setUpdatingSkill(null)
@@ -123,7 +231,7 @@ export default function InstructorCadetDetails({ params }: PageProps) {
     return (
       <div className="min-h-screen bg-void text-text-1 flex flex-col items-center justify-center">
         <Clock className="w-8 h-8 animate-spin text-primary mb-4" />
-        <span className="font-mono text-xs uppercase text-text-3">LOADING STUDENT PROFILE...</span>
+        <span className="font-mono text-xs uppercase text-text-3">{t.loadingStudentProfile}</span>
       </div>
     )
   }
@@ -134,10 +242,10 @@ export default function InstructorCadetDetails({ params }: PageProps) {
     return (
       <div className="min-h-screen bg-void text-text-1 flex flex-col items-center justify-center p-6 text-center">
         <AlertTriangle className="w-12 h-12 text-danger mb-4" />
-        <h2 className="text-xl font-bold font-display mb-2">Student Not Found</h2>
-        <p className="text-text-3 font-body text-sm mb-6">The cadet profile you are looking for does not exist or is not assigned to you.</p>
+        <h2 className="text-xl font-bold font-display mb-2">{t.studentNotFoundTitle}</h2>
+        <p className="text-text-3 font-body text-sm mb-6">{t.studentNotFoundDesc}</p>
         <Link href="/instructor/students" className="px-6 py-2.5 bg-surface border border-border rounded-xl text-sm font-semibold hover:bg-surface-2 transition-all">
-          Return to Roster
+          {t.returnToRoster}
         </Link>
       </div>
     )
@@ -163,7 +271,7 @@ export default function InstructorCadetDetails({ params }: PageProps) {
 
       <header className="mb-8">
         <Link href="/instructor/students" className="inline-flex items-center gap-2 text-xs font-bold text-text-3 hover:text-text-1 transition-colors uppercase tracking-widest mb-6">
-          <ChevronLeft className="w-4 h-4" /> Back to Roster
+          <ChevronLeft className="w-4 h-4" /> {t.backToRoster}
         </Link>
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex items-center gap-6">
@@ -171,25 +279,25 @@ export default function InstructorCadetDetails({ params }: PageProps) {
               <User className="w-8 h-8" />
             </div>
             <div>
-              <span className="text-xs font-mono tracking-widest text-primary uppercase">Student Profile</span>
+              <span className="text-xs font-mono tracking-widest text-primary uppercase">{t.studentProfileLabel}</span>
               <h1 className="text-3xl font-extrabold text-text-1 tracking-tight font-display mt-1">
-                {(studentData as any).name || 'Student'}
+                {(studentData as any).name || t.student}
               </h1>
-              <p className="text-sm font-mono text-text-3 mt-1">ID: {studentId.toUpperCase()}</p>
+              <p className="text-sm font-mono text-text-3 mt-1">{t.idLabel}: {studentId.toUpperCase()}</p>
             </div>
           </div>
           
           <div className="flex gap-4">
             <div className="bg-surface border border-border px-4 py-2 rounded-xl text-center">
-              <span className="text-[10px] text-text-3 font-mono uppercase">Level</span>
+              <span className="text-[10px] text-text-3 font-mono uppercase">{t.levelLabel}</span>
               <div className="text-xl font-bold font-mono text-text-1">{studentData.level}</div>
             </div>
             <div className="bg-surface border border-border px-4 py-2 rounded-xl text-center">
-              <span className="text-[10px] text-text-3 font-mono uppercase">XP Total</span>
+              <span className="text-[10px] text-text-3 font-mono uppercase">{t.xpTotalLabel}</span>
               <div className="text-xl font-bold font-mono text-accent">{studentData.xp}</div>
             </div>
             <div className="bg-surface border border-border px-4 py-2 rounded-xl text-center">
-              <span className="text-[10px] text-text-3 font-mono uppercase">Streak</span>
+              <span className="text-[10px] text-text-3 font-mono uppercase">{t.streakLabel}</span>
               <div className="text-xl font-bold font-mono text-primary flex items-center gap-1 justify-center">
                 <Flame className="w-4 h-4" /> {studentData.streakDays}
               </div>
@@ -206,7 +314,7 @@ export default function InstructorCadetDetails({ params }: PageProps) {
             activeTab === 'OVERVIEW' ? 'bg-primary text-void shadow-lg shadow-primary/20' : 'bg-surface border border-border text-text-3 hover:text-text-1'
           }`}
         >
-          Performance Overview
+          {t.performanceOverview}
         </button>
         <button 
           onClick={() => setActiveTab('FEEDBACK')}
@@ -214,7 +322,7 @@ export default function InstructorCadetDetails({ params }: PageProps) {
             activeTab === 'FEEDBACK' ? 'bg-accent text-void shadow-lg shadow-accent/20' : 'bg-surface border border-border text-text-3 hover:text-text-1'
           }`}
         >
-          Submit Feedback
+          {t.submitFeedback}
         </button>
       </div>
 
@@ -232,14 +340,14 @@ export default function InstructorCadetDetails({ params }: PageProps) {
               <div className="flex justify-between items-center border-b border-border pb-4 mb-6">
                 <div className="flex items-center gap-3">
                   <Battery className="w-5 h-5 text-primary" />
-                  <h3 className="text-sm font-bold font-display uppercase tracking-widest text-text-1">Driving Skills</h3>
+                  <h3 className="text-sm font-bold font-display uppercase tracking-widest text-text-1">{t.drivingSkills}</h3>
                 </div>
                 <button
                   onClick={() => setIsEditingSkills(!isEditingSkills)}
                   className="text-xs font-mono uppercase tracking-widest text-text-3 hover:text-primary transition-colors flex items-center gap-1"
                 >
                   <PenTool className="w-3 h-3" />
-                  {isEditingSkills ? 'Done' : 'Edit'}
+                  {isEditingSkills ? t.done : t.edit}
                 </button>
               </div>
               <div className="flex flex-col gap-5">
@@ -303,7 +411,7 @@ export default function InstructorCadetDetails({ params }: PageProps) {
             <div className="bg-surface border border-border rounded-3xl p-6">
               <div className="flex items-center gap-3 border-b border-border pb-4 mb-6">
                 <AlertTriangle className="w-5 h-5 text-accent" />
-                <h3 className="text-sm font-bold font-display uppercase tracking-widest text-text-1">Weak Theory Topics</h3>
+                <h3 className="text-sm font-bold font-display uppercase tracking-widest text-text-1">{t.weakTheoryTopics}</h3>
               </div>
               
               {Object.keys(weakTopics).length > 0 ? (
@@ -317,7 +425,7 @@ export default function InstructorCadetDetails({ params }: PageProps) {
               ) : (
                 <div className="text-center py-10">
                   <ShieldCheck className="w-8 h-8 text-success mx-auto mb-3 opacity-50" />
-                  <p className="text-xs font-mono text-text-3 uppercase">No theory vulnerabilities detected.</p>
+                  <p className="text-xs font-mono text-text-3 uppercase">{t.noTheoryVulnerabilities}</p>
                 </div>
               )}
             </div>
@@ -336,11 +444,11 @@ export default function InstructorCadetDetails({ params }: PageProps) {
               
               <div className="flex items-center gap-3 border-b border-border pb-4">
                 <PenTool className="w-5 h-5 text-primary" />
-                <h3 className="text-lg font-bold font-display text-text-1">Session Notes & Feedback</h3>
+                <h3 className="text-lg font-bold font-display text-text-1">{t.sessionNotesFeedback}</h3>
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase tracking-widest text-text-3 mb-3">Overall Performance</label>
+                <label className="block text-xs font-mono uppercase tracking-widest text-text-3 mb-3">{t.overallPerformance}</label>
                 <div className="flex gap-3">
                   {[1, 2, 3, 4, 5].map(rating => (
                     <button 
@@ -360,13 +468,13 @@ export default function InstructorCadetDetails({ params }: PageProps) {
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase tracking-widest text-text-3 mb-3">Your Feedback for the Student</label>
+                <label className="block text-xs font-mono uppercase tracking-widest text-text-3 mb-3">{t.yourFeedback}</label>
                 <textarea 
                   required
                   rows={5}
                   value={sessionNotes}
                   onChange={(e) => setSessionNotes(e.target.value)}
-                  placeholder="Note specific maneuvers needing practice, defensive driving habits..."
+                  placeholder={t.feedbackPlaceholder}
                   className="w-full bg-void border border-border rounded-xl p-4 text-sm text-text-1 focus:border-primary outline-none transition-colors resize-none font-body"
                 />
               </div>
@@ -374,8 +482,8 @@ export default function InstructorCadetDetails({ params }: PageProps) {
               <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 flex items-start gap-4">
                 <Award className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                 <div>
-                  <h4 className="text-sm font-bold text-primary">XP Bonus Authorized</h4>
-                  <p className="text-xs text-text-2 mt-1">Submitting this feedback will automatically award <strong>+150 XP</strong> to the student for completing the session.</p>
+                  <h4 className="text-sm font-bold text-primary">{t.xpBonusAuthorized}</h4>
+                  <p className="text-xs text-text-2 mt-1">{t.xpBonusDesc}<strong>{t.xpBonusVal}</strong>{t.xpBonusSuffix}</p>
                 </div>
               </div>
 
@@ -383,7 +491,7 @@ export default function InstructorCadetDetails({ params }: PageProps) {
                 type="submit"
                 className="w-full py-4 mt-2 bg-primary hover:bg-primary-hover text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(37,99,235,0.4)]"
               >
-                <CheckCircle className="w-4 h-4" /> Submit Feedback & Award XP
+                <CheckCircle className="w-4 h-4" /> {t.submitFeedbackAwardXp}
               </button>
 
             </form>

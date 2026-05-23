@@ -3,6 +3,89 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Filter, Plus, Calendar, Edit3, MapPin, X, CheckCircle, FileWarning, Clock } from 'lucide-react'
+import { useLanguageStore } from '@/store/languageStore'
+
+const PAGE_DICT = {
+  EN: {
+    pageTitle: '{t.pageTitle}',
+    pageDesc: '{t.pageDesc}',
+    searchPh: 'Search student...',
+    loading: '{t.loading}',
+    dateTime: '{t.dateTime}',
+    center: 'Center',
+    notAssigned: t.notAssigned,
+    status: 'Status',
+    attempt: 'Attempt',
+    edit: 'Edit',
+    noTests: '{t.noTests}',
+    editExam: 'Edit Exam',
+    scheduleExam: 'Schedule Exam',
+    student: 'Student:',
+    result: 'Result',
+    scheduled: 'Scheduled',
+    passStr: 'Pass',
+    failStr: 'Fail',
+    notes: 'Notes',
+    phCenter: 'e.g. RTO North',
+    phNotes: 'Optional notes about the test...',
+    saving: 'Saving...',
+    saveExam: 'Save Exam',
+    failSave: 'Failed to save'
+  },
+  HI: {
+    pageTitle: 'परीक्षा टाइमलाइन',
+    pageDesc: 'सभी आगामी और पिछली ड्राइविंग परीक्षाओं का प्रबंधन करें।',
+    searchPh: 'छात्र खोजें...',
+    loading: 'टाइमलाइन डेटा लोड हो रहा है...',
+    dateTime: 'दिनांक और समय',
+    center: 'केंद्र',
+    notAssigned: 'सौंपा नहीं गया',
+    status: 'स्थिति',
+    attempt: 'प्रयास',
+    edit: 'संपादित करें',
+    noTests: 'आपकी खोज से कोई परीक्षा मेल नहीं खाती।',
+    editExam: 'परीक्षा संपादित करें',
+    scheduleExam: 'परीक्षा निर्धारित करें',
+    student: 'छात्र:',
+    result: 'परिणाम',
+    scheduled: 'निर्धारित',
+    passStr: 'उत्तीर्ण',
+    failStr: 'अनुत्तीर्ण',
+    notes: 'नोट्स',
+    phCenter: 'उदा. आरटीओ उत्तर',
+    phNotes: 'परीक्षा के बारे में वैकल्पिक नोट्स...',
+    saving: 'सहेजा जा रहा है...',
+    saveExam: 'परीक्षा सहेजें',
+    failSave: 'सहेजने में विफल'
+  },
+  TE: {
+    pageTitle: 'పరీక్షల టైమ్‌లైన్',
+    pageDesc: 'రాబోయే మరియు గత డ్రైవింగ్ పరీక్షలన్నింటినీ నిర్వహించండి.',
+    searchPh: 'విద్యార్థిని వెతకండి...',
+    loading: 'టైమ్‌లైన్ డేటాను లోడ్ చేస్తోంది...',
+    dateTime: 'తేదీ & సమయం',
+    center: 'కేంద్రం',
+    notAssigned: 'కేటాయించబడలేదు',
+    status: 'స్థితి',
+    attempt: 'ప్రయత్నం',
+    edit: 'సవరించు',
+    noTests: 'మీ శోధనకు ఏ పరీక్షలు సరిపోలలేదు.',
+    editExam: 'పరీక్షను సవరించండి',
+    scheduleExam: 'పరీక్షను షెడ్యూల్ చేయండి',
+    student: 'విద్యార్థి:',
+    result: 'ఫలితం',
+    scheduled: 'షెడ్యూల్ చేయబడింది',
+    passStr: 'పాస్',
+    failStr: 'ఫెయిల్',
+    notes: 'గమనికలు',
+    phCenter: 'ఉదా. ఆర్టీఓ నార్త్',
+    phNotes: 'పరీక్ష గురించి ఐచ్ఛిక గమనికలు...',
+    saving: 'సేవ్ చేయబడుతోంది...',
+    saveExam: 'పరీక్షను సేవ్ చేయండి',
+    failSave: 'సేవ్ చేయడం విఫలమైంది'
+  }
+}
+
 
 interface DrivingTest {
   id: string
@@ -21,6 +104,10 @@ interface DrivingTest {
 }
 
 export default function AdminTimelinePage() {
+  const { language } = useLanguageStore()
+  const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
+  const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
+
   const [tests, setTests] = useState<DrivingTest[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -79,7 +166,7 @@ export default function AdminTimelinePage() {
         setIsEditModalOpen(false)
       } else {
         const err = await res.json()
-        alert(err.error || 'Failed to save')
+        alert(err.error || t.failSave)
       }
     } catch (e) {
       console.error(e)
@@ -97,15 +184,15 @@ export default function AdminTimelinePage() {
       <div className="max-w-6xl mx-auto">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
-            <h1 className="text-4xl font-display font-bold text-white mb-2">Exams Timeline</h1>
-            <p className="text-text-2">Manage all upcoming and past driving tests.</p>
+            <h1 className="text-4xl font-display font-bold text-white mb-2">{t.pageTitle}</h1>
+            <p className="text-text-2">{t.pageDesc}</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
               <input 
                 type="text" 
-                placeholder="Search student..." 
+                placeholder={t.searchPh} 
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 className="bg-surface border border-border rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-primary text-white"
@@ -122,7 +209,7 @@ export default function AdminTimelinePage() {
         </header>
 
         {loading ? (
-          <div className="text-center text-text-3 py-20">Loading timeline data...</div>
+          <div className="text-center text-text-3 py-20">{t.loading}</div>
         ) : (
           <div className="space-y-4">
             {filteredTests.map((test) => {
@@ -152,15 +239,15 @@ export default function AdminTimelinePage() {
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-grow w-full md:w-auto">
                     <div className="flex flex-col">
-                      <span className="text-xs text-text-3 font-bold uppercase mb-1">Date & Time</span>
+                      <span className="text-xs text-text-3 font-bold uppercase mb-1">{t.dateTime}</span>
                       <span className="font-semibold text-text-1">{dateObj.toLocaleDateString()} {dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs text-text-3 font-bold uppercase mb-1">Center</span>
-                      <span className="text-sm text-text-1 truncate max-w-[150px]">{test.testCenter || 'Not Assigned'}</span>
+                      <span className="text-xs text-text-3 font-bold uppercase mb-1">{t.center}</span>
+                      <span className="text-sm text-text-1 truncate max-w-[150px]">{test.testCenter || t.notAssigned}</span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs text-text-3 font-bold uppercase mb-1">Status</span>
+                      <span className="text-xs text-text-3 font-bold uppercase mb-1">{t.status}</span>
                       <span className={`text-sm font-bold ${
                         test.result === 'PASS' ? 'text-success' :
                         test.result === 'FAIL' ? 'text-danger' :
@@ -168,7 +255,7 @@ export default function AdminTimelinePage() {
                       }`}>{test.result}</span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs text-text-3 font-bold uppercase mb-1">Attempt</span>
+                      <span className="text-xs text-text-3 font-bold uppercase mb-1">{t.attempt}</span>
                       <span className="text-sm text-text-1">#{test.attemptNo}</span>
                     </div>
                   </div>
@@ -193,7 +280,7 @@ export default function AdminTimelinePage() {
 
             {filteredTests.length === 0 && (
               <div className="text-center py-20 text-text-3 border border-dashed border-border rounded-2xl">
-                No tests match your search.
+                {t.noTests}
               </div>
             )}
           </div>
@@ -217,20 +304,20 @@ export default function AdminTimelinePage() {
                 <X className="w-5 h-5" />
               </button>
               
-              <h2 className="text-2xl font-bold font-display mb-6">{editTest.id ? 'Edit Exam' : 'Schedule Exam'}</h2>
+              <h2 className="text-2xl font-bold font-display mb-6">{editTest.id ? t.editExam : t.scheduleExam}</h2>
 
               <form onSubmit={handleSave} className="flex flex-col gap-5">
                 
                 {/* ID visible only on edit for context */}
                 {editTest.id && (
                   <div className="text-sm text-text-3 mb-2 font-mono">
-                    Student: <span className="text-white">{editTest.student?.user?.name}</span>
+                    {t.student} <span className="text-white">{editTest.student?.user?.name}</span>
                   </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2 col-span-2">
-                    <label className="text-xs font-bold uppercase text-text-3">Date & Time</label>
+                    <label className="text-xs font-bold uppercase text-text-3">{t.dateTime}</label>
                     <input 
                       type="datetime-local" 
                       value={editTest.testDate || ''}
@@ -241,36 +328,36 @@ export default function AdminTimelinePage() {
                   </div>
                   
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold uppercase text-text-3">Test Center</label>
+                    <label className="text-xs font-bold uppercase text-text-3">{t.center}</label>
                     <input 
                       type="text" 
                       value={editTest.testCenter || ''}
                       onChange={(e) => setEditTest({...editTest, testCenter: e.target.value})}
-                      placeholder="e.g. RTO North"
+                      placeholder={t.phCenter}
                       className="bg-void border border-border rounded-xl p-3 text-white focus:outline-none focus:border-primary"
                     />
                   </div>
 
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold uppercase text-text-3">Result</label>
+                    <label className="text-xs font-bold uppercase text-text-3">{t.result}</label>
                     <select
                       value={editTest.result || 'SCHEDULED'}
                       onChange={(e) => setEditTest({...editTest, result: e.target.value as any})}
                       className="bg-void border border-border rounded-xl p-3 text-white focus:outline-none focus:border-primary"
                     >
-                      <option value="SCHEDULED">Scheduled</option>
-                      <option value="PASS">Pass</option>
-                      <option value="FAIL">Fail</option>
+                      <option value="SCHEDULED">{t.scheduled}</option>
+                      <option value="PASS">{t.passStr}</option>
+                      <option value="FAIL">{t.failStr}</option>
                     </select>
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold uppercase text-text-3">Notes</label>
+                  <label className="text-xs font-bold uppercase text-text-3">{t.notes}</label>
                   <textarea 
                     value={editTest.notes || ''}
                     onChange={(e) => setEditTest({...editTest, notes: e.target.value})}
-                    placeholder="Optional notes about the test..."
+                    placeholder={t.phNotes}
                     className="bg-void border border-border rounded-xl p-3 text-white focus:outline-none focus:border-primary min-h-[80px]"
                   />
                 </div>
@@ -280,7 +367,7 @@ export default function AdminTimelinePage() {
                   disabled={submitting}
                   className="w-full mt-2 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
-                  {submitting ? 'Saving...' : 'Save Exam'}
+                  {submitting ? t.saving : t.saveExam}
                 </button>
               </form>
             </motion.div>

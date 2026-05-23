@@ -6,8 +6,6 @@ export const metadata = {
   title: 'Booking Review | Admin Dashboard',
 }
 
-
-
 export default async function AdminBookingsPage() {
   let pendingBookings: any[] = []
   let instructors: any[] = []
@@ -31,13 +29,6 @@ export default async function AdminBookingsPage() {
 
   return (
     <div className="max-w-6xl mx-auto w-full">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold font-display text-[rgb(var(--color-text-1))]">Booking Review (Manual Mode)</h1>
-        <p className="text-sm text-[rgb(var(--color-text-2))] mt-1">
-          Review incoming student registrations. Assign an instructor and approve to officially create their account.
-        </p>
-      </div>
-
       <BookingsManagerClient 
         initialBookings={pendingBookings}
         instructors={instructors}

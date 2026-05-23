@@ -103,6 +103,33 @@ export default function AdminConsoleLayout({
   const { language } = useLanguageStore()
   const navItems = ADMIN_NAV_T[language] || ADMIN_NAV_T.EN
 
+  const ADMIN_LAYOUT_DICT = {
+    EN: {
+      notifications: "Notifications",
+      noNotifs: "No new notifications",
+      navigation: "Navigation",
+      opsMaster: "Ops. Master",
+      adminDeck: "ADMIN DECK"
+    },
+    HI: {
+      notifications: "सूचनाएं",
+      noNotifs: "कोई नई सूचना नहीं",
+      navigation: "नेविगेशन",
+      opsMaster: "ऑप्स मास्टर",
+      adminDeck: "एडमिन डेक"
+    },
+    TE: {
+      notifications: "నోటిఫికేషన్‌లు",
+      noNotifs: "కొత్త నోటిఫికేషన్‌లు లేవు",
+      navigation: "నావిగేషన్",
+      opsMaster: "ఆప్స్ మాస్టర్",
+      adminDeck: "అడ్మిన్ డెక్"
+    }
+  }
+
+  const activeLang = language.toUpperCase() as keyof typeof ADMIN_LAYOUT_DICT
+  const t = ADMIN_LAYOUT_DICT[activeLang] || ADMIN_LAYOUT_DICT.EN
+
   return (
     <div className="h-full flex flex-col bg-[rgb(var(--color-void))] text-[rgb(var(--color-text-1))] font-sans overflow-hidden transition-colors duration-300">
       {/* TOP HEADER CONSOLE BAR */}
@@ -154,10 +181,10 @@ export default function AdminConsoleLayout({
                   exit={{ opacity: 0, y: 10 }}
                   className="absolute top-full mt-2 right-0 w-72 bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-xl shadow-xl overflow-hidden z-50"
                 >
-                  <div className="px-4 py-3 border-b border-[rgb(var(--color-border))] font-semibold text-sm">Notifications</div>
+                  <div className="px-4 py-3 border-b border-[rgb(var(--color-border))] font-semibold text-sm">{t.notifications}</div>
                   <div className="flex flex-col max-h-64 overflow-y-auto">
                     {notifications.length === 0 ? (
-                      <div className="p-4 text-center text-[rgb(var(--color-text-3))] text-sm">No new notifications</div>
+                      <div className="p-4 text-center text-[rgb(var(--color-text-3))] text-sm">{t.noNotifs}</div>
                     ) : (
                       notifications.map(n => (
                         <div key={n.id} className="p-3 border-b border-slate-50 dark:border-slate-800 hover:bg-[rgb(var(--color-surface))] flex flex-col gap-1 transition-colors">
@@ -195,7 +222,7 @@ export default function AdminConsoleLayout({
           <div className="flex flex-col gap-6 h-full">
             <div className="flex items-center justify-between">
               {!collapsed && (
-                <span className="text-xs uppercase tracking-wider text-[rgb(var(--color-text-3))] font-bold px-2">Navigation</span>
+                <span className="text-xs uppercase tracking-wider text-[rgb(var(--color-text-3))] font-bold px-2">{t.navigation}</span>
               )}
               <button 
                 onClick={() => setCollapsed(!collapsed)}
@@ -241,8 +268,8 @@ export default function AdminConsoleLayout({
                     OP
                   </div>
                   <div className="flex flex-col text-left">
-                    <span className="text-sm font-bold text-[rgb(var(--color-text-1))]">Ops. Master</span>
-                    <span className="text-xs text-[rgb(var(--color-text-3))]">ADMIN DECK</span>
+                    <span className="text-sm font-bold text-[rgb(var(--color-text-1))]">{t.opsMaster}</span>
+                    <span className="text-xs text-[rgb(var(--color-text-3))]">{t.adminDeck}</span>
                   </div>
                 </div>
               ) : (
@@ -274,7 +301,7 @@ export default function AdminConsoleLayout({
                 className="fixed inset-y-0 left-0 w-72 bg-[rgb(var(--color-surface))] border-r border-[rgb(var(--color-border))] z-50 p-5 lg:hidden flex flex-col gap-6 overflow-y-auto shadow-2xl"
               >
                 <div className="flex justify-between items-center">
-                  <span className="text-xs uppercase tracking-wider text-[rgb(var(--color-text-3))] font-bold">Navigation</span>
+                  <span className="text-xs uppercase tracking-wider text-[rgb(var(--color-text-3))] font-bold">{t.navigation}</span>
                   <button onClick={() => setMobileOpen(false)} className="p-2 bg-[rgb(var(--color-border))] rounded-lg text-[rgb(var(--color-text-3))] hover:text-[rgb(var(--color-text-1))] dark:hover:text-white">
                     <X className="w-5 h-5" />
                   </button>
@@ -313,8 +340,8 @@ export default function AdminConsoleLayout({
                     OP
                   </div>
                   <div className="flex flex-col text-left">
-                    <span className="text-sm font-bold text-[rgb(var(--color-text-1))]">Ops. Master</span>
-                    <span className="text-xs text-[rgb(var(--color-text-3))]">ADMIN DECK</span>
+                    <span className="text-sm font-bold text-[rgb(var(--color-text-1))]">{t.opsMaster}</span>
+                    <span className="text-xs text-[rgb(var(--color-text-3))]">{t.adminDeck}</span>
                   </div>
                 </div>
               </motion.aside>

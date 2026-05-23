@@ -4,8 +4,100 @@ import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Edit2, Trash2, Tag, Book, Activity, AlertCircle, Save, Image as ImageIcon } from 'lucide-react'
 import { Course, Offer } from '@/lib/data/academyStore'
+import { useLanguageStore } from '@/store/languageStore'
+
+const PAGE_DICT = {
+  EN: {
+    dashboard: 'Content Dashboard',
+    title: 'Academy Offerings',
+    desc: 'Manage the live curriculum courses and promotional voucher codes.',
+    tabCourses: 'Curriculum Courses',
+    tabOffers: 'Promotional Offers',
+    tabGallery: 'Gallery Manager',
+    syncing: 'Syncing Dashboard...',
+    coursesAlert: 'Live curriculum synced across student and public portals.',
+    addCourse: 'Add Course',
+    active: 'Active',
+    draft: 'Draft',
+    offersAlert: 'Promotional vouchers active on public booking channels.',
+    createOffer: 'Create Offer',
+    promoCode: 'PROMO CODE',
+    expired: 'Expired',
+    off: 'OFF',
+    galleryAlert: 'Manage images for the public gallery page.',
+    addImage: 'Add Image',
+    noCaption: 'No caption',
+    addGalleryImage: 'Add Gallery Image',
+    imageUrlKey: 'Image URL / Key',
+    imageUrlPlaceholder: 'e.g. https://...',
+    captionLabel: 'Caption (optional)',
+    captionPlaceholder: 'E.g. Student passing the test',
+    adding: 'Adding...',
+    confirmDeleteImage: 'Are you sure you want to delete this image?'
+  },
+  HI: {
+    dashboard: 'कंटेंट डैशबोर्ड',
+    title: 'अकादमी की पेशकश',
+    desc: 'लाइव पाठ्यक्रम और प्रचार वाउचर कोड प्रबंधित करें।',
+    tabCourses: 'पाठ्यक्रम',
+    tabOffers: 'प्रचार प्रस्ताव',
+    tabGallery: 'गैलरी प्रबंधक',
+    syncing: 'डैशबोर्ड सिंक हो रहा है...',
+    coursesAlert: 'लाइव पाठ्यक्रम छात्र और सार्वजनिक पोर्टल पर सिंक किया गया।',
+    addCourse: 'कोर्स जोड़ें',
+    active: 'सक्रिय',
+    draft: 'ड्राफ्ट',
+    offersAlert: 'सार्वजनिक बुकिंग चैनलों पर सक्रिय प्रचार वाउचर।',
+    createOffer: 'ऑफर बनाएं',
+    promoCode: 'प्रोमो कोड',
+    expired: 'समाप्त',
+    off: 'छूट',
+    galleryAlert: 'सार्वजनिक गैलरी पृष्ठ के लिए छवियां प्रबंधित करें।',
+    addImage: 'छवि जोड़ें',
+    noCaption: 'कोई कैप्शन नहीं',
+    addGalleryImage: 'गैलरी छवि जोड़ें',
+    imageUrlKey: 'छवि यूआरएल (URL) / कुंजी (Key)',
+    imageUrlPlaceholder: 'जैसे https://...',
+    captionLabel: 'कैप्शन (वैकल्पिक)',
+    captionPlaceholder: 'जैसे छात्र टेस्ट पास कर रहा है',
+    adding: 'जोड़ा जा रहा है...',
+    confirmDeleteImage: 'क्या आप वाकई इस छवि को हटाना चाहते हैं?'
+  },
+  TE: {
+    dashboard: 'కంటెంట్ డాష్‌బోర్డ్',
+    title: 'అకాడమీ ఆఫరింగ్స్',
+    desc: 'లైవ్ కరికులం కోర్సులు మరియు ప్రమోషనల్ వోచర్ కోడ్‌లను నిర్వహించండి.',
+    tabCourses: 'కరికులం కోర్సులు',
+    tabOffers: 'ప్రమోషనల్ ఆఫర్‌లు',
+    tabGallery: 'గ్యాలరీ మేనేజర్',
+    syncing: 'డాష్‌బోర్డ్ సింక్ అవుతోంది...',
+    coursesAlert: 'విద్యార్థి మరియు పబ్లిక్ పోర్టల్‌లలో లైవ్ కరికులం సింక్ చేయబడింది.',
+    addCourse: 'కోర్సును జోడించండి',
+    active: 'యాక్టివ్',
+    draft: 'డ్రాఫ్ట్',
+    offersAlert: 'పబ్లిక్ బుకింగ్ ఛానెల్‌లలో ప్రమోషనల్ వోచర్‌లు యాక్టివ్‌గా ఉన్నాయి.',
+    createOffer: 'ఆఫర్‌ను సృష్టించండి',
+    promoCode: 'ప్రోమో కోడ్',
+    expired: 'గడువు ముగిసింది',
+    off: 'తగ్గింపు',
+    galleryAlert: 'పబ్లిక్ గ్యాలరీ పేజీ కోసం చిత్రాలను నిర్వహించండి.',
+    addImage: 'చిత్రాన్ని జోడించండి',
+    noCaption: 'క్యాప్షన్ లేదు',
+    addGalleryImage: 'గ్యాలరీ చిత్రాన్ని జోడించండి',
+    imageUrlKey: 'చిత్రం URL / కీ',
+    imageUrlPlaceholder: 'ఉదా. https://...',
+    captionLabel: 'క్యాప్షన్ (ఐచ్ఛికం)',
+    captionPlaceholder: 'ఉదా. విద్యార్థి పరీక్షలో ఉత్తీర్ణత సాధించడం',
+    adding: 'జోడిస్తోంది...',
+    confirmDeleteImage: 'మీరు ఖచ్చితంగా ఈ చిత్రాన్ని తొలగించాలనుకుంటున్నారా?'
+  }
+}
 
 export default function ContentManagementPage() {
+  const { language } = useLanguageStore()
+  const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
+  const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
+
   const [activeTab, setActiveTab] = useState<'COURSES' | 'OFFERS' | 'GALLERY'>('COURSES')
   const [courses, setCourses] = useState<Course[]>([])
   const [offers, setOffers] = useState<Offer[]>([])
@@ -71,7 +163,7 @@ export default function ContentManagementPage() {
   }
 
   const handleDeleteImage = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this image?')) return
+    if (!confirm(t.confirmDeleteImage)) return
     try {
       const res = await fetch(`/api/admin/gallery/${id}`, { method: 'DELETE' })
       if (res.ok) {
@@ -87,11 +179,11 @@ export default function ContentManagementPage() {
       
       {/* Header section */}
       <header className="mb-10">
-        <span className="text-xs font-mono tracking-widest text-primary uppercase">Content Dashboard</span>
+        <span className="text-xs font-mono tracking-widest text-primary uppercase">{t.dashboard}</span>
         <h1 className="text-3xl md:text-4xl font-extrabold text-text-1 tracking-tight font-display mt-1">
-          Academy Offerings
+          {t.title}
         </h1>
-        <p className="text-sm text-text-2 mt-2">Manage the live curriculum courses and promotional voucher codes.</p>
+        <p className="text-sm text-text-2 mt-2">{t.desc}</p>
       </header>
 
       {/* Tabs */}
@@ -104,7 +196,7 @@ export default function ContentManagementPage() {
               : 'bg-surface border border-border text-text-3 hover:text-text-1'
           }`}
         >
-          <Book className="w-4 h-4" /> Curriculum Courses
+          <Book className="w-4 h-4" /> {t.tabCourses}
         </button>
         <button
           onClick={() => setActiveTab('OFFERS')}
@@ -114,7 +206,7 @@ export default function ContentManagementPage() {
               : 'bg-surface border border-border text-text-3 hover:text-text-1'
           }`}
         >
-          <Tag className="w-4 h-4" /> Promotional Offers
+          <Tag className="w-4 h-4" /> {t.tabOffers}
         </button>
         <button
           onClick={() => setActiveTab('GALLERY')}
@@ -124,14 +216,14 @@ export default function ContentManagementPage() {
               : 'bg-surface border border-border text-text-3 hover:text-text-1'
           }`}
         >
-          <ImageIcon className="w-4 h-4" /> Gallery Manager
+          <ImageIcon className="w-4 h-4" /> {t.tabGallery}
         </button>
       </div>
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 text-text-3">
           <Activity className="w-8 h-8 animate-spin mb-4 text-primary" />
-          <p className="font-mono text-xs uppercase tracking-widest">Syncing Dashboard...</p>
+          <p className="font-mono text-xs uppercase tracking-widest">{t.syncing}</p>
         </div>
       ) : (
         <AnimatePresence mode="wait">
@@ -146,15 +238,15 @@ export default function ContentManagementPage() {
               <div className="flex justify-between items-center bg-void/50 border border-border p-4 rounded-2xl">
                 <div className="flex items-center gap-3 text-text-2">
                   <AlertCircle className="w-5 h-5 text-primary" />
-                  <span className="text-sm font-mono tracking-wide">Live curriculum synced across student and public portals.</span>
+                  <span className="text-sm font-mono tracking-wide">{t.coursesAlert}</span>
                 </div>
                 <button className="flex items-center gap-2 px-4 py-2 bg-surface hover:bg-primary/20 border border-border hover:border-primary/40 rounded-xl text-xs font-bold text-text-1 transition-all">
-                  <Plus className="w-4 h-4" /> Add Course
+                  <Plus className="w-4 h-4" /> {t.addCourse}
                 </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {courses.map((course) => (
+                {courses.map((course: any) => (
                   <div key={course.id} className="bg-surface border border-border p-6 rounded-3xl flex flex-col relative group transition-all hover:border-primary/50">
                     <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button className="p-1.5 bg-void/80 hover:bg-white/10 rounded-lg text-text-2 transition-all"><Edit2 className="w-3.5 h-3.5" /></button>
@@ -162,13 +254,13 @@ export default function ContentManagementPage() {
                     </div>
 
                     <span className="text-[10px] font-mono uppercase tracking-widest text-primary mb-2">{course.category}</span>
-                    <h3 className="text-xl font-display font-bold text-text-1 leading-tight">{course.title.EN}</h3>
-                    <p className="text-sm text-text-2 mt-3 mb-6 line-clamp-3">{course.desc.EN}</p>
+                    <h3 className="text-xl font-display font-bold text-text-1 leading-tight">{course.title?.[activeLang] || course.title?.EN || course.title}</h3>
+                    <p className="text-sm text-text-2 mt-3 mb-6 line-clamp-3">{course.desc?.[activeLang] || course.desc?.EN || course.desc}</p>
                     
                     <div className="mt-auto pt-4 border-t border-border flex justify-between items-center">
                       <span className="text-lg font-bold text-text-1 font-mono">₹{course.price.toLocaleString('en-IN')}</span>
                       <span className={`px-3 py-1 text-[10px] uppercase tracking-wider font-bold rounded-full ${course.active ? 'bg-success/20 text-success' : 'bg-void text-text-3 border border-border'}`}>
-                        {course.active ? 'Active' : 'Draft'}
+                        {course.active ? t.active : t.draft}
                       </span>
                     </div>
                   </div>
@@ -188,15 +280,15 @@ export default function ContentManagementPage() {
               <div className="flex justify-between items-center bg-void/50 border border-border p-4 rounded-2xl">
                 <div className="flex items-center gap-3 text-text-2">
                   <AlertCircle className="w-5 h-5 text-accent" />
-                  <span className="text-sm font-mono tracking-wide">Promotional vouchers active on public booking channels.</span>
+                  <span className="text-sm font-mono tracking-wide">{t.offersAlert}</span>
                 </div>
                 <button className="flex items-center gap-2 px-4 py-2 bg-surface hover:bg-accent/20 border border-border hover:border-accent/40 rounded-xl text-xs font-bold text-text-1 transition-all">
-                  <Plus className="w-4 h-4" /> Create Offer
+                  <Plus className="w-4 h-4" /> {t.createOffer}
                 </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {offers.map((offer) => (
+                {offers.map((offer: any) => (
                   <div key={offer.id} className="bg-surface border border-border p-6 rounded-3xl flex flex-col relative group transition-all hover:border-accent/50">
                     <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button className="p-1.5 bg-void/80 hover:bg-white/10 rounded-lg text-text-2 transition-all"><Edit2 className="w-3.5 h-3.5" /></button>
@@ -208,18 +300,18 @@ export default function ContentManagementPage() {
                         <Tag className="w-6 h-6" />
                       </div>
                       <div>
-                        <span className="text-[10px] font-mono uppercase tracking-widest text-text-3">PROMO CODE</span>
+                        <span className="text-[10px] font-mono uppercase tracking-widest text-text-3">{t.promoCode}</span>
                         <h4 className="text-lg font-mono font-bold text-text-1 tracking-widest">{offer.promoCode}</h4>
                       </div>
                     </div>
 
-                    <h3 className="text-lg font-display font-bold text-text-1 mb-2">{offer.title.EN}</h3>
-                    <p className="text-sm text-text-2 mb-6 line-clamp-2">{offer.desc.EN}</p>
+                    <h3 className="text-lg font-display font-bold text-text-1 mb-2">{offer.title?.[activeLang] || offer.title?.EN || offer.title}</h3>
+                    <p className="text-sm text-text-2 mb-6 line-clamp-2">{offer.desc?.[activeLang] || offer.desc?.EN || offer.desc}</p>
                     
                     <div className="mt-auto pt-4 border-t border-border flex justify-between items-center">
-                      <span className="text-2xl font-bold text-accent font-display">{offer.discountPercent}% OFF</span>
+                      <span className="text-2xl font-bold text-accent font-display">{offer.discountPercent}% {t.off}</span>
                       <span className={`px-3 py-1 text-[10px] uppercase tracking-wider font-bold rounded-full ${offer.active ? 'bg-success/20 text-success' : 'bg-void text-text-3 border border-border'}`}>
-                        {offer.active ? 'Active' : 'Expired'}
+                        {offer.active ? t.active : t.expired}
                       </span>
                     </div>
                   </div>
@@ -239,13 +331,13 @@ export default function ContentManagementPage() {
               <div className="flex justify-between items-center bg-void/50 border border-border p-4 rounded-2xl">
                 <div className="flex items-center gap-3 text-text-2">
                   <ImageIcon className="w-5 h-5 text-success" />
-                  <span className="text-sm font-mono tracking-wide">Manage images for the public gallery page.</span>
+                  <span className="text-sm font-mono tracking-wide">{t.galleryAlert}</span>
                 </div>
                 <button 
                   onClick={() => setShowGalleryModal(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-surface hover:bg-success/20 border border-border hover:border-success/40 rounded-xl text-xs font-bold text-text-1 transition-all"
                 >
-                  <Plus className="w-4 h-4" /> Add Image
+                  <Plus className="w-4 h-4" /> {t.addImage}
                 </button>
               </div>
 
@@ -257,7 +349,7 @@ export default function ContentManagementPage() {
                       {/* You can render an actual img tag if imageKey is a valid URL */}
                     </div>
                     
-                    <h3 className="text-sm font-display font-bold text-text-1 mb-2 line-clamp-2 min-h-[40px]">{img.caption || 'No caption'}</h3>
+                    <h3 className="text-sm font-display font-bold text-text-1 mb-2 line-clamp-2 min-h-[40px]">{img.caption || t.noCaption}</h3>
                     <p className="text-xs text-text-3 font-mono truncate">{img.imageKey}</p>
                     
                     <div className="mt-4 pt-4 border-t border-border flex justify-between items-center">
@@ -278,20 +370,20 @@ export default function ContentManagementPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowGalleryModal(false)}>
           <div className="bg-surface border border-border rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="p-5 border-b border-border flex justify-between items-center bg-void/50">
-              <h3 className="font-bold text-lg text-white">Add Gallery Image</h3>
+              <h3 className="font-bold text-lg text-white">{t.addGalleryImage}</h3>
             </div>
             <form onSubmit={handleUploadGallery} className="p-5 flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Image URL / Key</label>
-                <input required type="text" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-success outline-none text-white w-full" value={newImage.imageKey} onChange={e => setNewImage({...newImage, imageKey: e.target.value})} placeholder="e.g. https://..." />
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">{t.imageUrlKey}</label>
+                <input required type="text" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-success outline-none text-white w-full" value={newImage.imageKey} onChange={e => setNewImage({...newImage, imageKey: e.target.value})} placeholder={t.imageUrlPlaceholder} />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Caption (optional)</label>
-                <input type="text" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-success outline-none text-white w-full" value={newImage.caption} onChange={e => setNewImage({...newImage, caption: e.target.value})} placeholder="E.g. Student passing the test" />
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">{t.captionLabel}</label>
+                <input type="text" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-success outline-none text-white w-full" value={newImage.caption} onChange={e => setNewImage({...newImage, caption: e.target.value})} placeholder={t.captionPlaceholder} />
               </div>
               <div className="pt-2">
                 <button type="submit" disabled={submitting} className="w-full py-3 bg-success text-void font-bold rounded-xl hover:bg-success/90 transition-colors disabled:opacity-50">
-                  {submitting ? 'Adding...' : 'Add Image'}
+                  {submitting ? t.adding : t.addImage}
                 </button>
               </div>
             </form>

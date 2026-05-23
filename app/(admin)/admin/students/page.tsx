@@ -1,6 +1,230 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
+import { useLanguageStore } from '@/store/languageStore'
+
+const PAGE_DICT = {
+  EN: {
+    pageTitle: 'Student Management',
+    pageDesc: '{t.pageDesc}',
+    total: 'Total',
+    feePaid: 'Fee Paid',
+    unpaid: 'Unpaid',
+    testSched: 'Test Scheduled',
+    searchPh: 'Search by name, email, or phone...',
+    createStudent: '{t.createStudent}',
+    all: 'All',
+    noInst: 'No Instructor',
+    loading: '{t.loading}',
+    noStudents: '{t.noStudents}',
+    tryAdjust: '{t.tryAdjust}',
+    noFeeSet: 'No fee set',
+    active: 'ACTIVE',
+    completed: 'COMPLETED',
+    dropped: 'DROPPED',
+    test: 'Test:',
+    setFee: 'Set Fee',
+    recordPayment: 'Record Payment',
+    schedule{t.test} 'Schedule Test',
+    recordResult: 'Record Test Result',
+    changeInst: 'Change Instructor',
+    assignInst: 'Assign Instructor',
+    deactivate: 'Deactivate',
+    reactivate: 'Reactivate',
+    payHistory: '{t.payHistory}',
+    noPayRec: '{t.noPayRec}',
+    testHistory: '{t.testHistory}',
+    noTestSched: '{t.noTestSched}',
+    attemptNo: '{t.attemptNo}',
+    enrolled: 'Enrolled:',
+    sessions: 'Sessions:',
+    balanceDue: '{t.balanceDue}',
+    recordPayModal: '💰 {t.recordPayment}',
+    schedTestModal: '🚗 Schedule Driving Test',
+    setFeeModal: '📋 Set Course Fee',
+    assignModal: '👨‍🏫 Assign Instructor',
+    resultModal: '🏆 {t.recordResult}',
+    createModal: '👤 Create New Student',
+    amount: 'Amount (₹)',
+    phAmount: 'e.g. 5000',
+    method: 'Method',
+    cash: 'Cash',
+    upi: 'UPI',
+    card: 'Card',
+    bank: 'Bank Transfer',
+    noteOpt: 'Note (optional)',
+    phNote: 'e.g. First installment',
+    recording: 'Recording...',
+    recordBtn: 'Record Payment',
+    testDate: 'Test Date',
+    centerOpt: 'Test Center / RTO (optional)',
+    phCenter: 'e.g. Hyderabad RTO Office',
+    notesOpt: 'Notes (optional)',
+    phNotes: 'e.g. Bring documents',
+    scheduling: 'Scheduling...',
+    schedBtn: 'Schedule Test',
+    courseFee: 'Course Fee (₹)',
+    phFee: 'e.g. 8999',
+    trainingType: 'Training Type',
+    beginner: 'Beginner',
+    advanced: 'Advanced',
+    rto: 'Fast Track (RTO)',
+    saving: 'Saving...',
+    setFeeBtn: 'Set Fee',
+    selInst: 'Select Instructor',
+    noInstSys: '{t.noInstSys}',
+    chooseInst: 'Choose instructor...',
+    assigning: 'Assigning...',
+    assignBtn: 'Assign Instructor'
+  },
+  HI: {
+    pageTitle: 'छात्र प्रबंधन',
+    pageDesc: 'पाठ्यक्रम शुल्क, ड्राइविंग टेस्ट, प्रशिक्षक असाइनमेंट और छात्र जीवनचक्र का प्रबंधन करें।',
+    total: 'कुल',
+    feePaid: 'शुल्क का भुगतान किया गया',
+    unpaid: 'अवैतनिक',
+    testSched: 'परीक्षा निर्धारित',
+    searchPh: 'नाम, ईमेल या फोन से खोजें...',
+    createStudent: 'छात्र बनाएं',
+    all: 'सभी',
+    noInst: 'कोई प्रशिक्षक नहीं',
+    loading: 'छात्रों को लोड किया जा रहा है...',
+    noStudents: 'कोई छात्र नहीं मिला',
+    tryAdjust: 'अपनी खोज या फ़िल्टर को समायोजित करने का प्रयास करें।',
+    noFeeSet: 'कोई शुल्क निर्धारित नहीं',
+    active: 'सक्रिय',
+    completed: 'पूरा हुआ',
+    dropped: 'छोड़ दिया',
+    test: 'परीक्षा:',
+    setFee: 'शुल्क निर्धारित करें',
+    recordPayment: 'भुगतान दर्ज करें',
+    schedule{t.test} 'परीक्षा निर्धारित करें',
+    recordResult: 'परीक्षा परिणाम दर्ज करें',
+    changeInst: 'प्रशिक्षक बदलें',
+    assignInst: 'प्रशिक्षक असाइन करें',
+    deactivate: 'निष्क्रिय करें',
+    reactivate: 'पुनः सक्रिय करें',
+    payHistory: 'भुगतान इतिहास',
+    noPayRec: 'अभी तक कोई भुगतान दर्ज नहीं किया गया है।',
+    testHistory: 'ड्राइविंग टेस्ट इतिहास',
+    noTestSched: 'अभी तक कोई ड्राइविंग टेस्ट निर्धारित नहीं है।',
+    attemptNo: 'प्रयास #',
+    enrolled: 'नामांकित:',
+    sessions: 'सत्र:',
+    balanceDue: 'बकाया राशि: ₹',
+    recordPayModal: '💰 भुगतान दर्ज करें',
+    schedTestModal: '🚗 ड्राइविंग टेस्ट निर्धारित करें',
+    setFeeModal: '📋 पाठ्यक्रम शुल्क निर्धारित करें',
+    assignModal: '👨‍🏫 प्रशिक्षक असाइन करें',
+    resultModal: '🏆 परीक्षा परिणाम दर्ज करें',
+    createModal: '👤 नया छात्र बनाएं',
+    amount: 'राशि (₹)',
+    phAmount: 'उदा. 5000',
+    method: 'तरीका',
+    cash: 'नकद',
+    upi: 'UPI',
+    card: 'कार्ड',
+    bank: 'बैंक ट्रांसफर',
+    noteOpt: 'नोट (वैकल्पिक)',
+    phNote: 'उदा. पहली किस्त',
+    recording: 'दर्ज किया जा रहा है...',
+    recordBtn: 'भुगतान दर्ज करें',
+    testDate: 'परीक्षा तिथि',
+    centerOpt: 'परीक्षा केंद्र / आरटीओ (वैकल्पिक)',
+    phCenter: 'उदा. हैदराबाद आरटीओ कार्यालय',
+    notesOpt: 'नोट्स (वैकल्पिक)',
+    phNotes: 'उदा. दस्तावेज़ लाएं',
+    scheduling: 'निर्धारित किया जा रहा है...',
+    schedBtn: 'परीक्षा निर्धारित करें',
+    courseFee: 'पाठ्यक्रम शुल्क (₹)',
+    phFee: 'उदा. 8999',
+    trainingType: 'प्रशिक्षण का प्रकार',
+    beginner: 'शुरुआती',
+    advanced: 'उन्नत',
+    rto: 'फास्ट ट्रैक (आरटीओ)',
+    saving: 'सहेजा जा रहा है...',
+    setFeeBtn: 'शुल्क निर्धारित करें',
+    selInst: 'प्रशिक्षक चुनें',
+    noInstSys: 'सिस्टम में कोई प्रशिक्षक नहीं मिला।',
+    chooseInst: 'प्रशिक्षक चुनें...',
+    assigning: 'असाइन किया जा रहा है...',
+    assignBtn: 'प्रशिक्षक असाइन करें'
+  },
+  TE: {
+    pageTitle: 'విద్యార్థుల నిర్వహణ',
+    pageDesc: 'కోర్సు ఫీజులు, డ్రైవింగ్ పరీక్షలు, బోధకుల కేటాయింపులు మరియు విద్యార్థి జీవితచక్రాన్ని నిర్వహించండి.',
+    total: 'మొత్తం',
+    feePaid: 'ఫీజు చెల్లించబడింది',
+    unpaid: 'చెల్లించని',
+    testSched: 'పరీక్ష షెడ్యూల్ చేయబడింది',
+    searchPh: 'పేరు, ఇమెయిల్ లేదా ఫోన్ ద్వారా శోధించండి...',
+    createStudent: 'విద్యార్థిని సృష్టించండి',
+    all: 'అన్ని',
+    noInst: 'బోధకుడు లేరు',
+    loading: 'విద్యార్థులను లోడ్ చేస్తోంది...',
+    noStudents: 'విద్యార్థులు ఎవరూ కనుగొనబడలేదు',
+    tryAdjust: 'మీ శోధన లేదా ఫిల్టర్‌ను సర్దుబాటు చేయడానికి ప్రయత్నించండి.',
+    noFeeSet: 'ఫీజు సెట్ చేయబడలేదు',
+    active: 'క్రియాశీల',
+    completed: 'పూర్తయింది',
+    dropped: 'వదిలివేయబడింది',
+    test: 'పరీక్ష:',
+    setFee: 'ఫీజును సెట్ చేయండి',
+    recordPayment: 'చెల్లింపును రికార్డ్ చేయండి',
+    schedule{t.test} 'పరీక్షను షెడ్యూల్ చేయండి',
+    recordResult: 'పరీక్ష ఫలితాన్ని రికార్డ్ చేయండి',
+    changeInst: 'బోధకుడిని మార్చండి',
+    assignInst: 'బోధకుడిని కేటాయించండి',
+    deactivate: 'నిష్క్రియం చేయండి',
+    reactivate: 'తిరిగి సక్రియం చేయండి',
+    payHistory: 'చెల్లింపు చరిత్ర',
+    noPayRec: 'ఇంకా ఎలాంటి చెల్లింపులు రికార్డ్ చేయబడలేదు.',
+    testHistory: 'డ్రైవింగ్ పరీక్ష చరిత్ర',
+    noTestSched: 'ఇంకా డ్రైవింగ్ పరీక్షలు షెడ్యూల్ చేయబడలేదు.',
+    attemptNo: 'ప్రయత్నం #',
+    enrolled: 'నమోదైనారు:',
+    sessions: 'సెషన్లు:',
+    balanceDue: 'బకాయి ఉన్న బ్యాలెన్స్: ₹',
+    recordPayModal: '💰 చెల్లింపును రికార్డ్ చేయండి',
+    schedTestModal: '🚗 డ్రైవింగ్ పరీక్షను షెడ్యూల్ చేయండి',
+    setFeeModal: '📋 కోర్సు ఫీజును సెట్ చేయండి',
+    assignModal: '👨‍🏫 బోధకుడిని కేటాయించండి',
+    resultModal: '🏆 పరీక్ష ఫలితాన్ని రికార్డ్ చేయండి',
+    createModal: '👤 కొత్త విద్యార్థిని సృష్టించండి',
+    amount: 'మొత్తం (₹)',
+    phAmount: 'ఉదా. 5000',
+    method: 'పద్ధతి',
+    cash: 'నగదు',
+    upi: 'UPI',
+    card: 'కార్డు',
+    bank: 'బ్యాంక్ బదిలీ',
+    noteOpt: 'గమనిక (ఐచ్ఛికం)',
+    phNote: 'ఉదా. మొదటి వాయిదా',
+    recording: 'రికార్డ్ చేయబడుతోంది...',
+    recordBtn: 'చెల్లింపును రికార్డ్ చేయండి',
+    testDate: 'పరీక్ష తేదీ',
+    centerOpt: 'పరీక్ష కేంద్రం / ఆర్టీఓ (ఐచ్ఛికం)',
+    phCenter: 'ఉదా. హైదరాబాద్ ఆర్టీఓ కార్యాలయం',
+    notesOpt: 'గమనికలు (ఐచ్ఛికం)',
+    phNotes: 'ఉదా. పత్రాలను తీసుకురండి',
+    scheduling: 'షెడ్యూల్ చేయబడుతోంది...',
+    schedBtn: 'పరీక్షను షెడ్యూల్ చేయండి',
+    courseFee: 'కోర్సు ఫీజు (₹)',
+    phFee: 'ఉదా. 8999',
+    trainingType: 'శిక్షణ రకం',
+    beginner: 'ప్రారంభకులు',
+    advanced: 'అధునాతన',
+    rto: 'ఫాస్ట్ ట్రాక్ (ఆర్టీఓ)',
+    saving: 'సేవ్ చేయబడుతోంది...',
+    setFeeBtn: 'ఫీజును సెట్ చేయండి',
+    selInst: 'బోధకుడిని ఎంచుకోండి',
+    noInstSys: 'సిస్టమ్‌లో బోధకులు ఎవరూ కనుగొనబడలేదు.',
+    chooseInst: 'బోధకుడిని ఎంచుకోండి...',
+    assigning: 'కేటాయిస్తోంది...',
+    assignBtn: 'బోధకుడిని కేటాయించండి'
+  }
+}
+
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Search, 
@@ -54,9 +278,9 @@ interface StudentData {
   balance: number
   instructorId: string | null
   instructorName: string | null
-  totalSessions: number
+  total{t.sessions} number
   payments: PaymentRecord[]
-  nextTest: { id: string; testDate: string; testCenter: string | null; attemptNo: number } | null
+  next{t.test} { id: string; testDate: string; testCenter: string | null; attemptNo: number } | null
   lastTestResult: { id: string; testDate: string; result: string; attemptNo: number } | null
   drivingTests: TestRecord[]
   status: 'ACTIVE' | 'COMPLETED' | 'DROPPED'
@@ -71,6 +295,10 @@ type FilterMode = 'ALL' | 'UNPAID' | 'TEST_UPCOMING' | 'NO_INSTRUCTOR'
 type ModalType = 'payment' | 'test' | 'fee' | 'assign' | 'result' | 'create' | null
 
 export default function AdminStudentsPage() {
+  const { language } = useLanguageStore()
+  const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
+  const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
+
   const [students, setStudents] = useState<StudentData[]>([])
   const [instructors, setInstructors] = useState<InstructorOption[]>([])
   const [loading, setLoading] = useState(true)
@@ -323,10 +551,10 @@ export default function AdminStudentsPage() {
   }
 
   const filterPills: { label: string; mode: FilterMode; count: number }[] = [
-    { label: 'All', mode: 'ALL', count: totalStudents },
-    { label: 'Unpaid', mode: 'UNPAID', count: unpaidCount },
-    { label: 'Test Upcoming', mode: 'TEST_UPCOMING', count: testUpcoming },
-    { label: 'No Instructor', mode: 'NO_INSTRUCTOR', count: students.filter(s => !s.instructorId).length },
+    { label: t.all, mode: 'ALL', count: totalStudents },
+    { label: t.unpaid, mode: 'UNPAID', count: unpaidCount },
+    { label: t.testSched, mode: 'TEST_UPCOMING', count: testUpcoming },
+    { label: t.noInst, mode: 'NO_INSTRUCTOR', count: students.filter(s => !s.instructorId).length },
   ]
 
   return (
@@ -340,7 +568,7 @@ export default function AdminStudentsPage() {
               Student Management
             </h1>
             <p className="text-[rgb(var(--color-text-3))] text-sm mt-1">
-              Manage course fees, driving tests, instructor assignments, and student lifecycle.
+              {t.pageDesc}
             </p>
           </div>
         </div>
@@ -352,7 +580,7 @@ export default function AdminStudentsPage() {
               <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
                 <Users className="w-5 h-5" />
               </div>
-              <span className="text-sm font-semibold text-[rgb(var(--color-text-3))]">Total</span>
+              <span className="text-sm font-semibold text-[rgb(var(--color-text-3))]">{t.total}</span>
             </div>
             <span className="text-2xl font-bold">{totalStudents}</span>
           </div>
@@ -361,7 +589,7 @@ export default function AdminStudentsPage() {
               <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
-              <span className="text-sm font-semibold text-[rgb(var(--color-text-3))]">Fee Paid</span>
+              <span className="text-sm font-semibold text-[rgb(var(--color-text-3))]">{t.feePaid}</span>
             </div>
             <span className="text-2xl font-bold text-emerald-600">{paidCount}</span>
           </div>
@@ -370,7 +598,7 @@ export default function AdminStudentsPage() {
               <div className="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-600 flex items-center justify-center">
                 <AlertTriangle className="w-5 h-5" />
               </div>
-              <span className="text-sm font-semibold text-[rgb(var(--color-text-3))]">Unpaid</span>
+              <span className="text-sm font-semibold text-[rgb(var(--color-text-3))]">{t.unpaid}</span>
             </div>
             <span className="text-2xl font-bold text-red-600">{unpaidCount}</span>
           </div>
@@ -379,7 +607,7 @@ export default function AdminStudentsPage() {
               <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center">
                 <Calendar className="w-5 h-5" />
               </div>
-              <span className="text-sm font-semibold text-[rgb(var(--color-text-3))]">Test Scheduled</span>
+              <span className="text-sm font-semibold text-[rgb(var(--color-text-3))]">{t.testSched}</span>
             </div>
             <span className="text-2xl font-bold text-amber-600">{testUpcoming}</span>
           </div>
@@ -391,7 +619,7 @@ export default function AdminStudentsPage() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input 
               type="text"
-              placeholder="Search by name, email, or phone..."
+              placeholder={t.searchPh}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl py-2.5 pl-11 pr-4 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm font-medium"
@@ -401,7 +629,7 @@ export default function AdminStudentsPage() {
             onClick={() => openModal('create', '')}
             className="px-4 py-2 bg-[rgb(var(--color-primary))] text-white font-bold rounded-xl flex items-center gap-2 text-sm shadow-sm hover:bg-[rgb(var(--color-primary))]/90 transition shrink-0"
           >
-            <Plus className="w-4 h-4" /> Create Student
+            <Plus className="w-4 h-4" /> {t.createStudent}
           </button>
           <div className="flex gap-2 flex-wrap">
             {filterPills.map(pill => (
@@ -424,13 +652,13 @@ export default function AdminStudentsPage() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-32 gap-4 text-[rgb(var(--color-text-3))]">
             <Clock className="w-8 h-8 animate-spin text-blue-600" />
-            <span className="text-base font-bold">Loading Students...</span>
+            <span className="text-base font-bold">{t.loading}</span>
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-32 gap-4 text-[rgb(var(--color-text-3))]">
             <Users className="w-12 h-12 text-slate-300" />
-            <span className="text-lg font-bold">No students found</span>
-            <p className="text-sm">Try adjusting your search or filter.</p>
+            <span className="text-lg font-bold">{t.noStudents}</span>
+            <p className="text-sm">{t.tryAdjust}</p>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
@@ -469,7 +697,7 @@ export default function AdminStudentsPage() {
                           {stu.totalPaid.toLocaleString()} / {stu.courseFee.toLocaleString()}
                         </span>
                       ) : (
-                        <span className="text-xs font-medium text-slate-400 italic">No fee set</span>
+                        <span className="text-xs font-medium text-slate-400 italic">{t.noFeeSet}</span>
                       )}
 
                       <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
@@ -477,7 +705,7 @@ export default function AdminStudentsPage() {
                         stu.status === 'COMPLETED' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400' :
                         'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400'
                       }`}>
-                        {stu.status}
+                        {stu.status === 'ACTIVE' ? t.active : stu.status === 'COMPLETED' ? t.completed : t.dropped}
                       </span>
 
                       {stu.instructorName ? (
@@ -485,13 +713,13 @@ export default function AdminStudentsPage() {
                           <UserCheck className="w-3 h-3" /> {stu.instructorName}
                         </span>
                       ) : (
-                        <span className="text-xs font-medium text-amber-500 bg-amber-50 dark:bg-amber-500/10 px-2.5 py-1 rounded-lg">No Instructor</span>
+                        <span className="text-xs font-medium text-amber-500 bg-amber-50 dark:bg-amber-500/10 px-2.5 py-1 rounded-lg">{t.noInst}</span>
                       )}
 
                       {stu.nextTest && (
                         <span className="text-xs font-bold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 px-2.5 py-1 rounded-lg flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
-                          Test: {new Date(stu.nextTest.testDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                          {t.test} {new Date(stu.nextTest.testDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                         </span>
                       )}
 
@@ -516,33 +744,33 @@ export default function AdminStudentsPage() {
                               onClick={(e) => { e.stopPropagation(); openModal('fee', stu.id) }}
                               className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 rounded-xl text-xs font-bold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors flex items-center gap-1.5"
                             >
-                              <FileText className="w-3.5 h-3.5" /> Set Fee
+                              <FileText className="w-3.5 h-3.5" />{t.setFee}
                             </button>
                             <button
                               onClick={(e) => { e.stopPropagation(); openModal('payment', stu.id) }}
                               className="px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-xl text-xs font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors flex items-center gap-1.5"
                             >
-                              <CreditCard className="w-3.5 h-3.5" /> Record Payment
+                              <CreditCard className="w-3.5 h-3.5" /> {t.recordPayment}
                             </button>
                             <button
                               onClick={(e) => { e.stopPropagation(); openModal('test', stu.id) }}
                               className="px-4 py-2 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-400 rounded-xl text-xs font-bold hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors flex items-center gap-1.5"
                             >
-                              <Calendar className="w-3.5 h-3.5" /> Schedule Test
+                              <Calendar className="w-3.5 h-3.5" /> {t.scheduleTest}
                             </button>
                             {stu.nextTest && (
                               <button
                                 onClick={(e) => { e.stopPropagation(); openModal('result', stu.id) }}
                                 className="px-4 py-2 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-xl text-xs font-bold hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors flex items-center gap-1.5"
                               >
-                                <Award className="w-3.5 h-3.5" /> Record Test Result
+                                <Award className="w-3.5 h-3.5" /> {t.recordResult}
                               </button>
                             )}
                             <button
                               onClick={(e) => { e.stopPropagation(); openModal('assign', stu.id) }}
                               className="px-4 py-2 bg-[rgb(var(--color-border))] text-[rgb(var(--color-text-2))] rounded-xl text-xs font-bold hover:bg-[rgb(var(--color-border))] transition-colors flex items-center gap-1.5"
                             >
-                              <UserCheck className="w-3.5 h-3.5" /> {stu.instructorId ? 'Change' : 'Assign'} Instructor
+                              <UserCheck className="w-3.5 h-3.5" /> {stu.instructorId ? t.changeInst : t.assignInst}
                             </button>
                             
                             {stu.status === 'ACTIVE' ? (
@@ -550,26 +778,26 @@ export default function AdminStudentsPage() {
                                 onClick={(e) => { e.stopPropagation(); handleStatusChange(stu.id, 'DROPPED') }}
                                 className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-xl text-xs font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors flex items-center gap-1.5 ml-auto"
                               >
-                                <XCircle className="w-3.5 h-3.5" /> Deactivate
+                                <XCircle className="w-3.5 h-3.5" /> {t.deactivate}
                               </button>
                             ) : (
                               <button
                                 onClick={(e) => { e.stopPropagation(); handleStatusChange(stu.id, 'ACTIVE') }}
                                 className="px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-xl text-xs font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors flex items-center gap-1.5 ml-auto"
                               >
-                                <CheckCircle2 className="w-3.5 h-3.5" /> Reactivate
+                                <CheckCircle2 className="w-3.5 h-3.5" /> {t.reactivate}
                               </button>
                             )}
                           </div>
 
                           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                            {/* Payment History */}
+                            {/* {t.payHistory} */}
                             <div className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl p-4">
                               <h4 className="text-sm font-bold text-[rgb(var(--color-text-2))] mb-3 flex items-center gap-2">
-                                <CreditCard className="w-4 h-4 text-emerald-600" /> Payment History
+                                <CreditCard className="w-4 h-4 text-emerald-600" /> {t.payHistory}
                               </h4>
                               {stu.payments.length === 0 ? (
-                                <p className="text-xs text-slate-400 italic">No payments recorded yet.</p>
+                                <p className="text-xs text-slate-400 italic">{t.noPayRec}</p>
                               ) : (
                                 <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto">
                                   {stu.payments.map(p => (
@@ -590,20 +818,20 @@ export default function AdminStudentsPage() {
                               )}
                             </div>
 
-                            {/* Driving Test History */}
+                            {/* {t.testHistory} */}
                             <div className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl p-4">
                               <h4 className="text-sm font-bold text-[rgb(var(--color-text-2))] mb-3 flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-violet-600" /> Driving Test History
+                                <Calendar className="w-4 h-4 text-violet-600" /> {t.testHistory}
                               </h4>
                               {stu.drivingTests.length === 0 ? (
-                                <p className="text-xs text-slate-400 italic">No driving tests scheduled yet.</p>
+                                <p className="text-xs text-slate-400 italic">{t.noTestSched}</p>
                               ) : (
                                 <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto">
                                   {stu.drivingTests.map(t => (
                                     <div key={t.id} className="flex justify-between items-center text-xs bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] p-3 rounded-lg">
                                       <div className="flex flex-col">
                                         <span className="font-bold text-[rgb(var(--color-text-1))]">
-                                          Attempt #{t.attemptNo}
+                                          {t.attemptNo}{t.attemptNo}
                                         </span>
                                         <span className="text-slate-400 mt-0.5">
                                           {new Date(t.testDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -626,9 +854,9 @@ export default function AdminStudentsPage() {
 
                           {/* Info row */}
                           <div className="mt-4 flex flex-wrap gap-4 text-xs text-[rgb(var(--color-text-3))]">
-                            <span>Enrolled: {new Date(stu.enrolledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                            <span>Sessions: {stu.totalSessions}</span>
-                            {stu.balance > 0 && <span className="text-red-500 font-bold">Balance Due: ₹{stu.balance.toLocaleString()}</span>}
+                            <span>{t.enrolled} {new Date(stu.enrolledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                            <span>{t.sessions} {stu.totalSessions}</span>
+                            {stu.balance > 0 && <span className="text-red-500 font-bold">{t.balanceDue}{stu.balance.toLocaleString()}</span>}
                           </div>
                         </div>
                       </motion.div>
@@ -661,43 +889,43 @@ export default function AdminStudentsPage() {
               {/* Close button */}
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-bold text-[rgb(var(--color-text-1))]">
-                  {modal === 'payment' && '💰 Record Payment'}
-                  {modal === 'test' && '🚗 Schedule Driving Test'}
-                  {modal === 'fee' && '📋 Set Course Fee'}
-                  {modal === 'assign' && '👨‍🏫 Assign Instructor'}
-                  {modal === 'result' && '🏆 Record Test Result'}
-                  {modal === 'create' && '👤 Create New Student'}
+                  {modal === 'payment' && '💰 {t.recordPayment}'}
+                  {modal === 'test' && t.schedTestModal}
+                  {modal === 'fee' && t.setFeeModal}
+                  {modal === 'assign' && t.assignModal}
+                  {modal === 'result' && '🏆 {t.recordResult}'}
+                  {modal === 'create' && t.createModal}
                 </h3>
                 <button onClick={closeModal} className="p-2 hover:bg-[rgb(var(--color-border))] rounded-xl transition-colors">
                   <X className="w-5 h-5 text-slate-400" />
                 </button>
               </div>
 
-              {/* Record Payment Form */}
+              {/* {t.recordPayment} Form */}
               {modal === 'payment' && (
                 <form onSubmit={handleRecordPayment} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">Amount (₹)</label>
-                    <input type="number" required min="1" placeholder="e.g. 5000"
+                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">{t.amount}</label>
+                    <input type="number" required min="1" placeholder={t.phAmount}
                       className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
                       value={paymentForm.amount} onChange={e => setPaymentForm({...paymentForm, amount: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">Method</label>
+                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">{t.method}</label>
                     <select
                       className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
                       value={paymentForm.method} onChange={e => setPaymentForm({...paymentForm, method: e.target.value})}
                     >
-                      <option value="CASH">Cash</option>
-                      <option value="UPI">UPI</option>
-                      <option value="CARD">Card</option>
-                      <option value="BANK_TRANSFER">Bank Transfer</option>
+                      <option value="CASH">{t.cash}</option>
+                      <option value="UPI">{t.upi}</option>
+                      <option value="CARD">{t.card}</option>
+                      <option value="BANK_TRANSFER">{t.bank}</option>
                     </select>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">Note (optional)</label>
-                    <input type="text" placeholder="e.g. First installment"
+                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">{t.noteOpt}</label>
+                    <input type="text" placeholder={t.phNote}
                       className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
                       value={paymentForm.note} onChange={e => setPaymentForm({...paymentForm, note: e.target.value})}
                     />
@@ -705,31 +933,31 @@ export default function AdminStudentsPage() {
                   <button type="submit" disabled={submitting}
                     className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl transition-colors shadow-sm disabled:opacity-50"
                   >
-                    {submitting ? 'Recording...' : 'Record Payment'}
+                    {submitting ? t.recording : t.recordBtn}
                   </button>
                 </form>
               )}
 
-              {/* Schedule Test Form */}
+              {/* {t.scheduleTest} Form */}
               {modal === 'test' && (
                 <form onSubmit={handleScheduleTest} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">Test Date</label>
+                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">{t.testDate}</label>
                     <input type="date" required
                       className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
                       value={testForm.testDate} onChange={e => setTestForm({...testForm, testDate: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">Test Center / RTO (optional)</label>
-                    <input type="text" placeholder="e.g. Hyderabad RTO Office"
+                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">{t.centerOpt}</label>
+                    <input type="text" placeholder={t.phCenter}
                       className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
                       value={testForm.testCenter} onChange={e => setTestForm({...testForm, testCenter: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">Notes (optional)</label>
-                    <input type="text" placeholder="e.g. Bring documents"
+                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">{t.notesOpt}</label>
+                    <input type="text" placeholder={t.phNotes}
                       className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
                       value={testForm.notes} onChange={e => setTestForm({...testForm, notes: e.target.value})}
                     />
@@ -737,7 +965,7 @@ export default function AdminStudentsPage() {
                   <button type="submit" disabled={submitting}
                     className="px-5 py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm rounded-xl transition-colors shadow-sm disabled:opacity-50"
                   >
-                    {submitting ? 'Scheduling...' : 'Schedule Test'}
+                    {submitting ? t.scheduling : t.schedBtn}
                   </button>
                 </form>
               )}
@@ -746,27 +974,27 @@ export default function AdminStudentsPage() {
               {modal === 'fee' && (
                 <form onSubmit={handleSetFee} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">Course Fee (₹)</label>
-                    <input type="number" required min="0" placeholder="e.g. 8999"
+                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">{t.courseFee}</label>
+                    <input type="number" required min="0" placeholder={t.phFee}
                       className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
                       value={feeForm.courseFee} onChange={e => setFeeForm({...feeForm, courseFee: e.target.value})}
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">Training Type</label>
+                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">{t.trainingType}</label>
                     <select
                       className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
                       value={feeForm.trainingType} onChange={e => setFeeForm({...feeForm, trainingType: e.target.value})}
                     >
-                      <option value="BEGINNER">Beginner</option>
-                      <option value="ADVANCED">Advanced</option>
-                      <option value="RTO_FAST_TRACK">Fast Track (RTO)</option>
+                      <option value="BEGINNER">{t.beginner}</option>
+                      <option value="ADVANCED">{t.advanced}</option>
+                      <option value="RTO_FAST_TRACK">{t.rto}</option>
                     </select>
                   </div>
                   <button type="submit" disabled={submitting}
                     className="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-colors shadow-sm disabled:opacity-50"
                   >
-                    {submitting ? 'Saving...' : 'Set Fee'}
+                    {submitting ? t.saving : t.setFeeBtn}
                   </button>
                 </form>
               )}
@@ -775,15 +1003,15 @@ export default function AdminStudentsPage() {
               {modal === 'assign' && (
                 <form onSubmit={handleAssignInstructor} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">Select Instructor</label>
+                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">{t.selInst}</label>
                     {instructors.length === 0 ? (
-                      <p className="text-sm text-slate-400 italic">No instructors found in system.</p>
+                      <p className="text-sm text-slate-400 italic">{t.noInstSys}</p>
                     ) : (
                       <select required
                         className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
                         value={assignForm.instructorId} onChange={e => setAssignForm({...assignForm, instructorId: e.target.value})}
                       >
-                        <option value="">Choose instructor...</option>
+                        <option value="">{t.chooseInst}</option>
                         {instructors.map(i => (
                           <option key={i.id} value={i.id}>{i.name}</option>
                         ))}
@@ -793,12 +1021,12 @@ export default function AdminStudentsPage() {
                   <button type="submit" disabled={submitting || instructors.length === 0}
                     className="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-colors shadow-sm disabled:opacity-50"
                   >
-                    {submitting ? 'Assigning...' : 'Assign Instructor'}
+                    {submitting ? t.assigning : t.assignBtn}
                   </button>
                 </form>
               )}
 
-              {/* Record Test Result Form */}
+              {/* {t.recordResult} Form */}
               {modal === 'result' && (
                 <form onSubmit={handleRecordResult} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1.5">
@@ -827,7 +1055,7 @@ export default function AdminStudentsPage() {
                     </div>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">Notes (optional)</label>
+                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">{t.notesOpt}</label>
                     <input type="text" placeholder="e.g. Needs more practice"
                       className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
                       value={resultForm.notes} onChange={e => setResultForm({...resultForm, notes: e.target.value})}
@@ -841,7 +1069,7 @@ export default function AdminStudentsPage() {
                 </form>
               )}
 
-              {/* Create Student Form */}
+              {/* {t.createStudent} Form */}
               {modal === 'create' && (
                 <form onSubmit={handleCreateStudent} className="flex flex-col gap-4">
                   <div className="flex flex-col gap-1.5">
@@ -866,14 +1094,14 @@ export default function AdminStudentsPage() {
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">Training Type</label>
+                    <label className="text-xs font-bold text-[rgb(var(--color-text-2))]">{t.trainingType}</label>
                     <select
                       className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none"
                       value={createForm.trainingType} onChange={e => setCreateForm({...createForm, trainingType: e.target.value})}
                     >
-                      <option value="BEGINNER">Beginner</option>
-                      <option value="ADVANCED">Advanced</option>
-                      <option value="RTO_FAST_TRACK">Fast Track (RTO)</option>
+                      <option value="BEGINNER">{t.beginner}</option>
+                      <option value="ADVANCED">{t.advanced}</option>
+                      <option value="RTO_FAST_TRACK">{t.rto}</option>
                     </select>
                   </div>
                   <div className="flex flex-col gap-1.5">
@@ -886,7 +1114,7 @@ export default function AdminStudentsPage() {
                   <button type="submit" disabled={submitting}
                     className="px-5 py-3 bg-[rgb(var(--color-primary))] text-white font-bold text-sm rounded-xl transition-colors shadow-sm hover:bg-[rgb(var(--color-primary))]/90 disabled:opacity-50 mt-2"
                   >
-                    {submitting ? 'Creating...' : 'Create Student'}
+                    {submitting ? 'Creating...' : '{t.createStudent}'}
                   </button>
                 </form>
               )}

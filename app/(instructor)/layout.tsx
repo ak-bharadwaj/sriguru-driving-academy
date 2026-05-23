@@ -15,6 +15,20 @@ const INSTRUCTOR_BOTTOM_NAV_T = {
     { label: 'Live', path: '/instructor/schedule', icon: Power, isCenter: true },
     { label: 'Notes', path: '/instructor/coaching-notes', icon: MessageSquare },
     { label: 'Analytics', path: '/instructor/analytics', icon: TrendingUp }
+  ],
+  HI: [
+    { label: 'कंसोल', path: '/instructor/dashboard', icon: Award },
+    { label: 'रोस्टर', path: '/instructor/students', icon: Users },
+    { label: 'लाइव', path: '/instructor/schedule', icon: Power, isCenter: true },
+    { label: 'नोट्स', path: '/instructor/coaching-notes', icon: MessageSquare },
+    { label: 'विश्लेषिकी', path: '/instructor/analytics', icon: TrendingUp }
+  ],
+  TE: [
+    { label: 'కన్సోల్', path: '/instructor/dashboard', icon: Award },
+    { label: 'రోస్టర్', path: '/instructor/students', icon: Users },
+    { label: 'లైవ్', path: '/instructor/schedule', icon: Power, isCenter: true },
+    { label: 'గమనికలు', path: '/instructor/coaching-notes', icon: MessageSquare },
+    { label: 'విశ్లేషణలు', path: '/instructor/analytics', icon: TrendingUp }
   ]
 }
 
@@ -25,7 +39,8 @@ export default function InstructorConsoleLayout({
 }) {
   const pathname = usePathname()
   const { language } = useLanguageStore()
-  const tabs = INSTRUCTOR_BOTTOM_NAV_T.EN // Fallback to EN for now
+  const activeLang = language.toUpperCase() as keyof typeof INSTRUCTOR_BOTTOM_NAV_T
+  const tabs = INSTRUCTOR_BOTTOM_NAV_T[activeLang] || INSTRUCTOR_BOTTOM_NAV_T.EN
 
   return (
     <div className="h-full flex flex-col bg-[rgb(var(--color-void))] relative overflow-hidden font-body text-[rgb(var(--color-text-1))] transition-colors duration-300">
