@@ -4,16 +4,9 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { 
-  CarFront,
-  Lock,
-  Mail,
-  Loader2,
-  ArrowRight,
-  ShieldCheck
-} from 'lucide-react'
-import { useLanguageStore } from '@/store/languageStore'
+import { Lock, Mail, Loader2, ArrowRight, ShieldCheck, CarFront } from 'lucide-react'
 import Image from 'next/image'
+import { useTranslation } from '@/hooks/useTranslation'
 
 // ELEGANT SPRING VARIANTS
 const fadeUpSpring = {
@@ -29,59 +22,14 @@ const staggerContainer = {
   }
 } as const
 
-const TRANSLATIONS = {
-  EN: {
-    title1: "Secure",
-    title2: "Access Portal",
-    subtitle: "Authenticate your identity to access premium curriculum, coaching rosters, and system telemetry.",
-    welcome: "Welcome Back",
-    welcomeSub: "Enter your credentials to continue",
-    email: "Email Address",
-    pass: "Password",
-    loginBtn: "Secure Login",
-    authBtn: "Authenticating...",
-    signupPrompt: "Don't have an account?",
-    signupBtn: "Create New Account"
-  },
-  HI: {
-    title1: "सुरक्षित",
-    title2: "एक्सेस पोर्टल",
-    subtitle: "प्रीमियम पाठ्यक्रम, कोचिंग रोस्टर और सिस्टम टेलीमेट्री तक पहुंचने के लिए कृपया अपनी पहचान प्रमाणित करें।",
-    welcome: "वापसी पर स्वागत है",
-    welcomeSub: "जारी रखने के लिए अपनी साख दर्ज करें",
-    email: "ईमेल पता",
-    pass: "पासवर्ड",
-    loginBtn: "सुरक्षित लॉगिन",
-    authBtn: "प्रमाणीकरण हो रहा है...",
-    signupPrompt: "क्या आपके पास खाता नहीं है?",
-    signupBtn: "नया खाता बनाएँ"
-  },
-  TE: {
-    title1: "సురక్షిత",
-    title2: "యాక్సెస్ పోర్టల్",
-    subtitle: "ప్రీమియం కరికులం మరియు సిస్టమ్ టెలిమెట్రీని యాక్సెస్ చేయడానికి దయచేసి ప్రామాణీకరించండి.",
-    welcome: "తిరిగి స్వాగతం",
-    welcomeSub: "కొనసాగించడానికి మీ ఆధారాలను నమోదు చేయండి",
-    email: "ఇమెయిల్ చిరునామా",
-    pass: "పాస్వర్డ్",
-    loginBtn: "సురక్షిత లాగిన్",
-    authBtn: "ప్రామాణీకరిస్తోంది...",
-    signupPrompt: "ఖాతా లేదా?",
-    signupBtn: "క్రొత్త ఖాతాను సృష్టించండి"
-  }
-}
-
 export default function CentralLoginHub() {
   const router = useRouter()
-  const { language } = useLanguageStore()
+  const { t } = useTranslation()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
   }, [])
-
-  const currentLang = mounted ? language : 'EN'
-  const t = TRANSLATIONS[(currentLang.toUpperCase() as keyof typeof TRANSLATIONS) || 'EN']
 
   const [isAuthenticating, setIsAuthenticating] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
@@ -163,10 +111,10 @@ export default function CentralLoginHub() {
             <CarFront className="w-8 h-8 text-white" />
           </motion.div>
           <h1 className="text-3xl sm:text-4xl font-display font-extrabold tracking-tight text-text-1 mb-2">
-            {t.title1} <span className="text-primary">{t.title2}</span>
+            {t('auth.title1')} <span className="text-primary">{t('auth.title2')}</span>
           </h1>
           <p className="text-sm text-text-3 font-medium px-4">
-            {t.subtitle}
+            {t('auth.subtitle')}
           </p>
         </div>
 
@@ -181,10 +129,10 @@ export default function CentralLoginHub() {
 
           <div className="mb-8">
             <h2 className="text-2xl font-display font-bold text-text-1 mb-1 tracking-tight">
-              {t.welcome}
+              {t('auth.welcome')}
             </h2>
             <p className="text-text-3 text-sm font-medium">
-              {t.welcomeSub}
+              {t('auth.welcomeSub')}
             </p>
             
             <AnimatePresence>
@@ -216,19 +164,19 @@ export default function CentralLoginHub() {
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
             </svg>
-            Continue with Google
+            {t('auth.google')}
           </button>
 
           {/* Divider */}
           <div className="relative flex items-center gap-3 my-2">
             <div className="flex-1 h-px bg-border/60" />
-            <span className="text-[11px] font-mono text-text-3 uppercase tracking-widest">or sign in with email</span>
+            <span className="text-[11px] font-mono text-text-3 uppercase tracking-widest">{t('auth.orEmail')}</span>
             <div className="flex-1 h-px bg-border/60" />
           </div>
 
           <form onSubmit={handleLogin} className="flex flex-col gap-5 mt-4">
             <div className="flex flex-col gap-2">
-              <label className="text-[11px] font-bold text-text-3 ml-1 font-mono uppercase tracking-widest">{t.email}</label>
+              <label className="text-[11px] font-bold text-text-3 ml-1 font-mono uppercase tracking-widest">{t('auth.email')}</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-3 group-focus-within:text-primary transition-colors">
                   <Mail className="w-5 h-5" />
@@ -244,7 +192,7 @@ export default function CentralLoginHub() {
             </div>
             
             <div className="flex flex-col gap-2">
-              <label className="text-[11px] font-bold text-text-3 ml-1 font-mono uppercase tracking-widest">{t.pass}</label>
+              <label className="text-[11px] font-bold text-text-3 ml-1 font-mono uppercase tracking-widest">{t('auth.pass')}</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-3 group-focus-within:text-primary transition-colors">
                   <Lock className="w-5 h-5" />
@@ -269,24 +217,24 @@ export default function CentralLoginHub() {
               {isAuthenticating ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  <span className="font-display tracking-wide">{t.authBtn}</span>
+                  <span className="font-display tracking-wide">{t('auth.authBtn')}</span>
                 </>
               ) : (
                 <>
-                  <span className="font-display tracking-wide text-[15px]">{t.loginBtn}</span>
+                  <span className="font-display tracking-wide text-[15px]">{t('auth.loginBtn')}</span>
                   <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </>
               )}
             </button>
             
             <div className="mt-2 text-center flex flex-col items-center justify-center">
-              <span className="text-[13px] text-text-3 font-medium">{t.signupPrompt}</span>
+              <span className="text-[13px] text-text-3 font-medium">{t('auth.signupPrompt')}</span>
               <button 
                 type="button" 
                 onClick={() => router.push('/booking')}
                 className="mt-1 text-[13px] text-primary font-bold hover:underline transition-all"
               >
-                {t.signupBtn}
+                {t('auth.signupBtn')}
               </button>
             </div>
           </form>
@@ -302,10 +250,10 @@ export default function CentralLoginHub() {
         >
           <div className="flex items-center gap-2 px-4 py-2 bg-surface/50 rounded-full border border-border backdrop-blur-sm">
             <ShieldCheck className="w-4 h-4 text-success" />
-            <span className="text-[11px] font-mono text-text-2 uppercase tracking-wider">Enterprise Security Layer</span>
+            <span className="text-[11px] font-mono text-text-2 uppercase tracking-wider">{t('auth.security')}</span>
           </div>
           <button type="button" className="text-xs text-text-3 font-medium hover:text-primary transition-colors">
-            Contact Support
+            {t('auth.support')}
           </button>
         </motion.div>
 

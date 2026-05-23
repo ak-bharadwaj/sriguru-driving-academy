@@ -21,7 +21,7 @@ import { useXPStore } from '@/lib/stores/xp-store'
 import { useLanguageStore } from '@/store/languageStore'
 
 const DASHBOARD_DICT = {
-  en: {
+  EN: {
     welcomeBack: "Welcome back,",
     courseProgress: "Course Progress",
     totalCompletion: "Total Completion",
@@ -47,35 +47,102 @@ const DASHBOARD_DICT = {
     dashboardHub: "Dashboard Hub",
     viewSchedule: "View Schedule",
     noSessions: "No Sessions",
-    bookLesson: "Book your next lesson"
+    bookLesson: "Book your next lesson",
+    feedbackTitle: "Congratulations!",
+    feedbackDesc: "You have completed your driving course. We'd love to hear about your experience.",
+    rateExp: "Rate your experience",
+    comments: "Any comments? (Optional)",
+    placeholder: "How was your instructor?",
+    submitBtn: "Submit & Claim Badge",
+    skipBtn: "Skip for now",
+    submitting: "Submitting...",
+    activeCoach: "Active Coach",
+    instructor: "Instructor",
+    unassigned: "Unassigned",
+    officialTest: "Official Test",
+    training: "Training"
   },
-  si: {
-    welcomeBack: "ආපසු සාදරයෙන් පිළිගනිමු,",
-    courseProgress: "පාඨමාලාවේ ප්‍රගතිය",
-    totalCompletion: "සම්පූර්ණ ප්‍රගතිය",
-    done: "අවසන්",
-    level: "මට්ටම",
-    streak: "දින",
-    cards: "කාඩ්",
-    attend: "පැමිණීම",
-    interactivePractice: "අන්තර්ක්‍රියාකාරී පුහුණුව",
-    simTitle: "අනුහුරුකරණ",
-    simDesc: "උසස් රියදුරු පුහුණුව",
-    flashTitle: "ෆ්ලෑෂ් කාඩ්",
-    flashDesc: "මාර්ග නීති සමාලෝචනය කරන්න",
-    learningHub: "ඉගෙනුම් කේන්ද්‍රය",
-    theoryMods: "න්‍යායික මොඩියුල",
-    theoryDesc: "අන්තර්ක්‍රියාකාරී මාර්ග ආරක්ෂණ පාඩම් සම්පූර්ණ කරන්න.",
-    rtoHub: "RTO ඉගෙනුම් කේන්ද්‍රය",
-    rtoDesc: "මාර්ග සංඥා සහ අනුහුරුකරණ පරීක්ෂණ.",
-    schedule: "කාලසටහන",
-    schedDesc: "ඔබේ උපදේශක සමඟ ප්‍රායෝගික සැසි වෙන්කර ගන්න.",
-    achievements: "ජයග්‍රහණ",
-    achDesc: "ඔබගේ ලාංඡන සහ ප්‍රගතිය බලන්න.",
-    dashboardHub: "උපකරණ පුවරුව",
-    viewSchedule: "කාලසටහන බලන්න",
-    noSessions: "සැසි නොමැත",
-    bookLesson: "ඔබේ ඊළඟ පාඩම වෙන්කර ගන්න"
+  HI: {
+    welcomeBack: "वापसी पर स्वागत है,",
+    courseProgress: "पाठ्यक्रम की प्रगति",
+    totalCompletion: "कुल पूर्णता",
+    done: "पूर्ण",
+    level: "स्तर",
+    streak: "स्ट्रीक",
+    cards: "कार्ड",
+    attend: "उपस्थिति",
+    interactivePractice: "इंटरएक्टिव अभ्यास",
+    simTitle: "सिमुलेशन",
+    simDesc: "उन्नत युद्धाभ्यास का अभ्यास करें",
+    flashTitle: "फ्लैशकार्ड",
+    flashDesc: "अपने सक्रिय नियमों की समीक्षा करें",
+    learningHub: "लर्निंग हब",
+    theoryMods: "सिद्धांत मॉड्यूल",
+    theoryDesc: "इंटरएक्टिव सड़क सुरक्षा सिद्धांत पाठ पूर्ण करें।",
+    rtoHub: "RTO लर्निंग हब",
+    rtoDesc: "सड़क संकेतों में महारत हासिल करें और मॉक सिमुलेशन टेस्ट लें।",
+    schedule: "प्रशिक्षण अनुसूची",
+    schedDesc: "अपने प्रशिक्षक के साथ आगामी व्यावहारिक सत्र बुक करें।",
+    achievements: "उपलब्धियां",
+    achDesc: "अर्जित बैज और प्रगति मील के पत्थर देखें।",
+    dashboardHub: "डैशबोर्ड हब",
+    viewSchedule: "अनुसूची देखें",
+    noSessions: "कोई सत्र नहीं",
+    bookLesson: "अपना अगला पाठ बुक करें",
+    feedbackTitle: "बधाई हो!",
+    feedbackDesc: "आपने अपना ड्राइविंग कोर्स पूरा कर लिया है। हम आपके अनुभव के बारे में जानना चाहेंगे।",
+    rateExp: "अपने अनुभव को रेट करें",
+    comments: "कोई टिप्पणी? (वैकल्पिक)",
+    placeholder: "आपका प्रशिक्षक कैसा था?",
+    submitBtn: "सबमिट करें और बैज का दावा करें",
+    skipBtn: "अभी के लिए छोड़ें",
+    submitting: "सबमिट किया जा रहा है...",
+    activeCoach: "सक्रिय कोच",
+    instructor: "प्रशिक्षक",
+    unassigned: "अनिर्दिष्ट",
+    officialTest: "आधिकारिक परीक्षा",
+    training: "प्रशिक्षण"
+  },
+  TE: {
+    welcomeBack: "తిరిగి స్వాగతం,",
+    courseProgress: "కోర్సు పురోగతి",
+    totalCompletion: "మొత్తం పూర్తి",
+    done: "పూర్తయింది",
+    level: "స్థాయి",
+    streak: "స్ట్రీక్",
+    cards: "కార్డులు",
+    attend: "హాజరు",
+    interactivePractice: "ఇంటరాక్టివ్ ప్రాక్టీస్",
+    simTitle: "సిమ్యులేషన్స్",
+    simDesc: "అధునాతన విన్యాసాలను ప్రాక్టీస్ చేయండి",
+    flashTitle: "ఫ్లాష్‌కార్డ్‌లు",
+    flashDesc: "మీ క్రియాశీల నియమాలను సమీక్షించండి",
+    learningHub: "లెర్నింగ్ హబ్",
+    theoryMods: "థియరీ మాడ్యూల్స్",
+    theoryDesc: "ఇంటరాక్టివ్ రోడ్ సేఫ్టీ థియరీ పాఠాలను పూర్తి చేయండి.",
+    rtoHub: "RTO లెర్నింగ్ హబ్",
+    rtoDesc: "రహదారి సంకేతాలను నేర్చుకోండి మరియు మాక్ సిమ్యులేషన్ పరీక్షలు తీసుకోండి.",
+    schedule: "శిక్షణ షెడ్యూల్",
+    schedDesc: "మీ బోధకుడితో రాబోయే ప్రాక్టికల్ సెషన్‌లను బుక్ చేయండి.",
+    achievements: "విజయాలు",
+    achDesc: "సంపాదించిన బ్యాడ్జ్‌లు మరియు పురోగతి మైలురాళ్లను చూడండి.",
+    dashboardHub: "డాష్‌బోర్డ్ హబ్",
+    viewSchedule: "షెడ్యూల్ చూడండి",
+    noSessions: "సెషన్‌లు లేవు",
+    bookLesson: "మీ తదుపరి పాఠాన్ని బుక్ చేయండి",
+    feedbackTitle: "అభినందనలు!",
+    feedbackDesc: "మీరు మీ డ్రైవింగ్ కోర్సును పూర్తి చేసారు. మీ అనుభవం గురించి వినడానికి మేము ఇష్టపడతాము.",
+    rateExp: "మీ అనుభవాన్ని రేట్ చేయండి",
+    comments: "ఏవైనా వ్యాఖ్యలు? (ఐచ్ఛికం)",
+    placeholder: "మీ బోధకుడు ఎలా ఉన్నాడు?",
+    submitBtn: "సమర్పించండి & బ్యాడ్జ్ క్లెయిమ్ చేయండి",
+    skipBtn: "ప్రస్తుతానికి వదిలేయండి",
+    submitting: "సమర్పిస్తోంది...",
+    activeCoach: "యాక్టివ్ కోచ్",
+    instructor: "బోధకుడు",
+    unassigned: "కేటాయించబడలేదు",
+    officialTest: "అధికారిక పరీక్ష",
+    training: "శిక్షణ"
   }
 }
 
@@ -137,7 +204,8 @@ interface StudentDashboardProps {
 export default function DashboardClient({ initialDbData }: StudentDashboardProps) {
   const [dbData] = useState(initialDbData)
   const { language } = useLanguageStore()
-  const t = DASHBOARD_DICT[language as keyof typeof DASHBOARD_DICT] || DASHBOARD_DICT.en
+  const activeLang = language.toUpperCase() as keyof typeof DASHBOARD_DICT
+  const t = DASHBOARD_DICT[activeLang] || DASHBOARD_DICT.EN
   
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState<string[]>([])
   const [showFeedbackModal, setShowFeedbackModal] = useState(false)
@@ -417,7 +485,7 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
                 <h4 className="text-4xl font-bold font-display">{new Date(dbData.nextSession.scheduledAt).getDate()}</h4>
                 <p className="text-white/80 text-sm mt-1 mb-6">{new Date(dbData.nextSession.scheduledAt).toLocaleString('default', { month: 'short', year: 'numeric' })}</p>
                 
-                <p className="font-semibold">{dbData.nextSession.lessonType} Training</p>
+                <p className="font-semibold">{dbData.nextSession.lessonType} {t.training}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <PlayCircle className="w-4 h-4 text-white/70" />
                   <span className="text-sm font-medium">{new Date(dbData.nextSession.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -437,12 +505,12 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
                 <div className="w-12 h-12 bg-white/40 rounded-full flex items-center justify-center mb-4 backdrop-blur-md">
                   <Award className="w-6 h-6" />
                 </div>
-                <p className="text-[rgb(var(--color-void))]/70 text-sm font-bold uppercase tracking-wider">Instructor</p>
+                <p className="text-[rgb(var(--color-void))]/70 text-sm font-bold uppercase tracking-wider">{t.instructor}</p>
               </div>
               <div>
-                <p className="font-bold text-2xl font-display leading-tight">{student.instructorName || 'Unassigned'}</p>
+                <p className="font-bold text-2xl font-display leading-tight">{student.instructorName || t.unassigned}</p>
                 <div className="flex items-center gap-2 mt-3">
-                  <span className="text-xs font-bold px-3 py-1.5 bg-[rgb(var(--color-void))]/10 rounded-full backdrop-blur-md">Active Coach</span>
+                  <span className="text-xs font-bold px-3 py-1.5 bg-[rgb(var(--color-void))]/10 rounded-full backdrop-blur-md">{t.activeCoach}</span>
                 </div>
               </div>
             </div>
@@ -453,7 +521,7 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
                 <h4 className="text-4xl font-bold font-display">{new Date(dbData.nextTest.testDate).getDate()}</h4>
                 <p className="text-white/80 text-sm mt-1 mb-6">{new Date(dbData.nextTest.testDate).toLocaleString('default', { month: 'short', year: 'numeric' })}</p>
                 
-                <p className="font-semibold uppercase text-xs tracking-widest text-white/90">Official Test</p>
+                <p className="font-semibold uppercase text-xs tracking-widest text-white/90">{t.officialTest}</p>
                 <p className="font-bold font-display text-lg mt-1">{dbData.nextTest.testCenter}</p>
               </div>
             )}
@@ -482,13 +550,13 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
                 <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
                   <Award className="w-8 h-8 text-emerald-500" />
                 </div>
-                <h2 className="text-2xl font-bold font-display text-[rgb(var(--color-text-1))]">Congratulations!</h2>
-                <p className="text-sm text-[rgb(var(--color-text-2))] mt-2">You have completed your driving course. We'd love to hear about your experience.</p>
+                <h2 className="text-2xl font-bold font-display text-[rgb(var(--color-text-1))]">{t.feedbackTitle}</h2>
+                <p className="text-sm text-[rgb(var(--color-text-2))] mt-2">{t.feedbackDesc}</p>
               </div>
 
               <form onSubmit={handleFeedbackSubmit} className="flex flex-col gap-6">
                 <div className="flex flex-col items-center gap-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[rgb(var(--color-text-3))]">Rate your experience</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[rgb(var(--color-text-3))]">{t.rateExp}</span>
                   <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -517,12 +585,12 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-[rgb(var(--color-text-3))]">Any comments? (Optional)</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-[rgb(var(--color-text-3))]">{t.comments}</label>
                   <textarea 
                     value={feedbackComment}
                     onChange={(e) => setFeedbackComment(e.target.value)}
                     className="w-full h-24 bg-[rgb(var(--color-void))]/50 border border-[rgb(var(--color-border))] rounded-xl p-4 text-sm text-[rgb(var(--color-text-1))] focus:border-[rgb(var(--color-primary))] outline-none resize-none"
-                    placeholder="How was your instructor?"
+                    placeholder={t.placeholder}
                   />
                 </div>
 
@@ -531,7 +599,7 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
                   disabled={feedbackRating === 0 || submittingFeedback}
                   className="w-full py-3.5 bg-[rgb(var(--color-primary))] text-white font-bold rounded-xl hover:bg-[rgb(var(--color-primary))]/90 transition-all shadow-lg shadow-[rgb(var(--color-primary))]/20 disabled:opacity-50 mt-2"
                 >
-                  {submittingFeedback ? 'Submitting...' : 'Submit & Claim Badge'}
+                  {submittingFeedback ? t.submitting : t.submitBtn}
                 </button>
                 
                 <button 
@@ -539,7 +607,7 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
                   onClick={() => setShowFeedbackModal(false)}
                   className="w-full py-2 text-xs font-bold uppercase tracking-wider text-[rgb(var(--color-text-3))] hover:text-[rgb(var(--color-text-1))] transition-colors"
                 >
-                  Skip for now
+                  {t.skipBtn}
                 </button>
               </form>
             </motion.div>

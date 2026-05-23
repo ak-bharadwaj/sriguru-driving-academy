@@ -55,8 +55,11 @@ interface LandingClientProps {
   branding?: BrandingState
 }
 
+import { useTranslation } from '@/hooks/useTranslation'
+
 export default function LandingClient({ courses, instructors, branding }: LandingClientProps) {
   const router = useRouter()
+  const { t } = useTranslation()
   const [activeFaq, setActiveFaq] = useState<number | null>(null)
   
   // Quiz State
@@ -119,7 +122,7 @@ export default function LandingClient({ courses, instructors, branding }: Landin
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 dark:bg-black/20 backdrop-blur-3xl border border-white/20 text-white text-xs font-semibold uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(139,92,246,0.3)] mb-10"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse shadow-[0_0_10px_rgba(167,139,250,0.8)]" />
-            Premium Driving Education
+            {t('landing.badge')}
           </motion.div>
           
           <motion.h1 
@@ -128,8 +131,8 @@ export default function LandingClient({ courses, instructors, branding }: Landin
             transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="font-display text-5xl md:text-7xl lg:text-[7rem] font-medium tracking-tighter leading-[0.95] mb-8 text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.1)]"
           >
-            Drive with <br className="hidden md:block"/>
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-400 via-fuchsia-300 to-indigo-400 drop-shadow-lg">Absolute Precision.</span>
+            {t('landing.title.1')} <br className="hidden md:block"/>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-400 via-fuchsia-300 to-indigo-400 drop-shadow-lg">{t('landing.title.2')}</span>
           </motion.h1>
           
           <motion.p 
@@ -138,7 +141,7 @@ export default function LandingClient({ courses, instructors, branding }: Landin
             transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="text-lg md:text-xl text-white/70 mb-12 max-w-2xl leading-relaxed font-light drop-shadow-md"
           >
-            {academyName} represents the pinnacle of driver education. Structured curriculums, dual-control fleets, and elite instructors.
+            {t('landing.desc')}
           </motion.p>
 
           <motion.div 
@@ -151,19 +154,19 @@ export default function LandingClient({ courses, instructors, branding }: Landin
               onClick={scrollToBooking}
               className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold rounded-full shadow-[0_0_40px_rgba(124,58,237,0.4)] hover:shadow-[0_0_60px_rgba(124,58,237,0.6)] transition-all duration-500 flex items-center justify-center gap-3 text-sm tracking-wide uppercase"
             >
-              Book a Trial <ArrowRight className="w-4 h-4" />
+              {t('landing.book')} <ArrowRight className="w-4 h-4" />
             </button>
             <a 
               href="#download-app" 
               className="w-full sm:w-auto px-8 py-4 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-medium rounded-full backdrop-blur-xl transition-all duration-500 flex items-center justify-center gap-2 text-sm tracking-wide uppercase"
             >
-              <Download className="w-4 h-4" /> Download App
+              <Download className="w-4 h-4" /> {t('landing.download')}
             </a>
             <a 
               href="#courses" 
               className="w-full sm:w-auto px-8 py-4 bg-transparent border border-white/20 hover:bg-white/10 text-white font-medium rounded-full backdrop-blur-xl transition-all duration-500 text-center text-sm tracking-wide uppercase hidden md:block"
             >
-              Curriculum
+              {t('nav.curriculum')}
             </a>
           </motion.div>
         </div>
@@ -175,9 +178,9 @@ export default function LandingClient({ courses, instructors, branding }: Landin
       <section className="py-32 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="mb-20">
-            <h2 className="font-display text-4xl md:text-6xl font-medium tracking-tighter mb-6">Engineering Trust.</h2>
+            <h2 className="font-display text-4xl md:text-6xl font-medium tracking-tighter mb-6">{t('landing.features.title')}</h2>
             <p className="text-slate-600 dark:text-slate-400 text-xl font-light leading-relaxed max-w-2xl">
-              We provide an uncompromised, strictly structured learning environment built on safety and analytical precision.
+              {t('landing.features.desc')}
             </p>
           </div>
 
@@ -189,9 +192,9 @@ export default function LandingClient({ courses, instructors, branding }: Landin
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center mb-8 shadow-lg shadow-violet-500/20">
                   <ShieldCheck className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-3xl md:text-4xl font-medium mb-6 font-display tracking-tight">Dual-Control Fleet</h3>
+                <h3 className="text-3xl md:text-4xl font-medium mb-6 font-display tracking-tight">{t('landing.f1.title')}</h3>
                 <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-lg font-light max-w-md">
-                  Our entire fleet is equipped with professional dual controls. Your instructor maintains absolute authority to intervene instantly, ensuring 100% safety during exposure to complex traffic scenarios.
+                  {t('landing.f1.desc')}
                 </p>
               </div>
             </div>
@@ -203,25 +206,25 @@ export default function LandingClient({ courses, instructors, branding }: Landin
                 <div className="w-14 h-14 rounded-2xl border border-white/50 dark:border-white/10 bg-white/80 dark:bg-white/10 backdrop-blur-md flex items-center justify-center shrink-0 shadow-sm">
                   <Award className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
                 </div>
-                <h3 className="text-2xl md:text-3xl font-medium font-display tracking-tight">Elite Instructors</h3>
+                <h3 className="text-2xl md:text-3xl font-medium font-display tracking-tight">{t('landing.f2.title')}</h3>
               </div>
               <p className="text-slate-600 dark:text-slate-300 leading-relaxed font-light text-lg relative z-10">
-                Government-certified professionals selected exclusively for their rigorous defensive driving expertise and pedagogical restraint.
+                {t('landing.f2.desc')}
               </p>
             </div>
 
             {/* Feature 3 */}
             <div className="md:col-span-1 md:row-span-1 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[2rem] p-10 flex flex-col justify-center items-center text-center shadow-xl shadow-indigo-500/20">
               <Clock className="w-10 h-10 text-white mb-6" />
-              <h3 className="text-2xl font-medium text-white font-display tracking-tight mb-3">Fluid</h3>
-              <p className="text-indigo-100 text-sm leading-relaxed">Book sessions seamlessly.</p>
+              <h3 className="text-2xl font-medium text-white font-display tracking-tight mb-3">{t('landing.f3.title')}</h3>
+              <p className="text-indigo-100 text-sm leading-relaxed">{t('landing.f3.desc')}</p>
             </div>
 
             {/* Feature 4 */}
             <div className="md:col-span-1 md:row-span-1 bg-white/60 dark:bg-white/5 backdrop-blur-3xl rounded-[2rem] p-10 border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-center items-center text-center">
               <Car className="w-10 h-10 mb-6 text-violet-600 dark:text-violet-400" />
-              <h3 className="text-2xl font-medium font-display tracking-tight mb-3">Modern</h3>
-              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">Train in pristine vehicles.</p>
+              <h3 className="text-2xl font-medium font-display tracking-tight mb-3">{t('landing.f4.title')}</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{t('landing.f4.desc')}</p>
             </div>
           </div>
         </div>
@@ -233,8 +236,8 @@ export default function LandingClient({ courses, instructors, branding }: Landin
       <section id="courses" className="py-32 px-6 relative z-10 border-t border-black/5 dark:border-white/5">
         <div className="max-w-7xl mx-auto">
           <div className="mb-20">
-            <h2 className="font-display text-4xl md:text-6xl font-medium tracking-tighter mb-6">The Curriculum.</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-xl font-light">Select a highly-calibrated program tailored to your precise experience level.</p>
+            <h2 className="font-display text-4xl md:text-6xl font-medium tracking-tighter mb-6">{t('landing.curriculum.title')}</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-xl font-light">{t('landing.curriculum.desc')}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -247,9 +250,9 @@ export default function LandingClient({ courses, instructors, branding }: Landin
                 
                 <div className="mb-10 pb-10 border-b border-black/5 dark:border-white/10 relative z-10">
                   <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-bold rounded-full mb-6 uppercase tracking-[0.2em] border border-violet-200 dark:border-violet-800">
-                    {course.durationDays} Days
+                    {course.durationDays} {t('general.days')}
                   </span>
-                  <h3 className="font-display text-3xl font-medium mb-4 tracking-tight leading-none">{course.name}</h3>
+                  <h3 className="font-display text-3xl font-medium mb-4 tracking-tight leading-none">{t(course.name as any) || course.name}</h3>
                   <div>
                     <span className="text-5xl font-medium tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400">
                       ₹{course.price.toLocaleString()}
@@ -258,21 +261,21 @@ export default function LandingClient({ courses, instructors, branding }: Landin
                 </div>
                 
                 <p className="text-slate-600 dark:text-slate-300 mb-12 flex-1 leading-relaxed font-light text-lg relative z-10">
-                  {course.description || "Comprehensive dynamic training covering advanced fundamentals, traffic theory, and defensive maneuvers."}
+                  {course.description || t('landing.course.desc')}
                 </p>
                 
                 <ul className="space-y-5 mb-12 relative z-10">
                   <li className="flex items-center gap-4">
                     <Check className="w-5 h-5 text-violet-600 dark:text-violet-400 shrink-0" />
-                    <span className="font-light text-lg">Dual-control training</span>
+                    <span className="font-light text-lg">{t('landing.course.f1')}</span>
                   </li>
                   <li className="flex items-center gap-4">
                     <Check className="w-5 h-5 text-violet-600 dark:text-violet-400 shrink-0" />
-                    <span className="font-light text-lg">RTO Exam Prep</span>
+                    <span className="font-light text-lg">{t('landing.course.f2')}</span>
                   </li>
                   <li className="flex items-center gap-4">
                     <Check className="w-5 h-5 text-violet-600 dark:text-violet-400 shrink-0" />
-                    <span className="font-light text-lg">Digital portal access</span>
+                    <span className="font-light text-lg">{t('landing.course.f3')}</span>
                   </li>
                 </ul>
 
@@ -280,7 +283,7 @@ export default function LandingClient({ courses, instructors, branding }: Landin
                   onClick={scrollToBooking}
                   className="w-full py-5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold rounded-full hover:scale-[1.02] transition-transform duration-300 tracking-wide text-sm uppercase shadow-lg shadow-violet-500/20 relative z-10"
                 >
-                  Select Program
+                  {t('general.selectProgram')}
                 </button>
               </div>
             ))}
@@ -294,8 +297,8 @@ export default function LandingClient({ courses, instructors, branding }: Landin
       <section className="py-32 px-6 relative z-10 border-t border-black/5 dark:border-white/5">
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-16">
-            <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tighter mb-4">Test Your Instincts.</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-lg font-light">Take our quick knowledge check to see if you're ready for the road.</p>
+            <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tighter mb-4">{t('landing.quiz.title')}</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-lg font-light">{t('landing.quiz.desc')}</p>
           </div>
 
           <div className="bg-white/60 dark:bg-white/5 backdrop-blur-3xl rounded-[2rem] p-10 md:p-16 border border-white/40 dark:border-white/10 shadow-2xl relative overflow-hidden">
@@ -365,11 +368,11 @@ export default function LandingClient({ courses, instructors, branding }: Landin
         <div className="max-w-7xl mx-auto">
           <div className="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
-              <h2 className="font-display text-4xl md:text-6xl font-medium tracking-tighter mb-6">Inside the Academy.</h2>
-              <p className="text-slate-500 dark:text-slate-400 text-xl font-light">Experience our premium training facilities and dual-control fleet.</p>
+              <h2 className="font-display text-4xl md:text-6xl font-medium tracking-tighter mb-6">{t('landing.gallery.title')}</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-xl font-light">{t('landing.gallery.desc')}</p>
             </div>
             <a href="/gallery" className="inline-flex items-center gap-2 text-violet-600 dark:text-violet-400 font-semibold hover:underline">
-              View full gallery <ArrowRight className="w-4 h-4" />
+              {t('landing.gallery.link')} <ArrowRight className="w-4 h-4" />
             </a>
           </div>
 
@@ -404,7 +407,7 @@ export default function LandingClient({ courses, instructors, branding }: Landin
             
           {/* Reviews Side */}
           <div>
-            <h2 className="font-display text-4xl font-medium mb-12 tracking-tighter">The Verdict.</h2>
+            <h2 className="font-display text-4xl font-medium mb-12 tracking-tighter">{t('landing.reviews.title')}</h2>
             <div className="space-y-8">
               {TESTIMONIALS.slice(0, 2).map((t, idx) => (
                 <div key={idx} className="bg-white/60 dark:bg-white/5 backdrop-blur-3xl p-10 rounded-[2rem] border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
@@ -427,7 +430,7 @@ export default function LandingClient({ courses, instructors, branding }: Landin
 
           {/* FAQ Side */}
           <div id="faq">
-            <h2 className="font-display text-4xl font-medium mb-12 tracking-tighter">Details.</h2>
+            <h2 className="font-display text-4xl font-medium mb-12 tracking-tighter">{t('landing.faq.title')}</h2>
             <div className="space-y-4">
               {FAQ_DATA.slice(0, 4).map((faq, idx) => {
                 const isOpen = activeFaq === idx
@@ -479,9 +482,9 @@ export default function LandingClient({ courses, instructors, branding }: Landin
             
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12 text-center md:text-left">
               <div className="max-w-lg">
-                <h2 className="font-display text-4xl md:text-5xl font-medium text-white tracking-tighter mb-6">Learn on the go.</h2>
+                <h2 className="font-display text-4xl md:text-5xl font-medium text-white tracking-tighter mb-6">{t('landing.app.title')}</h2>
                 <p className="text-violet-200 font-light text-lg leading-relaxed mb-10">
-                  Download the {academyName} mobile app to access mock tests, track your driving hours, and manage your bookings seamlessly from your phone.
+                  {t('landing.app.desc')}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <a href="/downloads/app-release.apk" download className="px-8 py-4 bg-white text-indigo-900 font-bold rounded-full hover:scale-105 transition-transform duration-300 flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.2)]">

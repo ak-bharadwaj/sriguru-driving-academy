@@ -20,6 +20,162 @@ interface SlotItem {
   status: string
 }
 
+const BOOKING_DICT = {
+  EN: {
+    scheduleTrial: "Schedule Trial Session",
+    reviewCal: "Review calendar hours, lock coaching specialties, and kickstart advanced license drills.",
+    step1Title: "Step 1: Student Personal Details",
+    step1Desc: "Provide baseline contact registries",
+    fullName: "Full Name",
+    indianContact: "Indian Contact Number",
+    emailAddr: "Email Address",
+    selectProgram: "Select Program",
+    step2Title: "Step 2: Coaching Curriculum Option",
+    step2Desc: "Select a specific training category",
+    loadingProg: "LOADING PROGRAMS...",
+    back: "Back",
+    skipCreate: "Skip & Create Account",
+    selectSlot: "Select Trial Slot",
+    step3Title: "Step 3: Schedule Calendar Grid",
+    step3Desc: "Click an active slot below (Amber highlight = Selected)",
+    fetching: "FETCHING ACTIVE ACADEMY HOURS...",
+    full: "FULL",
+    selected: "SELECTED",
+    unavailable: "UNAVAILABLE",
+    active: "ACTIVE",
+    skipSlot: "Skip Slot Selection",
+    validateSum: "Validate Summary",
+    step4Title: "Step 4: Booking Summary Review",
+    step4Desc: "Confirm your training specifications",
+    yourName: "YOUR NAME",
+    phoneReg: "PHONE REGISTER",
+    emailReg: "EMAIL REGISTER",
+    trainingMod: "TRAINING MODULE",
+    scheduledSlot: "SCHEDULED SLOT:",
+    maxCap: "Max Capacity",
+    receiptLedger: "🧾 Tuition Receipt Ledger",
+    baseFee: "Base tuition fee",
+    promoDed: "Promo deduction",
+    totalDue: "Total tuition due",
+    secureProcess: "🔒 Registration securely processed via Sri Guru Driving Academy.",
+    promoDesk: "Promo Voucher Desk",
+    deductionApp: "Deduction Applied",
+    enterPromo: "ENTER PROMO CODE",
+    apply: "Apply",
+    remove: "Remove",
+    availVouchers: "Available Vouchers:",
+    submitBooking: "Submit Booking",
+    confirming: "Confirming...",
+    slotAcquired: "SLOT REGISTRATION ACQUIRED",
+    bookingConf: "Booking Confirmed!",
+    trialVerified: "Your trial slot registration has been verified by the Sri Guru dashboard.",
+    refId: "REFERENCE ID:",
+    viewDash: "View Dashboard"
+  },
+  HI: {
+    scheduleTrial: "ट्रायल सत्र अनुसूची करें",
+    reviewCal: "कैलेंडर घंटे की समीक्षा करें, कोचिंग विशिष्टताओं को लॉक करें, और उन्नत लाइसेंस अभ्यास शुरू करें।",
+    step1Title: "चरण 1: छात्र व्यक्तिगत विवरण",
+    step1Desc: "बेसलाइन संपर्क रजिस्ट्रियां प्रदान करें",
+    fullName: "पूरा नाम",
+    indianContact: "भारतीय संपर्क नंबर",
+    emailAddr: "ईमेल पता",
+    selectProgram: "कार्यक्रम चुनें",
+    step2Title: "चरण 2: कोचिंग पाठ्यक्रम विकल्प",
+    step2Desc: "एक विशिष्ट प्रशिक्षण श्रेणी चुनें",
+    loadingProg: "प्रोग्राम लोड हो रहे हैं...",
+    back: "पीछे",
+    skipCreate: "छोड़ें और खाता बनाएं",
+    selectSlot: "ट्रायल स्लॉट चुनें",
+    step3Title: "चरण 3: अनुसूची कैलेंडर ग्रिड",
+    step3Desc: "नीचे एक सक्रिय स्लॉट पर क्लिक करें (एम्बर हाइलाइट = चयनित)",
+    fetching: "सक्रिय अकादमी घंटे प्राप्त कर रहा है...",
+    full: "पूर्ण",
+    selected: "चयनित",
+    unavailable: "अनुपलब्ध",
+    active: "सक्रिय",
+    skipSlot: "स्लॉट चयन छोड़ें",
+    validateSum: "सारांश मान्य करें",
+    step4Title: "चरण 4: बुकिंग सारांश समीक्षा",
+    step4Desc: "अपने प्रशिक्षण विनिर्देशों की पुष्टि करें",
+    yourName: "आपका नाम",
+    phoneReg: "फ़ोन रजिस्टर",
+    emailReg: "ईमेल रजिस्टर",
+    trainingMod: "प्रशिक्षण मॉड्यूल",
+    scheduledSlot: "निर्धारित स्लॉट:",
+    maxCap: "अधिकतम क्षमता",
+    receiptLedger: "🧾 ट्यूशन रसीद बहीखाता",
+    baseFee: "बेस ट्यूशन शुल्क",
+    promoDed: "प्रोमो कटौती",
+    totalDue: "कुल ट्यूशन देय",
+    secureProcess: "🔒 श्री गुरु ड्राइविंग अकादमी के माध्यम से पंजीकरण सुरक्षित रूप से संसाधित किया गया।",
+    promoDesk: "प्रोमो वाउचर डेस्क",
+    deductionApp: "कटौती लागू",
+    enterPromo: "प्रोमो कोड दर्ज करें",
+    apply: "लागू करें",
+    remove: "हटाएं",
+    availVouchers: "उपलब्ध वाउचर:",
+    submitBooking: "बुकिंग सबमिट करें",
+    confirming: "पुष्टि की जा रही है...",
+    slotAcquired: "स्लॉट पंजीकरण प्राप्त हुआ",
+    bookingConf: "बुकिंग की पुष्टि हो गई!",
+    trialVerified: "आपके ट्रायल स्लॉट पंजीकरण को श्री गुरु डैशबोर्ड द्वारा सत्यापित किया गया है।",
+    refId: "संदर्भ आईडी:",
+    viewDash: "डैशबोर्ड देखें"
+  },
+  TE: {
+    scheduleTrial: "ట్రయల్ సెషన్‌ను షెడ్యూల్ చేయండి",
+    reviewCal: "క్యాలెండర్ గంటలను సమీక్షించండి, కోచింగ్ స్పెషాలిటీలను లాక్ చేయండి మరియు అధునాతన లైసెన్స్ డ్రిల్స్‌ను ప్రారంభించండి.",
+    step1Title: "దశ 1: విద్యార్థి వ్యక్తిగత వివరాలు",
+    step1Desc: "బేస్‌లైన్ పరిచయ రిజిస్ట్రీలను అందించండి",
+    fullName: "పూర్తి పేరు",
+    indianContact: "భారతీయ సంప్రదింపు సంఖ్య",
+    emailAddr: "ఇమెయిల్ చిరునామా",
+    selectProgram: "ప్రోగ్రామ్‌ను ఎంచుకోండి",
+    step2Title: "దశ 2: కోచింగ్ కరికులం ఎంపిక",
+    step2Desc: "నిర్దిష్ట శిక్షణ వర్గాన్ని ఎంచుకోండి",
+    loadingProg: "ప్రోగ్రామ్‌లు లోడ్ అవుతున్నాయి...",
+    back: "వెనుకకు",
+    skipCreate: "వదిలేయండి & ఖాతాను సృష్టించండి",
+    selectSlot: "ట్రయల్ స్లాట్‌ను ఎంచుకోండి",
+    step3Title: "దశ 3: షెడ్యూల్ క్యాలెండర్ గ్రిడ్",
+    step3Desc: "క్రింద యాక్టివ్ స్లాట్‌పై క్లిక్ చేయండి (అంబర్ హైలైట్ = ఎంచుకోబడింది)",
+    fetching: "యాక్టివ్ అకాడమీ గంటలను పొందుతోంది...",
+    full: "పూర్తి",
+    selected: "ఎంచుకోబడింది",
+    unavailable: "అందుబాటులో లేదు",
+    active: "యాక్టివ్",
+    skipSlot: "స్లాట్ ఎంపికను వదిలేయండి",
+    validateSum: "సారాంశాన్ని ధృవీకరించండి",
+    step4Title: "దశ 4: బుకింగ్ సారాంశం సమీక్ష",
+    step4Desc: "మీ శిక్షణ వివరాలను నిర్ధారించండి",
+    yourName: "మీ పేరు",
+    phoneReg: "ఫోన్ రిజిస్టర్",
+    emailReg: "ఇమెయిల్ రిజిస్టర్",
+    trainingMod: "శిక్షణ మాడ్యూల్",
+    scheduledSlot: "షెడ్యూల్ చేయబడిన స్లాట్:",
+    maxCap: "గరిష్ట సామర్థ్యం",
+    receiptLedger: "🧾 ట్యూషన్ రసీదు లెడ్జర్",
+    baseFee: "బేస్ ట్యూషన్ ఫీజు",
+    promoDed: "ప్రోమో తగ్గింపు",
+    totalDue: "మొత్తం ట్యూషన్ బకాయి",
+    secureProcess: "🔒 రిజిస్ట్రేషన్ శ్రీ గురు డ్రైవింగ్ అకాడమీ ద్వారా సురక్షితంగా ప్రాసెస్ చేయబడింది.",
+    promoDesk: "ప్రోమో వోచర్ డెస్క్",
+    deductionApp: "తగ్గింపు వర్తించబడింది",
+    enterPromo: "ప్రోమో కోడ్ నమోదు చేయండి",
+    apply: "వర్తించు",
+    remove: "తొలగించు",
+    availVouchers: "అందుబాటులో ఉన్న వోచర్లు:",
+    submitBooking: "బుకింగ్ సమర్పించండి",
+    confirming: "నిర్ధారిస్తోంది...",
+    slotAcquired: "స్లాట్ రిజిస్ట్రేషన్ పొందబడింది",
+    bookingConf: "బుకింగ్ నిర్ధారించబడింది!",
+    trialVerified: "మీ ట్రయల్ స్లాట్ రిజిస్ట్రేషన్ శ్రీ గురు డాష్‌బోర్డ్ ద్వారా ధృవీకరించబడింది.",
+    refId: "రిఫరెన్స్ ID:",
+    viewDash: "డాష్‌బోర్డ్ చూడండి"
+  }
+}
+
 export default function PublicBookingSystem() {
   const [step, setStep] = useState(1)
 
@@ -46,6 +202,9 @@ export default function PublicBookingSystem() {
 
   // Dynamic Data & Languages
   const { language } = useLanguageStore()
+  const activeLang = language.toUpperCase() as keyof typeof BOOKING_DICT
+  const t = BOOKING_DICT[activeLang] || BOOKING_DICT.EN
+
   const [courses, setCourses] = useState<Course[]>([])
   const [offers, setOffers] = useState<Offer[]>([])
   const [loadingCourses, setLoadingCourses] = useState(true)
@@ -241,10 +400,10 @@ export default function PublicBookingSystem() {
         <header className="text-center">
           <span className="text-xs font-mono uppercase tracking-widest text-accent font-bold">SRI GURU RESERVATION DESK</span>
           <h1 className="text-3xl md:text-4xl font-extrabold text-text-1 font-display tracking-tight mt-1 uppercase">
-            Schedule Trial Session
+            {t.scheduleTrial}
           </h1>
           <p className="text-xs text-text-2 mt-1.5 max-w-sm mx-auto">
-            Review calendar hours, lock coaching specialties, and kickstart advanced license drills.
+            {t.reviewCal}
           </p>
         </header>
 
@@ -294,15 +453,15 @@ export default function PublicBookingSystem() {
                 className="flex flex-col gap-6 text-left"
               >
                 <div>
-                  <h3 className="text-lg font-bold text-text-1 uppercase font-display">Step 1: Student Personal Details</h3>
-                  <p className="text-[10px] text-text-3 mt-1 font-mono uppercase">Provide baseline contact registries</p>
+                  <h3 className="text-lg font-bold text-text-1 uppercase font-display">{t.step1Title}</h3>
+                  <p className="text-[10px] text-text-3 mt-1 font-mono uppercase">{t.step1Desc}</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   
                   {/* Name Input */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[9px] font-mono text-text-3 uppercase font-bold">Full Name</label>
+                    <label className="text-[9px] font-mono text-text-3 uppercase font-bold">{t.fullName}</label>
                     <div className="relative">
                       <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
                       <input
@@ -321,7 +480,7 @@ export default function PublicBookingSystem() {
 
                   {/* Phone Input */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[9px] font-mono text-text-3 uppercase font-bold">Indian Contact Number</label>
+                    <label className="text-[9px] font-mono text-text-3 uppercase font-bold">{t.indianContact}</label>
                     <div className="relative">
                       <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
                       <input
@@ -340,7 +499,7 @@ export default function PublicBookingSystem() {
 
                   {/* Email Input */}
                   <div className="flex flex-col gap-1.5 md:col-span-2">
-                    <label className="text-[9px] font-mono text-text-3 uppercase font-bold">Email Address</label>
+                    <label className="text-[9px] font-mono text-text-3 uppercase font-bold">{t.emailAddr}</label>
                     <div className="relative">
                       <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
                       <input
@@ -364,7 +523,7 @@ export default function PublicBookingSystem() {
                     onClick={handleNextStep1}
                     className="px-6 py-3 bg-primary hover:bg-primary/95 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-lg shadow-primary/10 transition-all duration-200"
                   >
-                    Select Program
+                    {t.selectProgram}
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -381,15 +540,15 @@ export default function PublicBookingSystem() {
                 className="flex flex-col gap-6 text-left"
               >
                 <div>
-                  <h3 className="text-lg font-bold text-text-1 uppercase font-display">Step 2: Coaching Curriculum Option</h3>
-                  <p className="text-[10px] text-text-3 mt-1 font-mono uppercase">Select a specific training category</p>
+                  <h3 className="text-lg font-bold text-text-1 uppercase font-display">{t.step2Title}</h3>
+                  <p className="text-[10px] text-text-3 mt-1 font-mono uppercase">{t.step2Desc}</p>
                 </div>
 
                 <div className="flex flex-col gap-4">
                   {loadingCourses ? (
                     <div className="flex flex-col items-center justify-center py-10 gap-3">
                       <Clock className="w-8 h-8 text-primary animate-spin" />
-                      <span className="text-[9px] font-mono text-text-3">LOADING PROGRAMS...</span>
+                      <span className="text-[9px] font-mono text-text-3">{t.loadingProg}</span>
                     </div>
                   ) : (
                     courses.map((opt) => {
@@ -443,7 +602,7 @@ export default function PublicBookingSystem() {
                       className="px-5 py-3 bg-void border border-border text-text-2 hover:text-text-1 font-bold text-xs rounded-xl flex items-center gap-1 transition-all duration-200"
                     >
                       <ArrowLeft className="w-3.5 h-3.5" />
-                      Back
+                      {t.back}
                     </button>
                     <button
                       onClick={async () => {
@@ -456,14 +615,14 @@ export default function PublicBookingSystem() {
                       }}
                       className="px-5 py-3 bg-void border border-border text-text-3 hover:text-text-1 font-bold text-xs rounded-xl transition-all duration-200"
                     >
-                      Skip & Create Account
+                      {t.skipCreate}
                     </button>
                   </div>
                   <button
                     onClick={() => setStep(3)}
                     className="px-6 py-3 bg-primary hover:bg-primary/95 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200"
                   >
-                    Select Trial Slot
+                    {t.selectSlot}
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -480,14 +639,14 @@ export default function PublicBookingSystem() {
                 className="flex flex-col gap-6 text-left"
               >
                 <div>
-                  <h3 className="text-lg font-bold text-text-1 uppercase font-display">Step 3: Schedule Calendar Grid</h3>
-                  <p className="text-[10px] text-text-3 mt-1 font-mono uppercase">Click an active slot below (Amber highlight = Selected)</p>
+                  <h3 className="text-lg font-bold text-text-1 uppercase font-display">{t.step3Title}</h3>
+                  <p className="text-[10px] text-text-3 mt-1 font-mono uppercase">{t.step3Desc}</p>
                 </div>
 
                 {loadingSlots ? (
                   <div className="flex flex-col items-center justify-center py-20 gap-3">
                     <Clock className="w-8 h-8 text-primary animate-spin" />
-                    <span className="text-[9px] font-mono text-text-3">FETCHING ACTIVE ACADEMY HOURS...</span>
+                    <span className="text-[9px] font-mono text-text-3">{t.fetching}</span>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-4">
@@ -547,7 +706,7 @@ export default function PublicBookingSystem() {
                           >
                             <span className="text-sm font-bold font-mono">{hour}</span>
                             <span className="text-[9px] uppercase tracking-wider mt-1 opacity-80 font-bold">
-                              {isFull ? 'FULL' : isSelected ? 'SELECTED' : (!matchingSlot || isClosed) ? 'UNAVAILABLE' : 'ACTIVE'}
+                              {isFull ? t.full : isSelected ? t.selected : (!matchingSlot || isClosed) ? t.unavailable : t.active}
                             </span>
                           </button>
                         )
@@ -563,7 +722,7 @@ export default function PublicBookingSystem() {
                       className="px-5 py-3 bg-void border border-border text-text-2 hover:text-text-1 font-bold text-xs rounded-xl flex items-center gap-1 transition-all duration-200"
                     >
                       <ArrowLeft className="w-3.5 h-3.5" />
-                      Back
+                      {t.back}
                     </button>
                     <button
                       onClick={async () => {
@@ -575,7 +734,7 @@ export default function PublicBookingSystem() {
                       }}
                       className="px-5 py-3 bg-void border border-border text-text-3 hover:text-text-1 font-bold text-xs rounded-xl transition-all duration-200"
                     >
-                      Skip Slot Selection
+                      {t.skipSlot}
                     </button>
                   </div>
                   <button
@@ -585,7 +744,7 @@ export default function PublicBookingSystem() {
                     disabled={!selectedSlot}
                     className="px-6 py-3 bg-primary hover:bg-primary/95 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200 disabled:opacity-40"
                   >
-                    Validate Summary
+                    {t.validateSum}
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -602,8 +761,8 @@ export default function PublicBookingSystem() {
                 className="flex flex-col gap-6 text-left"
               >
                 <div>
-                  <h3 className="text-lg font-bold text-text-1 uppercase font-display">Step 4: Booking Summary Review</h3>
-                  <p className="text-[10px] text-text-3 mt-1 font-mono uppercase">Confirm your training specifications</p>
+                  <h3 className="text-lg font-bold text-text-1 uppercase font-display">{t.step4Title}</h3>
+                  <p className="text-[10px] text-text-3 mt-1 font-mono uppercase">{t.step4Desc}</p>
                 </div>
 
                 {/* SUMMARY DETAILS AND RECEIPTS */}
@@ -611,22 +770,22 @@ export default function PublicBookingSystem() {
                   <div className="grid grid-cols-2 gap-4 text-xs font-mono">
                     
                     <div className="flex flex-col gap-1 border-b border-border/40 pb-3">
-                      <span className="text-[9px] text-text-3 uppercase font-semibold">YOUR NAME</span>
+                      <span className="text-[9px] text-text-3 uppercase font-semibold">{t.yourName}</span>
                       <span className="text-text-1 font-bold">{name}</span>
                     </div>
 
                     <div className="flex flex-col gap-1 border-b border-border/40 pb-3">
-                      <span className="text-[9px] text-text-3 uppercase font-semibold">PHONE REGISTER</span>
+                      <span className="text-[9px] text-text-3 uppercase font-semibold">{t.phoneReg}</span>
                       <span className="text-text-1 font-bold">{phone}</span>
                     </div>
 
                     <div className="flex flex-col gap-1 border-b border-border/40 pb-3">
-                      <span className="text-[9px] text-text-3 uppercase font-semibold">EMAIL REGISTER</span>
+                      <span className="text-[9px] text-text-3 uppercase font-semibold">{t.emailReg}</span>
                       <span className="text-text-1 font-bold">{email}</span>
                     </div>
 
                     <div className="flex flex-col gap-1 border-b border-border/40 pb-3">
-                      <span className="text-[9px] text-text-3 uppercase font-semibold">TRAINING MODULE</span>
+                      <span className="text-[9px] text-text-3 uppercase font-semibold">{t.trainingMod}</span>
                       <span className="text-accent font-bold uppercase">{courseTitle}</span>
                     </div>
 
@@ -635,34 +794,34 @@ export default function PublicBookingSystem() {
                   <div className="flex items-center gap-3 bg-primary/5 border border-primary/20 p-3.5 rounded-xl mt-2 text-xs leading-relaxed text-text-2 shadow-[0_0_10px_rgba(var(--color-primary),0.05)]">
                     <Calendar className="w-5 h-5 text-primary flex-shrink-0" />
                     <div>
-                      <span className="font-bold text-text-1 uppercase font-mono">SCHEDULED SLOT:</span>{' '}
-                      <span className="text-text-1">{selectedSlot?.dayOfWeek}</span> at <span className="text-text-1">{selectedSlot?.time}</span> (Max Capacity {selectedSlot?.maxCapacity})
+                      <span className="font-bold text-text-1 uppercase font-mono">{t.scheduledSlot}</span>{' '}
+                      <span className="text-text-1">{selectedSlot?.dayOfWeek}</span> at <span className="text-text-1">{selectedSlot?.time}</span> ({t.maxCap} {selectedSlot?.maxCapacity})
                     </div>
                   </div>
 
                   {/* Receipt breakdown ledger */}
                   <div className="border-t border-border/45 pt-4 flex flex-col gap-2.5 font-mono text-xs">
                     <span className="text-[9px] text-text-3 uppercase tracking-wider block font-bold mb-1">
-                      🧾 Tuition Receipt Ledger
+                      {t.receiptLedger}
                     </span>
                     <div className="flex justify-between items-center text-text-2">
-                      <span className="uppercase text-[10px]">Base tuition fee</span>
+                      <span className="uppercase text-[10px]">{t.baseFee}</span>
                       <span className="font-bold text-text-1">₹{basePrice}</span>
                     </div>
                     {appliedPromo && (
                       <div className="flex justify-between items-center text-success font-medium">
-                        <span className="uppercase text-[10px]">Promo deduction ({appliedPromo.promoCode})</span>
+                        <span className="uppercase text-[10px]">{t.promoDed} ({appliedPromo.promoCode})</span>
                         <span className="font-bold">-₹{discountAmount.toFixed(0)}</span>
                       </div>
                     )}
                     <div className="flex justify-between items-center text-accent font-bold border-t border-border/40 pt-2.5 text-sm tracking-tight shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-                      <span className="uppercase text-[11px]">Total tuition due</span>
+                      <span className="uppercase text-[11px]">{t.totalDue}</span>
                       <span className="text-accent text-base">₹{grandTotal.toFixed(0)}</span>
                     </div>
                   </div>
 
                   <div className="bg-void/40 border border-border/30 p-3 rounded-xl text-center text-text-3 text-[10px] font-mono leading-relaxed uppercase">
-                    🔒 Registration securely processed via Sri Guru Driving Academy.
+                    {t.secureProcess}
                   </div>
                 </div>
 
@@ -671,11 +830,11 @@ export default function PublicBookingSystem() {
                   <div className="flex items-center justify-between border-b border-border/40 pb-2">
                     <span className="text-[10px] font-mono text-text-3 uppercase tracking-wider font-bold flex items-center gap-1.5">
                       <Zap className="w-3.5 h-3.5 text-accent animate-pulse" />
-                      Promo Voucher Desk
+                      {t.promoDesk}
                     </span>
                     {appliedPromo && (
                       <span className="text-[8px] font-mono bg-success/20 text-success border border-success/30 px-2 py-0.5 rounded uppercase font-bold">
-                        Deduction Applied
+                        {t.deductionApp}
                       </span>
                     )}
                   </div>
@@ -683,7 +842,7 @@ export default function PublicBookingSystem() {
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="ENTER PROMO CODE"
+                      placeholder={t.enterPromo}
                       value={promoCodeInput}
                       onChange={(e) => {
                         setPromoCodeInput(e.target.value.toUpperCase())
@@ -696,7 +855,7 @@ export default function PublicBookingSystem() {
                       onClick={() => handleApplyPromo(promoCodeInput)}
                       className="px-5 py-2.5 bg-primary hover:bg-primary/95 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all duration-200 flex-shrink-0"
                     >
-                      Apply
+                      {t.apply}
                     </button>
                   </div>
 
@@ -714,7 +873,7 @@ export default function PublicBookingSystem() {
                         }}
                         className="text-danger hover:underline font-bold uppercase ml-2 text-[9px]"
                       >
-                        Remove
+                        {t.remove}
                       </button>
                     </div>
                   )}
@@ -723,7 +882,7 @@ export default function PublicBookingSystem() {
                   {offers.length > 0 && (
                     <div className="flex flex-col gap-2 mt-1 border-t border-border/30 pt-3">
                       <span className="text-[9px] font-mono text-text-3 uppercase tracking-wider font-bold">
-                        Available Vouchers:
+                        {t.availVouchers}
                       </span>
                       <div className="flex flex-wrap gap-2">
                         {offers.map((offer) => {
@@ -757,14 +916,14 @@ export default function PublicBookingSystem() {
                     className="px-5 py-3 bg-void border border-border text-text-2 hover:text-text-1 font-bold text-xs rounded-xl flex items-center gap-1 transition-all duration-200"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
-                    Back
+                    {t.back}
                   </button>
                   <button
                     onClick={handleBookingSubmit}
                     disabled={submitting}
                     className="px-8 py-3 bg-accent hover:bg-accent/90 text-void font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-accent/10 flex items-center justify-center gap-1.5 transition-all duration-200 disabled:opacity-40"
                   >
-                    {submitting ? 'Confirming...' : 'Submit Booking'}
+                    {submitting ? t.confirming : t.submitBooking}
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -784,18 +943,18 @@ export default function PublicBookingSystem() {
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">SLOT REGISTRATION ACQUIRED</span>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">{t.slotAcquired}</span>
                   <h2 className="text-2xl font-extrabold text-text-1 font-display tracking-tight mt-2 uppercase">
-                    Booking Confirmed!
+                    {t.bookingConf}
                   </h2>
                   <p className="text-xs text-text-2 leading-relaxed mt-2 font-body px-4">
-                    Your trial slot registration has been verified by the Sri Guru dashboard.
+                    {t.trialVerified}
                   </p>
                 </div>
 
                 <div className="w-full bg-void/60 border border-border p-5 rounded-2xl text-left flex flex-col gap-3 font-mono text-xs">
                   <div className="flex justify-between items-center pb-2 border-b border-border/40">
-                    <span className="text-text-3 uppercase">REFERENCE ID:</span>
+                    <span className="text-text-3 uppercase">{t.refId}</span>
                     <span className="text-accent font-bold uppercase">{bookingResult.ref}</span>
                   </div>
                   <div className="flex justify-between items-center">

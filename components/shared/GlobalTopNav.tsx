@@ -6,6 +6,7 @@ import { User, LayoutDashboard, LogIn, Download } from "lucide-react";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { LanguageToggle } from "@/components/shared/LanguageToggle";
 import { useSession } from "next-auth/react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const HIDE_TOP_NAV_PREFIXES = [
   "/instructor",
@@ -17,6 +18,7 @@ const HIDE_TOP_NAV_PREFIXES = [
 export function GlobalTopNav() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { t } = useTranslation();
   const shouldHide = HIDE_TOP_NAV_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
   if (shouldHide) return null;
@@ -52,7 +54,7 @@ export function GlobalTopNav() {
           className="hidden md:flex px-4 py-2 bg-white/5 hover:bg-white/10 dark:bg-white/10 dark:hover:bg-white/20 text-text-1 font-semibold text-sm rounded-full transition-colors duration-300 items-center gap-2 border border-black/5 dark:border-white/10"
         >
           <Download className="w-4 h-4" />
-          <span>App</span>
+          <span>{t('nav.app')}</span>
         </a>
         <LanguageToggle />
         <ThemeToggle />
@@ -61,7 +63,7 @@ export function GlobalTopNav() {
             href={dashboardRoute}
             className="px-3 sm:px-5 py-2 sm:py-2.5 bg-primary text-white font-bold text-sm rounded-full hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(var(--color-primary),0.25)] transition-all duration-300 flex items-center gap-1.5 sm:gap-2 group"
           >
-            <span className="hidden sm:inline">Dashboard</span>
+            <span className="hidden sm:inline">{t('nav.dashboard')}</span>
             <LayoutDashboard className="w-4 h-4" />
           </Link>
         ) : !isLoginPage ? (
@@ -69,7 +71,7 @@ export function GlobalTopNav() {
             href="/login"
             className="px-3 sm:px-5 py-2 sm:py-2.5 bg-text-1 text-void font-bold text-sm rounded-full hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(var(--color-primary),0.2)] transition-all duration-300 flex items-center gap-1.5 sm:gap-2 group"
           >
-            <span>Portal</span>
+            <span>{t('nav.portal')}</span>
             <User className="w-4 h-4" />
           </Link>
         ) : null}

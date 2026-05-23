@@ -59,6 +59,134 @@ interface AdminDashboardClientProps {
   engagementData: { day: string; activeStudents: number; xpAwarded: number }[]
 }
 
+import { useLanguageStore } from '@/store/languageStore'
+
+const ADMIN_DICT = {
+  EN: {
+    adminWorkspace: "Admin Workspace",
+    academyHQ: "Academy HQ",
+    cmdCenter: "Command center for operations, student onboarding, and engagement analytics.",
+    systemOnline: "System Online",
+    totalStudents: "Total Students",
+    active: "active",
+    sessions: "Sessions",
+    today: "today",
+    wk: "/wk",
+    enquiries: "Enquiries",
+    pendingReview: "pending review",
+    instructors: "Instructors",
+    activeToday: "active today",
+    pendingActions: "Pending Actions",
+    waiting: "waiting",
+    inboxZero: "Inbox zero! All bookings processed.",
+    reviewApprove: "Review & Approve",
+    recentActivity: "Recent Activity",
+    engagementTrends: "Engagement Trends",
+    last7Days: "Last 7 Days",
+    students: "students",
+    xp: "XP",
+    topStudents: "Top Students",
+    level: "Level",
+    instructorLoad: "Instructor Load",
+    sessWk: "sess/wk",
+    feedbackComp: "Feedback completion:",
+    onboardStudent: "Onboard Student",
+    name: "Name",
+    trainingType: "Training Type",
+    emailLogin: "Email (for login)",
+    assignInstructor: "Assign Primary Instructor",
+    selectInstructor: "Select an instructor...",
+    studentsCurrently: "students currently",
+    cancel: "Cancel",
+    approveCreate: "Approve & Create Account",
+    accountCreated: "Account created and login sent to student!",
+    failedCreate: "Failed to create account",
+    networkError: "Network error occurred."
+  },
+  HI: {
+    adminWorkspace: "व्यवस्थापक कार्यस्थान",
+    academyHQ: "अकादमी मुख्यालय",
+    cmdCenter: "संचालन, छात्र ऑनबोर्डिंग और जुड़ाव विश्लेषण के लिए कमांड सेंटर।",
+    systemOnline: "सिस्टम ऑनलाइन",
+    totalStudents: "कुल छात्र",
+    active: "सक्रिय",
+    sessions: "सत्र",
+    today: "आज",
+    wk: "/सप्ताह",
+    enquiries: "पूछताछ",
+    pendingReview: "समीक्षा लंबित",
+    instructors: "प्रशिक्षक",
+    activeToday: "आज सक्रिय",
+    pendingActions: "लंबित कार्रवाइयां",
+    waiting: "प्रतीक्षारत",
+    inboxZero: "इनबॉक्स शून्य! सभी बुकिंग संसाधित।",
+    reviewApprove: "समीक्षा और अनुमोदन",
+    recentActivity: "हाल की गतिविधि",
+    engagementTrends: "जुड़ाव रुझान",
+    last7Days: "पिछले 7 दिन",
+    students: "छात्र",
+    xp: "एक्सपी",
+    topStudents: "शीर्ष छात्र",
+    level: "स्तर",
+    instructorLoad: "प्रशिक्षक कार्यभार",
+    sessWk: "सत्र/सप्ताह",
+    feedbackComp: "फ़ीडबैक पूर्णता:",
+    onboardStudent: "छात्र को ऑनबोर्ड करें",
+    name: "नाम",
+    trainingType: "प्रशिक्षण का प्रकार",
+    emailLogin: "ईमेल (लॉगिन के लिए)",
+    assignInstructor: "प्राथमिक प्रशिक्षक असाइन करें",
+    selectInstructor: "एक प्रशिक्षक चुनें...",
+    studentsCurrently: "छात्र वर्तमान में",
+    cancel: "रद्द करें",
+    approveCreate: "अनुमोदित करें और खाता बनाएं",
+    accountCreated: "खाता बनाया गया और छात्र को लॉगिन भेजा गया!",
+    failedCreate: "खाता बनाने में विफल",
+    networkError: "नेटवर्क त्रुटि हुई।"
+  },
+  TE: {
+    adminWorkspace: "అడ్మిన్ వర్క్‌స్పేస్",
+    academyHQ: "అకాడమీ HQ",
+    cmdCenter: "కార్యకలాపాలు, విద్యార్థుల ఆన్‌బోర్డింగ్ మరియు నిశ్చితార్థ విశ్లేషణల కోసం కమాండ్ సెంటర్.",
+    systemOnline: "సిస్టమ్ ఆన్‌లైన్",
+    totalStudents: "మొత్తం విద్యార్థులు",
+    active: "యాక్టివ్",
+    sessions: "సెషన్‌లు",
+    today: "ఈరోజు",
+    wk: "/వారం",
+    enquiries: "విచారణలు",
+    pendingReview: "సమీక్ష పెండింగ్‌లో ఉంది",
+    instructors: "బోధకులు",
+    activeToday: "ఈరోజు యాక్టివ్",
+    pendingActions: "పెండింగ్ చర్యలు",
+    waiting: "వేచి ఉంది",
+    inboxZero: "ఇన్‌బాక్స్ శూన్యం! అన్ని బుకింగ్‌లు ప్రాసెస్ చేయబడ్డాయి.",
+    reviewApprove: "సమీక్షించి ఆమోదించండి",
+    recentActivity: "ఇటీవలి కార్యాచరణ",
+    engagementTrends: "నిశ్చితార్థం ట్రెండ్స్",
+    last7Days: "గత 7 రోజులు",
+    students: "విద్యార్థులు",
+    xp: "XP",
+    topStudents: "టాప్ విద్యార్థులు",
+    level: "స్థాయి",
+    instructorLoad: "బోధకుని లోడ్",
+    sessWk: "సెస్/వారం",
+    feedbackComp: "అభిప్రాయం పూర్తి:",
+    onboardStudent: "విద్యార్థిని ఆన్‌బోర్డ్ చేయండి",
+    name: "పేరు",
+    trainingType: "శిక్షణ రకం",
+    emailLogin: "ఇమెయిల్ (లాగిన్ కోసం)",
+    assignInstructor: "ప్రాథమిక బోధకుడిని కేటాయించండి",
+    selectInstructor: "ఒక బోధకుడిని ఎంచుకోండి...",
+    studentsCurrently: "ప్రస్తుతం విద్యార్థులు",
+    cancel: "రద్దు చేయి",
+    approveCreate: "ఆమోదించండి & ఖాతాను సృష్టించండి",
+    accountCreated: "ఖాతా సృష్టించబడింది మరియు లాగిన్ విద్యార్థికి పంపబడింది!",
+    failedCreate: "ఖాతా సృష్టించడం విఫలమైంది",
+    networkError: "నెట్‌వర్క్ లోపం సంభవించింది."
+  }
+}
+
 export default function AdminDashboardClient({
   stats,
   pendingBookings: initialBookings,
@@ -74,6 +202,10 @@ export default function AdminDashboardClient({
   const [assignedInstructor, setAssignedInstructor] = useState('')
   const [onboardingStatus, setOnboardingStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [onboardMessage, setOnboardMessage] = useState('')
+
+  const { language } = useLanguageStore()
+  const activeLang = language.toUpperCase() as keyof typeof ADMIN_DICT
+  const t = ADMIN_DICT[activeLang] || ADMIN_DICT.EN
 
   const handleApprove = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -96,7 +228,7 @@ export default function AdminDashboardClient({
 
       if (res.ok) {
         setOnboardingStatus('success')
-        setOnboardMessage('Account created and login sent to student!')
+        setOnboardMessage(t.accountCreated)
         setPendingBookings(prev => prev.filter(b => b.id !== selectedBooking.id))
         setTimeout(() => {
           setSelectedBooking(null)
@@ -105,11 +237,11 @@ export default function AdminDashboardClient({
       } else {
         const err = await res.json()
         setOnboardingStatus('error')
-        setOnboardMessage(err.error || 'Failed to create account')
+        setOnboardMessage(err.error || t.failedCreate)
       }
     } catch (e) {
       setOnboardingStatus('error')
-      setOnboardMessage('Network error occurred.')
+      setOnboardMessage(t.networkError)
     }
   }
 
@@ -129,12 +261,12 @@ export default function AdminDashboardClient({
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
-              <p className="text-white/80 font-medium text-lg">Admin Workspace</p>
-              <h1 className="text-3xl font-bold font-display mt-1">Academy HQ</h1>
-              <p className="text-white/60 text-sm mt-1 max-w-xl">Command center for operations, student onboarding, and engagement analytics.</p>
+              <p className="text-white/80 font-medium text-lg">{t.adminWorkspace}</p>
+              <h1 className="text-3xl font-bold font-display mt-1">{t.academyHQ}</h1>
+              <p className="text-white/60 text-sm mt-1 max-w-xl">{t.cmdCenter}</p>
             </div>
             <div className="px-5 py-2.5 bg-white text-[rgb(var(--color-primary))] rounded-2xl text-sm font-bold shadow-lg">
-              System Online
+              {t.systemOnline}
             </div>
           </div>
         </div>
@@ -146,21 +278,21 @@ export default function AdminDashboardClient({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 flex flex-col gap-2 backdrop-blur-md">
             <span className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider flex items-center gap-2">
-              <Users className="w-3.5 h-3.5 text-[rgb(var(--color-primary))]" /> Total Students
+              <Users className="w-3.5 h-3.5 text-[rgb(var(--color-primary))]" /> {t.totalStudents}
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-extrabold text-[rgb(var(--color-text-1))]">{stats.totalStudents}</span>
-              <span className="text-xs font-medium text-[rgb(var(--color-text-2))]">{stats.activeStudents} active</span>
+              <span className="text-xs font-medium text-[rgb(var(--color-text-2))]">{stats.activeStudents} {t.active}</span>
             </div>
           </div>
 
           <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 flex flex-col gap-2 backdrop-blur-md">
             <span className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider flex items-center gap-2">
-              <Calendar className="w-3.5 h-3.5 text-emerald-500" /> Sessions
+              <Calendar className="w-3.5 h-3.5 text-emerald-500" /> {t.sessions}
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-extrabold text-[rgb(var(--color-text-1))]">{stats.sessionsToday}</span>
-              <span className="text-xs font-medium text-[rgb(var(--color-text-2))]">today ({stats.sessionsThisWeek} /wk)</span>
+              <span className="text-xs font-medium text-[rgb(var(--color-text-2))]">{t.today} ({stats.sessionsThisWeek} {t.wk})</span>
             </div>
           </div>
 
@@ -174,21 +306,21 @@ export default function AdminDashboardClient({
               </div>
             )}
             <span className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider flex items-center gap-2">
-              <AlertTriangle className="w-3.5 h-3.5 text-rose-500" /> Enquiries
+              <AlertTriangle className="w-3.5 h-3.5 text-rose-500" /> {t.enquiries}
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-extrabold text-[rgb(var(--color-text-1))]">{stats.pendingBookings}</span>
-              <span className="text-xs font-medium text-[rgb(var(--color-text-2))]">pending review</span>
+              <span className="text-xs font-medium text-[rgb(var(--color-text-2))]">{t.pendingReview}</span>
             </div>
           </div>
 
           <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 flex flex-col gap-2 backdrop-blur-md">
             <span className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider flex items-center gap-2">
-              <UserCheck className="w-3.5 h-3.5 text-amber-500" /> Instructors
+              <UserCheck className="w-3.5 h-3.5 text-amber-500" /> {t.instructors}
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-extrabold text-[rgb(var(--color-text-1))]">{stats.activeInstructors}</span>
-              <span className="text-xs font-medium text-[rgb(var(--color-text-2))]">active today</span>
+              <span className="text-xs font-medium text-[rgb(var(--color-text-2))]">{t.activeToday}</span>
             </div>
           </div>
         </div>
@@ -202,14 +334,14 @@ export default function AdminDashboardClient({
             <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-6 shadow-sm flex flex-col gap-5 backdrop-blur-md relative">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))] flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" /> Pending Actions
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" /> {t.pendingActions}
                 </h3>
-                <span className="text-xs font-mono font-bold bg-rose-500/10 text-rose-500 px-2 py-1 rounded-lg">{pendingBookings.length} waiting</span>
+                <span className="text-xs font-mono font-bold bg-rose-500/10 text-rose-500 px-2 py-1 rounded-lg">{pendingBookings.length} {t.waiting}</span>
               </div>
 
               {pendingBookings.length === 0 ? (
                 <div className="text-center py-8 text-[rgb(var(--color-text-3))] text-sm italic font-mono bg-[rgb(var(--color-void))] rounded-2xl border border-[rgb(var(--color-border))]/50">
-                  Inbox zero! All bookings processed.
+                  {t.inboxZero}
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">
@@ -229,7 +361,7 @@ export default function AdminDashboardClient({
                         onClick={() => setSelectedBooking(bk)}
                         className="w-full py-2 bg-[rgb(var(--color-primary))] hover:bg-[rgb(var(--color-primary-hover))] text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-[rgb(var(--color-primary))]/20"
                       >
-                        Review & Approve
+                        {t.reviewApprove}
                       </button>
                     </div>
                   ))}
@@ -240,7 +372,7 @@ export default function AdminDashboardClient({
             {/* ZONE 6: Recent Activity (System Logs) */}
             <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-6 shadow-sm flex flex-col gap-5 backdrop-blur-md flex-1">
               <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))] flex items-center gap-2">
-                <Activity className="w-4 h-4 text-[rgb(var(--color-text-3))]" /> Recent Activity
+                <Activity className="w-4 h-4 text-[rgb(var(--color-text-3))]" /> {t.recentActivity}
               </h3>
               
               <div className="flex flex-col gap-4 overflow-y-auto max-h-[300px] pr-2">
@@ -267,9 +399,9 @@ export default function AdminDashboardClient({
             <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-6 shadow-sm flex flex-col gap-5 backdrop-blur-md">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))] flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-[rgb(var(--color-primary))]" /> Engagement Trends
+                  <TrendingUp className="w-4 h-4 text-[rgb(var(--color-primary))]" /> {t.engagementTrends}
                 </h3>
-                <span className="text-xs text-[rgb(var(--color-text-3))] font-mono">Last 7 Days</span>
+                <span className="text-xs text-[rgb(var(--color-text-3))] font-mono">{t.last7Days}</span>
               </div>
 
               <div className="h-40 w-full flex items-end gap-2 px-2 pb-2 mt-4 relative">
@@ -284,7 +416,7 @@ export default function AdminDashboardClient({
                     <div key={i} className="flex-1 flex flex-col items-center justify-end h-full gap-2 group relative z-10">
                       {/* Tooltip */}
                       <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] text-[10px] py-1 px-2 rounded-lg font-mono whitespace-nowrap shadow-lg">
-                        {d.activeStudents} students, {d.xpAwarded} XP
+                        {d.activeStudents} {t.students}, {d.xpAwarded} {t.xp}
                       </div>
                       
                       {/* Bar */}
@@ -306,7 +438,7 @@ export default function AdminDashboardClient({
               {/* ZONE 4: Top Students (Leaderboard) */}
               <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-6 shadow-sm flex flex-col gap-5 backdrop-blur-md">
                 <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))] flex items-center gap-2">
-                  <Award className="w-4 h-4 text-amber-500" /> Top Students
+                  <Award className="w-4 h-4 text-amber-500" /> {t.topStudents}
                 </h3>
                 
                 <div className="flex flex-col gap-3">
@@ -322,10 +454,10 @@ export default function AdminDashboardClient({
                       </div>
                       <div className="flex-1 flex flex-col">
                         <span className="text-sm font-bold text-[rgb(var(--color-text-1))] truncate">{stu.name}</span>
-                        <span className="text-[10px] text-[rgb(var(--color-text-3))] font-mono">Level {stu.level}</span>
+                        <span className="text-[10px] text-[rgb(var(--color-text-3))] font-mono">{t.level} {stu.level}</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-xs font-bold text-[rgb(var(--color-primary))] font-mono">{stu.xp} XP</span>
+                        <span className="text-xs font-bold text-[rgb(var(--color-primary))] font-mono">{stu.xp} {t.xp}</span>
                       </div>
                     </div>
                   ))}
@@ -335,7 +467,7 @@ export default function AdminDashboardClient({
               {/* ZONE 5: Instructor Load */}
               <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-6 shadow-sm flex flex-col gap-5 backdrop-blur-md">
                 <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))] flex items-center gap-2">
-                  <Sliders className="w-4 h-4 text-emerald-500" /> Instructor Load
+                  <Sliders className="w-4 h-4 text-emerald-500" /> {t.instructorLoad}
                 </h3>
                 
                 <div className="flex flex-col gap-4">
@@ -343,7 +475,7 @@ export default function AdminDashboardClient({
                     <div key={ins.id} className="flex flex-col gap-2">
                       <div className="flex justify-between items-center text-xs">
                         <span className="font-bold text-[rgb(var(--color-text-1))]">{ins.name}</span>
-                        <span className="text-[rgb(var(--color-text-3))] font-mono">{ins.studentCount} students</span>
+                        <span className="text-[rgb(var(--color-text-3))] font-mono">{ins.studentCount} {t.students}</span>
                       </div>
                       
                       <div className="flex items-center gap-3">
@@ -353,11 +485,11 @@ export default function AdminDashboardClient({
                             style={{ width: `${Math.min(ins.sessionsThisWeek * 5, 100)}%` }}
                           />
                         </div>
-                        <span className="text-[10px] font-mono text-[rgb(var(--color-text-2))]">{ins.sessionsThisWeek} sess/wk</span>
+                        <span className="text-[10px] font-mono text-[rgb(var(--color-text-2))]">{ins.sessionsThisWeek} {t.sessWk}</span>
                       </div>
                       
                       <div className="flex items-center justify-between text-[10px] font-mono mt-1 border-t border-[rgb(var(--color-border))]/50 pt-1">
-                        <span className="text-[rgb(var(--color-text-3))]">Feedback completion:</span>
+                        <span className="text-[rgb(var(--color-text-3))]">{t.feedbackComp}</span>
                         <span className={ins.feedbackRate < 80 ? 'text-amber-500' : 'text-emerald-500'}>{ins.feedbackRate}%</span>
                       </div>
                     </div>
@@ -386,7 +518,7 @@ export default function AdminDashboardClient({
               className="w-full max-w-lg bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-6 shadow-2xl flex flex-col gap-6"
             >
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold font-display text-[rgb(var(--color-text-1))]">Onboard Student</h2>
+                <h2 className="text-xl font-bold font-display text-[rgb(var(--color-text-1))]">{t.onboardStudent}</h2>
                 <button 
                   onClick={() => { setSelectedBooking(null); setOnboardingStatus('idle'); setOnboardMessage(''); }}
                   className="w-8 h-8 rounded-full bg-[rgb(var(--color-void))] flex items-center justify-center text-[rgb(var(--color-text-3))] hover:text-white border border-[rgb(var(--color-border))]"
@@ -404,31 +536,31 @@ export default function AdminDashboardClient({
                 <form onSubmit={handleApprove} className="flex flex-col gap-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-[rgb(var(--color-text-3))]">Name</label>
+                      <label className="text-xs font-bold text-[rgb(var(--color-text-3))]">{t.name}</label>
                       <input type="text" readOnly value={selectedBooking.name} className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-3 py-2 text-sm text-[rgb(var(--color-text-2))] outline-none" />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-[rgb(var(--color-text-3))]">Training Type</label>
+                      <label className="text-xs font-bold text-[rgb(var(--color-text-3))]">{t.trainingType}</label>
                       <input type="text" readOnly value={selectedBooking.trainingType} className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-3 py-2 text-sm text-[rgb(var(--color-text-2))] outline-none" />
                     </div>
                     <div className="flex flex-col gap-1.5 col-span-2">
-                      <label className="text-xs font-bold text-[rgb(var(--color-text-3))]">Email (for login)</label>
+                      <label className="text-xs font-bold text-[rgb(var(--color-text-3))]">{t.emailLogin}</label>
                       <input type="text" readOnly value={selectedBooking.email} className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-3 py-2 text-sm text-[rgb(var(--color-text-2))] outline-none" />
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-2 pt-2 border-t border-[rgb(var(--color-border))]/50 mt-2">
-                    <label className="text-xs font-bold text-[rgb(var(--color-primary))]">Assign Primary Instructor</label>
+                    <label className="text-xs font-bold text-[rgb(var(--color-primary))]">{t.assignInstructor}</label>
                     <select
                       required
                       value={assignedInstructor}
                       onChange={(e) => setAssignedInstructor(e.target.value)}
                       className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] focus:border-[rgb(var(--color-primary))] rounded-xl px-3 py-3 text-sm font-medium text-[rgb(var(--color-text-1))] outline-none transition-colors"
                     >
-                      <option value="" disabled>Select an instructor...</option>
+                      <option value="" disabled>{t.selectInstructor}</option>
                       {instructors.map(ins => (
                         <option key={ins.id} value={ins.id}>
-                          {ins.name} ({ins.studentCount} students currently)
+                          {ins.name} ({ins.studentCount} {t.studentsCurrently})
                         </option>
                       ))}
                     </select>
@@ -446,7 +578,7 @@ export default function AdminDashboardClient({
                       onClick={() => { setSelectedBooking(null); setOnboardingStatus('idle'); setOnboardMessage(''); }}
                       className="flex-1 py-3 bg-[rgb(var(--color-void))] hover:bg-[rgb(var(--color-border))]/40 border border-[rgb(var(--color-border))] text-[rgb(var(--color-text-2))] rounded-xl text-xs font-bold transition-all"
                     >
-                      Cancel
+                      {t.cancel}
                     </button>
                     <button
                       type="submit"
@@ -456,7 +588,7 @@ export default function AdminDashboardClient({
                       {onboardingStatus === 'loading' ? (
                         <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       ) : (
-                        <>Approve & Create Account</>
+                        <>{t.approveCreate}</>
                       )}
                     </button>
                   </div>
