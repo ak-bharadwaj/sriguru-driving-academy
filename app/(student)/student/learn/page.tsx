@@ -33,6 +33,177 @@ import {
 } from 'lucide-react'
 
 // Import Zustand stores
+
+import { useLanguageStore } from '@/store/languageStore'
+
+const PAGE_DICT = {
+  EN: {
+    acqHub: {t.acqHub},
+    academyTitle: "{t.academyTitle}",
+    academyDesc: "{t.academyDesc}",
+    studentCadet: "{t.studentCadet}",
+    level: "LEVEL",
+    practicalTraining: "{t.practicalTraining}",
+    rtoMaterial: "{t.rtoMaterial}",
+    seekingDb: "{t.seekingDb}",
+    dbStalled: "{t.dbStalled}",
+    retryConnection: "{t.retryConnection}",
+    availableTasks: "Available Tasks:",
+    skills: "Skills",
+    resetProgress: "{t.resetProgress}",
+    mastered: "{t.mastered}",
+    xp: "XP",
+    phase: "PHASE:",
+    beginTraining: "{t.beginTraining}",
+    searchTheory: t.searchTheory,
+    searchSigns: t.searchSigns,
+    theoryQA: "{t.theoryQA}",
+    roadSigns: "{t.roadSigns}",
+    noQuestions: "{t.noQuestions}",
+    question: "QUESTION",
+    of: "OF",
+    previous: "{t.previous}",
+    next: "{t.next}",
+    rtoRationale: "{t.rtoRationale}",
+    category: "CATEGORY:",
+    selectAnswer: "{t.selectAnswer}",
+    noSignboards: "{t.noSignboards}",
+    all: "All",
+    signs: "Signs",
+    parking: "Parking",
+    emergencies: "Emergencies",
+    laws: "Laws",
+    rtoValidation: "{t.rtoValidation}",
+    masterPrefix: 'To master "',
+    masterSuffix: '", verify you understand the core regulatory practice:',
+    fullyCompleted: "I have fully completed and understand this module.",
+    needReview: "I need to review instructions again.",
+    excellent: "{t.excellent}",
+    masterySuccess: "{t.masterySuccess}",
+    incorrect: "{t.incorrect}",
+    checkMirror: "{t.checkMirror}",
+    stepByStep: "{t.stepByStep}",
+    mistakeAlert: "{t.mistakeAlert}",
+    safetyWarning: "{t.safetyWarning}",
+    backToSteps: "{t.backToSteps}",
+    tryAgain: "{t.tryAgain}",
+    verifyAnswer: "{t.verifyAnswer}",
+    closeDetails: "{t.closeDetails}",
+    runSimFirst: "{t.runSimFirst}",
+    takeChallenge: "{t.takeChallenge}"
+  },
+  HI: {
+    acqHub: "अधिग्रहण केंद्र",
+    academyTitle: "अकादमी शिक्षण केंद्र",
+    academyDesc: "सिद्धांत अध्ययन और सक्रिय व्यावहारिक ड्राइविंग सिमुलेशन के बीच टॉगल करें।",
+    studentCadet: "छात्र कैडेट:",
+    level: "स्तर",
+    practicalTraining: "व्यावहारिक प्रशिक्षण",
+    rtoMaterial: "RTO परीक्षण सामग्री",
+    seekingDb: "डेटाबेस पथ खोज रहे हैं...",
+    dbStalled: "डेटाबेस कनेक्शन रुका हुआ है",
+    retryConnection: "पुनः प्रयास करें",
+    availableTasks: "उपलब्ध कार्य:",
+    skills: "कौशल",
+    resetProgress: "प्रगति रीसेट करें",
+    mastered: "महारत हासिल",
+    xp: "XP",
+    phase: "चरण:",
+    beginTraining: "प्रशिक्षण शुरू करें",
+    searchTheory: "सिद्धांत प्रश्न खोजें...",
+    searchSigns: "सड़क संकेत खोजें...",
+    theoryQA: "सिद्धांत प्रश्नोत्तर",
+    roadSigns: "सड़क के संकेत",
+    noQuestions: "आपकी खोज से कोई प्रश्न मेल नहीं खाता।",
+    question: "प्रश्न",
+    of: "का",
+    previous: "पिछला",
+    next: "अगला",
+    rtoRationale: "RTO तर्क:",
+    category: "श्रेणी:",
+    selectAnswer: "एक उत्तर चुनें",
+    noSignboards: "आपके चयनित फ़िल्टर से कोई भी साइनबोर्ड मेल উভয় मेल नहीं खाता।",
+    all: "सभी",
+    signs: "संकेत",
+    parking: "पार्किंग",
+    emergencies: "आपात स्थिति",
+    laws: "कानून",
+    rtoValidation: "RTO सत्यापन चुनौती",
+    masterPrefix: '"',
+    masterSuffix: '" में महारत हासिल करने के लिए, सत्यापित करें कि आप मूल नियामक अभ्यास को समझते हैं:',
+    fullyCompleted: "मैंने इस मॉड्यूल को पूरी तरह से पूरा कर लिया है और समझ लिया है।",
+    needReview: "मुझे निर्देशों की फिर से समीक्षा करने की आवश्यकता है।",
+    excellent: "उत्कृष्ट!",
+    masterySuccess: "महारत सत्यापन सफल हुआ। जोड़ा जा रहा है +",
+    incorrect: "ग़लत।",
+    checkMirror: "दर्पण निर्देशों की जाँच करें और पुनः प्रयास करें।",
+    stepByStep: "चरण-दर-चरण निर्देश",
+    mistakeAlert: "गलती चेतावनी:",
+    safetyWarning: "सुरक्षा चेतावनी:",
+    backToSteps: "चरणों पर वापस",
+    tryAgain: "पुनः प्रयास करें",
+    verifyAnswer: "उत्तर सत्यापित करें",
+    closeDetails: "विवरण बंद करें",
+    runSimFirst: "पहले सिम चलाएं",
+    takeChallenge: "चुनौती लें"
+  },
+  TE: {
+    acqHub: "అక్విజిషన్ హబ్",
+    academyTitle: "అకాడమీ లెర్నింగ్ సెంటర్",
+    academyDesc: "థియరీ అధ్యయనాలు మరియు యాక్టివ్ ప్రాక్టికల్ డ్రైవింగ్ సిమ్యులేషన్స్ మధ్య టోగుల్ చేయండి.",
+    studentCadet: "విద్యార్థి క్యాడెట్:",
+    level: "స్థాయి",
+    practicalTraining: "ప్రాక్టికల్ శిక్షణ",
+    rtoMaterial: "RTO పరీక్ష మెటీరియల్",
+    seekingDb: "డేటాబేస్ మార్గాలను వెతుకుతోంది...",
+    dbStalled: "డేటాబేస్ కనెక్షన్ నిలిచిపోయింది",
+    retryConnection: "మళ్లీ ప్రయత్నించండి",
+    availableTasks: "అందుబాటులో ఉన్న పనులు:",
+    skills: "నైపుణ్యాలు",
+    resetProgress: "పురోగతిని రీసెట్ చేయండి",
+    mastered: "ప్రావీణ్యం పొందారు",
+    xp: "XP",
+    phase: "దశ:",
+    beginTraining: "శిక్షణ ప్రారంభించండి",
+    searchTheory: "సిద్ధాంత ప్రశ్నలను శోధించండి...",
+    searchSigns: "రహదారి సంకేతాలను శోధించండి...",
+    theoryQA: "సిద్ధాంతం Q&A",
+    roadSigns: "రహదారి సంకేతాలు",
+    noQuestions: "మీ శోధనకు ఏ ప్రశ్నలు సరిపోలలేదు.",
+    question: "ప్రశ్న",
+    of: "యొక్క",
+    previous: "మునుపటి",
+    next: "తర్వాత",
+    rtoRationale: "RTO హేతుబద్ధత:",
+    category: "వర్గం:",
+    selectAnswer: "సమాధానాన్ని ఎంచుకోండి",
+    noSignboards: "మీరు ఎంచుకున్న ఫిల్టర్‌లకు ఏ సైన్‌బోర్డ్‌లు సరిపోలలేదు.",
+    all: "అన్నీ",
+    signs: "సంకేతాలు",
+    parking: "పార్కింగ్",
+    emergencies: "అత్యవసరాలు",
+    laws: "చట్టాలు",
+    rtoValidation: "RTO ధ్రువీకరణ సవాలు",
+    masterPrefix: '"',
+    masterSuffix: '" లో ప్రావీణ్యం పొందడానికి, మీరు ప్రధాన నియంత్రణ అభ్యాసాన్ని అర్థం చేసుకున్నారని ధృవీకరించండి:',
+    fullyCompleted: "నేను ఈ మాడ్యూల్‌ను పూర్తిగా పూర్తి చేసాను మరియు అర్థం చేసుకున్నాను.",
+    needReview: "నేను సూచనలను మళ్లీ సమీక్షించాల్సిన అవసరం ఉంది.",
+    excellent: "అద్భుతమైన!",
+    masterySuccess: "మాస్టరీ ధృవీకరణ విజయవంతమైంది. జోడిస్తోంది +",
+    incorrect: "తప్పు.",
+    checkMirror: "అద్దం సూచనలను తనిఖీ చేసి, మళ్లీ ప్రయత్నించండి.",
+    stepByStep: "దశల వారీ సూచనలు",
+    mistakeAlert: "పొరపాటు హెచ్చరిక:",
+    safetyWarning: "భద్రతా హెచ్చరిక:",
+    backToSteps: "దశలకు తిరిగి వెళ్ళు",
+    tryAgain: "మళ్ళీ ప్రయత్నించండి",
+    verifyAnswer: "సమాధానాన్ని ధృవీకరించండి",
+    closeDetails: "వివరాలను మూసివేయండి",
+    runSimFirst: "ముందుగా సిమ్ రన్ చేయండి",
+    takeChallenge: "ఛాలెంజ్ తీసుకోండి"
+  }
+}
+
 import { useXPStore } from '@/lib/stores/xp-store'
 
 // Import components
@@ -67,6 +238,9 @@ interface LearningCardData {
 }
 
 export default function StudentLearnPortal() {
+  const { language } = useLanguageStore()
+  const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
+  const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
   // Main tab switcher
   const [activeSection, setActiveSection] = useState<'practical' | 'rto'>('practical')
   
@@ -263,13 +437,13 @@ export default function StudentLearnPortal() {
       localStorage.setItem('completed_skills', JSON.stringify(next))
       addXP(card.xpReward)
       addToast({
-        title: 'Skill Mastered!',
+        title: 'Skill {t.mastered}!',
         description: `Gained +${card.xpReward} XP for mastering.`,
         type: 'xp'
       })
     } else {
       addToast({
-        title: 'Already Mastered',
+        title: 'Already {t.mastered}',
         description: 'You have already collected XP for this skill.',
         type: 'xp'
       })
@@ -307,7 +481,7 @@ export default function StudentLearnPortal() {
   // Filter road signs based on category and search query
   const filteredSigns = useMemo(() => {
     return ROAD_SIGNS_DATA.filter((sign: RoadSignItem) => {
-      const matchCategory = selectedSignCategory === 'All' || sign.category === selectedSignCategory
+      const matchCategory = selectedSignCategory === t.all || sign.category === selectedSignCategory
       const matchSearch = sign.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           sign.meaning.toLowerCase().includes(searchQuery.toLowerCase())
       return matchCategory && matchSearch
@@ -369,10 +543,10 @@ export default function StudentLearnPortal() {
           <div>
             <span className="text-xs font-mono uppercase tracking-widest text-primary font-bold">Acquisition Hub</span>
             <h1 className="text-3xl font-extrabold text-text-1 font-display tracking-tight mt-0.5">
-              Academy Learning Center
+              {t.academyTitle}
             </h1>
             <p className="text-xs text-text-2 mt-1">
-              Toggle between theory studies and active practical driving simulations.
+              {t.academyDesc}
             </p>
           </div>
 
@@ -380,9 +554,9 @@ export default function StudentLearnPortal() {
 
 
             <div className="bg-surface/50 border border-border px-3.5 py-1.5 rounded-full flex items-center gap-2 shadow-xs">
-              <span className="text-[10px] font-mono text-text-3">Student Cadet:</span>
+              <span className="text-[10px] font-mono text-text-3">{t.studentCadet}</span>
               <span className="text-xs font-bold text-accent font-mono">
-                LEVEL {level}
+                {t.level} {level}
               </span>
             </div>
           </div>
@@ -404,7 +578,7 @@ export default function StudentLearnPortal() {
             }`}
           >
             <BookOpen className="w-3.5 h-3.5" />
-            <span>Practical Training</span>
+            <span>{t.practicalTraining}</span>
           </button>
           
           <button
@@ -419,7 +593,7 @@ export default function StudentLearnPortal() {
             }`}
           >
             <FileText className="w-3.5 h-3.5" />
-            <span>RTO Test Material</span>
+            <span>{t.rtoMaterial}</span>
           </button>
         </div>
 
@@ -433,14 +607,14 @@ export default function StudentLearnPortal() {
             {loading ? (
               <div className="flex flex-col items-center justify-center gap-4 py-20">
                 <RotateCcw className="w-10 h-10 text-primary animate-spin" />
-                <h4 className="text-sm font-mono text-text-3">SEEKING DATABASE PATHWAYS...</h4>
+                <h4 className="text-sm font-mono text-text-3">{t.seekingDb}</h4>
               </div>
             ) : error ? (
               <div className="bg-danger/10 border border-danger/20 p-6 rounded-3xl text-center max-w-sm">
-                <h4 className="text-base font-bold text-danger">Database Connection Stalled</h4>
+                <h4 className="text-base font-bold text-danger">{t.dbStalled}</h4>
                 <p className="text-xs text-text-2 mt-2">{error}</p>
                 <button onClick={fetchCards} className="mt-4 px-4 py-2 bg-danger text-white rounded-xl text-xs font-semibold">
-                  Retry Connection
+                  {t.retryConnection}
                 </button>
               </div>
             ) : (
@@ -449,14 +623,14 @@ export default function StudentLearnPortal() {
                 {/* Reset Progress & Header Tools */}
                 <div className="w-full flex justify-between items-center bg-surface border border-border/80 px-4 py-3 rounded-2xl shadow-xs">
                   <span className="text-[11px] font-mono text-text-2">
-                    Available Tasks: <span className="font-bold text-primary">{cards.length} Skills</span>
+                    {t.availableTasks} <span className="font-bold text-primary">{cards.length} {t.skills}</span>
                   </span>
                   {completedCount > 0 && (
                     <button
                       onClick={handleResetProgress}
                       className="text-[10px] font-mono text-danger hover:underline uppercase font-bold tracking-wider"
                     >
-                      Reset progress
+                      {t.resetProgress}
                     </button>
                   )}
                 </div>
@@ -488,7 +662,7 @@ export default function StudentLearnPortal() {
                             {isCompleted ? (
                               <span className="text-[9px] font-bold text-success bg-success/15 border border-success/25 px-2 py-0.5 rounded-full flex items-center gap-0.5">
                                 <Check className="w-2.5 h-2.5" />
-                                Mastered
+                                {t.mastered}
                               </span>
                             ) : (
                               <span className="text-[9px] font-bold text-text-3 font-mono bg-void border border-border px-1.5 py-0.5 rounded-full">
@@ -501,7 +675,7 @@ export default function StudentLearnPortal() {
                         {/* Title and details */}
                         <div className="mt-3 relative z-10 flex-1 flex flex-col justify-end">
                           <span className="text-[9px] font-mono text-text-3 uppercase tracking-wider block">
-                            PHASE: {card.phase}
+                            {t.phase} {card.phase}
                           </span>
                           <h3 className="text-base font-extrabold text-text-1 font-display tracking-tight leading-snug group-hover:text-primary transition-colors mt-0.5">
                             {card.title}
@@ -510,7 +684,7 @@ export default function StudentLearnPortal() {
 
                         {/* Card bottom arrow */}
                         <div className="flex justify-between items-center border-t border-border/40 pt-3 mt-3 w-full text-[10px] font-mono text-text-3 group-hover:text-primary transition-colors">
-                          <span>Begin Training</span>
+                          <span>{t.beginTraining}</span>
                           <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                         </div>
 
@@ -541,7 +715,7 @@ export default function StudentLearnPortal() {
                 <Search className="w-4 h-4 text-text-3 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder={rtoSubTab === 'theory' ? "Search theory questions..." : "Search road signs..."}
+                  placeholder={rtoSubTab === 'theory' ? t.searchTheory : t.searchSigns}
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value)
@@ -552,7 +726,7 @@ export default function StudentLearnPortal() {
                 />
               </div>
 
-              {/* Sub-Tabs: Theory Q&A vs Road Signs */}
+              {/* Sub-Tabs: {t.theoryQA} vs {t.roadSigns} */}
               <div className="flex gap-1.5 bg-void p-1.5 rounded-2xl border border-border/60 w-full md:w-auto shadow-inner">
                 <button
                   onClick={() => {
@@ -565,7 +739,7 @@ export default function StudentLearnPortal() {
                       : 'text-text-3 hover:text-text-1 hover:bg-surface'
                   }`}
                 >
-                  Theory Q&A
+                  {t.theoryQA}
                 </button>
                 <button
                   onClick={() => {
@@ -578,7 +752,7 @@ export default function StudentLearnPortal() {
                       : 'text-text-3 hover:text-text-1 hover:bg-surface'
                   }`}
                 >
-                  Road Signs
+                  {t.roadSigns}
                 </button>
               </div>
 
@@ -590,14 +764,14 @@ export default function StudentLearnPortal() {
                 
                 {filteredQuestions.length === 0 ? (
                   <div className="w-full bg-surface border border-border rounded-2xl p-12 text-center text-text-3">
-                    No questions match your search query.
+                    {t.noQuestions}
                   </div>
                 ) : (
                   <div className="flex flex-col gap-4">
                     {/* Progress & Navigation Header */}
                     <div className="flex justify-between items-center bg-surface border border-border rounded-2xl px-4 py-3 shadow-sm">
                       <span className="text-sm font-bold text-text-2 font-mono">
-                        QUESTION {currentQuestionIndex + 1} <span className="text-text-3">OF {filteredQuestions.length}</span>
+                        {t.question} {currentQuestionIndex + 1} <span className="text-text-3">{t.of} {filteredQuestions.length}</span>
                       </span>
                       <div className="flex gap-2">
                         <button 
@@ -608,7 +782,7 @@ export default function StudentLearnPortal() {
                           disabled={currentQuestionIndex === 0}
                           className="px-4 py-2 rounded-xl text-xs font-bold bg-void border border-border text-text-2 hover:text-text-1 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
-                          PREVIOUS
+                          {t.previous}
                         </button>
                         <button 
                           onClick={() => {
@@ -618,7 +792,7 @@ export default function StudentLearnPortal() {
                           disabled={currentQuestionIndex === filteredQuestions.length - 1}
                           className="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-primary/20 transition-all"
                         >
-                          NEXT
+                          {t.next}
                         </button>
                       </div>
                     </div>
@@ -677,7 +851,7 @@ export default function StudentLearnPortal() {
                                 className="overflow-hidden"
                               >
                                 <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 sm:p-5 mt-5 text-sm text-text-1 leading-relaxed">
-                                  <span className="font-bold text-primary uppercase font-mono tracking-wider block mb-2 text-xs">RTO Rationale:</span>
+                                  <span className="font-bold text-primary uppercase font-mono tracking-wider block mb-2 text-xs">{t.rtoRationale}</span>
                                   {currentQ.explanation}
                                 </div>
                               </motion.div>
@@ -686,8 +860,8 @@ export default function StudentLearnPortal() {
 
                           {/* Category Footer */}
                           <div className="mt-6 flex items-center justify-between border-t border-border/40 pt-4 px-1 text-xs font-mono text-text-3">
-                            <span>CATEGORY: {currentQ.topic}</span>
-                            {!showCurrentAnswer && <span className="text-primary font-bold animate-pulse uppercase">Select an answer</span>}
+                            <span>{t.category} {currentQ.topic}</span>
+                            {!showCurrentAnswer && <span className="text-primary font-bold animate-pulse uppercase">{t.selectAnswer}</span>}
                           </div>
 
                         </div>
@@ -705,7 +879,7 @@ export default function StudentLearnPortal() {
                 
                 {/* Category horizontal filters */}
                 <div className="flex gap-2.5 flex-wrap items-center bg-surface border border-border p-3 rounded-2xl justify-center shadow-sm">
-                  {['All', 'Signs', 'Parking', 'Emergencies', 'Laws'].map((cat) => (
+                  {[t.all, t.signs, t.parking, t.emergencies, t.laws].map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setSelectedSignCategory(cat)}
@@ -723,7 +897,7 @@ export default function StudentLearnPortal() {
                 {/* Grid of Sign Cards */}
                 {filteredSigns.length === 0 ? (
                   <div className="w-full bg-surface border border-border rounded-2xl p-12 text-center text-text-3">
-                    No signboards match your selected filters.
+                    {t.noSignboards}
                   </div>
                 ) : (
                   <div className="flex flex-wrap gap-4 items-center justify-center">
@@ -814,10 +988,10 @@ export default function StudentLearnPortal() {
                         >
                           <div>
                             <span className="text-[9px] font-mono font-bold text-accent bg-accent/10 border border-accent/20 px-2 py-0.5 rounded-full uppercase tracking-wider block w-max mb-3">
-                              RTO Validation Challenge
+                              {t.rtoValidation}
                             </span>
                             <h4 className="text-xs font-extrabold text-text-1 leading-relaxed">
-                              {selectedCard.quizQuestion || `To master "${selectedCard.title}", verify you understand the core regulatory practice:`}
+                              {selectedCard.quizQuestion || `{t.masterPrefix}{selectedCard.title}{t.masterSuffix}`}
                             </h4>
                           </div>
 
@@ -865,7 +1039,7 @@ export default function StudentLearnPortal() {
                             ) : (
                               // Fallback verification
                               <div className="flex flex-col gap-2">
-                                {['I have fully completed and understand this module.', 'I need to review instructions again.'].map((option, idx) => {
+                                {[t.fullyCompleted, t.needReview].map((option, idx) => {
                                   const isSelected = selectedAnswerIndex === idx
                                   let optClass = isSelected ? 'bg-primary/10 border-primary text-primary font-bold' : 'bg-void/40 border-border text-text-2'
                                   return (
@@ -886,12 +1060,12 @@ export default function StudentLearnPortal() {
                           {quizFeedback === 'correct' && (
                             <div className="bg-success/15 border border-success/30 px-3 py-2.5 rounded-xl text-[10px] text-success leading-relaxed flex items-center gap-2">
                               <Sparkles className="w-4 h-4 animate-bounce flex-shrink-0" />
-                              <span><strong>Excellent!</strong> Mastery verification succeeded. Adding +{selectedCard.xpReward} XP.</span>
+                              <span><strong>{t.excellent}</strong> {t.masterySuccess}{selectedCard.xpReward} XP.</span>
                             </div>
                           )}
                           {quizFeedback === 'incorrect' && (
                             <div className="bg-danger/10 border border-danger/25 px-3 py-2.5 rounded-xl text-[10px] text-danger leading-relaxed">
-                              <span><strong>Incorrect.</strong> Check mirror instructions and try again.</span>
+                              <span><strong>{t.incorrect}</strong> {t.checkMirror}</span>
                             </div>
                           )}
                         </motion.div>
@@ -905,7 +1079,7 @@ export default function StudentLearnPortal() {
                         >
                           <div>
                             <h5 className="text-[10px] font-mono text-text-3 uppercase tracking-wider mb-2.5">
-                              Step-By-Step Instructions
+                              {t.stepByStep}
                             </h5>
                             <div className="flex flex-col gap-2">
                               {parsed.steps.map((step, sIdx) => (
@@ -924,14 +1098,14 @@ export default function StudentLearnPortal() {
                             <div className="flex gap-2 items-start text-[10px] leading-relaxed">
                               <AlertTriangle className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
                               <div>
-                                <span className="font-bold text-accent font-mono uppercase tracking-wider">Mistake Alert:</span>{' '}
+                                <span className="font-bold text-accent font-mono uppercase tracking-wider">{t.mistakeAlert}</span>{' '}
                                 <span className="text-text-2">{parsed.commonMistakes}</span>
                               </div>
                             </div>
                             <div className="bg-danger/5 border border-danger/10 px-3 py-2 rounded-xl flex gap-2 items-start text-[10px] leading-relaxed text-text-2">
                               <ShieldAlert className="w-4 h-4 text-danger mt-0.5 flex-shrink-0" />
                               <div>
-                                <span className="font-bold text-danger font-mono uppercase tracking-wider block mb-0.5">Safety Warning:</span>
+                                <span className="font-bold text-danger font-mono uppercase tracking-wider block mb-0.5">{t.safetyWarning}</span>
                                 {parsed.safetyWarning}
                               </div>
                             </div>
@@ -960,7 +1134,7 @@ export default function StudentLearnPortal() {
                             }}
                             className="flex-1 py-3 bg-void border border-border text-text-2 hover:text-text-1 font-bold text-xs uppercase tracking-wider rounded-xl transition-all"
                           >
-                            Back to Steps
+                            {t.backToSteps}
                           </button>
                           
                           {quizFeedback === 'incorrect' ? (
@@ -971,7 +1145,7 @@ export default function StudentLearnPortal() {
                               }}
                               className="flex-1 py-3 bg-accent text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all"
                             >
-                              Try Again
+                              {t.tryAgain}
                             </button>
                           ) : (
                             <button
@@ -1004,7 +1178,7 @@ export default function StudentLearnPortal() {
                                   : 'bg-primary hover:bg-primary/95 text-white'
                               }`}
                             >
-                              Verify Answer
+                              {t.verifyAnswer}
                             </button>
                           )}
                         </motion.div>
@@ -1019,13 +1193,13 @@ export default function StudentLearnPortal() {
                             onClick={() => setSelectedCard(null)}
                             className="flex-1 py-3 bg-void border border-border text-text-2 hover:text-text-1 font-bold text-xs uppercase tracking-wider rounded-xl transition-all"
                           >
-                            Close Details
+                            {t.closeDetails}
                           </button>
                           
                           {isCompleted ? (
                             <div className="flex-1 py-3 bg-success/15 border border-success/35 text-success font-bold text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 shadow-sm">
                               <Check className="w-3.5 h-3.5" />
-                              <span>Mastered</span>
+                              <span>{t.mastered}</span>
                             </div>
                           ) : hasSim && !simCompleted ? (
                             <button
@@ -1034,14 +1208,14 @@ export default function StudentLearnPortal() {
                               className="flex-1 py-3 bg-border text-text-3 font-bold text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 cursor-not-allowed opacity-75"
                             >
                               <Play className="w-3 h-3 fill-text-3" />
-                              <span>Run Sim First</span>
+                              <span>{t.runSimFirst}</span>
                             </button>
                           ) : (
                             <button
                               onClick={() => setShowQuiz(true)}
                               className="flex-1 py-3 bg-primary hover:bg-primary/95 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-1.5"
                             >
-                              <span>Take Challenge</span>
+                              <span>{t.takeChallenge}</span>
                               <ArrowRight className="w-3.5 h-3.5" />
                             </button>
                           )}

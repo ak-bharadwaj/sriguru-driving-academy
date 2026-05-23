@@ -18,7 +18,86 @@ import {
   RotateCcw,
   TrendingUp
 } from 'lucide-react'
-import { useRTOStore } from '@/lib/stores/rto-store'
+import { useRTOStore } from '@/lib/stores/rto-store'\nimport { useLanguageStore } from '@/store/languageStore'
+
+const PAGE_DICT = {
+  EN: {
+    learningVectors: '{t.learningVectors}',
+    curriculumRoadmap: '{t.curriculumRoadmap}',
+    visualCoordinates: '{t.visualCoordinates}',
+    currentZone: 'CURRENT ZONE:',
+    studentResolution: 'Student RESOLUTION',
+    overallCompletion: '{t.overallCompletion}',
+    estimatedCompletion: '3 Weeks remaining (based on 3 sessions/week)',
+    progressRatio: 'Progress ratio masteries',
+    coachingFocus: '{t.coachingFocus}',
+    criticalWeakMetrics: '{t.criticalWeakMetrics}',
+    warningSignsMastery: '{t.warningSignsMastery}',
+    accuracyScored: '{t.accuracyScored}',
+    practiceNow: 'Practice Now',
+    moduleSuffix: 'Module',
+    failedTimesPre: 'Failed',
+    failedTimesPost: 'times inside practice sheets',
+    milestone: 'MILESTONE',
+    observationChecklist: '{t.observationChecklist}',
+    check1: '{t.check1}',
+    check2: '{t.check2}',
+    check3: '{t.check3}',
+    cancel: 'Cancel',
+    continueCourse: 'Continue Course',
+  },
+  HI: {
+    learningVectors: 'सीखने के वेक्टर',
+    curriculumRoadmap: 'पाठ्यक्रम रोडमैप',
+    visualCoordinates: 'आपके शारीरिक और सैद्धांतिक प्रगति लूप का प्रतिनिधित्व करने वाला दृश्य समन्वय पथ।',
+    currentZone: 'वर्तमान क्षेत्र:',
+    studentResolution: 'छात्र संकल्प',
+    overallCompletion: 'समग्र पाठ्यक्रम मील का पत्थर पूरा होना',
+    estimatedCompletion: '3 सप्ताह शेष (3 सत्र/सप्ताह के आधार पर)',
+    progressRatio: 'प्रगति अनुपात महारत',
+    coachingFocus: 'कोचिंग फोकस बोर्ड',
+    criticalWeakMetrics: 'RTO संकेत अभ्यास रन के अंदर महत्वपूर्ण कमजोर मेट्रिक्स मिले',
+    warningSignsMastery: 'चेतावनी संकेत महारत',
+    accuracyScored: 'समयबद्ध अभ्यास रन के दौरान 56% सटीकता प्राप्त की',
+    practiceNow: 'अभी अभ्यास करें',
+    moduleSuffix: 'मॉड्यूल',
+    failedTimesPre: '',
+    failedTimesPost: 'बार अभ्यास शीट के अंदर विफल रहे',
+    milestone: 'मील का पत्थर',
+    observationChecklist: 'अवलोकन चेकलिस्ट:',
+    check1: '✓ रियर व्यू मिरर वैक्टर समायोजित करें',
+    check2: '✓ सीटबेल्ट हार्नेस एंकर लॉक करें',
+    check3: '✓ इग्निशन स्टार्टर स्विच मान्य करें',
+    cancel: 'रद्द करें',
+    continueCourse: 'कोर्स जारी रखें',
+  },
+  TE: {
+    learningVectors: 'లెర్నింగ్ వెక్టార్స్',
+    curriculumRoadmap: 'కరికులం రోడ్‌మ్యాప్',
+    visualCoordinates: 'మీ శారీరక మరియు సైద్ధాంతిక పురోగతి లూప్‌లను సూచించే దృశ్య సమన్వయ మార్గం.',
+    currentZone: 'ప్రస్తుత జోన్:',
+    studentResolution: 'విద్యార్థి తీర్మానం',
+    overallCompletion: 'మొత్తం కరికులం మైలురాయి పూర్తి',
+    estimatedCompletion: '3 వారాలు మిగిలి ఉన్నాయి (వారానికి 3 సెషన్ల ఆధారంగా)',
+    progressRatio: 'ప్రోగ్రెస్ రేషియో మాస్టరీస్',
+    coachingFocus: 'కోచింగ్ ఫోకస్ బోర్డ్',
+    criticalWeakMetrics: 'RTO సంకేతాల ప్రాక్టీస్ రన్‌లలో క్లిష్టమైన బలహీన కొలమానాలు కనుగొనబడ్డాయి',
+    warningSignsMastery: 'హెచ్చరిక సంకేతాల మాస్టరీ',
+    accuracyScored: 'సమయబద్ధమైన ప్రాక్టీస్ రన్‌లలో 56% ఖచ్చితత్వం సాధించబడింది',
+    practiceNow: 'ఇప్పుడే ప్రాక్టీస్ చేయండి',
+    moduleSuffix: 'మాడ్యూల్',
+    failedTimesPre: 'ప్రాక్టీస్ షీట్‌లలో',
+    failedTimesPost: 'సార్లు విఫలమయ్యారు',
+    milestone: 'మైలురాయి',
+    observationChecklist: 'పరిశీలన చెక్‌లిస్ట్:',
+    check1: '✓ రియర్ వ్యూ మిర్రర్ వెక్టార్‌లను సర్దుబాటు చేయండి',
+    check2: '✓ సీట్‌బెల్ట్ హార్నెస్ యాంకర్‌లను లాక్ చేయండి',
+    check3: '✓ ఇగ్నిషన్ స్టార్టర్ స్విచ్‌లను ధృవీకరించండి',
+    cancel: 'రద్దు చేయండి',
+    continueCourse: 'కోర్సును కొనసాగించండి',
+  }
+}
+
 
 interface Milestone {
   id: string
@@ -64,6 +143,9 @@ const PHASE_MAP: Record<string, { id: number, name: string }> = {
 
 export default function StudentLearningRoadmap() {
   const { weakTopics, practiceProgress } = useRTOStore()
+  const { language } = useLanguageStore()
+  const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
+  const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
  
   // Manage node progress states (Normally resolved via Zustand lessons completion, mock here for clean visual mapping)
   // Milestone 1, 2, 3: Completed
@@ -123,7 +205,7 @@ export default function StudentLearningRoadmap() {
   // Top overall stats calculation
   const totalMilestones = milestones.length
   const completedCount = completedIds.length
-  const estimatedCompletion = "3 Weeks remaining (based on 3 sessions/week)"
+  const estimatedCompletion = t.estimatedCompletion
 
   // Unlock validation details
   const phase1Nodes = milestones.filter(m => m.phase === 1)
@@ -183,18 +265,18 @@ export default function StudentLearningRoadmap() {
         {/* Hub Header */}
         <header className="border-b border-border pb-4 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <span className="text-xs font-mono uppercase tracking-widest text-primary">LEARNING VECTORS</span>
+            <span className="text-xs font-mono uppercase tracking-widest text-primary">{t.learningVectors}</span>
             <h1 className="text-3xl font-extrabold text-text-1 font-display tracking-tight mt-0.5 uppercase">
-              Curriculum Roadmap
+              {t.curriculumRoadmap}
             </h1>
             <p className="text-xs text-text-2 mt-1">
-              Visual coordinates path representing your physical and theoretical progress loops.
+              {t.visualCoordinates}
             </p>
           </div>
 
           <div className="flex gap-2">
             <span className="text-[10px] font-mono bg-white/[0.03] border border-border px-3.5 py-1.5 rounded-full text-accent font-bold uppercase">
-              CURRENT ZONE: {currentPhaseZone}
+              {t.currentZone} {currentPhaseZone}
             </span>
           </div>
         </header>
@@ -202,8 +284,8 @@ export default function StudentLearningRoadmap() {
         {/* Overall progress box */}
         <div className="bg-surface border border-border p-5 rounded-3xl grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
           <div className="text-left">
-            <span className="text-[9px] font-mono text-text-3 uppercase tracking-wider block">Student RESOLUTION</span>
-            <h4 className="text-sm font-bold text-text-1 uppercase font-display mt-1">Overall Curriculum Milestone Completion</h4>
+            <span className="text-[9px] font-mono text-text-3 uppercase tracking-wider block">{t.studentResolution}</span>
+            <h4 className="text-sm font-bold text-text-1 uppercase font-display mt-1">{t.overallCompletion}</h4>
             <p className="text-xs text-text-2 font-mono mt-0.5">{estimatedCompletion}</p>
           </div>
 
@@ -219,7 +301,7 @@ export default function StudentLearningRoadmap() {
                   style={{ width: `${(completedCount / totalMilestones) * 100}%` }}
                 />
               </div>
-              <span className="text-[9px] font-mono text-text-3 mt-1 block text-right">Progress ratio masteries</span>
+              <span className="text-[9px] font-mono text-text-3 mt-1 block text-right">{t.progressRatio}</span>
             </div>
           </div>
         </div>
@@ -343,8 +425,8 @@ export default function StudentLearningRoadmap() {
             <div className="flex items-center gap-2 border-b border-border/40 pb-2">
               <AlertCircle className="w-5 h-5 text-accent animate-pulse" />
               <div>
-                <h4 className="text-sm font-bold text-text-1 uppercase font-display leading-tight">Coaching Focus Board</h4>
-                <p className="text-[9px] font-mono text-text-3 uppercase mt-0.5">Critical weak metrics spotted inside RTO signs practice runs</p>
+                <h4 className="text-sm font-bold text-text-1 uppercase font-display leading-tight">{t.coachingFocus}</h4>
+                <p className="text-[9px] font-mono text-text-3 uppercase mt-0.5">{t.criticalWeakMetrics}</p>
               </div>
             </div>
 
@@ -353,28 +435,28 @@ export default function StudentLearningRoadmap() {
                 // Fallback weak topics in case the initial seed wasn't failed yet
                 <div className="bg-surface border border-border p-4 rounded-xl flex justify-between items-center">
                   <div className="flex flex-col">
-                    <span className="text-xs font-bold text-text-1 font-mono">Warning Signs Mastery</span>
-                    <span className="text-[9px] text-text-3 font-mono mt-1">Accuracy scored 56% during timed practice runs</span>
+                    <span className="text-xs font-bold text-text-1 font-mono">{t.warningSignsMastery}</span>
+                    <span className="text-[9px] text-text-3 font-mono mt-1">{t.accuracyScored}</span>
                   </div>
                   <button
                     onClick={() => window.location.href = '/rto'}
                     className="px-3.5 py-1.5 bg-accent hover:bg-accent/90 text-void font-bold text-[9px] font-mono rounded-lg transition-all duration-200"
                   >
-                    Practice Now
+                    {t.practiceNow}
                   </button>
                 </div>
               ) : (
                 Object.entries(weakTopics).map(([topic, count]) => (
                   <div key={topic} className="bg-surface border border-border p-4 rounded-xl flex justify-between items-center">
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold text-text-1 font-mono uppercase">{topic} Module</span>
-                      <span className="text-[9px] text-text-3 font-mono mt-1">Failed {count} times inside practice sheets</span>
+                      <span className="text-xs font-bold text-text-1 font-mono uppercase">{topic} {t.moduleSuffix}</span>
+                      <span className="text-[9px] text-text-3 font-mono mt-1">{t.failedTimesPre} {count} {t.failedTimesPost}</span>
                     </div>
                     <button
                       onClick={() => window.location.href = '/rto'}
                       className="px-3.5 py-1.5 bg-accent hover:bg-accent/90 text-void font-bold text-[9px] font-mono rounded-lg transition-all duration-200"
                     >
-                      Practice Now
+                      {t.practiceNow}
                     </button>
                   </div>
                 ))
@@ -408,7 +490,7 @@ export default function StudentLearningRoadmap() {
               <div className="flex justify-between items-start">
                 <div>
                   <span className="text-[9px] font-mono text-primary uppercase font-bold tracking-wider">
-                    {selectedMilestone.phaseName} · MILESTONE {selectedMilestone.id}
+                    {selectedMilestone.phaseName} · {t.milestone} {selectedMilestone.id}
                   </span>
                   <h3 className="text-xl font-extrabold text-text-1 font-display mt-0.5 uppercase">
                     {selectedMilestone.name}
@@ -427,11 +509,11 @@ export default function StudentLearningRoadmap() {
               </p>
 
               <div className="bg-void/60 border border-border p-4 rounded-xl my-4 text-xs font-mono">
-                <span className="text-[9px] text-text-3 uppercase tracking-wider block">OBSERVATION CHECKLIST:</span>
+                <span className="text-[9px] text-text-3 uppercase tracking-wider block">{t.observationChecklist}</span>
                 <p className="text-text-2 mt-1 leading-relaxed">
-                  ✓ Adjust rear view mirror vectors<br />
-                  ✓ Lock seatbelt harness anchors<br />
-                  ✓ Validate ignition starter switches
+                  {t.check1}<br />
+                  {t.check2}<br />
+                  {t.check3}
                 </p>
               </div>
 
@@ -440,14 +522,14 @@ export default function StudentLearningRoadmap() {
                   onClick={() => setSelectedMilestone(null)}
                   className="flex-1 py-3 bg-void hover:bg-white/[0.02] border border-border text-text-2 font-bold text-xs rounded-xl transition-all duration-200"
                 >
-                  Cancel
+                  {t.cancel}
                 </button>
                 <button
                   onClick={() => window.location.href = '/learn'}
                   className="flex-1 py-3 bg-primary hover:bg-primary/95 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1 shadow-lg shadow-primary/10 transition-all duration-200"
                 >
                   <Play className="w-3.5 h-3.5" />
-                  Continue Course
+                  {t.continueCourse}
                 </button>
               </div>
 

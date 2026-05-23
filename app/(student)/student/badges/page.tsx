@@ -19,12 +19,60 @@ import {
 
 // Import Zustand stores
 import { useXPStore } from '@/lib/stores/xp-store'
+import { useLanguageStore } from '@/store/languageStore'
+
+const PAGE_DICT = {
+  EN: {
+    dashboard: '{t.dashboard}',
+    title: '{t.title}',
+    desc: '{t.desc}',
+    progress: '{t.progress}',
+    earned: 'Earned',
+    nextProgress: '{t.nextProgress}',
+    xp: 'XP',
+    locked: '{t.locked}',
+    achieved: '{t.achieved}',
+    rarity: '{t.rarity}',
+    unlocked: 'Unlocked:'
+  },
+  HI: {
+    dashboard: 'गेमिफिकेशन डैशबोर्ड',
+    title: 'उपलब्धि बैज',
+    desc: 'ड्राइविंग कौशल में महारत हासिल करके, थ्योरी परीक्षा पास करके और सही उपस्थिति बनाए रखकर प्रतिष्ठित बैज एकत्र करें।',
+    progress: 'छात्र की प्रगति',
+    earned: 'अर्जित',
+    nextProgress: 'अगले बैज की प्रगति',
+    xp: 'एक्सपी',
+    locked: 'लॉक की गई स्थिति',
+    achieved: 'प्राप्त स्थिति',
+    rarity: 'दुर्लभता वर्ग',
+    unlocked: 'अनलॉक किया गया:'
+  },
+  TE: {
+    dashboard: 'గేమిఫికేషన్ డాష్‌బోర్డ్',
+    title: 'సాధన బ్యాడ్జీలు',
+    desc: 'డ్రైవింగ్ నైపుణ్యాలను సాధించడం ద్వారా, థియరీ పరీక్షలను ఉత్తీర్ణత సాధించడం ద్వారా మరియు సరైన హాజరును కొనసాగించడం ద్వారా ప్రతిష్టాత్మక బ్యాడ్జీలను సేకరించండి.',
+    progress: 'విద్యార్థి పురోగతి',
+    earned: 'సంపాదించారు',
+    nextProgress: 'తదుపరి బ్యాడ్జ్ పురోగతి',
+    xp: 'ఎక్స్‌పీ',
+    locked: 'లాక్ చేయబడిన స్థితి',
+    achieved: 'సాధించిన స్థితి',
+    rarity: 'అరుదైన తరగతి',
+    unlocked: 'అన్‌లాక్ చేయబడింది:'
+  }
+}
+
 
 const ICON_MAP: Record<string, React.ElementType> = {
   Award, Mountain, BookOpen, Moon, CalendarCheck, Car, Route, Zap, ShieldCheck, Star
 }
 
 export default function BadgesPage() {
+  const { language } = useLanguageStore()
+  const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
+  const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
+
   const [selectedBadge, setSelectedBadge] = useState<any>(null)
   const [earnedBadges, setEarnedBadges] = useState<any[]>([])
   const [lockedBadges, setLockedBadges] = useState<any[]>([])
@@ -67,19 +115,19 @@ export default function BadgesPage() {
       <div className="max-w-6xl mx-auto px-6 pt-32 md:pt-40">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
           <div>
-            <span className="text-xs font-mono uppercase tracking-widest text-accent">Gamification Dashboard</span>
+            <span className="text-xs font-mono uppercase tracking-widest text-accent">{t.dashboard}</span>
             <h1 className="text-4xl font-extrabold text-text-1 font-display tracking-tight mt-1">
-              Achievement Badges
+              {t.title}
             </h1>
             <p className="text-sm text-text-2 mt-2 max-w-xl font-body">
-              Collect prestigious badges by mastering driving skills, acing theory exams, and maintaining perfect attendance.
+              {t.desc}
             </p>
           </div>
 
           <div className="flex flex-col items-end gap-2 bg-surface border border-border p-5 rounded-2xl min-w-[280px]">
             <div className="flex justify-between w-full text-xs font-mono text-text-3">
-              <span>Student Progress</span>
-              <span className="text-accent font-bold">{earnedCount} / {totalCount} Earned</span>
+              <span>{t.progress}</span>
+              <span className="text-accent font-bold">{earnedCount} / {totalCount} {t.earned}</span>
             </div>
             <div className="w-full h-3 bg-void rounded-full overflow-hidden border border-border/80 mt-1">
               <motion.div 
@@ -90,8 +138,8 @@ export default function BadgesPage() {
               />
             </div>
             <div className="flex justify-between w-full text-[10px] text-text-2 mt-1">
-              <span>Next Badge Progress</span>
-              <span>{progress.xp} / {progress.nextBadgeXp} XP</span>
+              <span>{t.nextProgress}</span>
+              <span>{progress.xp} / {progress.nextBadgeXp} {t.xp}</span>
             </div>
           </div>
         </header>
@@ -149,7 +197,7 @@ export default function BadgesPage() {
 
                 {isEarned && badge.unlockedAt && (
                   <div className="mt-4 text-[9px] text-text-3 font-mono bg-void border border-border px-2 py-1 rounded">
-                    Unlocked: {new Date(badge.unlockedAt).toLocaleDateString()}
+                    {t.unlocked} {new Date(badge.unlockedAt).toLocaleDateString()}
                   </div>
                 )}
               </motion.div>
@@ -206,7 +254,7 @@ export default function BadgesPage() {
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <ShieldCheck className={`w-4 h-4 ${earnedBadgeIds.includes(selectedBadge.id) ? 'text-success' : 'text-text-3'}`} />
                   <span className="text-xs font-mono uppercase tracking-widest text-text-3">
-                    {earnedBadgeIds.includes(selectedBadge.id) ? 'Achieved Status' : 'Locked Status'}
+                    {earnedBadgeIds.includes(selectedBadge.id) ? '{t.achieved}' : '{t.locked}'}
                   </span>
                 </div>
 
@@ -219,7 +267,7 @@ export default function BadgesPage() {
                 </p>
 
                 <div className="w-full bg-void border border-border rounded-xl p-4 flex justify-between items-center">
-                  <span className="text-xs font-mono text-text-3 uppercase tracking-wider">Rarity Class</span>
+                  <span className="text-xs font-mono text-text-3 uppercase tracking-wider">{t.rarity}</span>
                   <div className="flex items-center gap-1.5">
                     <Star className={`w-3.5 h-3.5 ${
                       selectedBadge.rarity === 'Legendary' ? 'text-primary fill-primary' : 

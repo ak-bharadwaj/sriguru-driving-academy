@@ -23,11 +23,153 @@ import { SignCard } from '@/components/student/SignCard'
 import { useXPStore } from '@/lib/stores/xp-store'
 import { useRTOStore } from '@/lib/stores/rto-store'
 
-import { RoadSignItem, QuizQuestionItem, ROAD_SIGNS_DATA, QUIZ_QUESTIONS } from '@/lib/data/rto-data'
+import { RoadSignItem, QuizQuestionItem, ROAD_SIGNS_DATA, QUIZ_QUESTIONS } from '@/lib/data/rto-data'\nimport { useLanguageStore } from '@/store/languageStore'
+
+const PAGE_DICT = {
+  EN: {
+    dashboardTitle: '{t.dashboardTitle}',
+    learningCenter: 'RTO Learning Center',
+    learningDesc: '{t.learningDesc}',
+    signboardsGrid: 'Signboards Grid',
+    flashcards: '3D Flashcards',
+    mockExam: 'RTO Mock Exam',
+    noSigns: '{t.noSigns}',
+    noSignsDesc: '{t.noSignsDesc}',
+    conceptFlashcards: 'Concept Flashcards',
+    reviewRules: '{t.reviewRules}',
+    flashcardHint: '{t.flashcardHint}',
+    forget: 'FORGET',
+    mastered: 'MASTERED',
+    conceptCard: '{t.conceptCard}',
+    zebraLoop: '{t.zebraLoop}',
+    clickToFlip: 'Click to Flip',
+    rtoRules: '{t.rtoRules}',
+    xpLog: '{t.xpLog}',
+    conceptMeaning: '{t.conceptMeaning}',
+    safetySteps: '{t.safetySteps}',
+    swipeHint: '{t.swipeHint}',
+    flip: 'Flip',
+    question: 'Question',
+    of: 'of',
+    remaining: 's remaining',
+    concept: 'Concept',
+    regulationCode: '{t.regulationCode}',
+    spiderDashboard: '{t.spiderDashboard}',
+    assessmentLog: 'Mock RTO Assessment Log',
+    totalAccuracy: 'Total Accuracy',
+    correctSigns: 'Correct Signs',
+    dashboardInsight: '{t.dashboardInsight}',
+    insightDesc: '{t.insightDesc}',
+    retakeExam: 'Retake Exam',
+    studyMaterials: 'Study Materials',
+    categories: {
+      'Signs': 'Signs',
+      'Signals': 'Signals',
+      'Rules': 'Rules',
+      'Parking': 'Parking',
+      'Emergencies': 'Emergencies',
+      'Laws': 'Laws'
+    }
+  },
+  HI: {
+    dashboardTitle: 'आरटीओ सैद्धांतिक डैशबोर्ड',
+    learningCenter: 'आरटीओ लर्निंग सेंटर',
+    learningDesc: 'पूर्ण सुरक्षा चौकियों को अनलॉक करने के लिए अनिवार्य संकेत, सिग्नल स्थिति और क्षेत्रीय कानूनों में महारत हासिल करें।',
+    signboardsGrid: 'साइनबोर्ड ग्रिड',
+    flashcards: '3D फ्लैशकार्ड',
+    mockExam: 'आरटीओ मॉक परीक्षा',
+    noSigns: 'कोई संकेत नहीं मिला',
+    noSignsDesc: 'इस श्रेणी के लिए अभी तक कोई संकेत उपलब्ध नहीं हैं।',
+    conceptFlashcards: 'अवधारणा फ्लैशकार्ड',
+    reviewRules: 'सक्रिय सड़क नियमों की समीक्षा करें',
+    flashcardHint: 'पलटने के लिए टैप करें, पॉइंटर वेलोसिटी के साथ लेफ्ट (भूल गए) या राइट (महारत हासिल) स्वाइप करें।',
+    forget: 'भूल गए',
+    mastered: 'महारत हासिल',
+    conceptCard: 'अवधारणा कार्ड',
+    zebraLoop: 'ज़ेबरा लूप',
+    clickToFlip: 'पलटने के लिए क्लिक करें',
+    rtoRules: 'आरटीओ ड्राइविंग नियम',
+    xpLog: '+5 XP लॉग',
+    conceptMeaning: 'अवधारणा का अर्थ',
+    safetySteps: 'छात्र सुरक्षा कदम',
+    swipeHint: 'बाएं स्वाइप करें (भूल गए) | दाएं स्वाइप करें (महारत हासिल)',
+    flip: 'पलटें',
+    question: 'प्रश्न',
+    of: 'का',
+    remaining: 'सेकंड शेष',
+    concept: 'अवधारणा',
+    regulationCode: 'यातायात विनियमन कोड',
+    spiderDashboard: 'स्पाइडर सटीकता डैशबोर्ड',
+    assessmentLog: 'मॉक आरटीओ मूल्यांकन लॉग',
+    totalAccuracy: 'कुल सटीकता',
+    correctSigns: 'सही संकेत',
+    dashboardInsight: 'आरटीओ डैशबोर्ड इनसाइट',
+    insightDesc: 'आपकी प्रतिक्रिया मैट्रिक मानक संकेतों और नियमों पर उच्च महारत का सुझाव देती है, जिसमें "कानून" विषयों के तहत मामूली सड़क संकेत अंतराल चिह्नित हैं। अवधारणा फ्लैशकार्ड की समीक्षा करने का सुझाव दिया गया है।',
+    retakeExam: 'फिर से परीक्षा दें',
+    studyMaterials: 'अध्ययन सामग्री',
+    categories: {
+      'Signs': 'संकेत',
+      'Signals': 'सिग्नल',
+      'Rules': 'नियम',
+      'Parking': 'पार्किंग',
+      'Emergencies': 'आपात स्थिति',
+      'Laws': 'कानून'
+    }
+  },
+  TE: {
+    dashboardTitle: 'RTO సైద్ధాంతిక డాష్‌బోర్డ్',
+    learningCenter: 'RTO లెర్నింగ్ సెంటర్',
+    learningDesc: 'పూర్తి భద్రతా తనిఖీ కేంద్రాలను అన్‌లాక్ చేయడానికి తప్పనిసరి సంకేతాలు, సిగ్నల్ స్థితులు మరియు ప్రాంతీయ చట్టాలపై పట్టు సాధించండి.',
+    signboardsGrid: 'సైన్‌బోర్డ్స్ గ్రిడ్',
+    flashcards: '3D ఫ్లాష్‌కార్డ్‌లు',
+    mockExam: 'RTO మాక్ పరీక్ష',
+    noSigns: 'ఎలాంటి సంకేతాలు కనుగొనబడలేదు',
+    noSignsDesc: 'ఈ వర్గానికి ఇంకా ఎలాంటి సంకేతాలు అందుబాటులో లేవు.',
+    conceptFlashcards: 'కాన్సెప్ట్ ఫ్లాష్‌కార్డ్‌లు',
+    reviewRules: 'యాక్టివ్ రోడ్ రూల్స్‌ను సమీక్షించండి',
+    flashcardHint: 'ఫ్లిప్ చేయడానికి నొక్కండి, పాయింటర్ వేగంతో ఎడమ (మర్చిపో) లేదా కుడి (మాస్టర్) స్వైప్ చేయండి.',
+    forget: 'మర్చిపో',
+    mastered: 'మాస్టర్డ్',
+    conceptCard: 'కాన్సెప్ట్ కార్డ్',
+    zebraLoop: 'జీబ్రా లూప్',
+    clickToFlip: 'ఫ్లిప్ చేయడానికి క్లిక్ చేయండి',
+    rtoRules: 'RTO డ్రైవింగ్ రూల్స్',
+    xpLog: '+5 XP లాగ్',
+    conceptMeaning: 'కాన్సెప్ట్ అర్థం',
+    safetySteps: 'విద్యార్థి భద్రతా దశలు',
+    swipeHint: 'ఎడమకు స్వైప్ చేయండి (మర్చిపోయాను) | కుడికి స్వైప్ చేయండి (మాస్టర్డ్)',
+    flip: 'ఫ్లిప్',
+    question: 'ప్రశ్న',
+    of: '/',
+    remaining: 'సెకన్లు మిగిలి ఉన్నాయి',
+    concept: 'కాన్సెప్ట్',
+    regulationCode: 'ట్రాఫిక్ రెగ్యులేషన్ కోడ్',
+    spiderDashboard: 'స్పైడర్ అక్యూరసీ డాష్‌బోర్డ్',
+    assessmentLog: 'మాక్ RTO అసెస్‌మెంట్ లాగ్',
+    totalAccuracy: 'మొత్తం ఖచ్చితత్వం',
+    correctSigns: 'సరైన సంకేతాలు',
+    dashboardInsight: 'RTO డాష్‌బోర్డ్ ఇన్‌సైట్',
+    insightDesc: 'మీ ప్రతిస్పందన మ్యాట్రిక్‌లు ప్రామాణిక సంకేతాలు మరియు నిబంధనలపై అధిక పట్టును సూచిస్తున్నాయి, "చట్టాలు" అంశాల క్రింద చిన్న రోడ్ సైన్ అంతరాలు గుర్తించబడ్డాయి. కాన్సెప్ట్ ఫ్లాష్‌కార్డ్‌లను సమీక్షించడం సూచించబడింది.',
+    retakeExam: 'మళ్లీ పరీక్ష రాయండి',
+    studyMaterials: 'స్టడీ మెటీరియల్స్',
+    categories: {
+      'Signs': 'సంకేతాలు',
+      'Signals': 'సిగ్నల్స్',
+      'Rules': 'నిబంధనలు',
+      'Parking': 'పార్కింగ్',
+      'Emergencies': 'అత్యవసరాలు',
+      'Laws': 'చట్టాలు'
+    }
+  }
+}
+
 
 const CATEGORIES = ['Signs', 'Signals', 'Rules', 'Parking', 'Emergencies', 'Laws']
 
 export default function RTOLearningCenter() {
+  const { language } = useLanguageStore()
+  const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
+  const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
   const [activeCategory, setActiveCategory] = useState('Signs')
   const [activeMode, setActiveMode] = useState<'learn' | 'quiz' | 'flashcard'>('learn')
 
@@ -342,12 +484,12 @@ export default function RTOLearningCenter() {
         {/* Header Title Section */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
           <div>
-            <span className="text-xs font-mono uppercase tracking-widest text-accent">RTO Theoretical Dashboard</span>
+            <span className="text-xs font-mono uppercase tracking-widest text-accent">{t.dashboardTitle}</span>
             <h1 className="text-4xl font-extrabold text-text-1 font-display tracking-tight mt-1">
               RTO Learning Center
             </h1>
             <p className="text-sm text-text-2 mt-2 max-w-xl font-body">
-              Master mandatory signs, signal states, and regional laws to unlock complete safety checkpoints.
+              {t.learningDesc}
             </p>
           </div>
 
@@ -441,8 +583,8 @@ export default function RTOLearningCenter() {
                 ) : (
                   <div className="col-span-full py-20 flex flex-col items-center justify-center text-center">
                     <BookOpen className="w-12 h-12 text-text-3 opacity-30 animate-pulse" />
-                    <h4 className="text-lg font-bold mt-4 text-text-2">No Signs Found</h4>
-                    <p className="text-xs text-text-3 max-w-xs mt-1">There are no signs available for this category yet.</p>
+                    <h4 className="text-lg font-bold mt-4 text-text-2">{t.noSigns}</h4>
+                    <p className="text-xs text-text-3 max-w-xs mt-1">{t.noSignsDesc}</p>
                   </div>
                 )}
               </motion.div>
@@ -456,9 +598,9 @@ export default function RTOLearningCenter() {
         {activeMode === 'flashcard' && (
           <div className="mt-12 flex flex-col items-center gap-8">
             <div className="text-center">
-              <span className="text-xs font-mono uppercase tracking-widest text-text-3">Concept Flashcards</span>
-              <h3 className="text-xl font-extrabold text-text-1 font-display mt-1">Review Active Road Rules</h3>
-              <p className="text-xs text-text-2 mt-1">Tap to flip, swipe Left (forget) or Right (master) with pointer velocity.</p>
+              <span className="text-xs font-mono uppercase tracking-widest text-text-3">{t.conceptFlashcards}</span>
+              <h3 className="text-xl font-extrabold text-text-1 font-display mt-1">{t.reviewRules}</h3>
+              <p className="text-xs text-text-2 mt-1">{t.flashcardHint}</p>
             </div>
 
             {/* 3D perspective flip container */}
@@ -512,8 +654,8 @@ export default function RTOLearningCenter() {
                     style={{ backfaceVisibility: 'hidden' }}
                   >
                     <div className="flex justify-between w-full text-xs font-mono text-text-3">
-                      <span>Concept Card {currentFlashIdx + 1}/{ROAD_SIGNS_DATA.length}</span>
-                      <span className="uppercase text-primary font-bold">Zebra Loop</span>
+                      <span>{t.conceptCard} {currentFlashIdx + 1}/{ROAD_SIGNS_DATA.length}</span>
+                      <span className="uppercase text-primary font-bold">{t.zebraLoop}</span>
                     </div>
 
                     <div className="w-[140px] h-[140px] flex items-center justify-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.3)] relative">
@@ -545,7 +687,7 @@ export default function RTOLearningCenter() {
                     </div>
 
                     <div className="text-center">
-                      <span className="text-[10px] text-text-3 font-mono uppercase tracking-widest">Click to Flip</span>
+                      <span className="text-[10px] text-text-3 font-mono uppercase tracking-widest">{t.clickToFlip}</span>
                       <h4 className="text-lg font-bold text-text-1 font-display tracking-tight mt-1">
                         {ROAD_SIGNS_DATA[currentFlashIdx].name}
                       </h4>
@@ -561,17 +703,17 @@ export default function RTOLearningCenter() {
                     }}
                   >
                     <div className="flex justify-between w-full text-xs font-mono text-text-3 border-b border-border pb-3">
-                      <span>RTO DRIVING RULES</span>
-                      <span className="text-accent font-bold">+5 XP LOG</span>
+                      <span>{t.rtoRules}</span>
+                      <span className="text-accent font-bold">{t.xpLog}</span>
                     </div>
 
                     <div className="flex-1 flex flex-col gap-4 justify-center mt-2">
                       <div>
-                        <h6 className="text-[10px] font-mono text-text-3 uppercase tracking-wider">Concept Meaning</h6>
+                        <h6 className="text-[10px] font-mono text-text-3 uppercase tracking-wider">{t.conceptMeaning}</h6>
                         <p className="text-sm text-text-1 font-body mt-1 leading-relaxed">{ROAD_SIGNS_DATA[currentFlashIdx].meaning}</p>
                       </div>
                       <div className="border-t border-border pt-4">
-                        <h6 className="text-[10px] font-mono text-accent uppercase tracking-wider">Student Safety Steps</h6>
+                        <h6 className="text-[10px] font-mono text-accent uppercase tracking-wider">{t.safetySteps}</h6>
                         <div className="mt-2 flex flex-col gap-2">
                           {ROAD_SIGNS_DATA[currentFlashIdx].steps && ROAD_SIGNS_DATA[currentFlashIdx].steps.length > 0 ? (
                             ROAD_SIGNS_DATA[currentFlashIdx].steps.map((step, sIdx) => (
@@ -590,7 +732,7 @@ export default function RTOLearningCenter() {
                     </div>
 
                     <div className="text-center text-[10px] text-text-3 font-mono border-t border-border pt-4">
-                      Swipe LEFT (forgot) | Swipe RIGHT (mastered)
+                      {t.swipeHint}
                     </div>
                   </div>
 
@@ -640,14 +782,14 @@ export default function RTOLearningCenter() {
 
                 {/* Header question and clock */}
                 <div className="relative z-10 flex justify-between items-center text-xs font-mono text-text-3 border-b border-border pb-4">
-                  <span>Question {quizIdx + 1} of {activeQuestions.length}</span>
+                  <span>{t.question} {quizIdx + 1} {t.of} {activeQuestions.length}</span>
                   
                   {/* requestAnimationFrame Clock HUD */}
                   <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${
                     timeLeft < 5 ? 'border-danger/30 text-danger bg-danger/5 animate-pulse' : 'border-border text-text-2'
                   }`}>
                     <Clock className="w-3.5 h-3.5" />
-                    <span className="font-bold">{timeLeft}s remaining</span>
+                    <span className="font-bold">{timeLeft} {t.remaining}</span>
                   </div>
                 </div>
 
@@ -673,7 +815,7 @@ export default function RTOLearningCenter() {
                                        
                       return (
                         <div className={`w-24 h-24 ${shapeClass} bg-primary/20 flex items-center justify-center border-4 border-primary/50 shadow-lg`}>
-                          <span className="text-primary font-bold text-[10px] uppercase text-center px-1">Concept</span>
+                          <span className="text-primary font-bold text-[10px] uppercase text-center px-1">{t.concept}</span>
                         </div>
                       )
                     })()}
@@ -681,7 +823,7 @@ export default function RTOLearningCenter() {
 
                   {/* Question wording */}
                   <div className="flex-1">
-                    <span className="text-xs font-mono uppercase tracking-widest text-primary">Traffic Regulation Code</span>
+                    <span className="text-xs font-mono uppercase tracking-widest text-primary">{t.regulationCode}</span>
                     <h3 className="text-lg md:text-xl font-bold text-text-1 font-display mt-1 leading-snug">
                       {activeQuestions[quizIdx].question}
                     </h3>
@@ -726,7 +868,7 @@ export default function RTOLearningCenter() {
               >
                 {/* Left Area: Accurate raw radar polygon */}
                 <div className="w-full md:w-1/2 flex flex-col items-center">
-                  <span className="text-[10px] font-mono text-accent uppercase tracking-widest mb-2">Spider Accuracy Dashboard</span>
+                  <span className="text-[10px] font-mono text-accent uppercase tracking-widest mb-2">{t.spiderDashboard}</span>
                   <div className="bg-void border border-border/80 p-4 rounded-3xl shadow-inner flex items-center justify-center">
                     {renderRadarChart()}
                   </div>
@@ -743,13 +885,13 @@ export default function RTOLearningCenter() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-void/50 border border-border p-4 rounded-2xl flex flex-col justify-between">
-                      <span className="text-[10px] font-mono text-text-3 uppercase">Total Accuracy</span>
+                      <span className="text-[10px] font-mono text-text-3 uppercase">{t.totalAccuracy}</span>
                       <span className="text-3xl font-extrabold text-success mt-2">
                         {Math.round((quizScore / activeQuestions.length) * 100)}%
                       </span>
                     </div>
                     <div className="bg-void/50 border border-border p-4 rounded-2xl flex flex-col justify-between">
-                      <span className="text-[10px] font-mono text-text-3 uppercase">Correct Signs</span>
+                      <span className="text-[10px] font-mono text-text-3 uppercase">{t.correctSigns}</span>
                       <span className="text-3xl font-extrabold text-primary mt-2">
                         {quizScore} <span className="text-xs text-text-3">/ {activeQuestions.length}</span>
                       </span>
@@ -757,7 +899,7 @@ export default function RTOLearningCenter() {
                   </div>
 
                   <div className="bg-void/30 border border-border p-4 rounded-2xl flex flex-col gap-1">
-                    <h5 className="text-xs font-bold text-text-2 uppercase font-display tracking-tight">RTO Dashboard Insight</h5>
+                    <h5 className="text-xs font-bold text-text-2 uppercase font-display tracking-tight">{t.dashboardInsight}</h5>
                     <p className="text-xs text-text-3 leading-relaxed font-body">
                       Your response matrices suggest high mastery on standard Signs and Rules, with minor road sign gaps flagged under &quot;Laws&quot; topics. Reviewing concept flashcards is suggested.
                     </p>
@@ -775,7 +917,7 @@ export default function RTOLearningCenter() {
                       onClick={() => setActiveMode('learn')}
                       className="flex-1 py-3 bg-primary hover:bg-primary/95 text-white font-bold text-sm rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 flex items-center justify-center gap-1.5 transition-all duration-300"
                     >
-                      <span>Study Materials</span>
+                      <span>{t.studyMaterials}</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </div>

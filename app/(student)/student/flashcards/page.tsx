@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React, { useState } from 'react'
 import Image from 'next/image'
@@ -11,35 +11,42 @@ import { ROAD_SIGNS_DATA } from '@/lib/data/rto-data'
 
 import { useLanguageStore } from '@/store/languageStore'
 
-const FLASH_T = {
-  en: {
+const PAGE_DICT = {
+  EN: {
     card: 'Card',
     clickFlip: 'Click to Flip',
     concept: 'Concept Meaning',
     safety: 'Safety Guidelines',
     rule: 'RULE',
-    info: 'INFO'
+    info: 'INFO',
+    title: 'All Flashcards Verification',
+    desc: (count: number) => \Displaying all \ interactive 3D Flashcards. Click any card to flip.\
   },
-  hi: {
+  HI: {
     card: 'कार्ड',
     clickFlip: 'पलटने के लिए क्लिक करें',
     concept: 'अवधारणा अर्थ',
     safety: 'सुरक्षा दिशा निर्देश',
     rule: 'नियम',
-    info: 'जानकारी'
+    info: 'जानकारी',
+    title: 'सभी फ्लैशकार्ड सत्यापन',
+    desc: (count: number) => \सभी \ 3D फ्लैशकार्ड दिखा रहा है। पलटने के लिए किसी भी कार्ड पर क्लिक करें।\
   },
-  te: {
+  TE: {
     card: 'కార్డు',
     clickFlip: 'తిప్పడానికి క్లిక్ చేయండి',
     concept: 'కాన్సెప్ట్ అర్థం',
     safety: 'భద్రతా మార్గదర్శకాలు',
     rule: 'నియమం',
-    info: 'సమాచారం'
+    info: 'సమాచారం',
+    title: 'అన్ని ఫ్లాష్‌కార్డ్‌ల ధృవీకరణ',
+    desc: (count: number) => \అన్ని \ 3D ఫ్లాష్‌కార్డ్‌లను ప్రదర్శిస్తోంది. తిప్పడానికి ఏదైనా కార్డ్‌పై క్లిక్ చేయండి.\
   }
 }
 
 const translateName = (name: string, lang: string) => {
-  if (lang === 'en') return name;
+  const upperLang = lang.toUpperCase();
+  if (upperLang === 'EN') return name;
   let translated = name;
   const dict: Record<string, [string, string]> = {
     'Prohibited': ['निषिद्ध', 'నిషేధించబడింది'],
@@ -47,7 +54,7 @@ const translateName = (name: string, lang: string) => {
     'Compulsory': ['अनिवार्य', 'తప్పనిసరి'],
     'Ahead': ['आगे', 'ముందుకు'],
     'Turn Left': ['बाएं मुड़ें', 'ఎడమవైపు మలుపు'],
-    'Turn Right': ['दाएं मुड़ें', 'కుడివైపు మలుపు'],
+    'Turn Right': ['दाएं मुड़ें', 'कुడివైపు మలుపు'],
     'Keep Left': ['बाएं रहें', 'ఎడమవైపు ఉండండి'],
     'Keep Right': ['दाएं रहें', 'కుడివైపు ఉండండి'],
     'Speed Limit': ['गति सीमा', 'వేగ పరిమితి'],
@@ -61,7 +68,7 @@ const translateName = (name: string, lang: string) => {
   };
   
   Object.entries(dict).forEach(([eng, [hi, te]]) => {
-    const replacement = lang === 'hi' ? hi : te;
+    const replacement = upperLang === 'HI' ? hi : te;
     translated = translated.replace(new RegExp(eng, 'gi'), replacement);
   });
   
@@ -71,6 +78,8 @@ const translateName = (name: string, lang: string) => {
 export default function VerifyFlashcardsPage() {
   const [flippedCards, setFlippedCards] = useState<Record<number, boolean>>({})
   const { language } = useLanguageStore()
+  const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
+  const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
 
   const toggleFlip = (index: number) => {
     setFlippedCards(prev => ({
@@ -79,16 +88,14 @@ export default function VerifyFlashcardsPage() {
     }))
   }
 
-  const t = FLASH_T[language as keyof typeof FLASH_T] || FLASH_T.en
-
   return (
     <div className="min-h-screen bg-void text-text-1 flex flex-col items-center pt-20 pb-32 overflow-x-hidden font-body relative">
       <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
       <div className="fixed bottom-20 left-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="text-center mb-12 relative z-10 px-4">
-        <h1 className="text-4xl font-display font-bold text-primary">{language === 'en' ? 'All Flashcards Verification' : language === 'hi' ? 'सभी फ्लैशकार्ड सत्यापन' : 'అన్ని ఫ్లాష్‌కార్డ్‌ల ధృవీకరణ'}</h1>
-        <p className="text-text-3 mt-2">{language === 'en' ? `Displaying all ${ROAD_SIGNS_DATA.length} interactive 3D Flashcards. Click any card to flip.` : language === 'hi' ? `सभी ${ROAD_SIGNS_DATA.length} 3D फ्लैशकार्ड दिखा रहा है। पलटने के लिए किसी भी कार्ड पर क्लिक करें।` : `అన్ని ${ROAD_SIGNS_DATA.length} 3D ఫ్లాష్‌కార్డ్‌లను ప్రదర్శిస్తోంది. తిప్పడానికి ఏదైనా కార్డ్‌పై క్లిక్ చేయండి.`}</p>
+        <h1 className="text-4xl font-display font-bold text-primary">{t.title}</h1>
+        <p className="text-text-3 mt-2">{t.desc(ROAD_SIGNS_DATA.length)}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 px-6 max-w-[1600px] mx-auto z-10">
@@ -118,7 +125,7 @@ export default function VerifyFlashcardsPage() {
 
                   <div className="w-[120px] h-[120px] flex items-center justify-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.3)] relative">
                     {(() => {
-                      const SVGComponent = activeSign.signKey ? RoadSigns[activeSign.signKey] : null
+                      const SVGComponent = activeSign.signKey ? RoadSigns[activeSign.signKey as keyof typeof RoadSigns] : null
                       if (activeSign.imagePath) {
                         return <Image src={activeSign.imagePath} alt="Sign" width={120} height={120} className="object-contain" />
                       } else if (SVGComponent) {
@@ -135,7 +142,7 @@ export default function VerifyFlashcardsPage() {
                                        : 'bg-[#34c759]'
                                        
                       return (
-                        <div className={`w-28 h-28 ${shapeClass} ${colorClass} flex items-center justify-center border-4 border-white shadow-lg`}>
+                        <div className={\w-28 h-28 \ \ flex items-center justify-center border-4 border-white shadow-lg\}>
                           <span className="text-white font-bold text-[10px] uppercase text-center px-1">{activeSign.name}</span>
                         </div>
                       )

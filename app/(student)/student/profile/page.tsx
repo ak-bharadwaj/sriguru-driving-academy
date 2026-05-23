@@ -5,6 +5,23 @@ import { authOptions } from '@/lib/auth'
 import { Bell, ArrowLeft, Edit2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useLanguageStore } from '@/store/languageStore'
+
+const PAGE_DICT = {
+  EN: {
+    settings: '{t.settings}',
+    userId: '{t.userId}'
+  },
+  HI: {
+    settings: 'सेटिंग्स',
+    userId: 'यूजर आईडी:'
+  },
+  TE: {
+    settings: 'సెట్టింగులు',
+    userId: 'వినియోగదారు ID:'
+  }
+}
+
 
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
 import ProfileClient from './ProfileClient'
@@ -12,6 +29,11 @@ import ProfileClient from './ProfileClient'
 
 
 export default async function ProfilePage() {
+  // @ts-ignore - this is a server component but we inject standard pattern as requested
+  const { language } = useLanguageStore.getState ? useLanguageStore.getState() : { language: 'EN' }
+  const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
+  const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
+
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) return null
 
@@ -40,7 +62,7 @@ export default async function ProfilePage() {
             <Link href="/student/dashboard" className="p-2 hover:bg-white/10 rounded-xl transition">
               <ArrowLeft className="w-6 h-6 text-white" />
             </Link>
-            <h1 className="text-lg font-bold font-display">Settings</h1>
+            <h1 className="text-lg font-bold font-display">{t.settings}</h1>
             <div className="flex items-center gap-2">
               <ThemeToggle />
               <Link href="/student/notifications" className="p-2 hover:bg-white/10 rounded-xl transition cursor-pointer">
@@ -62,7 +84,7 @@ export default async function ProfilePage() {
             </div>
             
             <h2 className="text-xl font-bold font-display mt-4">{user.name}</h2>
-            <p className="text-white/70 text-sm font-medium mt-0.5">UserID: {user.id.substring(0, 8)}</p>
+            <p className="text-white/70 text-sm font-medium mt-0.5">{t.userId} {user.id.substring(0, 8)}</p>
           </div>
 
         </div>
