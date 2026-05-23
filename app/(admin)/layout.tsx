@@ -1,0 +1,335 @@
+"use client"
+
+import React, { useState } from 'react'
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
+import { signOut } from 'next-auth/react'
+import { 
+  Activity, 
+  Users, 
+  Calendar, 
+  Database,
+  Layers,
+  LogOut,
+  Bell,
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+  X,
+  Tag,
+  FileDown
+} from 'lucide-react'
+import { ThemeToggle } from '@/components/shared/ThemeToggle'
+import { LanguageToggle } from '@/components/shared/LanguageToggle'
+import { useLanguageStore } from '@/store/languageStore'
+import { Breadcrumbs } from '@/components/shared/Breadcrumbs'
+
+interface NavItem {
+  name: string
+  path: string
+  icon: React.ComponentType<{ className?: string }>
+  category: string
+}
+
+const ADMIN_NAV_T = {
+  EN: [
+    { name: 'Console HUD', path: '/admin/dashboard', icon: Activity, category: 'OPERATIONS' },
+    { name: 'Student Directory', path: '/admin/students', icon: Users, category: 'Students' },
+    { name: 'Slot Registries', path: '/slots', icon: Calendar, category: 'SCHEDULING' },
+    { name: 'Booking Review', path: '/admin/bookings', icon: Users, category: 'OPERATIONS' },
+    { name: 'Instructors', path: '/admin/instructors', icon: Users, category: 'OPERATIONS' },
+    { name: 'Analytics & Insights', path: '/admin/analytics', icon: Activity, category: 'ANALYTICS' },
+    { name: 'Content Dashboard', path: '/admin/content', icon: Layers, category: 'SYSTEM' },
+    { name: 'Gamification HQ', path: '/admin/gamification', icon: Database, category: 'SYSTEM' },
+    { name: 'Promotions', path: '/admin/offers', icon: Tag, category: 'MARKETING' },
+    { name: 'Reports & Export', path: '/admin/reports', icon: FileDown, category: 'ANALYTICS' }
+  ],
+  HI: [
+    { name: 'कंसोल HUD', path: '/admin/dashboard', icon: Activity, category: 'संचालन' },
+    { name: 'छात्र निर्देशिका', path: '/admin/students', icon: Users, category: 'छात्र' },
+    { name: 'स्लॉट रजिस्ट्रियां', path: '/slots', icon: Calendar, category: 'निर्धारण' },
+    { name: 'बुकिंग समीक्षा', path: '/admin/bookings', icon: Users, category: 'संचालन' },
+    { name: 'प्रशिक्षक', path: '/admin/instructors', icon: Users, category: 'संचालन' },
+    { name: 'विश्लेषिकी और अंतर्दृष्टि', path: '/admin/analytics', icon: Activity, category: 'विश्लेषिकी' },
+    { name: 'सामग्री डैशबोर्ड', path: '/admin/content', icon: Layers, category: 'प्रणाली' },
+    { name: 'गेमिफिकेशन मुख्यालय', path: '/admin/gamification', icon: Database, category: 'प्रणाली' },
+    { name: 'प्रचार', path: '/admin/offers', icon: Tag, category: 'विपणन' },
+    { name: 'रिपोर्ट और निर्यात', path: '/admin/reports', icon: FileDown, category: 'विश्लेषिकी' }
+  ],
+  TE: [
+    { name: 'కన్సోల్ HUD', path: '/admin/dashboard', icon: Activity, category: 'కార్యకలాపాలు' },
+    { name: 'విద్యార్థుల డైరెక్టరీ', path: '/admin/students', icon: Users, category: 'విద్యార్థులు' },
+    { name: 'స్లాట్ రిజిస్ట్రీలు', path: '/slots', icon: Calendar, category: 'షెడ్యూలింగ్' },
+    { name: 'బుకింగ్ సమీక్ష', path: '/admin/bookings', icon: Users, category: 'కార్యకలాపాలు' },
+    { name: 'బోధకులు', path: '/admin/instructors', icon: Users, category: 'కార్యకలాపాలు' },
+    { name: 'విశ్లేషణలు & అంతర్దృష్టులు', path: '/admin/analytics', icon: Activity, category: 'విశ్లేషణలు' },
+    { name: 'కంటెంట్ డాష్‌బోర్డ్', path: '/admin/content', icon: Layers, category: 'వ్యవస్థ' },
+    { name: 'గామిఫికేషన్ హెచ్క్యూ', path: '/admin/gamification', icon: Database, category: 'వ్యవస్థ' },
+    { name: 'ప్రమోషన్లు', path: '/admin/offers', icon: Tag, category: 'మార్కెటింగ్' },
+    { name: 'నివేదికలు & ఎగుమతి', path: '/admin/reports', icon: FileDown, category: 'విశ్లేషణలు' }
+  ]
+}
+
+export default function AdminConsoleLayout({
+  children
+}: {
+  children: React.ReactNode
+}) {
+  const pathname = usePathname()
+  const router = useRouter()
+  const [collapsed, setCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [notifDropdownOpen, setNotifDropdownOpen] = useState(false)
+  
+  const [notifications, setNotifications] = useState([
+    { id: 1, text: 'System backup completed successfully.', time: '2m ago', read: false },
+    { id: 2, text: 'New instructor registration pending review.', time: '1h ago', read: false }
+  ])
+
+  const unreadCount = notifications.filter(n => !n.read).length
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/login' })
+  }
+
+  const handleNotifClick = () => {
+    setNotifDropdownOpen(!notifDropdownOpen)
+    if (!notifDropdownOpen) {
+      setNotifications(notifications.map(n => ({ ...n, read: true })))
+    }
+  }
+
+  const { language } = useLanguageStore()
+  const navItems = ADMIN_NAV_T[language] || ADMIN_NAV_T.EN
+
+  return (
+    <div className="h-full flex flex-col bg-[rgb(var(--color-void))] text-[rgb(var(--color-text-1))] font-sans overflow-hidden transition-colors duration-300">
+      {/* TOP HEADER CONSOLE BAR */}
+      <header className="sticky top-0 inset-x-0 bg-[rgb(var(--color-surface))]/80 border-b border-[rgb(var(--color-border))] backdrop-blur-xl z-40 flex shrink-0 items-center justify-between px-4 py-3 gap-3 transition-colors duration-300">
+        <div className="flex items-center gap-3 min-w-0">
+          <button 
+            onClick={() => setMobileOpen(!mobileOpen)} 
+            className="lg:hidden p-1.5 hover:bg-[rgb(var(--color-border))] border border-[rgb(var(--color-border))] rounded-lg text-[rgb(var(--color-text-3))] hover:text-[rgb(var(--color-text-1))] dark:hover:text-white transition-all"
+          >
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+          
+          <div className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse hidden sm:block" />
+          <Link href="/admin/dashboard" className="font-bold text-[rgb(var(--color-text-1))] tracking-tight text-sm sm:text-base uppercase flex items-center gap-2 hover:opacity-80 transition-opacity truncate">
+            <span className="truncate">SRI GURU</span>
+            <span className="hidden sm:inline text-blue-600 dark:text-blue-400 font-medium text-xs bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800/50 px-2 py-0.5 rounded">OPS CONSOLE v4.5</span>
+          </Link>
+        </div>
+
+        {/* Actions & Toggles */}
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="hidden md:flex items-center gap-4 text-xs font-medium text-[rgb(var(--color-text-3))] border-r border-[rgb(var(--color-border))] pr-4">
+            <span className="flex items-center gap-1.5"><Database className="w-4 h-4 text-emerald-500" /> PG: ONLINE</span>
+            <span className="flex items-center gap-1.5"><Activity className="w-4 h-4 text-blue-500" /> 11ms</span>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-3 relative">
+            <LanguageToggle />
+            <ThemeToggle />
+            
+            <button 
+              onClick={handleNotifClick}
+              className="relative p-2 bg-[rgb(var(--color-border))] hover:bg-[rgb(var(--color-border))] border border-[rgb(var(--color-border))] rounded-lg text-[rgb(var(--color-text-2))] transition-all duration-200"
+            >
+              <Bell className="w-4 h-4" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* Notifications Dropdown */}
+            <AnimatePresence>
+              {notifDropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute top-full mt-2 right-0 w-72 bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-xl shadow-xl overflow-hidden z-50"
+                >
+                  <div className="px-4 py-3 border-b border-[rgb(var(--color-border))] font-semibold text-sm">Notifications</div>
+                  <div className="flex flex-col max-h-64 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-4 text-center text-[rgb(var(--color-text-3))] text-sm">No new notifications</div>
+                    ) : (
+                      notifications.map(n => (
+                        <div key={n.id} className="p-3 border-b border-slate-50 dark:border-slate-800 hover:bg-[rgb(var(--color-surface))] flex flex-col gap-1 transition-colors">
+                          <p className="text-sm text-[rgb(var(--color-text-2))]">{n.text}</p>
+                          <span className="text-xs text-slate-400">{n.time}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Logout button */}
+            <button 
+              onClick={handleLogout}
+              className="hidden sm:inline-flex p-2 bg-[rgb(var(--color-border))] hover:bg-red-50 dark:hover:bg-red-900/20 border border-[rgb(var(--color-border))] hover:border-red-200 dark:hover:border-red-800/50 rounded-lg text-[rgb(var(--color-text-2))] hover:text-red-600 dark:hover:text-red-400 transition-all duration-200"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* CORE FRAME LAYOUT SECTION */}
+      <div className="flex-1 flex overflow-hidden relative z-10">
+        
+        {/* DESKTOP SIDEBAR */}
+        <aside 
+          className={`hidden lg:flex flex-col border-r border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] h-full z-30 transition-all duration-300 overflow-y-auto scrollbar-thin p-4 ${
+            collapsed ? 'w-20' : 'w-64'
+          }`}
+        >
+          <div className="flex flex-col gap-6 h-full">
+            <div className="flex items-center justify-between">
+              {!collapsed && (
+                <span className="text-xs uppercase tracking-wider text-[rgb(var(--color-text-3))] font-bold px-2">Navigation</span>
+              )}
+              <button 
+                onClick={() => setCollapsed(!collapsed)}
+                className="p-1.5 bg-[rgb(var(--color-border))] hover:bg-[rgb(var(--color-border))] border border-[rgb(var(--color-border))] rounded-lg text-[rgb(var(--color-text-2))] transition-all ml-auto"
+              >
+                {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+              </button>
+            </div>
+
+            <div className="h-px bg-[rgb(var(--color-border))]" />
+
+            <nav className="flex flex-col gap-3">
+              {navItems.map((item) => {
+                const isActive = pathname === item.path
+                const Icon = item.icon
+                
+                return (
+                  <Link 
+                    key={item.path}
+                    href={item.path}
+                    className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 ${
+                      isActive 
+                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-bold' 
+                        : 'text-[rgb(var(--color-text-2))] hover:text-[rgb(var(--color-text-1))] dark:hover:text-white hover:bg-[rgb(var(--color-surface))]'
+                    }`}
+                  >
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-[rgb(var(--color-text-3))]'}`} />
+                    {!collapsed && (
+                      <div className="flex flex-col text-left">
+                        <span className="text-sm tracking-wide">{item.name}</span>
+                        <span className="text-xs text-[rgb(var(--color-text-3))] dark:text-[rgb(var(--color-text-3))] mt-0.5">{item.category}</span>
+                      </div>
+                    )}
+                  </Link>
+                )
+              })}
+            </nav>
+
+            <div className="mt-auto border-t border-[rgb(var(--color-border))] pt-4 flex flex-col gap-2">
+              {!collapsed ? (
+                <div className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl p-3 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm">
+                    OP
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-sm font-bold text-[rgb(var(--color-text-1))]">Ops. Master</span>
+                    <span className="text-xs text-[rgb(var(--color-text-3))]">ADMIN DECK</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm mx-auto">
+                  OP
+                </div>
+              )}
+            </div>
+          </div>
+        </aside>
+
+        {/* MOBILE DRAWER */}
+        <AnimatePresence>
+          {mobileOpen && (
+            <>
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.5 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setMobileOpen(false)}
+                className="fixed inset-0 bg-slate-900 z-40 lg:hidden"
+              />
+              
+              <motion.aside 
+                initial={{ x: -280 }}
+                animate={{ x: 0 }}
+                exit={{ x: -280 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="fixed inset-y-0 left-0 w-72 bg-[rgb(var(--color-surface))] border-r border-[rgb(var(--color-border))] z-50 p-5 lg:hidden flex flex-col gap-6 overflow-y-auto shadow-2xl"
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-xs uppercase tracking-wider text-[rgb(var(--color-text-3))] font-bold">Navigation</span>
+                  <button onClick={() => setMobileOpen(false)} className="p-2 bg-[rgb(var(--color-border))] rounded-lg text-[rgb(var(--color-text-3))] hover:text-[rgb(var(--color-text-1))] dark:hover:text-white">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                
+                <div className="h-px bg-[rgb(var(--color-border))]" />
+
+                <nav className="flex flex-col gap-3">
+                  {navItems.map((item) => {
+                    const isActive = pathname === item.path
+                    const Icon = item.icon
+                    
+                    return (
+                      <Link 
+                        key={item.path}
+                        href={item.path}
+                        onClick={() => setMobileOpen(false)}
+                        className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
+                          isActive 
+                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-bold' 
+                            : 'text-[rgb(var(--color-text-2))] hover:text-[rgb(var(--color-text-1))] hover:bg-[rgb(var(--color-surface))]'
+                        }`}
+                      >
+                        <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`} />
+                        <div className="flex flex-col">
+                          <span className="text-sm">{item.name}</span>
+                          <span className="text-xs text-[rgb(var(--color-text-3))]">{item.category}</span>
+                        </div>
+                      </Link>
+                    )
+                  })}
+                </nav>
+
+                <div className="mt-auto bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center font-bold text-sm">
+                    OP
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-sm font-bold text-[rgb(var(--color-text-1))]">Ops. Master</span>
+                    <span className="text-xs text-[rgb(var(--color-text-3))]">ADMIN DECK</span>
+                  </div>
+                </div>
+              </motion.aside>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* MAIN WORKSPACE WRAPPER */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden transition-all duration-300 relative z-10 w-full">
+          <div className="w-full px-4 sm:px-6 pt-6">
+            <Breadcrumbs />
+          </div>
+          {children}
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -3,15 +3,18 @@ import { db } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
+
+
 export async function GET() {
   try {
     // 0. Security Audit check: verify INSTRUCTOR role in active session
     const session = await getServerSession(authOptions)
-    if (!session || (session.user as any)?.role !== 'INSTRUCTOR') {
+    const user = session?.user as { id?: string; role?: string } | undefined
+    if (!session || user?.role !== 'INSTRUCTOR') {
       return NextResponse.json({ error: 'Forbidden. Instructor credentials required.' }, { status: 403 })
     }
-
-    const userId = (session.user as any).id
+ 
+    const userId = user?.id
 
     // 1. Locate the authenticated instructor from the session
     const instructor = await db.instructor.findUnique({
@@ -30,6 +33,7 @@ export async function GET() {
         id: true,
         enrolledAt: true,
         trainingType: true,
+        feeStatus: true,
         xp: true,
         level: true,
         user: {
@@ -57,6 +61,13 @@ export async function GET() {
             scheduledAt: true,
             status: true,
             duration: true
+          }
+        },
+        drivingTests: {
+          select: {
+            id: true,
+            testDate: true,
+            result: true
           }
         },
         feedback: {
@@ -108,10 +119,14 @@ export async function GET() {
         license: s.trainingType === 'RTO_FAST_TRACK' ? 'RTO' : s.trainingType,
         enrollmentDate: s.enrolledAt.toISOString().split('T')[0],
         totalSessions: s.sessions.length,
+        xp: s.xp,
+        level: s.level,
         completionPercent,
         skills,
         feedbackTimeline,
         dailyLog,
+        feeStatus: s.feeStatus,
+        drivingTests: s.drivingTests,
         todaySession: s.sessions.find(sess => {
           const sDate = new Date(sess.scheduledAt).toDateString()
           const tDate = new Date().toDateString()
@@ -121,8 +136,9 @@ export async function GET() {
     })
 
     return NextResponse.json(formattedStudents, { status: 200 })
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
     console.error('Instructor students query Error:', error)
-    return NextResponse.json({ error: 'Roster compilation failed', details: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Roster compilation failed', details: message }, { status: 500 })
   }
 }

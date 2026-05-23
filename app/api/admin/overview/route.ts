@@ -3,6 +3,8 @@ import { db } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
+
+
 const FALLBACK_HEATMAP = Array.from({ length: 7 * 12 }, (_, i) => ({
   day: i % 7,
   week: Math.floor(i / 7),
@@ -16,7 +18,8 @@ export async function GET(request: Request) {
   try {
     // 0. Security Audit check: verify ADMIN role in active session
     const session = await getServerSession(authOptions)
-    if (!session || (session.user as any)?.role !== 'ADMIN') {
+    const user = session?.user as { role?: string } | undefined
+    if (!session || user?.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Forbidden. Admin credentials required.' }, { status: 403 })
     }
 
@@ -25,22 +28,44 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '5')
     const skip = (page - 1) * limit
 
+    interface DBStudent {
+      id: string
+      level: number
+      xp: number
+      trainingType: string
+      user: {
+        name: string | null
+        email: string | null
+      }
+    }
+    interface DBBooking {
+      id: string
+      name: string
+      email: string
+      phone: string
+      trainingType: string
+      status: string
+      createdAt: Date
+    }
+
     let studentCount = 0
-    let instructorCount = 0
-    let bookingCount = 0
     let sessionCount = 0
-    let databaseStudents: any[] = []
-    let databaseBookings: any[] = []
+    let databaseStudents: DBStudent[] = []
+    let databaseBookings: DBBooking[] = []
+    let fetchedActivityLog: any = null
+    let fetchedRevenue = 0
 
     try {
       // Fetch statistics and datasets concurrently from real database tables
       const [
         sCount,
-        iCount,
-        bCount,
+        ,
+        ,
         sessCount,
         dbStudents,
-        dbBookings
+        dbBookings,
+        revenueAgg,
+        dbNotifications
       ] = await Promise.all([
         db.student.count(),
         db.instructor.count(),
@@ -74,17 +99,36 @@ export async function GET(request: Request) {
             createdAt: true
           },
           orderBy: { createdAt: 'desc' }
+        }),
+        db.payment.aggregate({
+          _sum: { amount: true }
+        }),
+        db.notification.findMany({
+          take: limit,
+          orderBy: { createdAt: 'desc' },
+          include: { user: true }
         })
       ])
 
       studentCount = sCount
-      instructorCount = iCount
-      bookingCount = bCount
       sessionCount = sessCount
-      databaseStudents = dbStudents
-      databaseBookings = dbBookings
-    } catch (e) {
-      console.warn('Telemetry database retrieval bypassed. Using fallbacks.')
+      databaseStudents = dbStudents as unknown as DBStudent[]
+      databaseBookings = dbBookings as unknown as DBBooking[]
+      
+      const realActivityLog = dbNotifications.map(n => ({
+        id: n.id,
+        timestamp: n.createdAt.toTimeString().split(' ')[0],
+        type: n.type,
+        text: n.message
+      }))
+      
+      const totalRevenue = revenueAgg._sum.amount || 0
+
+      // Override mock if real data exists
+      fetchedActivityLog = realActivityLog.length > 0 ? realActivityLog : null
+      fetchedRevenue = totalRevenue
+    } catch {
+      console.warn('Analytics database retrieval bypassed. Using fallbacks.')
     }
 
     // Group bookings into dynamic Kanban columns
@@ -110,19 +154,20 @@ export async function GET(request: Request) {
       { name: 'Amanpreet Kaur', hours: 48, rate: 96 }
     ]
 
-    const recentActivityLog = [
-      { id: 'act-1', timestamp: '14:22:05', type: 'BOOKING_NEW', text: 'New cadet booking signed: Vikram Rathore (LMV)' },
-      { id: 'act-2', timestamp: '13:58:12', type: 'QUIZ_PASS', text: 'Cadet Aarav Mehta cleared Mock RTO test (90% Acc)' },
+    const recentActivityLog = fetchedActivityLog || [
+      { id: 'act-1', timestamp: '14:22:05', type: 'BOOKING_NEW', text: 'New Student booking signed: Vikram Rathore (LMV)' },
+      { id: 'act-2', timestamp: '13:58:12', type: 'QUIZ_PASS', text: 'Student Aarav Mehta cleared Mock RTO test (90% Acc)' },
       { id: 'act-3', timestamp: '12:44:30', type: 'BADGE_GOLD', text: 'Badge unlocked: Parallel Parking master - Diya Kapoor' },
       { id: 'act-4', timestamp: '11:15:00', type: 'SESSION_END', text: 'Session finished: Harpreet Singh (Clutch Balancing)' },
-      { id: 'act-5', timestamp: '09:30:15', type: 'XP_EVENT', text: 'Cadet Vikram Rathore earned +100 XP (Cockpit Drill)' }
+      { id: 'act-5', timestamp: '09:30:15', type: 'XP_EVENT', text: 'Student Vikram Rathore earned +100 XP (Cockpit Drill)' }
     ].slice(0, limit)
 
     return NextResponse.json({
       health: {
         activeStudents: studentCount || 5,
         sessionsToday: sessionCount || 8,
-        pendingBookings: databaseBookings.filter(b => b.status === 'PENDING').length || 2
+        pendingBookings: databaseBookings.filter(b => b.status === 'PENDING').length || 2,
+        totalRevenue: fetchedRevenue || 0
       },
       topStudents: databaseStudents.map(s => ({
         id: s.id,
@@ -143,8 +188,10 @@ export async function GET(request: Request) {
         totalItems: studentCount || 5
       }
     }, { status: 200 })
-  } catch (error: any) {
-    console.error('Admin telemetry route Error:', error)
-    return NextResponse.json({ error: 'Telemetry retrieval failed', details: error.message }, { status: 500 })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    console.error('Admin Analytics route Error:', error)
+    return NextResponse.json({ error: 'Analytics retrieval failed', details: message }, { status: 500 })
   }
 }
+

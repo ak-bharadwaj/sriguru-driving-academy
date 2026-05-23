@@ -1,20 +1,29 @@
 "use client"
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Award, HelpCircle } from 'lucide-react'
+import { 
+  X, Award, HelpCircle, AlertTriangle, Ban, Info, Phone, Plus, SquareParking as ParkingSquare, 
+  ArrowRight, ArrowLeft, ArrowUp, Zap, HelpCircle as Question, TriangleAlert, 
+  CircleSlash, Navigation, MapPin, Hand, XCircle, AlertCircle
+} from 'lucide-react'
 
 // Import road sign SVGs
 import * as RoadSigns from '@/lib/icons/road-signs'
 
 interface SignCardProps {
-  signKey: keyof typeof RoadSigns
+  signKey?: keyof typeof RoadSigns
   name: string
   category: string
   meaning: string
-  rule: string
+  rule?: string
+  steps?: string[]
   limit?: number
   lightState?: 'red' | 'amber' | 'green'
+  imagePath?: string
+  fallbackShape?: 'circle' | 'triangle' | 'octagon' | 'square'
+  fallbackColor?: 'red' | 'blue' | 'yellow' | 'green'
   onStartQuiz?: () => void
 }
 
@@ -24,16 +33,124 @@ export const SignCard: React.FC<SignCardProps> = ({
   category,
   meaning,
   rule,
+  steps,
   limit = 50,
   lightState = 'red',
+  imagePath,
+  fallbackShape,
+  fallbackColor,
   onStartQuiz
 }) => {
   const [isOpen, setIsOpen] = useState(false)
 
-  // Retrieve the custom SVG component
-  const SVGIcon = RoadSigns[signKey] as any
+  // Retrieve the custom SVG component if it exists
+  const FallbackComponent = () => null
+  const SVGIcon = (signKey && RoadSigns[signKey])
+    ? (RoadSigns[signKey] as React.ComponentType<{ size: number; glow?: boolean; limit?: number; state?: 'red' | 'amber' | 'green' }>) 
+    : FallbackComponent
 
-  if (!SVGIcon) return null
+  // Render a CSS fallback shape with a distinct Lucide icon if no image or SVG is present
+  const renderShape = (size: number) => {
+    if (imagePath) {
+      return <Image src={imagePath} alt={name} width={size} height={size} className="object-contain drop-shadow-md" />
+    }
+    if (signKey) {
+      if (signKey === 'SPEED_LIMIT') return <SVGIcon size={size} limit={limit} />
+      if (signKey === 'TRAFFIC_LIGHT') return <SVGIcon size={size} state={lightState} />
+      return <SVGIcon size={size} />
+    }
+
+    // CSS Fallback Shapes
+    const colorMap = {
+      red: 'bg-[#dc2626] border-[#b91c1c]',
+      blue: 'bg-[#2563eb] border-[#1d4ed8]',
+      yellow: 'bg-[#fbbf24] border-[#d97706]',
+      green: 'bg-[#059669] border-[#047857]'
+    }
+    const colorClass = colorMap[fallbackColor || 'red']
+    const iconSize = size * 0.45
+    
+    // Determine dynamic icon based on sign name
+    let IconToUse = Question;
+    const lowerName = name.toLowerCase();
+    
+    if (fallbackShape === 'octagon' || lowerName.includes('stop')) IconToUse = Hand;
+    else if (lowerName.includes('prohibited') || lowerName.includes('no ')) IconToUse = Ban;
+    else if (lowerName.includes('hospital') || lowerName.includes('first aid')) IconToUse = Plus;
+    else if (lowerName.includes('telephone') || lowerName.includes('sos')) IconToUse = Phone;
+    else if (lowerName.includes('park') || lowerName.includes('stand')) IconToUse = ParkingSquare;
+    else if (lowerName.includes('curve') || lowerName.includes('bend')) IconToUse = AlertCircle;
+    else if (lowerName.includes('left')) IconToUse = ArrowLeft;
+    else if (lowerName.includes('right')) IconToUse = ArrowRight;
+    else if (lowerName.includes('ahead') || lowerName.includes('straight')) IconToUse = ArrowUp;
+    else if (fallbackShape === 'triangle') IconToUse = AlertTriangle;
+    else if (fallbackShape === 'square') IconToUse = Info;
+    else if (fallbackShape === 'circle') IconToUse = CircleSlash;
+
+    if (fallbackShape === 'octagon') {
+      return (
+        <div 
+          className={`flex items-center justify-center ${colorClass} text-white`}
+          style={{
+            width: size, height: size,
+            clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)'
+          }}
+        >
+          {lowerName.includes('stop') ? (
+            <span className={`font-extrabold font-display uppercase ${size > 80 ? 'text-4xl' : 'text-xl'}`}>STOP</span>
+          ) : (
+            <IconToUse size={iconSize} strokeWidth={2.5} />
+          )}
+        </div>
+      )
+    }
+
+    if (fallbackShape === 'triangle') {
+      return (
+        <div 
+          className={`flex flex-col justify-end pb-[15%] items-center`}
+          style={{
+            width: size, height: size,
+            background: fallbackColor === 'red' ? '#ef4444' : '#3b82f6',
+            clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)'
+          }}
+        >
+          <div className="w-[85%] h-[85%] bg-white flex items-end justify-center pb-[10%] text-black" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}>
+             <IconToUse size={iconSize} strokeWidth={3} className="mb-2" />
+          </div>
+        </div>
+      )
+    }
+
+    if (fallbackShape === 'square') {
+      return (
+        <div 
+          className={`flex flex-col items-center justify-center ${colorClass} text-white rounded-lg relative overflow-hidden`}
+          style={{ width: size, height: size, border: '4px solid white', outline: `4px solid ${fallbackColor === 'red' ? '#dc2626' : '#2563eb'}` }}
+        >
+           {lowerName.includes('park') || lowerName.includes('stand') ? (
+              <span className={`font-extrabold font-display uppercase ${size > 80 ? 'text-6xl' : 'text-3xl'}`}>P</span>
+           ) : (
+              <IconToUse size={iconSize} strokeWidth={2.5} />
+           )}
+        </div>
+      )
+    }
+
+    // Default to circle (Mandatory signs)
+    return (
+      <div 
+        className={`flex items-center justify-center bg-white text-black rounded-full border-[6px]`}
+        style={{ width: size, height: size, borderColor: fallbackColor === 'blue' ? '#2563eb' : '#dc2626' }}
+      >
+        {lowerName.includes('limit') ? (
+          <span className={`font-extrabold font-display ${size > 80 ? 'text-5xl' : 'text-2xl'}`}>{limit}</span>
+        ) : (
+          <IconToUse size={iconSize} strokeWidth={2.5} className={fallbackColor === 'blue' ? 'text-blue-600' : 'text-red-600'} />
+        )}
+      </div>
+    )
+  }
 
   return (
     <>
@@ -54,15 +171,9 @@ export const SignCard: React.FC<SignCardProps> = ({
           <span className="text-[9px] font-bold text-accent font-mono">+5 XP</span>
         </div>
 
-        {/* SVG Icon centered at 72px */}
-        <div className="w-[72px] h-[72px] flex items-center justify-center mt-3">
-          {signKey === 'SPEED_LIMIT' ? (
-            <SVGIcon size={72} limit={limit} />
-          ) : signKey === 'TRAFFIC_LIGHT' ? (
-            <SVGIcon size={72} state={lightState} />
-          ) : (
-            <SVGIcon size={72} />
-          )}
+        {/* Dynamic Image/Shape */}
+        <div className="w-[72px] h-[72px] flex items-center justify-center mt-3 relative">
+          {renderShape(72)}
         </div>
 
         {/* Sign Name */}
@@ -106,14 +217,8 @@ export const SignCard: React.FC<SignCardProps> = ({
               {/* Modal content */}
               <div className="flex flex-col items-center text-center gap-6 mt-4">
                 {/* SVG Icon centered large */}
-                <div className="w-[120px] h-[120px] flex items-center justify-center drop-shadow-[0_8px_20px_rgba(0,0,0,0.4)]">
-                  {signKey === 'SPEED_LIMIT' ? (
-                    <SVGIcon size={120} limit={limit} glow />
-                  ) : signKey === 'TRAFFIC_LIGHT' ? (
-                    <SVGIcon size={120} state={lightState} glow />
-                  ) : (
-                    <SVGIcon size={120} glow />
-                  )}
+                <div className="w-[120px] h-[120px] flex items-center justify-center drop-shadow-[0_8px_20px_rgba(0,0,0,0.4)] relative">
+                  {renderShape(120)}
                 </div>
 
                 <div className="w-full">
@@ -130,10 +235,21 @@ export const SignCard: React.FC<SignCardProps> = ({
                     <p className="text-sm text-text-2 mt-1 font-body leading-relaxed">{meaning}</p>
                   </div>
                   <div>
-                    <h5 className="text-xs font-mono uppercase tracking-wider text-text-3">RTO Driving Rule</h5>
-                    <p className="text-sm text-text-2 mt-1 font-body leading-relaxed border-l-2 border-l-accent pl-3 italic bg-accent/5 py-2 rounded-r-lg">
-                      {rule}
-                    </p>
+                    <h5 className="text-xs font-mono uppercase tracking-wider text-text-3">RTO Safety Steps</h5>
+                    <div className="mt-2 flex flex-col gap-2">
+                      {steps && steps.length > 0 ? (
+                        steps.map((step, idx) => (
+                          <div key={idx} className="flex gap-2.5 items-start bg-accent/5 py-2 px-3 rounded-lg border-l-2 border-l-accent">
+                            <span className="flex-shrink-0 w-4 h-4 rounded-full bg-accent/20 text-accent flex items-center justify-center text-[10px] font-bold mt-0.5">{idx + 1}</span>
+                            <span className="text-sm text-text-2 font-body leading-tight">{step}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-text-2 font-body leading-relaxed border-l-2 border-l-accent pl-3 italic bg-accent/5 py-2 rounded-r-lg">
+                          {rule}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -143,7 +259,7 @@ export const SignCard: React.FC<SignCardProps> = ({
                     onClick={() => setIsOpen(false)}
                     className="flex-1 py-3 bg-void/60 hover:bg-white/[0.03] border border-border text-text-2 hover:text-text-1 rounded-xl text-sm font-semibold transition-all duration-300"
                   >
-                    Got It, Cadet
+                    Got It, Student
                   </button>
                   {onStartQuiz && (
                     <button
@@ -166,3 +282,4 @@ export const SignCard: React.FC<SignCardProps> = ({
     </>
   )
 }
+

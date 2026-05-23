@@ -4,21 +4,25 @@ import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Home, Compass, BookOpen, FileText, Award } from 'lucide-react'
+import { Home, Compass, BookOpen, Settings, User, Power, FileText, Award } from 'lucide-react'
 
 // Import Gamification Overlays
 import { XPToast } from '@/components/shared/XPToast'
 import { LevelUpOverlay } from '@/components/shared/LevelUpOverlay'
 import { BadgeReveal } from '@/components/shared/BadgeReveal'
 import { StreakReminder } from '@/components/shared/StreakReminder'
+import { useLanguageStore } from '@/store/languageStore'
+import { LanguageToggle } from '@/components/shared/LanguageToggle'
 
-const ORBITAL_TABS = [
-  { label: 'Home', path: '/dashboard', icon: Home },
-  { label: 'Learn', path: '/learn', icon: BookOpen },
-  { label: 'RTO', path: '/rto', icon: FileText },
-  { label: 'Roadmap', path: '/dashboard#roadmap', icon: Compass },
-  { label: 'Badges', path: '/dashboard#badges', icon: Award }
-]
+const BOTTOM_NAV_T = {
+  EN: [
+    { label: 'Home', path: '/student/dashboard', icon: Home },
+    { label: 'Learn', path: '/student/learn', icon: BookOpen },
+    { label: 'Start', path: '/student/rto', icon: Power, isCenter: true },
+    { label: 'Analysis', path: '/student/leaderboard', icon: Compass },
+    { label: 'Profile', path: '/student/profile', icon: User }
+  ]
+}
 
 export default function StudentPortalLayout({
   children
@@ -26,57 +30,65 @@ export default function StudentPortalLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const { language } = useLanguageStore()
+  const tabs = BOTTOM_NAV_T.EN // Hardcoded to EN for now, can expand later
 
   return (
-    <div className="min-h-screen bg-void relative">
+    <div className="h-full flex flex-col bg-[rgb(var(--color-void))] relative overflow-hidden font-body text-[rgb(var(--color-text-1))] transition-colors duration-300">
       
+      {/* Main Content Area - Scrollable */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 custom-scrollbar pb-24">
+        {children}
+      </div>
+
       {/* ----------------------------------------------------
-          TOP ORBITAL NAVIGATION FLOATING PILL
+          MOBILE BOTTOM NAVIGATION BAR
           ---------------------------------------------------- */}
-      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[999] pointer-events-none w-full max-w-md px-4">
-        <nav className="flex items-center justify-around gap-1 p-1.5 bg-surface/85 border border-border/80 backdrop-blur-md rounded-full shadow-[0_12px_32px_rgba(0,0,0,0.5)] pointer-events-auto">
-          {ORBITAL_TABS.map((tab) => {
-            const isActive = pathname === tab.path || (tab.path.startsWith('/dashboard#') && pathname === '/dashboard')
+      {pathname !== '/student/onboarding' && (
+        <>
+          <div className="fixed top-4 right-4 z-[999] md:hidden">
+            <LanguageToggle />
+          </div>
+          <div className="fixed top-4 right-6 z-[999] hidden md:block">
+            <LanguageToggle />
+          </div>
+          <div className="absolute bottom-0 inset-x-0 z-[999] w-full bg-[rgb(var(--color-surface))] rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)] border-t border-[rgb(var(--color-border))] pb-safe transition-colors duration-300">
+          <nav className="flex items-center justify-around px-4 h-20 max-w-md mx-auto relative">
+            {tabs.map((tab) => {
+            const isActive = pathname === tab.path || (tab.path.startsWith('/student/dashboard#') && pathname === '/student/dashboard')
             const Icon = tab.icon
+
+            if (tab.isCenter) {
+              return (
+                <Link
+                  key={tab.label}
+                  href={tab.path}
+                  className="relative -top-6 flex flex-col items-center justify-center group"
+                >
+                  <div className="w-16 h-16 rounded-full bg-[rgb(var(--color-primary))] flex items-center justify-center shadow-app-hover text-white transition-transform duration-300 group-hover:scale-105 active:scale-95 border-4 border-[rgb(var(--color-void))]">
+                    <Icon className="w-8 h-8 stroke-[2.5]" />
+                  </div>
+                </Link>
+              )
+            }
 
             return (
               <Link
                 key={tab.label}
                 href={tab.path}
-                className="relative px-3.5 py-2 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all duration-300 group text-text-2 hover:text-text-1"
+                className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors duration-200 ${
+                  isActive ? 'text-[rgb(var(--color-primary))]' : 'text-[rgb(var(--color-text-3))] hover:text-[rgb(var(--color-text-1))]'
+                }`}
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="orbital-active-pill"
-                    className="absolute inset-0 bg-white/[0.04] border border-border/40 rounded-full"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                  />
-                )}
-                
-                <Icon className={`w-4 h-4 transition-transform duration-200 group-hover:scale-110 ${
-                  isActive ? 'text-primary' : 'text-text-2'
-                }`} />
-                
-                <span className={`hidden sm:inline ${isActive ? 'text-text-1 font-bold' : 'text-text-2'}`}>
-                  {tab.label}
-                </span>
-
-                {isActive && (
-                  <motion.span
-                    layoutId="orbital-active-dot"
-                    className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
-                  />
-                )}
+                <Icon className={`w-6 h-6 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
+                <span className="text-[10px] font-medium">{tab.label}</span>
               </Link>
             )
           })}
-        </nav>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="relative z-10">
-        {children}
-      </div>
+          </nav>
+        </div>
+        </>
+      )}
 
       {/* ----------------------------------------------------
           GLOBAL GAMIFICATION OVERLAYS

@@ -5,7 +5,8 @@ import { authOptions } from '@/lib/auth'
 // Live feed records simulated with relative timings
 export async function GET() {
   const session = await getServerSession(authOptions)
-  if (!session || (session.user as any)?.role !== 'ADMIN') {
+  const user = session?.user as { role?: string } | undefined
+  if (!session || user?.role !== 'ADMIN') {
     return NextResponse.json({ error: 'Forbidden. Admin credentials required.' }, { status: 403 })
   }
   const alerts = [
@@ -19,7 +20,7 @@ export async function GET() {
     {
       id: `alert-${Date.now()}-2`,
       type: 'BADGE',
-      message: 'Cadet Aarav Mehta awarded the "Highway Master" gold badge',
+      message: 'Student Aarav Mehta awarded the "Highway Master" gold badge',
       relativeTime: '8 mins ago',
       pulse: false
     },
@@ -48,3 +49,4 @@ export async function GET() {
 
   return NextResponse.json(alerts, { status: 200 })
 }
+

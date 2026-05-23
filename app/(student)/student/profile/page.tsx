@@ -1,0 +1,89 @@
+import React from 'react'
+import { db } from '@/lib/db'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { Bell, ArrowLeft, Edit2 } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+
+import { ThemeToggle } from '@/components/shared/ThemeToggle'
+import ProfileClient from './ProfileClient'
+
+
+
+export default async function ProfilePage() {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.email) return null
+
+  const user = await db.user.findUnique({
+    where: { email: session.user.email },
+    include: { student: { include: { instructor: { include: { user: true } } } } }
+  })
+
+  if (!user) return null
+
+  return (
+    <div className="min-h-screen bg-[rgb(var(--color-void))] font-body text-[rgb(var(--color-text-1))] pb-28">
+      
+      {/* -----------------------------
+          BLUE CURVED HEADER
+          ----------------------------- */}
+      <div className="bg-[rgb(var(--color-primary))] rounded-b-[40px] pt-12 pb-32 px-6 relative overflow-hidden text-white shadow-md">
+        {/* Decorative background curves */}
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/10 rounded-full blur-2xl transform translate-x-1/2 -translate-y-1/3" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-white/5 rounded-full blur-3xl transform -translate-x-1/3 translate-y-1/3" />
+        
+        <div className="max-w-md mx-auto relative z-10">
+          
+          {/* Top Bar */}
+          <div className="flex justify-between items-center mb-8">
+            <Link href="/student/dashboard" className="p-2 hover:bg-white/10 rounded-xl transition">
+              <ArrowLeft className="w-6 h-6 text-white" />
+            </Link>
+            <h1 className="text-lg font-bold font-display">Settings</h1>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Link href="/student/notifications" className="p-2 hover:bg-white/10 rounded-xl transition cursor-pointer">
+                <Bell className="w-6 h-6 text-white" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Avatar and Name */}
+          <div className="flex flex-col items-center">
+            <div className="w-24 h-24 rounded-full overflow-hidden border-[4px] border-[rgb(var(--color-primary))] shadow-lg relative">
+              {user.avatarUrl ? (
+                <Image src={user.avatarUrl} alt={user.name} fill sizes="96px" className="object-cover" />
+              ) : (
+                <div className="w-full h-full bg-white/20 flex items-center justify-center text-white text-3xl font-bold">
+                  {user.name.charAt(0)}
+                </div>
+              )}
+            </div>
+            
+            <h2 className="text-xl font-bold font-display mt-4">{user.name}</h2>
+            <p className="text-white/70 text-sm font-medium mt-0.5">UserID: {user.id.substring(0, 8)}</p>
+          </div>
+
+        </div>
+      </div>
+
+      {/* -----------------------------
+          MAIN CONTENT AREA (-mt to overlap header)
+          ----------------------------- */}
+      <div className="max-w-md mx-auto px-5 -mt-16 relative z-10 flex flex-col gap-6">
+        
+        {/* User Information Card */}
+        <ProfileClient initialUser={{
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          trainingType: user.student?.trainingType || 'BEGINNER',
+          avatarUrl: user.avatarUrl
+        }} />
+
+      </div>
+    </div>
+  )
+}

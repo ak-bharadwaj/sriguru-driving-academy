@@ -37,7 +37,7 @@ interface XPState {
   setPendingBadgeReveal: (badge: Badge | null) => void
 }
 
-export const useXPStore = create<XPState>()((set, get) => ({
+export const useXPStore = create<XPState>()((set) => ({
   currentXP: 0,
   level: 1,
   streakDays: 3, // Mocked initialized to 3 for daily streak triggers

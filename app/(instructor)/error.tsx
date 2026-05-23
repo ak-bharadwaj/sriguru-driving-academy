@@ -17,7 +17,7 @@ export default function InstructorDashboardError({
   return (
     <div className="min-h-screen bg-void text-text-1 font-body flex items-center justify-center p-6 relative">
       
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-danger/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-danger/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-md w-full bg-surface border border-border p-8 rounded-3xl shadow-2xl relative z-10 text-center flex flex-col items-center gap-6">
         
@@ -31,7 +31,7 @@ export default function InstructorDashboardError({
             Instructor Workspace Error
           </h2>
           <p className="text-xs text-text-2 mt-2 leading-relaxed font-medium">
-            Roster queries or telemetry synchronizers encountered an unexpected interruption.
+            Roster queries or Analytics synchronizers encountered an unexpected interruption.
           </p>
         </div>
 
@@ -48,3 +48,4 @@ export default function InstructorDashboardError({
     </div>
   )
 }
+

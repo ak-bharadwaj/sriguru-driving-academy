@@ -1,6 +1,8 @@
 import type { Config } from "tailwindcss";
+import { withUt } from "uploadthing/tw";
 
-const config: Config = {
+const config = withUt({
+  darkMode: 'class',
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -11,31 +13,33 @@ const config: Config = {
       colors: {
         // Specific custom tokens from ARCHITECTURE.md mapped to tailwind config
         void: {
-          DEFAULT: '#07090F', // Page background
+          DEFAULT: 'rgb(var(--color-void) / <alpha-value>)', // Page background
         },
         surface: {
-          DEFAULT: '#0D1117', // Card/panel background
+          DEFAULT: 'rgb(var(--color-surface) / <alpha-value>)', // Card/panel background
         },
         border: {
-          DEFAULT: 'rgba(255,255,255,0.07)', // All borders
+          DEFAULT: 'rgb(var(--color-border) / <alpha-value>)', // All borders
         },
         primary: {
-          DEFAULT: '#2563EB', // Electric blue - actions
+          DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)', // Electric blue - actions
         },
         accent: {
-          DEFAULT: '#F59E0B', // Amber - XP, rewards, highlights
+          DEFAULT: 'rgb(var(--color-accent) / <alpha-value>)', // Amber - XP, rewards, highlights
         },
         success: {
-          DEFAULT: '#10B981', // Green - completed, attendance
+          DEFAULT: 'rgb(var(--color-success) / <alpha-value>)', // Green - completed, attendance
         },
         danger: {
-          DEFAULT: '#EF4444', // Red - warnings, errors
+          DEFAULT: 'rgb(var(--color-danger) / <alpha-value>)', // Red - warnings, errors
         },
         text: {
-          1: '#F1F5F9', // Primary text
-          2: '#94A3B8', // Secondary text
-          3: '#475569', // Muted text
+          1: 'rgb(var(--color-text-1) / <alpha-value>)', // Primary text
+          2: 'rgb(var(--color-text-2) / <alpha-value>)', // Secondary text
+          3: 'rgb(var(--color-text-3) / <alpha-value>)', // Muted text
         },
+        'app-blue': '#4579FF',
+        'app-yellow': '#F9F1C5',
       },
       fontFamily: {
         display: ['var(--font-display)', 'sans-serif'],
@@ -57,8 +61,12 @@ const config: Config = {
         'smooth': 'var(--ease-smooth)',
         'snap': 'var(--ease-snap)',
       },
+      boxShadow: {
+        'app': '0 8px 30px rgba(0, 0, 0, 0.04)',
+        'app-hover': '0 10px 40px rgba(0, 0, 0, 0.08)',
+      },
     },
   },
   plugins: [],
-};
+});
 export default config;

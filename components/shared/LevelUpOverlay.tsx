@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Zap, Trophy } from 'lucide-react'
+import { Trophy } from 'lucide-react'
 import { useXPStore } from '@/lib/stores/xp-store'
 
 export const LevelUpOverlay: React.FC = () => {
@@ -80,7 +80,7 @@ export const LevelUpOverlay: React.FC = () => {
             </div>
 
             <div>
-              <span className="text-xs font-mono uppercase tracking-widest text-primary font-bold">CADET RANK ACQUIRED</span>
+              <span className="text-xs font-mono uppercase tracking-widest text-primary font-bold">Student RANK ACQUIRED</span>
               <h1 className="text-5xl font-extrabold text-text-1 font-display tracking-tighter mt-2 uppercase">
                 LEVEL {level}
               </h1>
@@ -100,3 +100,4 @@ export const LevelUpOverlay: React.FC = () => {
     </AnimatePresence>
   )
 }
+

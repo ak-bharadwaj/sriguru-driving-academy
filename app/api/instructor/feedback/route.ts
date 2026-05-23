@@ -7,11 +7,15 @@ export async function POST(request: Request) {
   try {
     // 0. Security Audit check: verify INSTRUCTOR role in active session
     const authSession = await getServerSession(authOptions)
-    if (!authSession || (authSession.user as any)?.role !== 'INSTRUCTOR') {
+    const user = authSession?.user as { id?: string; role?: string } | undefined
+    if (!authSession || user?.role !== 'INSTRUCTOR') {
       return NextResponse.json({ error: 'Forbidden. Instructor credentials required.' }, { status: 403 })
     }
-
-    const userId = (authSession.user as any).id
+ 
+    const userId = user?.id
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized. User ID not found.' }, { status: 401 })
+    }
     const instructor = await db.instructor.findUnique({
       where: { userId }
     })
@@ -47,8 +51,9 @@ export async function POST(request: Request) {
     })
 
     return NextResponse.json({ success: true, feedback }, { status: 200 })
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
     console.error('Submit feedback API Error:', error)
-    return NextResponse.json({ error: 'Failed to record feedback', details: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to record feedback', details: message }, { status: 500 })
   }
 }

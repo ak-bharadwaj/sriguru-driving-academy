@@ -65,6 +65,24 @@ enum NotificationType {
   BOOKING_APPROVED
   BOOKING_REJECTED
   STREAK_AT_RISK
+  PAYMENT_RECEIVED
+  TEST_SCHEDULED
+  TEST_RESULT
+  STREAK_LOST
+  NEW_CARD_UNLOCKED
+  CHALLENGE_COMPLETED
+}
+
+enum StudentStatus {
+  ACTIVE
+  COMPLETED
+  DROPPED
+}
+
+enum PreferredTime {
+  MORNING
+  AFTERNOON
+  EVENING
 }
 
 enum RoadmapPhase {
@@ -103,6 +121,19 @@ model User {
   @@index([email])
 }
 
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
+enum TestResult {
+  SCHEDULED
+  PASS
+  FAIL
+}
+
 model Student {
   id           String   @id @default(cuid())
   userId       String   @unique
@@ -111,6 +142,14 @@ model Student {
   instructor   Instructor? @relation(fields: [instructorId], references: [id])
   trainingType TrainingType @default(BEGINNER)
   enrolledAt   DateTime @default(now())
+
+  status       StudentStatus @default(ACTIVE)
+  hasOnboarded Boolean @default(false)
+  confidenceScore Float @default(0)
+
+  // Fee & Plan tracking
+  courseFee    Float?
+  feeStatus    PaymentStatus @default(PENDING)
 
   xp           Int      @default(0)
   level        Int      @default(1)
@@ -127,6 +166,14 @@ model Student {
   roadmapNodes StudentRoadmapNode[]
   quizAttempts QuizAttempt[]
   notifications Notification[]
+  payments     Payment[]
+  drivingTests DrivingTest[]
+  
+  activityLogs ActivityLog[]
+  dailyChallenges StudentDailyChallenge[]
+  sessionNotes SessionNote[]
+  cardProgress StudentCardProgress[]
+  skillMastery SkillMastery[]
 
   @@index([userId])
   @@index([instructorId])
@@ -144,6 +191,7 @@ model Instructor {
   sessions  Session[]
   slots     Slot[]
   dailyLogs InstructorLog[]
+  coachingNotes CoachingNote[]
 
   @@index([userId])
 }
@@ -169,8 +217,11 @@ model Session {
   notes        String?
   completedAt  DateTime?
   createdAt    DateTime      @default(now())
+  skillsCovered String[]
 
   attendance   Attendance?
+  studentNotes SessionNote[]
+  coachingNotes CoachingNote[]
 
   @@index([studentId])
   @@index([instructorId])
@@ -198,6 +249,7 @@ model Feedback {
   tag          String
   content      String
   skillScores  Json?
+  studentVisible Boolean @default(true)
   createdAt    DateTime @default(now())
 
   @@index([studentId])
@@ -209,6 +261,7 @@ model InstructorLog {
   instructor   Instructor @relation(fields: [instructorId], references: [id])
   date         DateTime   @default(now())
   content      String
+  skillsCovered Json?
 
   @@index([instructorId])
   @@unique([instructorId, date])
@@ -374,6 +427,7 @@ model Booking {
   email        String
   trainingType TrainingType
   status       BookingStatus @default(PENDING)
+  preferredTime PreferredTime?
   reference    String        @unique @default(cuid())
   notes        String?
   createdAt    DateTime      @default(now())
@@ -408,4 +462,150 @@ model Inquiry {
   message   String
   createdAt DateTime @default(now())
   resolved  Boolean  @default(false)
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id])
+  amount      Float
+  method      String   // CASH, UPI, CARD, BANK_TRANSFER
+  note        String?
+  receivedAt  DateTime @default(now())
+  recordedBy  String   // Admin user ID who recorded it
+
+  @@index([studentId])
+  @@index([receivedAt])
+}
+
+model DrivingTest {
+  id          String     @id @default(cuid())
+  studentId   String
+  student     Student    @relation(fields: [studentId], references: [id])
+  testDate    DateTime
+  testCenter  String?
+  result      TestResult @default(SCHEDULED)
+  attemptNo   Int        @default(1)
+  notes       String?
+  scheduledBy String     // Admin user ID
+  createdAt   DateTime   @default(now())
+
+  @@index([studentId])
+  @@index([testDate])
+}
+
+model Announcement {
+  id         String   @id @default(cuid())
+  title      String
+  message    String
+  expiryDate DateTime
+  createdAt  DateTime @default(now())
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+  action    String
+  xpEarned  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([studentId])
+  @@index([createdAt])
+}
+
+model DailyChallenge {
+  id        String   @id @default(cuid())
+  date      DateTime @unique
+  tasks     Json     
+  xpReward  Int      @default(25)
+}
+
+model StudentDailyChallenge {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+  date      DateTime
+  completedTasks Json 
+  claimed   Boolean  @default(false)
+
+  @@unique([studentId, date])
+  @@index([studentId])
+}
+
+model CoachingNote {
+  id           String     @id @default(cuid())
+  sessionId    String
+  session      Session    @relation(fields: [sessionId], references: [id])
+  instructorId String
+  instructor   Instructor @relation(fields: [instructorId], references: [id])
+  note         String
+  createdAt    DateTime   @default(now())
+
+  @@index([sessionId])
+  @@index([instructorId])
+}
+
+model SessionNote {
+  id        String   @id @default(cuid())
+  sessionId String
+  session   Session  @relation(fields: [sessionId], references: [id])
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+  note      String
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([studentId])
+}
+
+model Promotion {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  active      Boolean  @default(true)
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model Vehicle {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   
+  imageKey  String?
+  features  Json?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model GalleryImage {
+  id         String   @id @default(cuid())
+  imageKey   String
+  caption    String?
+  uploadedAt DateTime @default(now())
+}
+
+model StudentCardProgress {
+  id         String   @id @default(cuid())
+  studentId  String
+  student    Student  @relation(fields: [studentId], references: [id])
+  cardKey    String
+  studied    Boolean  @default(false)
+  quizPassed Boolean  @default(false)
+  updatedAt  DateTime @updatedAt
+
+  @@unique([studentId, cardKey])
+  @@index([studentId])
+}
+
+model SkillMastery {
+  id           String   @id @default(cuid())
+  studentId    String
+  student      Student  @relation(fields: [studentId], references: [id])
+  skillKey     String
+  masteryLevel String   @default("Novice") 
+  updatedAt    DateTime @updatedAt
+
+  @@unique([studentId, skillKey])
+  @@index([studentId])
 }

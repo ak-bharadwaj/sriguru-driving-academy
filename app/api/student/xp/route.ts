@@ -1,36 +1,29 @@
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { TrainingType } from '@prisma/client'
 
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user || (session.user as any).role !== 'STUDENT') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { amount } = await clientParseJson(request)
     if (typeof amount !== 'number') {
       return NextResponse.json({ error: 'XP amount must be a number' }, { status: 400 })
     }
 
-    // Retrieve the first student as the active session profile
-    let student = await db.student.findFirst()
+    // Retrieve the student based on the authenticated user ID
+    const userId = (session.user as any).id
+    let student = await db.student.findUnique({
+      where: { userId }
+    })
+
     if (!student) {
-      // Seed a default student if none exist
-      const defaultUser = await db.user.create({
-        data: {
-          email: 'cadet@sriguru.com',
-          name: 'Cadet Driver',
-          passwordHash: 'srigurustudent123',
-          role: 'STUDENT'
-        }
-      })
-      student = await db.student.create({
-        data: {
-          id: 'stu-session-1',
-          userId: defaultUser.id,
-          xp: 0,
-          level: 1,
-          streakDays: 3,
-          trainingType: TrainingType.BEGINNER
-        }
-      })
+      return NextResponse.json({ error: 'Student record not found for this user' }, { status: 404 })
     }
 
     const currentXP = student.xp + amount
@@ -73,9 +66,10 @@ export async function POST(request: Request) {
       currentXP: student.xp,
       neededXP: newLevel * 1000
     }, { status: 200 })
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
     console.error('XP reconcile API Error:', error)
-    return NextResponse.json({ error: 'XP reconciliation failed', details: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'XP reconciliation failed', details: message }, { status: 500 })
   }
 }
 
@@ -87,3 +81,4 @@ async function clientParseJson(request: Request) {
     return {}
   }
 }
+

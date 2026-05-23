@@ -21,8 +21,9 @@ export async function POST(request: Request) {
     console.log(`PUBLIC INQUIRY RECEIVED: name: ${name}, phone: ${phone}, message: ${message}`)
 
     return NextResponse.json({ success: true, inquiry }, { status: 200 })
-  } catch (error: any) {
+  } catch (error) {
+    const errMessage = error instanceof Error ? error.message : 'Unknown error'
     console.error('Public inquiry submit error:', error)
-    return NextResponse.json({ error: 'Failed to record inquiry', details: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to record inquiry', details: errMessage }, { status: 500 })
   }
 }

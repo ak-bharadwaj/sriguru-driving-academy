@@ -29,12 +29,36 @@ export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Real-time polling with SWR every 60s (free tier constraint)
-  const { data: notifications = [], mutate } = useSWR<Notification[]>(
+  // Fetch initial notifications once
+  const { data: initialNotifications = [], mutate } = useSWR<Notification[]>(
     '/api/notifications',
     fetcher,
-    { refreshInterval: 60000 }
+    { revalidateOnFocus: false, revalidateOnReconnect: true } // Removed aggressive polling
   )
+
+  const [liveNotifications, setLiveNotifications] = useState<Notification[]>([])
+  
+  // Combine initial and live notifications
+  const notifications = [...liveNotifications, ...initialNotifications].reduce((acc, curr) => {
+    if (!acc.find(n => n.id === curr.id)) acc.push(curr)
+    return acc
+  }, [] as Notification[]).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+
+  // SSE for real-time updates
+  useEffect(() => {
+    const eventSource = new EventSource('/api/notifications/stream')
+    
+    eventSource.onmessage = (event) => {
+      try {
+        const newNotifs = JSON.parse(event.data)
+        setLiveNotifications(prev => [...newNotifs, ...prev])
+      } catch (err) {}
+    }
+
+    return () => {
+      eventSource.close()
+    }
+  }, [])
 
   const unreadCount = notifications.filter(n => !n.read).length
 
@@ -53,8 +77,9 @@ export default function NotificationBell() {
   const handleMarkAsRead = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
     // Optimistic UI update
+    setLiveNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
     mutate(
-      notifications.map(n => (n.id === id ? { ...n, read: true } : n)),
+      initialNotifications.map(n => (n.id === id ? { ...n, read: true } : n)),
       false
     )
 
@@ -70,8 +95,9 @@ export default function NotificationBell() {
   // Mark all read
   const handleMarkAllRead = async () => {
     // Optimistic UI update
+    setLiveNotifications(prev => prev.map(n => ({ ...n, read: true })))
     mutate(
-      notifications.map(n => ({ ...n, read: true })),
+      initialNotifications.map(n => ({ ...n, read: true })),
       false
     )
 

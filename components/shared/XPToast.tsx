@@ -40,7 +40,7 @@ export const XPToast: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.9, filter: 'blur(2px)' }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-              className={`p-4 rounded-2xl border backdrop-blur-md flex items-center gap-3.5 shadow-2xl relative overflow-hidden pointer-events-auto ${
+              className={`p-3 rounded-xl border backdrop-blur-md flex items-center gap-2.5 shadow-xl relative overflow-hidden pointer-events-auto ${
                 isLevel 
                   ? 'bg-success/90 border-success/40 text-white shadow-success/15'
                   : isXP
@@ -49,10 +49,10 @@ export const XPToast: React.FC = () => {
               }`}
             >
               {/* Glow accent */}
-              <div className="absolute -left-10 -top-10 w-24 h-24 bg-current opacity-10 rounded-full blur-xl pointer-events-none" />
+              <div className="absolute -left-6 -top-6 w-16 h-16 bg-current opacity-10 rounded-full blur-xl pointer-events-none" />
 
               {/* Indicator icon */}
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
+              <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${
                 isLevel 
                   ? 'bg-white/10 text-white' 
                   : isXP 
@@ -60,23 +60,23 @@ export const XPToast: React.FC = () => {
                     : 'bg-primary/10 text-primary'
               }`}>
                 {isLevel ? (
-                  <Zap className="w-4 h-4 fill-current text-success-foreground" />
+                  <Zap className="w-3 h-3 fill-current text-success-foreground" />
                 ) : isXP ? (
-                  <Award className="w-4 h-4 fill-current" />
+                  <Award className="w-3 h-3 fill-current" />
                 ) : (
-                  <BadgeIcon className="w-4 h-4 fill-current" />
+                  <BadgeIcon className="w-3 h-3 fill-current" />
                 )}
               </div>
 
               {/* Content description */}
               <div className="flex flex-col text-left flex-1 min-w-0">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-text-3 font-semibold leading-none">
-                  {isLevel ? 'ACADEMY RANK UP' : isXP ? 'CADET REWARD' : 'CRITERION MET'}
+                <span className="text-[9px] font-mono uppercase tracking-widest text-text-3 font-semibold leading-none">
+                  {isLevel ? 'RANK UP' : isXP ? 'REWARD' : 'CRITERION'}
                 </span>
-                <h4 className="text-sm font-bold mt-1 leading-snug truncate font-display text-text-1">
+                <h4 className="text-xs font-bold mt-0.5 leading-snug truncate font-display text-text-1">
                   {toast.title}
                 </h4>
-                <p className="text-xs text-text-2 font-mono mt-0.5 leading-none">
+                <p className="text-[10px] text-text-2 font-mono mt-0.5 leading-none line-clamp-1">
                   {toast.description}
                 </p>
               </div>
@@ -87,3 +87,4 @@ export const XPToast: React.FC = () => {
     </div>
   )
 }
+

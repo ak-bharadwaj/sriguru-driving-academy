@@ -4,7 +4,6 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Mail, 
-  ArrowRight, 
   ArrowLeft, 
   CheckCircle, 
   AlertCircle 
@@ -40,7 +39,7 @@ export default function ForgotPasswordRequest() {
       } else {
         setError(data.error || 'Failed to trigger password recovery')
       }
-    } catch (err) {
+    } catch {
       setError('Connection failure during password reset operation')
     } finally {
       setLoading(false)
@@ -82,7 +81,7 @@ export default function ForgotPasswordRequest() {
               <input
                 type="email"
                 required
-                placeholder="cadet@sriguru.com"
+                placeholder="student@sriguru.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-void/60 border border-border focus:border-primary pl-10 pr-4 py-3 rounded-xl text-xs text-text-1 placeholder-text-3 transition-all duration-200 outline-none"
@@ -145,3 +144,4 @@ export default function ForgotPasswordRequest() {
     </div>
   )
 }
+

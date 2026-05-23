@@ -70,29 +70,11 @@ async function main() {
     include: { instructor: true }
   })
 
-  const i2User = await prisma.user.create({
-    data: {
-      email: 'priya@sriguru.in',
-      passwordHash: hash('instructor123'),
-      role: Role.INSTRUCTOR,
-      name: 'Priya Sharma',
-      instructor: {
-        create: {
-          bio: 'RTO theory specialist and emergency vehicle dynamics researcher.',
-          specialization: 'RTO Prep & Advanced Maneuvers',
-          yearsExp: 5
-        }
-      }
-    },
-    include: { instructor: true }
-  })
+
 
   // Students
   console.log('Seeding Students...')
-  const studentNames = [
-    'Arjun Reddy', 'Sneha Patel', 
-    'Vikram Singh', 'Kavya Nair', 'Rohit Mehta'
-  ]
+  const studentNames = ['Arjun Reddy']
   
   const createdStudents: any[] = []
   for (let i = 0; i < studentNames.length; i++) {
@@ -106,12 +88,8 @@ async function main() {
         name,
         student: {
           create: {
-            instructorId: i < 3 
-              ? i1User.instructor!.id 
-              : i2User.instructor!.id,
-            trainingType: i % 2 === 0 
-              ? TrainingType.BEGINNER 
-              : TrainingType.ADVANCED,
+            instructorId: i1User.instructor!.id,
+            trainingType: TrainingType.BEGINNER,
             xp: Math.floor(Math.random() * 800),
             level: Math.floor(Math.random() * 5) + 1,
             streakDays: Math.floor(Math.random() * 15),

@@ -1,8 +1,22 @@
 import { NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+
+interface Slot {
+  id: string
+  dayOfWeek: string
+  time: string
+  trainingType: string
+  maxCapacity: number
+  currentBooked: number
+  status: string
+  instructorId: string
+  createdAt?: string
+}
 
 // Resilient in-memory slot grid fallback in case DATABASE_URL is missing
-let localSlotsMemory: any[] = []
+let localSlotsMemory: Slot[] = []
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 const HOURS = ['8AM', '10AM', '12PM', '2PM', '4PM', '6PM']
@@ -14,7 +28,7 @@ function getClientIP(request: Request) {
 }
 
 function generateInitialSlots(trainingType: string) {
-  const list: any[] = []
+  const list: Slot[] = []
   
   DAYS.forEach(day => {
     HOURS.forEach((hour, idx) => {
@@ -67,14 +81,10 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'Beginner'
 
-    // Find or generate in-memory slots for this training type
+    // Find in-memory slots for this training type
     const existing = localSlotsMemory.filter(s => s.trainingType === type)
     let results = existing
-    if (existing.length === 0) {
-      const seeded = generateInitialSlots(type)
-      localSlotsMemory = [...localSlotsMemory, ...seeded]
-      results = seeded
-    }
+
 
     return NextResponse.json(results, { 
       status: 200,
@@ -82,8 +92,9 @@ export async function GET(request: Request) {
         'Cache-Control': 's-maxage=300, stale-while-revalidate'
       }
     })
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Failed to retrieve slots', details: error.message }, { status: 500 })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ error: 'Failed to retrieve slots', details: message }, { status: 500 })
   }
 }
 
@@ -105,6 +116,11 @@ export async function POST(request: Request) {
   }
 
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user || (session.user as any).role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized. Admin access required.' }, { status: 403 })
+    }
+
     const { dayOfWeek, time, trainingType, maxCapacity, instructorId, status } = await request.json()
     
     const newSlot = {
@@ -122,13 +138,19 @@ export async function POST(request: Request) {
     // Save to memory
     localSlotsMemory.push(newSlot)
     return NextResponse.json(newSlot, { status: 200 })
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Failed to create slot', details: error.message }, { status: 500 })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ error: 'Failed to create slot', details: message }, { status: 500 })
   }
 }
 
 export async function PUT(request: Request) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user || (session.user as any).role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized. Admin access required.' }, { status: 403 })
+    }
+
     const { id, status, currentBooked } = await request.json()
     
     // Update locally
@@ -140,7 +162,7 @@ export async function PUT(request: Request) {
     })
     const updated = localSlotsMemory.find(s => s.id === id)
     return NextResponse.json(updated, { status: 200 })
-  } catch (error: any) {
+  } catch {
     return NextResponse.json({ error: 'Slot modification failed' }, { status: 500 })
   }
 }

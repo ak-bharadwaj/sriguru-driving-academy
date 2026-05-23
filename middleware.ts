@@ -12,27 +12,11 @@ export async function middleware(request: NextRequest) {
 
   // If there's no token, redirect to login
   if (!token) {
+    if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const loginUrl = new URL('/login', request.url)
     // Save the original intended destination
     loginUrl.searchParams.set('callbackUrl', pathname)
     return NextResponse.redirect(loginUrl)
-  }
-
-  const role = token.role as string
-
-  // Protect /admin routes -> ADMIN role required
-  if (pathname.startsWith('/admin') && role !== 'ADMIN') {
-    return NextResponse.redirect(new URL('/unauthorized', request.url))
-  }
-
-  // Protect /instructor routes -> INSTRUCTOR or ADMIN required
-  if (pathname.startsWith('/instructor') && role !== 'INSTRUCTOR' && role !== 'ADMIN') {
-    return NextResponse.redirect(new URL('/unauthorized', request.url))
-  }
-
-  // Protect /student routes & /dashboard -> STUDENT or ADMIN required
-  if ((pathname.startsWith('/student') || pathname === '/dashboard') && role !== 'STUDENT' && role !== 'ADMIN') {
-    return NextResponse.redirect(new URL('/unauthorized', request.url))
   }
 
   return NextResponse.next()
@@ -44,6 +28,9 @@ export const config = {
     '/student/:path*',
     '/instructor/:path*',
     '/admin/:path*',
+    '/api/student/:path*',
+    '/api/instructor/:path*',
+    '/api/admin/:path*',
     '/dashboard'
   ]
 }

@@ -1,230 +1,315 @@
 "use client"
 
-import React, { useState } from 'react'
-import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { signIn, getSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { 
-  User, 
-  Lock, 
-  ArrowRight, 
-  Eye, 
-  EyeOff, 
-  AlertCircle,
-  HelpCircle
+  CarFront,
+  Lock,
+  Mail,
+  Loader2,
+  ArrowRight,
+  ShieldCheck
 } from 'lucide-react'
+import { useLanguageStore } from '@/store/languageStore'
+import Image from 'next/image'
 
-export default function AcademySignIn() {
+// ELEGANT SPRING VARIANTS
+const fadeUpSpring = {
+  hidden: { opacity: 0, y: 30 },
+  show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 70, damping: 20 } }
+} as const
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.1 }
+  }
+} as const
+
+const TRANSLATIONS = {
+  EN: {
+    title1: "Secure",
+    title2: "Access Portal",
+    subtitle: "Authenticate your identity to access premium curriculum, coaching rosters, and system telemetry.",
+    welcome: "Welcome Back",
+    welcomeSub: "Enter your credentials to continue",
+    email: "Email Address",
+    pass: "Password",
+    loginBtn: "Secure Login",
+    authBtn: "Authenticating...",
+    signupPrompt: "Don't have an account?",
+    signupBtn: "Create New Account"
+  },
+  HI: {
+    title1: "सुरक्षित",
+    title2: "एक्सेस पोर्टल",
+    subtitle: "प्रीमियम पाठ्यक्रम, कोचिंग रोस्टर और सिस्टम टेलीमेट्री तक पहुंचने के लिए कृपया अपनी पहचान प्रमाणित करें।",
+    welcome: "वापसी पर स्वागत है",
+    welcomeSub: "जारी रखने के लिए अपनी साख दर्ज करें",
+    email: "ईमेल पता",
+    pass: "पासवर्ड",
+    loginBtn: "सुरक्षित लॉगिन",
+    authBtn: "प्रमाणीकरण हो रहा है...",
+    signupPrompt: "क्या आपके पास खाता नहीं है?",
+    signupBtn: "नया खाता बनाएँ"
+  },
+  TE: {
+    title1: "సురక్షిత",
+    title2: "యాక్సెస్ పోర్టల్",
+    subtitle: "ప్రీమియం కరికులం మరియు సిస్టమ్ టెలిమెట్రీని యాక్సెస్ చేయడానికి దయచేసి ప్రామాణీకరించండి.",
+    welcome: "తిరిగి స్వాగతం",
+    welcomeSub: "కొనసాగించడానికి మీ ఆధారాలను నమోదు చేయండి",
+    email: "ఇమెయిల్ చిరునామా",
+    pass: "పాస్వర్డ్",
+    loginBtn: "సురక్షిత లాగిన్",
+    authBtn: "ప్రామాణీకరిస్తోంది...",
+    signupPrompt: "ఖాతా లేదా?",
+    signupBtn: "క్రొత్త ఖాతాను సృష్టించండి"
+  }
+}
+
+export default function CentralLoginHub() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const { language } = useLanguageStore()
+  const [mounted, setMounted] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const currentLang = mounted ? language : 'EN'
+  const t = TRANSLATIONS[(currentLang.toUpperCase() as keyof typeof TRANSLATIONS) || 'EN']
+
+  const [isAuthenticating, setIsAuthenticating] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setError(null)
-    if (!email.trim() || !password) {
-      setError('Please provide both email/phone and password details')
-      return
-    }
+    setIsAuthenticating(true)
+    setErrorMsg('')
 
-    setLoading(true)
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+
     try {
       const res = await signIn('credentials', {
-        email: email.trim(),
-        password,
-        redirect: false
+        redirect: false,
+        email,
+        password
       })
 
       if (res?.error) {
-        setError(res.error === 'CredentialsSignin' ? 'Invalid email or password combination' : res.error)
-        setLoading(false)
+        setErrorMsg('Invalid credentials. Please try again.')
+        setIsAuthenticating(false)
       } else {
-        // Authenticated successfully! Fetch user session to determine role redirect
-        const sessionRes = await fetch('/api/auth/session')
-        if (sessionRes.ok) {
-          const sessionData = await sessionRes.json()
-          const role = sessionData?.user?.role || 'STUDENT'
-          
-          if (role === 'ADMIN') {
-            router.push('/admin/dashboard')
-          } else if (role === 'INSTRUCTOR') {
-            router.push('/instructor/dashboard')
-          } else {
-            router.push('/student/dashboard')
-          }
-        } else {
-          router.push('/student/dashboard')
-        }
+        const session = await getSession()
+        const role = (session?.user as { role?: string })?.role
+
+        if (role === 'ADMIN') router.push('/admin/students')
+        else if (role === 'INSTRUCTOR') router.push('/instructor/schedule')
+        else router.push('/student/dashboard')
       }
-    } catch (err) {
-      setError('An unexpected validation error occurred during sign in')
-      setLoading(false)
+    } catch {
+      setErrorMsg('An unexpected error occurred.')
+      setIsAuthenticating(false)
+    }
+  }
+  const handleGoogleLogin = async () => {
+    setIsAuthenticating(true)
+    setErrorMsg('')
+    try {
+      // signIn with Google will redirect; role-based redirect handled in middleware
+      await signIn('google', { callbackUrl: '/student/dashboard' })
+    } catch {
+      setErrorMsg('Google sign-in failed. Please try again.')
+      setIsAuthenticating(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-void text-text-1 font-body flex overflow-hidden">
-      
+    <div className="min-h-screen w-full flex items-center justify-center bg-void relative overflow-hidden font-body px-4 py-8">
       {/* ----------------------------------------------------
-          LEFT 50% PANEL: BRANDING + ROAD VISUAL (SVG)
+          CINEMATIC BACKGROUND
           ---------------------------------------------------- */}
-      <div className="hidden lg:flex lg:w-1/2 bg-surface border-r border-border relative flex-col justify-between p-12 select-none overflow-hidden">
-        
-        {/* Repeating road-lane visual SVG */}
-        <div className="absolute inset-0 flex justify-center pointer-events-none opacity-20">
-          <svg className="w-[140px] h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <line x1="50" y1="0" x2="50" y2="100" stroke="var(--color-primary)" strokeWidth="3" strokeDasharray="10, 15" />
-          </svg>
-        </div>
-
-        <div>
-          <span className="text-[10px] font-mono text-primary uppercase font-bold tracking-widest block">
-            SRI GURU AUTH PORTAL
-          </span>
-          <h2 className="text-3xl font-extrabold text-text-1 font-display tracking-tight uppercase mt-1">
-            The future of<br />driving education
-          </h2>
-        </div>
-
-        {/* Conceptual visual dashboard card */}
-        <div className="relative bg-void/50 border border-border p-6 rounded-2xl flex flex-col gap-4 max-w-sm z-10 mx-auto">
-          <div className="flex justify-between items-center text-[10px] font-mono text-text-3 uppercase">
-            <span>COCKPIT TELEMETRIES</span>
-            <span className="text-accent animate-pulse">● LIVE CONNECTION</span>
-          </div>
-
-          <div className="h-0.5 bg-gradient-to-r from-primary to-transparent w-3/4 rounded-full" />
-          
-          <p className="text-xs text-text-2 leading-relaxed">
-            Access customized student roadmaps, real-time instructor feedback logs, and dynamic RTO examinations instantly.
-          </p>
-
-          <div className="flex gap-4 font-mono text-[9px] text-text-3 border-t border-border/40 pt-3 uppercase">
-            <span>LMV manual</span>
-            <span>•</span>
-            <span>defensive friction</span>
-          </div>
-        </div>
-
-        <div className="text-[9px] font-mono text-text-3 uppercase">
-          © 2024 SRI GURU DRIVING ACADEMY
-        </div>
-
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-primary/20 via-void to-void" />
+        <div className="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[120px]" />
+        <div className="absolute -bottom-[20%] -left-[10%] w-[60%] h-[60%] bg-accent/10 rounded-full blur-[140px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('/images/grid.svg')] opacity-5" />
       </div>
 
       {/* ----------------------------------------------------
-          RIGHT 50% PANEL: LOGIN FORM
+          GLASSMORPHISM LOGIN CARD
           ---------------------------------------------------- */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 md:px-16 py-12 relative">
-        
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      <motion.div 
+        variants={fadeUpSpring}
+        initial="hidden"
+        animate="show"
+        className="relative z-10 w-full max-w-[480px] flex flex-col"
+      >
+        {/* Brand Header */}
+        <div className="flex flex-col items-center justify-center mb-10 text-center">
+          <motion.div 
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', delay: 0.1, stiffness: 200 }}
+            className="w-16 h-16 bg-gradient-to-br from-primary to-blue-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-primary/30 mb-6 relative group overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+            <CarFront className="w-8 h-8 text-white" />
+          </motion.div>
+          <h1 className="text-3xl sm:text-4xl font-display font-extrabold tracking-tight text-text-1 mb-2">
+            {t.title1} <span className="text-primary">{t.title2}</span>
+          </h1>
+          <p className="text-sm text-text-3 font-medium px-4">
+            {t.subtitle}
+          </p>
+        </div>
 
-        <div className="max-w-md w-full mx-auto flex flex-col gap-8 text-left">
-          
-          <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-text-1 font-display tracking-tight uppercase">
-              Sign In to Academy
-            </h1>
-            <p className="text-xs text-text-2 mt-1.5 font-medium leading-relaxed font-body">
-              Provide your credential registries to access dashboards.
+        {/* Auth Form Card */}
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="bg-surface/80 backdrop-blur-xl border border-border/50 shadow-app-hover rounded-[32px] p-8 sm:p-10 relative overflow-hidden"
+        >
+          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-blue-400 to-accent" />
+
+          <div className="mb-8">
+            <h2 className="text-2xl font-display font-bold text-text-1 mb-1 tracking-tight">
+              {t.welcome}
+            </h2>
+            <p className="text-text-3 text-sm font-medium">
+              {t.welcomeSub}
             </p>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             
-            {/* Email/Phone Input */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[9px] font-mono text-text-3 uppercase font-bold">Email or Phone Registry</label>
-              <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
-                <input
-                  type="text"
-                  required
-                  placeholder="student@sriguru.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-surface border border-border focus:border-primary pl-10 pr-4 py-3 rounded-xl text-xs text-text-1 placeholder-text-3 transition-all duration-200 outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Password Input */}
-            <div className="flex flex-col gap-1.5">
-              <div className="flex justify-between items-center text-[9px] font-mono">
-                <label className="text-text-3 uppercase font-bold">Account Password</label>
-                <a 
-                  href="/forgot-password" 
-                  className="text-primary hover:underline uppercase font-bold"
-                >
-                  Forgot Password?
-                </a>
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-3" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-surface border border-border focus:border-primary pl-10 pr-12 py-3 rounded-xl text-xs text-text-1 placeholder-text-3 transition-all duration-200 outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-text-3 hover:text-text-2 rounded-lg"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Inline Error Displays (No toasts) */}
             <AnimatePresence>
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="bg-danger/10 border border-danger/25 text-danger px-4 py-3 rounded-xl flex items-start gap-2.5 text-xs font-medium"
+              {errorMsg && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0, y: -10 }}
+                  animate={{ opacity: 1, height: 'auto', y: 0 }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-6 p-4 bg-danger/10 border border-danger/20 text-danger text-sm rounded-2xl font-medium flex items-center gap-3"
                 >
-                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                  <span>{error}</span>
+                  <Lock className="w-4 h-4 shrink-0" />
+                  {errorMsg}
                 </motion.div>
               )}
             </AnimatePresence>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="mt-2 w-full py-3.5 bg-primary hover:bg-primary/95 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-primary/10 flex items-center justify-center gap-1.5 transition-all duration-200 disabled:opacity-40"
-            >
-              {loading ? 'Validating Registry...' : 'Sign In to Dashboard'}
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-
-          </form>
-
-          {/* New student booking link */}
-          <div className="text-center border-t border-border/80 pt-6 font-mono text-[10px]">
-            <span className="text-text-3 uppercase">New cadet? </span>
-            <a 
-              href="/booking" 
-              className="text-accent hover:underline uppercase font-bold ml-1"
-            >
-              Book a Trial Demo first
-            </a>
           </div>
 
-        </div>
+          {/* Google Sign-In Button */}
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={isAuthenticating}
+            className="w-full flex items-center justify-center gap-3 py-4 bg-white hover:bg-gray-50 dark:bg-white/10 dark:hover:bg-white/15 border border-gray-200 dark:border-white/10 rounded-2xl font-bold text-sm text-gray-700 dark:text-white transition-all duration-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 disabled:opacity-60 disabled:hover:translate-y-0 mb-2"
+          >
+            {/* Google Logo SVG */}
+            <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Continue with Google
+          </button>
 
-      </div>
+          {/* Divider */}
+          <div className="relative flex items-center gap-3 my-2">
+            <div className="flex-1 h-px bg-border/60" />
+            <span className="text-[11px] font-mono text-text-3 uppercase tracking-widest">or sign in with email</span>
+            <div className="flex-1 h-px bg-border/60" />
+          </div>
 
+          <form onSubmit={handleLogin} className="flex flex-col gap-5 mt-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-[11px] font-bold text-text-3 ml-1 font-mono uppercase tracking-widest">{t.email}</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-3 group-focus-within:text-primary transition-colors">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <input 
+                  name="email"
+                  type="email" 
+                  required
+                  placeholder="hello@example.com"
+                  className="w-full bg-void/30 hover:bg-void/50 border border-border/50 rounded-2xl pl-12 pr-4 py-4 text-text-1 placeholder:text-text-3/50 focus:outline-none focus:bg-surface focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all shadow-sm font-body text-sm font-medium"
+                />
+              </div>
+            </div>
+            
+            <div className="flex flex-col gap-2">
+              <label className="text-[11px] font-bold text-text-3 ml-1 font-mono uppercase tracking-widest">{t.pass}</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-3 group-focus-within:text-primary transition-colors">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <input 
+                  name="password"
+                  type="password" 
+                  required
+                  placeholder="••••••••"
+                  className="w-full bg-void/30 hover:bg-void/50 border border-border/50 rounded-2xl pl-12 pr-4 py-4 text-text-1 placeholder:text-text-3/50 focus:outline-none focus:bg-surface focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all shadow-sm font-body text-sm font-medium"
+                />
+              </div>
+            </div>
+
+            <button 
+              type="submit" 
+              disabled={isAuthenticating}
+              className="w-full mt-6 py-4 bg-primary hover:bg-primary/95 text-white font-bold rounded-2xl transition-all duration-300 shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-1 flex items-center justify-center gap-3 disabled:opacity-70 disabled:hover:translate-y-0 relative overflow-hidden group"
+            >
+              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out" />
+              
+              {isAuthenticating ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="font-display tracking-wide">{t.authBtn}</span>
+                </>
+              ) : (
+                <>
+                  <span className="font-display tracking-wide text-[15px]">{t.loginBtn}</span>
+                  <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                </>
+              )}
+            </button>
+            
+            <div className="mt-2 text-center flex flex-col items-center justify-center">
+              <span className="text-[13px] text-text-3 font-medium">{t.signupPrompt}</span>
+              <button 
+                type="button" 
+                onClick={() => router.push('/booking')}
+                className="mt-1 text-[13px] text-primary font-bold hover:underline transition-all"
+              >
+                {t.signupBtn}
+              </button>
+            </div>
+          </form>
+
+        </motion.div>
+
+        {/* Bottom Trust Badge */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6, duration: 1 }}
+          className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 text-center"
+        >
+          <div className="flex items-center gap-2 px-4 py-2 bg-surface/50 rounded-full border border-border backdrop-blur-sm">
+            <ShieldCheck className="w-4 h-4 text-success" />
+            <span className="text-[11px] font-mono text-text-2 uppercase tracking-wider">Enterprise Security Layer</span>
+          </div>
+          <button type="button" className="text-xs text-text-3 font-medium hover:text-primary transition-colors">
+            Contact Support
+          </button>
+        </motion.div>
+
+      </motion.div>
     </div>
   )
 }

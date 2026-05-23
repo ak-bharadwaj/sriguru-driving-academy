@@ -1,8 +1,22 @@
 "use client"
 
 import React, { useState } from 'react'
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
-import { Award, AlertTriangle, ShieldAlert, Check, HelpCircle, ArrowRight, X } from 'lucide-react'
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion'
+import { Award, AlertTriangle, ShieldAlert, Check, HelpCircle, X } from 'lucide-react'
+import { ParallelParkingSimulation } from './ParallelParkingSimulation'
+import { ReverseBayParkingSimulation } from './ReverseBayParkingSimulation'
+import { 
+  VehicleStartupSimulation, 
+  SteeringControlSimulation, 
+  ClutchControlSimulation, 
+  HighwayMergingSimulation 
+} from './DynamicHTMLSimulations'
+import {
+  ThreePointTurnSimulation,
+  EmergencyBrakingSimulation,
+  RoundaboutSimulation,
+  NightDrivingSimulation
+} from './AdvancedDrivingSimulations'
 
 export interface QuizData {
   question: string
@@ -16,7 +30,18 @@ export interface LearningCardData {
   title: string
   category: string
   signImage?: string | null
-  content: string // JSON representation
+  content?: string | null // JSON representation
+  slug?: string
+  phase?: string
+  xpReward?: number
+  steps?: string[] | any
+  commonMistakes?: string[] | any
+  instructorTips?: string[] | any
+  safetyWarnings?: string[] | any
+  quizQuestion?: string
+  quizOptions?: string[] | any
+  quizAnswer?: string
+  orderIndex?: number
 }
 
 interface ParsedCardContent {
@@ -46,21 +71,51 @@ export const LearningCard: React.FC<LearningCardProps> = ({
   isNextCard1 = false,
   isNextCard2 = false
 }) => {
-  // Parse JSON content safely
+  // Parse JSON content safely or map directly from flat object fields
   let parsedContent: ParsedCardContent
-  try {
-    parsedContent = JSON.parse(card.content)
-  } catch (e) {
+  if (card.steps && Array.isArray(card.steps)) {
+    const steps = card.steps as string[]
+    const commonMistakes = Array.isArray(card.commonMistakes)
+      ? card.commonMistakes.join(', ')
+      : (card.commonMistakes || '')
+    const safetyWarning = Array.isArray(card.safetyWarnings)
+      ? card.safetyWarnings.join(', ')
+      : (card.safetyWarnings || '')
+    const quizOptions = Array.isArray(card.quizOptions) ? (card.quizOptions as string[]) : []
+    const correctIndex = quizOptions.findIndex(opt => opt === card.quizAnswer) !== -1
+      ? quizOptions.findIndex(opt => opt === card.quizAnswer)
+      : 0
+    const explanation = Array.isArray(card.instructorTips)
+      ? card.instructorTips.join('. ')
+      : (card.instructorTips || 'Follow correct practice guidelines.')
+
     parsedContent = {
-      steps: ['Ensure cockpit parameters match visual drill guidelines.'],
-      commonMistakes: 'Skipping cabin validation mirrors check.',
-      safetyWarning: 'Never disengage gear check disconnections.',
-      xpReward: 50,
+      steps,
+      commonMistakes,
+      safetyWarning,
+      xpReward: card.xpReward || 10,
       quiz: {
-        question: 'Standard check default placeholder?',
-        options: ['Check', 'Ignore', 'Skip', 'Fasten'],
-        correctIndex: 0,
-        explanation: 'Baseline default parameters.'
+        question: card.quizQuestion || 'Verify your understanding of this skill.',
+        options: quizOptions.length > 0 ? quizOptions : ['Correct', 'Incorrect'],
+        correctIndex,
+        explanation
+      }
+    }
+  } else {
+    try {
+      parsedContent = JSON.parse(card.content || '')
+    } catch {
+      parsedContent = {
+        steps: ['Ensure cockpit parameters match visual drill guidelines.'],
+        commonMistakes: 'Skipping cabin validation mirrors check.',
+        safetyWarning: 'Never disengage gear check disconnections.',
+        xpReward: 50,
+        quiz: {
+          question: 'Standard check default placeholder?',
+          options: ['Check', 'Ignore', 'Skip', 'Fasten'],
+          correctIndex: 0,
+          explanation: 'Baseline default parameters.'
+        }
       }
     }
   }
@@ -75,7 +130,7 @@ export const LearningCard: React.FC<LearningCardProps> = ({
   const opacity = useTransform(dragX, [-200, -150, 0, 150, 200], [0.5, 1, 1, 1, 0.5])
 
   // Handle pointer end velocity drag check
-  const handleDragEnd = (event: any, info: any) => {
+  const handleDragEnd = (_event: unknown, info: PanInfo) => {
     const swipeThreshold = 140
     const swipeVelocity = info.velocity.x
 
@@ -173,51 +228,75 @@ export const LearningCard: React.FC<LearningCardProps> = ({
         {/* Active Card Body Grid */}
         <div className="w-full h-full flex flex-col justify-between">
           
-          {/* Top 40% illustration area: abstract road geometric scene */}
+          {/* Top 40% illustration area: abstract road geometric scene or simulator */}
           <div className="h-[35%] bg-gradient-to-b from-void to-primary/20 relative overflow-hidden flex items-center justify-center border-b border-border">
-            
-            {/* Absolute positioning of abstract SVGs */}
-            <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="roadGrad" x1="0%" y1="100%" x2="0%" y2="0%">
-                  <stop offset="0%" stopColor="#0D1117" />
-                  <stop offset="100%" stopColor="#1E293B" stopOpacity="0.8" />
-                </linearGradient>
-              </defs>
-              {/* Sky sunset glow */}
-              <circle cx="200" cy="40" r="160" fill="url(#roadGrad)" className="opacity-40" />
-              <circle cx="200" cy="50" r="80" fill="var(--color-accent)" className="opacity-[0.05] blur-xl" />
-              
-              {/* Mountain Silhouettes */}
-              <path d="M-20,110 L60,50 L140,110 L220,70 L340,110 Z" fill="#07090F" opacity="0.6" />
-              <path d="M80,110 L180,60 L280,110 L380,80 L480,110 Z" fill="#07090F" opacity="0.8" />
+            {card.slug === 'parallel-parking' ? (
+              <ParallelParkingSimulation />
+            ) : card.slug === 'reverse-parking' ? (
+              <ReverseBayParkingSimulation />
+            ) : card.slug === 'vehicle-startup' ? (
+              <VehicleStartupSimulation />
+            ) : card.slug === 'steering-control' ? (
+              <SteeringControlSimulation />
+            ) : card.slug === 'clutch-control' ? (
+              <ClutchControlSimulation />
+            ) : card.slug === 'highway-merging' ? (
+              <HighwayMergingSimulation />
+            ) : card.slug === 'three-point-turn' ? (
+              <ThreePointTurnSimulation />
+            ) : card.slug === 'emergency-braking' ? (
+              <EmergencyBrakingSimulation />
+            ) : card.slug === 'roundabout' ? (
+              <RoundaboutSimulation />
+            ) : card.slug === 'night-driving' ? (
+              <NightDrivingSimulation />
+            ) : (
+              <>
+                {/* Absolute positioning of abstract SVGs */}
+                <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="roadGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                      <stop offset="0%" stopColor="var(--color-surface)" />
+                      <stop offset="100%" stopColor="var(--color-void)" />
+                    </linearGradient>
+                  </defs>
+                  {/* Sky sunset glow */}
+                  <circle cx="200" cy="40" r="160" fill="url(#roadGrad)" className="opacity-40" />
+                  
+                  {/* Mountain Silhouettes - Soft Theme Colors */}
+                  <path d="M-20,110 L60,50 L140,110 L220,70 L340,110 Z" className="fill-slate-200 dark:fill-slate-900" opacity="0.6" />
+                  <path d="M80,110 L180,60 L280,110 L380,80 L480,110 Z" className="fill-slate-300 dark:fill-slate-800" opacity="0.8" />
 
-              {/* Tapering road lanes */}
-              <path d="M140,110 L260,110 L205,30 L195,30 Z" fill="#090D14" stroke="rgba(255,255,255,0.03)" />
-              {/* Highway side boundaries */}
-              <line x1="140" y1="110" x2="195" y2="30" stroke="var(--color-primary)" strokeWidth="2.5" className="opacity-70" />
-              <line x1="260" y1="110" x2="205" y2="30" stroke="var(--color-primary)" strokeWidth="2.5" className="opacity-70" />
-              
-              {/* Dashed center lane divider line */}
-              <line x1="200" y1="110" x2="200" y2="30" stroke="var(--color-accent)" strokeWidth="1.5" strokeDasharray="6,8" className="opacity-80" />
-            </svg>
+                  {/* Tapering road lanes */}
+                  <path d="M140,110 L260,110 L205,30 L195,30 Z" className="fill-slate-100 dark:fill-slate-950" stroke="var(--color-border)" strokeWidth="0.5" />
+                  
+                  {/* Highway side boundaries */}
+                  <line x1="140" y1="110" x2="195" y2="30" stroke="var(--color-primary)" strokeWidth="1.5" className="opacity-60" />
+                  <line x1="260" y1="110" x2="205" y2="30" stroke="var(--color-primary)" strokeWidth="1.5" className="opacity-60" />
+                  
+                  {/* Dashed center lane divider line */}
+                  <line x1="200" y1="110" x2="200" y2="30" stroke="var(--color-accent)" strokeWidth="1" strokeDasharray="4,5" className="opacity-60" />
+                </svg>
+              </>
+            )}
 
             {/* Title Badge overlays */}
-            <div className="absolute top-4 left-4 bg-void/60 border border-border px-3 py-1 rounded-full text-[10px] font-mono text-text-3">
+            <div className="absolute top-3 left-3 bg-surface/85 backdrop-blur-xs border border-border px-2.5 py-0.5 rounded-full text-[9px] font-mono text-text-2 z-30">
               SKILL {cardIndex + 1} OF {totalCards}
             </div>
 
-            <div className="absolute top-4 right-4 bg-accent/20 border border-accent/30 px-2.5 py-1 rounded-full flex items-center gap-1">
-              <Award className="w-3.5 h-3.5 text-accent fill-accent" />
-              <span className="text-[10px] font-bold text-accent font-mono">+{parsedContent.xpReward} XP</span>
+            <div className="absolute top-3 right-3 bg-accent/15 border border-accent/30 px-2 py-0.5 rounded-full flex items-center gap-1 z-30">
+              <Award className="w-3 text-accent fill-accent" />
+              <span className="text-[9px] font-bold text-accent font-mono">+{parsedContent.xpReward} XP</span>
             </div>
+          </div>
 
-            <div className="relative z-10 text-center px-6">
-              <span className="text-[10px] text-primary uppercase font-mono tracking-widest block">{card.category} Module</span>
-              <h3 className="text-xl font-extrabold text-text-1 font-display tracking-tight mt-1">
-                {card.title}
-              </h3>
-            </div>
+          {/* Dedicated High-Contrast Card Header */}
+          <div className="px-5 py-3 border-b border-border/40 bg-surface">
+            <span className="text-[10px] text-primary uppercase font-mono tracking-widest block font-bold">{card.category} Module</span>
+            <h3 className="text-base font-extrabold text-text-1 font-display tracking-tight mt-0.5 leading-tight">
+              {card.title}
+            </h3>
           </div>
 
           {/* Middle Section: Staggered step-by-step lists */}

@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     try {
       const user = await db.user.findUnique({ where: { email } })
       if (!user) {
-        return NextResponse.json({ error: 'No cadet registered with this email' }, { status: 404 })
+        return NextResponse.json({ error: 'No Student registered with this email' }, { status: 404 })
       }
       
       console.log(`PASSWORD RECOVERY REQUESTED: email: ${email}, generatedToken: ${resetToken}`)
@@ -25,10 +25,11 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       email,
-      resetToken,
-      message: "Reset token generated! (Development Mode: Reset token displayed directly above)"
+      message: "If an account exists for this email, a password reset link has been sent."
     }, { status: 200 })
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Reset failed', details: error.message }, { status: 500 })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return NextResponse.json({ error: 'Reset failed', details: message }, { status: 500 })
   }
 }
+

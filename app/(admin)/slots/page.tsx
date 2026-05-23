@@ -1,23 +1,19 @@
+
+
+
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  Calendar, 
   Clock, 
   Plus, 
   Check, 
   X, 
-  User, 
   Phone, 
   Mail, 
   CheckCircle, 
-  XCircle, 
-  AlertTriangle,
-  Sliders,
-  Award,
-  ChevronRight,
-  ShieldAlert
+  Award
 } from 'lucide-react'
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -63,7 +59,7 @@ export default function AdminSlotManagement() {
   // Feedback notifications
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       // 1. Fetch slots for the current selected type
       const slotsRes = await fetch(`/api/public/slots?type=${selectedType}`)
@@ -81,7 +77,7 @@ export default function AdminSlotManagement() {
     } catch (e) {
       console.error(e)
     }
-  }
+  }, [selectedType])
 
   useEffect(() => {
     const initFetch = async () => {
@@ -90,7 +86,7 @@ export default function AdminSlotManagement() {
       setLoading(false)
     }
     initFetch()
-  }, [selectedType])
+  }, [fetchData])
 
   const triggerToast = (msg: string) => {
     setToastMessage(msg)
@@ -153,6 +149,12 @@ export default function AdminSlotManagement() {
   // BOOKING APPROVALS WORKSPACE ACTIONS
   // ----------------------------------------------------
   const handleBookingResolution = async (id: string, status: 'APPROVED' | 'REJECTED') => {
+    // 1. Snapshot previous state for rollback
+    const previousBookings = [...bookings]
+    
+    // 2. Optimistic UI update
+    setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b))
+
     try {
       const res = await fetch('/api/public/bookings', {
         method: 'PUT',
@@ -161,12 +163,19 @@ export default function AdminSlotManagement() {
       })
 
       if (res.ok) {
-        // Trigger mock notification alert to the student
-        triggerToast(`Booking ${id.substring(3)} ${status.toUpperCase()}! Mapped mockup notification dispatched to student.`)
+        // Trigger notification alert to the student
+        triggerToast(`Booking ${id.substring(3)} ${status.toUpperCase()}! Notification dispatched to student.`)
         fetchData()
+      } else {
+        // Rollback on failure
+        setBookings(previousBookings)
+        triggerToast(`Failed to update booking status.`)
       }
     } catch (e) {
       console.error(e)
+      // Rollback on network error
+      setBookings(previousBookings)
+      triggerToast(`Network error. Booking update reverted.`)
     }
   }
 
@@ -233,7 +242,7 @@ export default function AdminSlotManagement() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-40 gap-3">
             <Clock className="w-8 h-8 text-primary animate-spin" />
-            <span className="text-[10px] text-text-3 font-mono">LOADING OPERATIONS CALENDAR MATRIX...</span>
+            <span className="text-[10px] text-text-3 font-mono">LOADING OPERATIONS CALENDAR Dashboard...</span>
           </div>
         ) : (
           
@@ -470,7 +479,7 @@ export default function AdminSlotManagement() {
             <div className="bg-surface border border-border rounded-3xl p-5 flex flex-col gap-4 shadow-lg">
               
               <div className="flex justify-between items-center border-b border-border/40 pb-3">
-                <span className="text-xs font-bold text-text-1 uppercase font-display">Pending cadet approvals</span>
+                <span className="text-xs font-bold text-text-1 uppercase font-display">Pending Student approvals</span>
                 <span className="text-[9px] font-mono text-text-3 uppercase">Real-Time</span>
               </div>
 
@@ -559,3 +568,4 @@ export default function AdminSlotManagement() {
     </div>
   )
 }
+

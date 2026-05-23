@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { rateLimit } from '@/lib/rate-limit'
 
-export async function GET(request: Request) {
+export async function GET() {
   // Simple check for booking lists in admin dashboard (GET is public but used by Admin HUD)
   try {
     let list = []
@@ -47,9 +47,10 @@ export async function GET(request: Request) {
         'Cache-Control': 's-maxage=60, stale-while-revalidate=30'
       }
     })
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
     console.error('Fetch bookings API Error:', error)
-    return NextResponse.json({ error: 'Failed to retrieve bookings logs', details: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to retrieve bookings logs', details: message }, { status: 500 })
   }
 }
 
@@ -86,11 +87,11 @@ export async function POST(request: Request) {
           name,
           email,
           phone,
-          trainingType: trainingType as any,
+          trainingType: trainingType as import('@prisma/client').TrainingType,
           status: 'PENDING'
         }
       })
-    } catch (e) {
+    } catch {
       console.warn('PostgreSQL write bypassed. Successfully simulated booking registration locally.')
     }
 
@@ -99,14 +100,23 @@ export async function POST(request: Request) {
       bookingRef,
       message: "We'll call you within 24 hours"
     }, { status: 200 })
-  } catch (error: any) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
     console.error('Booking submission API Error:', error)
-    return NextResponse.json({ error: 'Booking failed', details: error.message }, { status: 500 })
+    return NextResponse.json({ error: 'Booking failed', details: message }, { status: 500 })
   }
 }
 
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+
 export async function PUT(request: Request) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user || ((session.user as any).role !== 'ADMIN' && (session.user as any).role !== 'INSTRUCTOR')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { id, status } = await request.json()
     
     try {
@@ -118,7 +128,7 @@ export async function PUT(request: Request) {
     } catch {
       return NextResponse.json({ success: true, booking: { id, status } }, { status: 200 })
     }
-  } catch (error: any) {
+  } catch {
     return NextResponse.json({ error: 'Booking status modification failed' }, { status: 500 })
   }
 }
