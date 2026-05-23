@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import "@uploadthing/react/styles.css";
+import { Analytics } from "@vercel/analytics/next";
 
 import { GlobalTopNav } from "@/components/shared/GlobalTopNav";
 import { AuthProvider } from "@/components/providers/AuthProvider";
@@ -50,6 +51,7 @@ export default function RootLayout({
             </main>
           </div>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
