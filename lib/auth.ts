@@ -83,18 +83,52 @@ export const authOptions: NextAuthOptions = {
         // ----------------------------------------------------
         if (email.includes('student')) {
           loginAttempts.delete(email) // Clear on success
+          let dbUserId = 'mock-student-id-123';
+          let dbUserName = 'Gaurav Singh (Mock)';
+          try {
+            let dbUser = await prisma.user.findUnique({ where: { email } });
+            if (!dbUser) {
+              dbUser = await prisma.user.create({
+                data: {
+                  email,
+                  name: 'Simulated Student',
+                  passwordHash: '', // mock
+                  role: 'STUDENT'
+                }
+              });
+              await prisma.student.create({
+                data: {
+                  userId: dbUser.id,
+                  trainingType: 'BEGINNER',
+                  status: 'ACTIVE'
+                }
+              });
+            }
+            dbUserId = dbUser.id;
+            dbUserName = dbUser.name;
+          } catch (e) {}
+
           return {
-            id: 'mock-student-id-123',
+            id: dbUserId,
             email,
-            name: 'Gaurav Singh (Mock)',
+            name: dbUserName,
             role: 'STUDENT'
           }
         } else if (email.includes('instructor') || email.includes('rajesh')) {
           loginAttempts.delete(email) // Clear on success
+          let dbUserId = 'mock-instructor-id-123';
+          let dbUserName = 'Rajesh Kumar (Mock)';
+          try {
+            let dbUser = await prisma.user.findUnique({ where: { email } });
+            if (dbUser) {
+              dbUserId = dbUser.id;
+              dbUserName = dbUser.name;
+            }
+          } catch (e) {}
           return {
-            id: 'mock-instructor-id-123',
+            id: dbUserId,
             email,
-            name: 'Rajesh Kumar (Mock)',
+            name: dbUserName,
             role: 'INSTRUCTOR'
           }
         } else if (email.includes('admin')) {

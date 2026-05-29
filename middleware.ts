@@ -19,6 +19,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
+  // Redirect root role paths to their respective dashboards
+  if (pathname === '/admin') {
+    return NextResponse.redirect(new URL('/admin/dashboard', request.url))
+  }
+  if (pathname === '/instructor') {
+    return NextResponse.redirect(new URL('/instructor/dashboard', request.url))
+  }
+  if (pathname === '/student') {
+    return NextResponse.redirect(new URL('/student/dashboard', request.url))
+  }
+
   return NextResponse.next()
 }
 

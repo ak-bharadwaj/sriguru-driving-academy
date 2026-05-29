@@ -3,95 +3,121 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { Award, Users, Calendar, MessageSquare, TrendingUp, Power } from 'lucide-react'
+import { Award, Users, Calendar, MessageSquare, TrendingUp, Zap } from 'lucide-react'
 import { useLanguageStore } from '@/store/languageStore'
-import { Breadcrumbs } from '@/components/shared/Breadcrumbs'
+import { LanguageToggle } from '@/components/shared/LanguageToggle'
+import { ThemeToggle } from '@/components/shared/ThemeToggle'
 
-const INSTRUCTOR_BOTTOM_NAV_T = {
-  EN: [
-    { label: 'Console', path: '/instructor/dashboard', icon: Award },
-    { label: 'Roster', path: '/instructor/students', icon: Users },
-    { label: 'Live', path: '/instructor/schedule', icon: Power, isCenter: true },
-    { label: 'Notes', path: '/instructor/coaching-notes', icon: MessageSquare },
-    { label: 'Analytics', path: '/instructor/analytics', icon: TrendingUp }
-  ],
-  HI: [
-    { label: 'कंसोल', path: '/instructor/dashboard', icon: Award },
-    { label: 'रोस्टर', path: '/instructor/students', icon: Users },
-    { label: 'लाइव', path: '/instructor/schedule', icon: Power, isCenter: true },
-    { label: 'नोट्स', path: '/instructor/coaching-notes', icon: MessageSquare },
-    { label: 'विश्लेषिकी', path: '/instructor/analytics', icon: TrendingUp }
-  ],
-  TE: [
-    { label: 'కన్సోల్', path: '/instructor/dashboard', icon: Award },
-    { label: 'రోస్టర్', path: '/instructor/students', icon: Users },
-    { label: 'లైవ్', path: '/instructor/schedule', icon: Power, isCenter: true },
-    { label: 'గమనికలు', path: '/instructor/coaching-notes', icon: MessageSquare },
-    { label: 'విశ్లేషణలు', path: '/instructor/analytics', icon: TrendingUp }
-  ]
+type NavTab = {
+  label: string
+  labelHI: string
+  labelTE: string
+  path: string
+  icon: React.ComponentType<{ className?: string }>
+  isCenter?: boolean
 }
 
-export default function InstructorConsoleLayout({
-  children
-}: {
-  children: React.ReactNode
-}) {
+const INSTRUCTOR_NAV: NavTab[] = [
+  { label: 'Console',   labelHI: 'कंसोल',        labelTE: 'కన్సోల్',       path: '/instructor/dashboard',       icon: Award },
+  { label: 'Roster',    labelHI: 'रोस्टर',       labelTE: 'రోస్టర్',       path: '/instructor/students',        icon: Users },
+  { label: 'Schedule',  labelHI: 'शेड्यूल',      labelTE: 'షెడ్యూల్',      path: '/instructor/schedule',        icon: Zap, isCenter: true },
+  { label: 'Notes',     labelHI: 'नोट्स',        labelTE: 'నోట్స్',        path: '/instructor/coaching-notes',  icon: MessageSquare },
+  { label: 'Analytics', labelHI: 'विश्लेषिकी',   labelTE: 'విశ్లేషణలు',   path: '/instructor/analytics',       icon: TrendingUp },
+]
+
+export default function InstructorConsoleLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const { language } = useLanguageStore()
-  const activeLang = language.toUpperCase() as keyof typeof INSTRUCTOR_BOTTOM_NAV_T
-  const tabs = INSTRUCTOR_BOTTOM_NAV_T[activeLang] || INSTRUCTOR_BOTTOM_NAV_T.EN
+  const lang = language.toUpperCase()
+
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const getLabel = (tab: NavTab) => {
+    if (!mounted) return tab.label // Safe fallback for hydration matching
+    if (lang === 'HI') return tab.labelHI
+    if (lang === 'TE') return tab.labelTE
+    return tab.label
+  }
+
+  const isTabActive = (tab: NavTab) => {
+    if (tab.path === '/instructor/dashboard') return pathname === tab.path
+    return pathname === tab.path || pathname.startsWith(tab.path + '/')
+  }
 
   return (
-    <div className="h-full flex flex-col bg-[rgb(var(--color-void))] relative overflow-hidden font-body text-[rgb(var(--color-text-1))] transition-colors duration-300">
-      
-      {/* Main Content Area - Scrollable */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden relative z-10 custom-scrollbar pb-24 pt-4 px-4 sm:px-6 md:px-8">
+    <div className="w-full flex flex-col bg-[rgb(var(--color-void))] relative font-body text-[rgb(var(--color-text-1))] transition-colors duration-300">
+
+      {/* Main Content */}
+      <div className="flex-1 relative z-10 pb-24 pt-4 px-4 sm:px-6 md:px-8">
         <div className="max-w-4xl mx-auto w-full">
-          <Breadcrumbs />
+          {/* Top bar: Language & Theme toggle */}
+          <div className="flex justify-end items-center gap-2 mb-4">
+            <ThemeToggle />
+            <LanguageToggle />
+          </div>
           {children}
         </div>
       </div>
 
-      {/* ----------------------------------------------------
-          MOBILE BOTTOM NAVIGATION BAR (Figma App Style)
-          ---------------------------------------------------- */}
-      <div className="absolute bottom-0 inset-x-0 z-[999] w-full bg-[rgb(var(--color-surface))] rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.05)] border-t border-[rgb(var(--color-border))] pb-safe transition-colors duration-300">
-        <nav className="flex items-center justify-around px-4 h-20 max-w-md mx-auto relative">
-          {tabs.map((tab) => {
-            const isActive = pathname === tab.path || (pathname.startsWith(tab.path) && tab.path !== '/instructor/dashboard')
+      {/* Bottom Navigation Bar */}
+      <div
+        className="fixed bottom-0 inset-x-0 z-[500] bg-[rgb(var(--color-surface))] border-t border-[rgb(var(--color-border))]"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      >
+        <nav
+          aria-label="Instructor navigation"
+          className="flex items-end justify-around px-2 h-[72px] max-w-lg mx-auto relative"
+        >
+          {INSTRUCTOR_NAV.map((tab) => {
+            const active = isTabActive(tab)
             const Icon = tab.icon
+            const label = getLabel(tab)
 
             if (tab.isCenter) {
               return (
                 <Link
-                  key={tab.label}
+                  key={tab.path}
                   href={tab.path}
-                  className="relative -top-6 flex flex-col items-center justify-center group"
+                  aria-label={label}
+                  className="relative -top-5 flex flex-col items-center gap-1 group"
                 >
-                  <div className="w-16 h-16 rounded-full bg-[rgb(var(--color-primary))] flex items-center justify-center shadow-app-hover text-white transition-transform duration-300 group-hover:scale-105 active:scale-95 border-4 border-[rgb(var(--color-void))]">
-                    <Icon className="w-8 h-8 stroke-[2.5]" />
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow transition-all duration-300 group-hover:scale-105 active:scale-95 border-4 border-[rgb(var(--color-void))] ${
+                    active ? 'bg-accent shadow-accent/20' : 'bg-[rgb(var(--color-primary))] shadow-primary/20'
+                  }`}>
+                    <Icon className="w-6 h-6 text-white stroke-[2.5]" />
                   </div>
+                  <span className={`text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                    active ? 'text-accent' : 'text-[rgb(var(--color-text-3))]'
+                  }`}>{label}</span>
                 </Link>
               )
             }
 
             return (
               <Link
-                key={tab.label}
+                key={tab.path}
                 href={tab.path}
-                className={`flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors duration-200 ${
-                  isActive ? 'text-[rgb(var(--color-primary))]' : 'text-[rgb(var(--color-text-3))] hover:text-[rgb(var(--color-text-1))]'
-                }`}
+                aria-label={label}
+                aria-current={active ? 'page' : undefined}
+                className="flex flex-col items-center justify-center w-16 h-full gap-1 pt-2 relative transition-colors duration-200"
               >
-                <Icon className={`w-6 h-6 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
-                <span className="text-[10px] font-medium">{tab.label}</span>
+                {active && (
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[3px] rounded-full bg-[rgb(var(--color-primary))]" />
+                )}
+                <Icon className={`w-5 h-5 transition-all duration-200 ${
+                  active ? 'text-[rgb(var(--color-primary))] stroke-[2.5]' : 'text-[rgb(var(--color-text-3))] stroke-2'
+                }`} />
+                <span className={`text-[12px] font-semibold transition-colors ${
+                  active ? 'text-[rgb(var(--color-primary))]' : 'text-[rgb(var(--color-text-3))]'
+                }`}>{label}</span>
               </Link>
             )
           })}
         </nav>
       </div>
-
     </div>
   )
 }

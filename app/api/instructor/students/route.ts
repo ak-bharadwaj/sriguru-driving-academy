@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getServerSession } from 'next-auth'
@@ -67,6 +68,8 @@ export async function GET() {
           select: {
             id: true,
             testDate: true,
+            type: true,
+            testCenter: true,
             result: true
           }
         },

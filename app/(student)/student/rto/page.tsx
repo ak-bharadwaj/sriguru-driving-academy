@@ -23,43 +23,44 @@ import { SignCard } from '@/components/student/SignCard'
 import { useXPStore } from '@/lib/stores/xp-store'
 import { useRTOStore } from '@/lib/stores/rto-store'
 
-import { RoadSignItem, QuizQuestionItem, ROAD_SIGNS_DATA, QUIZ_QUESTIONS } from '@/lib/data/rto-data'\nimport { useLanguageStore } from '@/store/languageStore'
+import { RoadSignItem, QuizQuestionItem, ROAD_SIGNS_DATA, QUIZ_QUESTIONS } from '@/lib/data/rto-data'
+import { useLanguageStore } from '@/store/languageStore'
 
 const PAGE_DICT = {
   EN: {
-    dashboardTitle: '{t.dashboardTitle}',
+    dashboardTitle: 'RTO Theoretical Dashboard',
     learningCenter: 'RTO Learning Center',
-    learningDesc: '{t.learningDesc}',
+    learningDesc: 'Master mandatory signs, signal states and regional laws to unlock full safety checkpoints.',
     signboardsGrid: 'Signboards Grid',
     flashcards: '3D Flashcards',
     mockExam: 'RTO Mock Exam',
-    noSigns: '{t.noSigns}',
-    noSignsDesc: '{t.noSignsDesc}',
+    noSigns: 'No signs found',
+    noSignsDesc: 'No signs are available for this category yet.',
     conceptFlashcards: 'Concept Flashcards',
-    reviewRules: '{t.reviewRules}',
-    flashcardHint: '{t.flashcardHint}',
+    reviewRules: 'Review Active Road Rules',
+    flashcardHint: 'Tap to flip, swipe left (forgot) or right (mastered).',
     forget: 'FORGET',
     mastered: 'MASTERED',
-    conceptCard: '{t.conceptCard}',
-    zebraLoop: '{t.zebraLoop}',
+    conceptCard: 'Concept Card',
+    zebraLoop: 'Zebra Loop',
     clickToFlip: 'Click to Flip',
-    rtoRules: '{t.rtoRules}',
-    xpLog: '{t.xpLog}',
-    conceptMeaning: '{t.conceptMeaning}',
-    safetySteps: '{t.safetySteps}',
-    swipeHint: '{t.swipeHint}',
+    rtoRules: 'RTO Driving Rules',
+    xpLog: '+5 XP Log',
+    conceptMeaning: 'Concept Meaning',
+    safetySteps: 'Student Safety Steps',
+    swipeHint: 'Swipe Left (Forgot) | Swipe Right (Mastered)',
     flip: 'Flip',
     question: 'Question',
     of: 'of',
     remaining: 's remaining',
     concept: 'Concept',
-    regulationCode: '{t.regulationCode}',
-    spiderDashboard: '{t.spiderDashboard}',
+    regulationCode: 'Traffic Regulation Code',
+    spiderDashboard: 'Spider Accuracy Dashboard',
     assessmentLog: 'Mock RTO Assessment Log',
     totalAccuracy: 'Total Accuracy',
     correctSigns: 'Correct Signs',
-    dashboardInsight: '{t.dashboardInsight}',
-    insightDesc: '{t.insightDesc}',
+    dashboardInsight: 'RTO Dashboard Insight',
+    insightDesc: 'Your response matrices suggest high mastery on standard Signs and Rules, with minor road sign gaps flagged under "Laws" topics. Reviewing concept flashcards is suggested.',
     retakeExam: 'Retake Exam',
     studyMaterials: 'Study Materials',
     categories: {
@@ -176,6 +177,19 @@ export default function RTOLearningCenter() {
   const { addToast, addXP } = useXPStore()
   const { recordWeakTopic } = useRTOStore()
 
+  // Track if user has paid course
+  const [hasPaidCourse, setHasPaidCourse] = useState(true)
+  useEffect(() => {
+    fetch('/api/student/dashboard')
+      .then(res => res.json())
+      .then(data => {
+        if (!data.courseFee || data.feeStatus === 'PENDING') {
+          setHasPaidCourse(false)
+        }
+      })
+      .catch(() => {}) // Ignore errors gracefully
+  }, [])
+
   // ----------------------------------------------------
   // FLASHCARD MODE STATES & GESTURES
   // ----------------------------------------------------
@@ -209,7 +223,7 @@ export default function RTOLearningCenter() {
   // QUIZ MODE STATE & timerRef (requestAnimationFrame)
   // ----------------------------------------------------
   const [quizIdx, setQuizIdx] = useState(0)
-  const [activeQuestions, setActiveQuestions] = useState<QuizQuestionItem[]>([])
+  const [activeQuestions, setActiveQuestions] = useState<(QuizQuestionItem & { signImage?: string; signName?: string })[]>([])
   const [selectedOpt, setSelectedOpt] = useState<number | null>(null)
   const [isAnswered, setIsAnswered] = useState(false)
   const [quizFinished, setQuizFinished] = useState(false)
@@ -332,8 +346,41 @@ export default function RTOLearningCenter() {
   }, [handleNextQuestion])
 
   const resetQuizSession = () => {
-    const shuffled = [...QUIZ_QUESTIONS].sort(() => 0.5 - Math.random())
-    setActiveQuestions(shuffled.slice(0, 20))
+    // Build mixed exam: 10 theory questions + 10 sign-identify questions
+    const shuffledTheory = [...QUIZ_QUESTIONS].sort(() => 0.5 - Math.random()).slice(0, 10)
+    
+    // Generate sign-identify questions from ROAD_SIGNS_DATA
+    const signsWithImages = ROAD_SIGNS_DATA.filter(s => s.imagePath || s.signKey)
+    const shuffledSigns = [...signsWithImages].sort(() => 0.5 - Math.random()).slice(0, 10)
+    
+    const signQuestions: (QuizQuestionItem & { signImage?: string; signName?: string })[] = shuffledSigns.map((sign, i) => {
+      // Pick 3 wrong answers from other signs
+      const others = signsWithImages.filter(s => s.name !== sign.name)
+        .sort(() => 0.5 - Math.random()).slice(0, 3).map(s => s.name)
+      const options = [...others, sign.name].sort(() => 0.5 - Math.random())
+      const correctIndex = options.indexOf(sign.name)
+      return {
+        id: `sign-q-${i}`,
+        question: 'What does this road sign mean?',
+        options,
+        correctIndex,
+        explanation: sign.meaning,
+        topic: sign.category || 'Signs',
+        signImage: sign.imagePath,
+        signName: sign.name,
+        signKey: sign.signKey
+      } as QuizQuestionItem & { signImage?: string; signName?: string }
+    })
+    
+    // Interleave theory and sign questions perfectly 1 to 1
+    const mixed: any[] = []
+    for(let i = 0; i < 10; i++) {
+      if (shuffledTheory[i]) mixed.push({ ...shuffledTheory[i], signImage: undefined, signName: undefined })
+      if (signQuestions[i]) mixed.push(signQuestions[i])
+    }
+
+    
+    setActiveQuestions(mixed)
     setQuizIdx(0)
     setSelectedOpt(null)
     setIsAnswered(false)
@@ -349,122 +396,39 @@ export default function RTOLearningCenter() {
     })
   }
 
-  // ----------------------------------------------------
-  // RADAR CHART PURE SVG GRAPHICS MATH
-  // ----------------------------------------------------
-  const renderRadarChart = () => {
-    const center = 150
-    const scaleRadius = 90
+  const renderTopicProgressbars = () => {
     const keys = Object.keys(topicScores)
-    const pointsCount = keys.length
-
-    // Generate concentric pentagon polygon paths for background grid rings
-    const gridPolygons = [0.2, 0.4, 0.6, 0.8, 1.0].map((scale) => {
-      const points = keys.map((_, i) => {
-        const angle = (i * 2 * Math.PI) / pointsCount - Math.PI / 2
-        const x = center + scaleRadius * scale * Math.cos(angle)
-        const y = center + scaleRadius * scale * Math.sin(angle)
-        return `${x},${y}`
-      })
-      return points.join(' ')
-    })
-
-    // Generate active data points based on actual category accuracies
-    const dataPoints = keys.map((key, i) => {
-      const stats = topicScores[key]
-      const accuracy = stats.total > 0 ? stats.correct / stats.total : 0
-      const angle = (i * 2 * Math.PI) / pointsCount - Math.PI / 2
-      const x = center + scaleRadius * accuracy * Math.cos(angle)
-      const y = center + scaleRadius * accuracy * Math.sin(angle)
-      return `${x},${y}`
-    }).join(' ')
-
-    // Render text coordinates for labels
-    const labelCoordinates = keys.map((key, i) => {
-      const angle = (i * 2 * Math.PI) / pointsCount - Math.PI / 2
-      const x = center + (scaleRadius + 22) * Math.cos(angle)
-      const y = center + (scaleRadius + 10) * Math.sin(angle)
-      return { label: key, x, y }
-    })
 
     return (
-      <svg className="w-[300px] h-[300px]" viewBox="0 0 300 300">
-        {/* Render grid rings */}
-        {gridPolygons.map((pts, i) => (
-          <polygon
-            key={i}
-            points={pts}
-            fill="none"
-            stroke="rgba(255, 255, 255, 0.05)"
-            strokeWidth="1"
-            strokeDasharray="4,4"
-          />
-        ))}
-
-        {/* Center hub spokes */}
-        {keys.map((_, i) => {
-          const angle = (i * 2 * Math.PI) / pointsCount - Math.PI / 2
-          const x = center + scaleRadius * Math.cos(angle)
-          const y = center + scaleRadius * Math.sin(angle)
-          return (
-            <line
-              key={i}
-              x1={center}
-              y1={center}
-              x2={x}
-              y2={y}
-              stroke="rgba(255, 255, 255, 0.05)"
-              strokeWidth="1"
-            />
-          )
-        })}
-
-        {/* Dynamic Accuracy Poly-shape fill */}
-        <polygon
-          points={dataPoints}
-          fill="rgba(37, 99, 235, 0.25)"
-          stroke="var(--color-primary)"
-          strokeWidth="2"
-          strokeLinejoin="round"
-          className="transition-all duration-700"
-        />
-
-        {/* Render point nodes */}
-        {keys.map((key, i) => {
+      <div className="flex flex-col gap-4 w-full px-2 py-4">
+        {keys.map((key) => {
           const stats = topicScores[key]
-          const accuracy = stats.total > 0 ? stats.correct / stats.total : 0.5
-          const angle = (i * 2 * Math.PI) / pointsCount - Math.PI / 2
-          const x = center + scaleRadius * accuracy * Math.cos(angle)
-          const y = center + scaleRadius * accuracy * Math.sin(angle)
+          const accuracy = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0
+          
+          let colorClass = "bg-primary"
+          if (accuracy < 50 && stats.total > 0) colorClass = "bg-rose-500"
+          else if (accuracy < 80 && stats.total > 0) colorClass = "bg-amber-500"
+          else if (stats.total > 0) colorClass = "bg-emerald-500"
+          else colorClass = "bg-text-3 opacity-30"
+
           return (
-            <circle
-              key={i}
-              cx={x}
-              cy={y}
-              r="4.5"
-              fill="var(--color-accent)"
-              stroke="var(--color-surface)"
-              strokeWidth="1.5"
-            />
+            <div key={key} className="flex flex-col gap-2 w-full">
+              <div className="flex justify-between items-center text-sm font-bold font-mono uppercase tracking-wider">
+                <span className="text-text-2">{key}</span>
+                <span className={stats.total > 0 ? "text-text-1" : "text-text-3"}>
+                  {stats.total > 0 ? `${accuracy}%` : 'Not Tested'}
+                </span>
+              </div>
+              <div className="w-full h-2.5 bg-void/50 border border-border/50 rounded-full overflow-hidden shadow-inner">
+                <div 
+                  className={`h-full ${colorClass} transition-all duration-1000 shadow-[0_0_10px_currentColor]`}
+                  style={{ width: `${stats.total > 0 ? accuracy : 0}%` }}
+                />
+              </div>
+            </div>
           )
         })}
-
-        {/* Render category text labels */}
-        {labelCoordinates.map((pt, i) => (
-          <text
-            key={i}
-            x={pt.x}
-            y={pt.y}
-            fill="var(--color-text-2)"
-            fontSize="10"
-            fontWeight="700"
-            fontFamily="'Outfit', sans-serif"
-            textAnchor="middle"
-          >
-            {pt.label}
-          </text>
-        ))}
-      </svg>
+      </div>
     )
   }
 
@@ -716,7 +680,7 @@ export default function RTOLearningCenter() {
                         <h6 className="text-[10px] font-mono text-accent uppercase tracking-wider">{t.safetySteps}</h6>
                         <div className="mt-2 flex flex-col gap-2">
                           {ROAD_SIGNS_DATA[currentFlashIdx].steps && ROAD_SIGNS_DATA[currentFlashIdx].steps.length > 0 ? (
-                            ROAD_SIGNS_DATA[currentFlashIdx].steps.map((step, sIdx) => (
+                            ROAD_SIGNS_DATA[currentFlashIdx].steps.map((step: string, sIdx: number) => (
                               <div key={sIdx} className="flex gap-2 items-start text-xs text-text-2 font-body italic border-l border-l-accent pl-2.5 leading-relaxed">
                                 <span className="flex-shrink-0 text-accent font-bold">{sIdx + 1}.</span>
                                 <span>{step}</span>
@@ -794,36 +758,25 @@ export default function RTOLearningCenter() {
                 </div>
 
                 {/* Question Details */}
-                <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center mt-2">
+                <div className="relative z-10 flex flex-col items-center gap-5 mt-2">
                   
-                  {/* Question sign display */}
-                  <div className="w-[140px] h-[140px] flex items-center justify-center bg-void/50 border border-border rounded-2xl p-4 flex-shrink-0 drop-shadow-[0_4px_12px_rgba(0,0,0,0.3)] relative">
-                    {(() => {
-                      const activeQuestion = activeQuestions[quizIdx]
-                      const QuestionSVGComponent = activeQuestion.signKey ? RoadSigns[activeQuestion.signKey] : null
-                      if (activeQuestion.imagePath) {
-                        return <Image src={activeQuestion.imagePath} alt="Sign" width={100} height={100} className="object-contain" />
-                      } else if (QuestionSVGComponent) {
-                        return React.createElement(QuestionSVGComponent as React.ComponentType<{ size: number; glow?: boolean }>, { size: 100, glow: true })
-                      }
-                      
-                      // Fallback shape
-                      const shapeClass = activeQuestion.fallbackShape === 'circle' ? 'rounded-full' 
-                                       : activeQuestion.fallbackShape === 'octagon' ? 'clip-octagon'
-                                       : activeQuestion.fallbackShape === 'triangle' ? 'clip-triangle'
-                                       : 'rounded-xl'
-                                       
-                      return (
-                        <div className={`w-24 h-24 ${shapeClass} bg-primary/20 flex items-center justify-center border-4 border-primary/50 shadow-lg`}>
-                          <span className="text-primary font-bold text-[10px] uppercase text-center px-1">{t.concept}</span>
-                        </div>
-                      )
-                    })()}
-                  </div>
+                  {/* Sign image — shown only for sign-identify questions */}
+                  {(activeQuestions[quizIdx] as any).signImage && (
+                    <div className="w-[120px] h-[120px] flex items-center justify-center bg-void/50 border border-border/60 rounded-2xl p-3 drop-shadow-[0_4px_20px_rgba(0,0,0,0.4)] relative">
+                      <Image
+                        src={(activeQuestions[quizIdx] as any).signImage}
+                        alt="Road sign"
+                        fill
+                        className="object-contain p-2"
+                      />
+                    </div>
+                  )}
 
                   {/* Question wording */}
-                  <div className="flex-1">
-                    <span className="text-xs font-mono uppercase tracking-widest text-primary">{t.regulationCode}</span>
+                  <div className="w-full text-center md:text-left">
+                    <span className="text-xs font-mono uppercase tracking-widest text-primary">
+                      {(activeQuestions[quizIdx] as any).signImage ? 'Road Sign Identification' : t.regulationCode}
+                    </span>
                     <h3 className="text-lg md:text-xl font-bold text-text-1 font-display mt-1 leading-snug">
                       {activeQuestions[quizIdx].question}
                     </h3>
@@ -850,10 +803,17 @@ export default function RTOLearningCenter() {
                         key={oIdx}
                         disabled={isAnswered}
                         onClick={() => handleQuizAnswer(oIdx)}
-                        className={`w-full p-4 rounded-xl border text-left text-sm transition-all duration-300 flex items-center justify-between ${cardStyle}`}
+                        className={`w-full p-4 rounded-xl border text-left text-sm transition-all duration-300 flex items-center justify-between group ${cardStyle}`}
                       >
-                        <span>{opt}</span>
-                        {isAnswered && isSelected && <Check className="w-4 h-4 text-primary" />}
+                        <div className="flex items-center gap-4">
+                          <span className={`w-6 h-6 rounded-full border text-xs font-bold flex items-center justify-center flex-shrink-0 transition-colors ${
+                            isAnswered && isSelected ? 'border-primary text-primary bg-primary/20' : 'border-border/80 text-text-3 bg-surface group-hover:border-text-3'
+                          }`}>
+                            {oIdx + 1}
+                          </span>
+                          <span className="font-medium">{opt}</span>
+                        </div>
+                        {isAnswered && isSelected && <Check className="w-5 h-5 text-primary drop-shadow-[0_0_8px_rgba(37,99,235,0.5)]" />}
                       </button>
                     )
                   })}
@@ -866,21 +826,28 @@ export default function RTOLearningCenter() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="w-full max-w-4xl bg-surface border border-border rounded-3xl p-6 md:p-10 flex flex-col md:flex-row gap-10 items-center shadow-[0_24px_50px_rgba(0,0,0,0.8)]"
               >
-                {/* Left Area: Accurate raw radar polygon */}
-                <div className="w-full md:w-1/2 flex flex-col items-center">
-                  <span className="text-[10px] font-mono text-accent uppercase tracking-widest mb-2">{t.spiderDashboard}</span>
-                  <div className="bg-void border border-border/80 p-4 rounded-3xl shadow-inner flex items-center justify-center">
-                    {renderRadarChart()}
-                  </div>
-                </div>
-
-                {/* Right Area: Score log metrics */}
+                {/* Left Area: Score log metrics (Moved to top on mobile) */}
                 <div className="w-full md:w-1/2 flex flex-col gap-6">
                   <div>
                     <span className="text-xs font-mono uppercase tracking-widest text-primary">Simulation Completed</span>
-                    <h3 className="text-3xl font-extrabold text-text-1 font-display tracking-tight mt-1">
-                      Mock RTO Assessment Log
+                    <h3 className="text-3xl md:text-4xl font-extrabold text-text-1 font-display tracking-tight mt-1 leading-snug">
+                      Mock RTO Assessment
                     </h3>
+                  </div>
+
+                  {/* PASS / FAIL BANNER */}
+                  <div className={`w-full p-4 rounded-2xl flex items-center gap-4 ${quizScore >= 12 ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-rose-500/10 border border-rose-500/30'}`}>
+                    <div className={`w-12 h-12 rounded-full flex flex-shrink-0 items-center justify-center ${quizScore >= 12 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-rose-500/20 text-rose-500'}`}>
+                      {quizScore >= 12 ? <Check className="w-6 h-6" /> : <XIcon className="w-6 h-6" />}
+                    </div>
+                    <div>
+                      <h4 className={`text-xl font-bold font-display uppercase tracking-widest ${quizScore >= 12 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        {quizScore >= 12 ? 'EXAM PASSED' : 'EXAM FAILED'}
+                      </h4>
+                      <p className="text-sm font-medium text-text-2">
+                        {quizScore >= 12 ? 'Congratulations! You meet the RTO standard.' : 'You need at least 12 correct to pass.'}
+                      </p>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -898,9 +865,9 @@ export default function RTOLearningCenter() {
                     </div>
                   </div>
 
-                  <div className="bg-void/30 border border-border p-4 rounded-2xl flex flex-col gap-1">
-                    <h5 className="text-xs font-bold text-text-2 uppercase font-display tracking-tight">{t.dashboardInsight}</h5>
-                    <p className="text-xs text-text-3 leading-relaxed font-body">
+                  <div className="bg-void/30 border border-border p-5 rounded-2xl flex flex-col gap-1.5">
+                    <h5 className="text-sm font-bold text-text-2 uppercase font-display tracking-tight">{t.dashboardInsight}</h5>
+                    <p className="text-sm text-text-3 leading-relaxed font-body">
                       Your response matrices suggest high mastery on standard Signs and Rules, with minor road sign gaps flagged under &quot;Laws&quot; topics. Reviewing concept flashcards is suggested.
                     </p>
                   </div>
@@ -920,6 +887,14 @@ export default function RTOLearningCenter() {
                       <span>{t.studyMaterials}</span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
+                  </div>
+                </div>
+
+                {/* Right Area: Score log metrics (Moved to bottom on mobile) */}
+                <div className="w-full md:w-1/2 flex flex-col w-full">
+                  <span className="text-xs font-bold font-mono text-accent uppercase tracking-widest mb-3 text-center">Topic Progress Bars</span>
+                  <div className="bg-surface border border-border/80 p-6 rounded-3xl w-full shadow-inner flex flex-col justify-center">
+                    {renderTopicProgressbars()}
                   </div>
                 </div>
               </motion.div>

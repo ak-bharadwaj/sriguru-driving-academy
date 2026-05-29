@@ -1,18 +1,8 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-
-
-
-const FALLBACK_HEATMAP = Array.from({ length: 7 * 12 }, (_, i) => ({
-  day: i % 7,
-  week: Math.floor(i / 7),
-  value: Math.floor(Math.sin(i * 0.15) * 4) + Math.floor(Math.cos(i * 0.3) * 3) + 2
-})).map(item => ({
-  ...item,
-  value: Math.max(0, Math.min(item.value, 10))
-}))
 
 export async function GET(request: Request) {
   try {
@@ -55,81 +45,76 @@ export async function GET(request: Request) {
     let fetchedActivityLog: any = null
     let fetchedRevenue = 0
 
-    try {
-      // Fetch statistics and datasets concurrently from real database tables
-      const [
-        sCount,
-        ,
-        ,
-        sessCount,
-        dbStudents,
-        dbBookings,
-        revenueAgg,
-        dbNotifications
-      ] = await Promise.all([
-        db.student.count(),
-        db.instructor.count(),
-        db.booking.count(),
-        db.session.count(),
-        db.student.findMany({
-          select: {
-            id: true,
-            level: true,
-            xp: true,
-            trainingType: true,
-            user: {
-              select: {
-                name: true,
-                email: true
-              }
+    // Fetch statistics and datasets concurrently from real database tables
+    const [
+      sCount,
+      ,
+      ,
+      sessCount,
+      dbStudents,
+      dbBookings,
+      revenueAgg,
+      dbNotifications
+    ] = await Promise.all([
+      db.student.count(),
+      db.instructor.count(),
+      db.booking.count(),
+      db.session.count(),
+      db.student.findMany({
+        select: {
+          id: true,
+          level: true,
+          xp: true,
+          trainingType: true,
+          user: {
+            select: {
+              name: true,
+              email: true
             }
-          },
-          orderBy: { xp: 'desc' },
-          take: limit,
-          skip: skip
-        }),
-        db.booking.findMany({
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-            trainingType: true,
-            status: true,
-            createdAt: true
-          },
-          orderBy: { createdAt: 'desc' }
-        }),
-        db.payment.aggregate({
-          _sum: { amount: true }
-        }),
-        db.notification.findMany({
-          take: limit,
-          orderBy: { createdAt: 'desc' },
-          include: { user: true }
-        })
-      ])
+          }
+        },
+        orderBy: { xp: 'desc' },
+        take: limit,
+        skip: skip
+      }),
+      db.booking.findMany({
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          trainingType: true,
+          status: true,
+          createdAt: true
+        },
+        orderBy: { createdAt: 'desc' }
+      }),
+      db.payment.aggregate({
+        _sum: { amount: true }
+      }),
+      db.notification.findMany({
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: { user: true }
+      })
+    ])
 
-      studentCount = sCount
-      sessionCount = sessCount
-      databaseStudents = dbStudents as unknown as DBStudent[]
-      databaseBookings = dbBookings as unknown as DBBooking[]
-      
-      const realActivityLog = dbNotifications.map(n => ({
-        id: n.id,
-        timestamp: n.createdAt.toTimeString().split(' ')[0],
-        type: n.type,
-        text: n.message
-      }))
-      
-      const totalRevenue = revenueAgg._sum.amount || 0
+    studentCount = sCount
+    sessionCount = sessCount
+    databaseStudents = dbStudents as unknown as DBStudent[]
+    databaseBookings = dbBookings as unknown as DBBooking[]
+    
+    const realActivityLog = dbNotifications.map(n => ({
+      id: n.id,
+      timestamp: n.createdAt.toTimeString().split(' ')[0],
+      type: n.type,
+      text: n.message
+    }))
+    
+    const totalRevenue = revenueAgg._sum.amount || 0
 
-      // Override mock if real data exists
-      fetchedActivityLog = realActivityLog.length > 0 ? realActivityLog : null
-      fetchedRevenue = totalRevenue
-    } catch {
-      console.warn('Analytics database retrieval bypassed. Using fallbacks.')
-    }
+    fetchedActivityLog = realActivityLog
+    fetchedRevenue = totalRevenue
 
     // Group bookings into dynamic Kanban columns
     const bookingPipeline = {
@@ -138,36 +123,14 @@ export async function GET(request: Request) {
       completed: databaseBookings.filter(b => b.status === 'COMPLETED' || b.status === 'REJECTED').slice(0, 4)
     }
 
-    const enrollmentSparkline = [
-      { day: 'Mon', value: 12 },
-      { day: 'Tue', value: 19 },
-      { day: 'Wed', value: 15 },
-      { day: 'Thu', value: 24 },
-      { day: 'Fri', value: 31 },
-      { day: 'Sat', value: 28 },
-      { day: 'Sun', value: 35 }
-    ]
-
-    const instructorUtilization = [
-      { name: 'Harpreet Singh', hours: 42, rate: 85 },
-      { name: 'Rajesh Sharma', hours: 36, rate: 72 },
-      { name: 'Amanpreet Kaur', hours: 48, rate: 96 }
-    ]
-
-    const recentActivityLog = fetchedActivityLog || [
-      { id: 'act-1', timestamp: '14:22:05', type: 'BOOKING_NEW', text: 'New Student booking signed: Vikram Rathore (LMV)' },
-      { id: 'act-2', timestamp: '13:58:12', type: 'QUIZ_PASS', text: 'Student Aarav Mehta cleared Mock RTO test (90% Acc)' },
-      { id: 'act-3', timestamp: '12:44:30', type: 'BADGE_GOLD', text: 'Badge unlocked: Parallel Parking master - Diya Kapoor' },
-      { id: 'act-4', timestamp: '11:15:00', type: 'SESSION_END', text: 'Session finished: Harpreet Singh (Clutch Balancing)' },
-      { id: 'act-5', timestamp: '09:30:15', type: 'XP_EVENT', text: 'Student Vikram Rathore earned +100 XP (Cockpit Drill)' }
-    ].slice(0, limit)
+    const recentActivityLog = fetchedActivityLog || []
 
     return NextResponse.json({
       health: {
-        activeStudents: studentCount || 5,
-        sessionsToday: sessionCount || 8,
-        pendingBookings: databaseBookings.filter(b => b.status === 'PENDING').length || 2,
-        totalRevenue: fetchedRevenue || 0
+        activeStudents: studentCount,
+        sessionsToday: sessionCount,
+        pendingBookings: databaseBookings.filter(b => b.status === 'PENDING').length,
+        totalRevenue: fetchedRevenue
       },
       topStudents: databaseStudents.map(s => ({
         id: s.id,
@@ -178,14 +141,14 @@ export async function GET(request: Request) {
         license: s.trainingType === 'RTO_FAST_TRACK' ? 'RTO' : s.trainingType
       })),
       bookingPipeline,
-      enrollmentSparkline,
-      instructorUtilization,
-      attendanceHeatmap: FALLBACK_HEATMAP,
+      enrollmentSparkline: [],
+      instructorUtilization: [],
+      attendanceHeatmap: [],
       recentActivityLog,
       pagination: {
         currentPage: page,
-        totalPages: Math.ceil((studentCount || 5) / limit),
-        totalItems: studentCount || 5
+        totalPages: Math.ceil(studentCount / limit) || 1,
+        totalItems: studentCount
       }
     }, { status: 200 })
   } catch (error) {
@@ -194,4 +157,3 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Analytics retrieval failed', details: message }, { status: 500 })
   }
 }
-

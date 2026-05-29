@@ -9,37 +9,20 @@ import {
   Mail, 
   ArrowRight, 
   Star, 
-  ShieldCheck,
-  Clock,
-  Car,
-  Award,
-  Check,
-  Download,
-  Smartphone,
-  ImageIcon
+  ShieldCheck, 
+  Clock, 
+  Car, 
+  Award, 
+  Check, 
+  Download, 
+  Smartphone, 
+  ImageIcon,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Course, BrandingState } from '@/lib/data/academyStore'
-
-const FAQ_DATA = [
-  { q: "How long does the beginner course take?", a: "The standard beginner course runs for 21 days. This includes 15 practical on-road sessions and 4 theoretical modules designed to prepare you fully for your license exam." },
-  { q: "What is your fee structure?", a: "We believe in complete transparency. Our fees are clearly listed with no hidden charges. Payments are securely processed at our front desk." },
-  { q: "Do you provide dual-control vehicles?", a: "Yes, 100% of our training fleet consists of late-model vehicles equipped with professional dual-control systems for your absolute safety." },
-  { q: "Do you help with the driving license test?", a: "Absolutely. We manage all RTO test scheduling, and you will take your final driving exam in the exact same vehicle you trained in." },
-  { q: "Is pick-up and drop-off available?", a: "Yes, we offer complimentary door-to-door shuttle service for all our premium and advanced training tiers." }
-]
-
-const TESTIMONIALS = [
-  { name: "Amanpreet Kaur", role: "Student", rating: 5, quote: "The curriculum is meticulously structured. The instructors are incredibly patient, making parallel parking feel completely natural within days." },
-  { name: "Rohan Malhotra", role: "Student", rating: 5, quote: "Passed my driving test on the very first attempt. The mock theory tests on their digital portal are exactly what you need to prepare." },
-  { name: "Priya Sharma", role: "Student", rating: 5, quote: "A highly professional academy. The flexible scheduling and the calm demeanor of the instructors made learning to drive a joy." }
-]
-
-const QUIZ_QUESTIONS = [
-  { q: "What should you do when approaching a yellow traffic light?", options: ["Speed up to cross", "Stop safely if possible", "Honk and proceed", "Ignore it"], answer: 1 },
-  { q: "When are you allowed to pass a vehicle on the right?", options: ["Anytime", "Never", "When they are turning left", "On highways only"], answer: 2 },
-  { q: "What is the safest following distance in normal conditions?", options: ["1 second", "2 seconds", "3-4 seconds", "10 seconds"], answer: 2 }
-]
 
 export interface InstructorProp {
   id: string
@@ -53,15 +36,100 @@ interface LandingClientProps {
   courses: Course[]
   instructors: InstructorProp[]
   branding?: BrandingState
+  gallery?: { id: string; imageKey: string; caption: string | null }[]
 }
 
 import { useTranslation } from '@/hooks/useTranslation'
+import { useLanguageStore } from '@/store/languageStore'
 
-export default function LandingClient({ courses, instructors, branding }: LandingClientProps) {
+export default function LandingClient({ courses, instructors, branding, gallery = [] }: LandingClientProps) {
   const router = useRouter()
   const { t } = useTranslation()
+  const { language } = useLanguageStore()
+  const lang = language.toUpperCase() as 'EN' | 'HI' | 'TE'
   const [activeFaq, setActiveFaq] = useState<number | null>(null)
+  const [contactForm, setContactForm] = useState({ name: '', phone: '', email: '', message: '' })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+
+  // Gallery carousel state
+  const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0)
+  const defaultGallery = [
+    {
+      id: 'd1',
+      imageKey: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=1000&auto=format&fit=crop',
+      caption: 'Late-Model Fleet'
+    },
+    {
+      id: 'd2',
+      imageKey: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=1000&auto=format&fit=crop',
+      caption: 'One-on-One Coaching'
+    },
+    {
+      id: 'd3',
+      imageKey: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=1000&auto=format&fit=crop',
+      caption: 'Advanced Simulators'
+    }
+  ]
+  const galleryItems = gallery.length > 0 ? gallery : defaultGallery
+
+  useEffect(() => {
+    if (galleryItems.length <= 1) return
+    const interval = setInterval(() => {
+      setCurrentGalleryIndex((prev) => (prev + 1) % galleryItems.length)
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [galleryItems.length])
+
+  const nextSlide = () => {
+    setCurrentGalleryIndex((prev) => (prev + 1) % galleryItems.length)
+  }
+  const prevSlide = () => {
+    setCurrentGalleryIndex((prev) => (prev - 1 + galleryItems.length) % galleryItems.length)
+  }
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitStatus('idle')
+    try {
+      const res = await fetch('/api/public/inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contactForm)
+      })
+      if (res.ok) {
+        setSubmitStatus('success')
+        setContactForm({ name: '', phone: '', email: '', message: '' })
+      } else {
+        setSubmitStatus('error')
+      }
+    } catch (e) {
+      setSubmitStatus('error')
+    }
+    setIsSubmitting(false)
+  }
   
+  const FAQ_DATA = [
+    { q: t('faq.1.q' as any), a: t('faq.1.a' as any) },
+    { q: t('faq.2.q' as any), a: t('faq.2.a' as any) },
+    { q: t('faq.3.q' as any), a: t('faq.3.a' as any) },
+    { q: t('faq.4.q' as any), a: t('faq.4.a' as any) },
+    { q: t('faq.5.q' as any), a: t('faq.5.a' as any) }
+  ]
+
+  const TESTIMONIALS = [
+    { name: "Amanpreet Kaur", role: "Student", rating: 5, quote: t('test.1.q' as any) },
+    { name: "Rohan Malhotra", role: "Student", rating: 5, quote: t('test.2.q' as any) },
+    { name: "Priya Sharma", role: "Student", rating: 5, quote: t('test.3.q' as any) }
+  ]
+
+  const QUIZ_QUESTIONS = [
+    { q: t('quiz.1.q' as any), options: [t('quiz.1.o1' as any), t('quiz.1.o2' as any), t('quiz.1.o3' as any), t('quiz.1.o4' as any)], answer: 1 },
+    { q: t('quiz.2.q' as any), options: [t('quiz.2.o1' as any), t('quiz.2.o2' as any), t('quiz.2.o3' as any), t('quiz.2.o4' as any)], answer: 2 },
+    { q: t('quiz.3.q' as any), options: [t('quiz.3.o1' as any), t('quiz.3.o2' as any), t('quiz.3.o3' as any), t('quiz.3.o4' as any)], answer: 2 }
+  ]
+
   // Quiz State
   const [quizStep, setQuizStep] = useState(0)
   const [quizScore, setQuizScore] = useState(0)
@@ -93,11 +161,11 @@ export default function LandingClient({ courses, instructors, branding }: Landin
     <div className="w-full min-h-screen bg-slate-50 dark:bg-[#030014] text-slate-900 dark:text-slate-50 font-body selection:bg-violet-500/30 selection:text-violet-900 dark:selection:text-violet-100 relative overflow-x-hidden">
       
       {/* ----------------------------------------------------
-          AURORA MESH GRADIENTS (Global Background)
+          AURORA MESH GRADIENTS (Global Background - Responsive Fidelity)
           ---------------------------------------------------- */}
-      <div className="fixed top-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-violet-500/20 dark:bg-violet-600/20 blur-[140px] pointer-events-none mix-blend-multiply dark:mix-blend-screen z-0" />
-      <div className="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-cyan-500/20 dark:bg-teal-500/15 blur-[140px] pointer-events-none mix-blend-multiply dark:mix-blend-screen z-0" />
-      <div className="fixed top-[40%] left-[20%] w-[40vw] h-[40vw] rounded-full bg-fuchsia-500/10 dark:bg-fuchsia-600/15 blur-[140px] pointer-events-none mix-blend-multiply dark:mix-blend-screen z-0" />
+      <div className="fixed top-[-20%] left-[-10%] w-[80vw] md:w-[60vw] h-[80vw] md:h-[60vw] rounded-full bg-violet-500/15 md:bg-violet-500/20 dark:bg-violet-600/15 md:dark:bg-violet-600/20 blur-[80px] md:blur-[140px] pointer-events-none mix-blend-multiply dark:mix-blend-screen z-0 will-change-transform" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[70vw] md:w-[50vw] h-[70vw] md:h-[50vw] rounded-full bg-cyan-500/15 md:bg-cyan-500/20 dark:bg-teal-500/10 md:dark:bg-teal-500/15 blur-[80px] md:blur-[140px] pointer-events-none mix-blend-multiply dark:mix-blend-screen z-0 will-change-transform" />
+      <div className="fixed top-[40%] left-[20%] w-[60vw] md:w-[40vw] h-[60vw] md:h-[40vw] rounded-full bg-fuchsia-500/10 md:bg-fuchsia-500/10 dark:bg-fuchsia-600/10 md:dark:bg-fuchsia-600/15 blur-[80px] md:blur-[140px] pointer-events-none mix-blend-multiply dark:mix-blend-screen z-0 will-change-transform" />
 
       {/* ----------------------------------------------------
           PHOTOGRAPHIC HERO SECTION (SPATIAL GLASS)
@@ -244,27 +312,29 @@ export default function LandingClient({ courses, instructors, branding }: Landin
             {courses?.slice(0,3).map((course, i) => (
               <div 
                 key={course.id}
-                className="bg-white/60 dark:bg-white/5 backdrop-blur-3xl rounded-[2rem] p-10 border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col hover:border-violet-500/30 dark:hover:border-violet-400/30 transition-all duration-500 relative overflow-hidden"
+                className="bg-white/60 dark:bg-white/5 backdrop-blur-3xl rounded-[2rem] p-6 md:p-10 border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col hover:border-violet-500/30 dark:hover:border-violet-400/30 transition-all duration-500 relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-[50px] pointer-events-none" />
                 
-                <div className="mb-10 pb-10 border-b border-black/5 dark:border-white/10 relative z-10">
-                  <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-bold rounded-full mb-6 uppercase tracking-[0.2em] border border-violet-200 dark:border-violet-800">
-                    {course.durationDays} {t('general.days')}
+                <div className="mb-6 pb-6 md:mb-10 md:pb-10 border-b border-black/5 dark:border-white/10 relative z-10">
+                  <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs font-bold rounded-full mb-4 md:mb-6 uppercase tracking-[0.2em] border border-violet-200 dark:border-violet-800">
+                    {(course.tag as any)?.[lang] || (course.tag as any)?.EN || 'Program'}
                   </span>
-                  <h3 className="font-display text-3xl font-medium mb-4 tracking-tight leading-none">{t(course.name as any) || course.name}</h3>
+                  <h3 className="font-display text-2xl md:text-3xl font-medium mb-2 md:mb-4 tracking-tight leading-none">
+                    {(course.title as any)?.[lang] || (course.title as any)?.EN || course.category}
+                  </h3>
                   <div>
-                    <span className="text-5xl font-medium tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400">
+                    <span className="text-4xl md:text-5xl font-medium tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400">
                       ₹{course.price.toLocaleString()}
                     </span>
                   </div>
                 </div>
                 
-                <p className="text-slate-600 dark:text-slate-300 mb-12 flex-1 leading-relaxed font-light text-lg relative z-10">
-                  {course.description || t('landing.course.desc')}
+                <p className="text-slate-600 dark:text-slate-300 mb-8 md:mb-12 flex-1 leading-relaxed font-light text-base md:text-lg relative z-10">
+                  {(course.desc as any)?.[lang] || (course.desc as any)?.EN || t('landing.course.desc')}
                 </p>
                 
-                <ul className="space-y-5 mb-12 relative z-10">
+                <ul className="space-y-4 md:space-y-5 mb-8 md:mb-12 relative z-10">
                   <li className="flex items-center gap-4">
                     <Check className="w-5 h-5 text-violet-600 dark:text-violet-400 shrink-0" />
                     <span className="font-light text-lg">{t('landing.course.f1')}</span>
@@ -307,7 +377,7 @@ export default function LandingClient({ courses, instructors, branding }: Landin
             <AnimatePresence mode="wait">
               {!showQuizResult ? (
                 <motion.div 
-                  key="question"
+                  key={`question-${quizStep}`}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
@@ -376,25 +446,84 @@ export default function LandingClient({ courses, instructors, branding }: Landin
             </a>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="h-[400px] bg-slate-200 dark:bg-white/5 rounded-[2rem] overflow-hidden border border-white/40 dark:border-white/10 relative group shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-              <img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=1000&auto=format&fit=crop" alt="Training Vehicle" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-8">
-                <span className="text-white font-medium text-lg">Late-Model Fleet</span>
+          <div className="relative max-w-4xl mx-auto h-[350px] sm:h-[450px] md:h-[550px] bg-slate-200 dark:bg-white/5 rounded-[2.5rem] overflow-hidden border border-white/40 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] group">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentGalleryIndex}
+                initial={{ opacity: 0, scale: 1.02 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute inset-0 w-full h-full"
+              >
+                <Image 
+                  src={galleryItems[currentGalleryIndex].imageKey} 
+                  alt={galleryItems[currentGalleryIndex].caption || "Gallery Image"} 
+                  fill 
+                  sizes="(max-width: 1024px) 100vw, 1024px" 
+                  unoptimized={true} 
+                  className="object-cover" 
+                />
+                
+                {/* Deep overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                
+                {/* Caption card */}
+                <div className="absolute bottom-8 left-8 right-8 md:left-12 md:right-12 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                  <div className="max-w-md">
+                    <p className="text-violet-400 font-semibold tracking-wider text-xs uppercase mb-2">
+                      {t('landing.gallery.badge') || 'Inside the Academy'}
+                    </p>
+                    <h3 className="text-white text-2xl md:text-3xl font-display font-medium tracking-tight">
+                      {galleryItems[currentGalleryIndex].caption}
+                    </h3>
+                  </div>
+                  
+                  {/* Slide counter */}
+                  <span className="text-white/60 text-sm font-medium bg-black/35 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10 self-start md:self-auto">
+                    {currentGalleryIndex + 1} / {galleryItems.length}
+                  </span>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Navigation Arrows */}
+            {galleryItems.length > 1 && (
+              <>
+                <button
+                  onClick={prevSlide}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/30 hover:bg-black/50 border border-white/10 hover:border-white/20 text-white flex items-center justify-center backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0 active:scale-95"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/30 hover:bg-black/50 border border-white/10 hover:border-white/20 text-white flex items-center justify-center backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0 active:scale-95"
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </>
+            )}
+
+            {/* Pagination Dots */}
+            {galleryItems.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
+                {galleryItems.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentGalleryIndex(idx)}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      idx === currentGalleryIndex 
+                        ? 'w-6 bg-white' 
+                        : 'w-2 bg-white/40 hover:bg-white/60'
+                    }`}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  />
+                ))}
               </div>
-            </div>
-            <div className="h-[400px] bg-slate-200 dark:bg-white/5 rounded-[2rem] overflow-hidden border border-white/40 dark:border-white/10 relative group shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-              <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=1000&auto=format&fit=crop" alt="Instructor Session" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-8">
-                <span className="text-white font-medium text-lg">One-on-One Coaching</span>
-              </div>
-            </div>
-            <div className="h-[400px] bg-slate-200 dark:bg-white/5 rounded-[2rem] overflow-hidden border border-white/40 dark:border-white/10 relative group shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-              <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=1000&auto=format&fit=crop" alt="Safety Briefing" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-8">
-                <span className="text-white font-medium text-lg">Advanced Simulators</span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </section>
@@ -471,6 +600,82 @@ export default function LandingClient({ courses, instructors, branding }: Landin
       </section>
 
       {/* ----------------------------------------------------
+          CONTACT ENQUIRY FORM
+          ---------------------------------------------------- */}
+      <section id="contact" className="py-32 px-6 relative z-10 border-t border-black/5 dark:border-white/5">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-16">
+          <div className="flex-1">
+            <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tighter mb-6">Have Questions?</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-lg font-light mb-10">
+              Send us an enquiry and our administration team will get back to you directly to arrange a consultation or help you choose the right program.
+            </p>
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-medium">Call Us Directly</h4>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">+91 98765 43210</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-medium">Email Support</h4>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">support@sriguru.in</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1 bg-white/60 dark:bg-white/5 backdrop-blur-3xl rounded-[2rem] p-8 md:p-12 border border-white/40 dark:border-white/10 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none" />
+            
+            {submitStatus === 'success' ? (
+              <div className="h-full flex flex-col items-center justify-center text-center relative z-10 py-10">
+                <div className="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-6">
+                  <Check className="w-10 h-10" />
+                </div>
+                <h3 className="font-display text-3xl font-medium mb-4">Message Sent!</h3>
+                <p className="text-slate-500 dark:text-slate-400">Our admin team has received your enquiry and will contact you shortly.</p>
+                <button onClick={() => setSubmitStatus('idle')} className="mt-8 px-6 py-3 bg-violet-600 text-white rounded-full font-medium hover:bg-violet-700 transition-colors">
+                  Send Another
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleContactSubmit} className="relative z-10 flex flex-col gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Full Name *</label>
+                    <input required value={contactForm.name} onChange={e => setContactForm({...contactForm, name: e.target.value})} type="text" className="px-4 py-3 bg-white/50 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl focus:outline-none focus:border-violet-500 transition-colors" placeholder="John Doe" />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Phone Number *</label>
+                    <input required value={contactForm.phone} onChange={e => setContactForm({...contactForm, phone: e.target.value})} type="tel" className="px-4 py-3 bg-white/50 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl focus:outline-none focus:border-violet-500 transition-colors" placeholder="+91 XXXXX XXXXX" />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Email Address</label>
+                  <input value={contactForm.email} onChange={e => setContactForm({...contactForm, email: e.target.value})} type="email" className="px-4 py-3 bg-white/50 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl focus:outline-none focus:border-violet-500 transition-colors" placeholder="john@example.com" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">How can we help? *</label>
+                  <textarea required value={contactForm.message} onChange={e => setContactForm({...contactForm, message: e.target.value})} rows={4} className="px-4 py-3 bg-white/50 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl focus:outline-none focus:border-violet-500 transition-colors resize-none" placeholder="I am interested in..." />
+                </div>
+                {submitStatus === 'error' && <p className="text-red-500 text-sm">Failed to send message. Please try again.</p>}
+                <button type="submit" disabled={isSubmitting} className="py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-lg shadow-violet-500/20 disabled:opacity-70 flex items-center justify-center gap-2">
+                  {isSubmitting ? 'Sending...' : 'Send Enquiry'}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ----------------------------------------------------
           DOWNLOAD APP CTA (SPATIAL)
           ---------------------------------------------------- */}
       <section id="download-app" className="py-32 px-6 relative z-10">
@@ -512,7 +717,9 @@ export default function LandingClient({ courses, instructors, branding }: Landin
           
           <div className="flex items-center gap-6">
             {logoUrl ? (
-              <img src={logoUrl} alt={`${academyName} Logo`} className="w-12 h-12 object-contain rounded" />
+              <div className="relative w-12 h-12">
+                <Image src={logoUrl} alt={`${academyName} Logo`} fill className="object-contain rounded" />
+              </div>
             ) : (
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
                 <Car className="w-6 h-6 text-white" />

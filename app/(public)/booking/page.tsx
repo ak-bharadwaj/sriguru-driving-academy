@@ -214,7 +214,7 @@ export default function PublicBookingSystem() {
 
   const selectedCourse = courses.find(c => c.id === selectedType)
   const courseTitle = selectedCourse 
-    ? (selectedCourse.title[language] || selectedCourse.title['EN'] || selectedType) 
+    ? (selectedCourse.title[activeLang] || selectedCourse.title['EN'] || selectedType) 
     : selectedType
 
   const basePrice = selectedCourse ? selectedCourse.price : 0
@@ -554,9 +554,9 @@ export default function PublicBookingSystem() {
                     courses.map((opt) => {
                       const isSelected = selectedType === opt.id
                       const Icon = opt.category === 'BEGINNER' ? BookOpen : opt.category === 'ADVANCED' ? Award : Zap
-                      const displayTitle = opt.title[language] || opt.title['EN'] || ''
-                      const displayTag = opt.tag[language] || opt.tag['EN'] || ''
-                      const displayDesc = opt.desc[language] || opt.desc['EN'] || ''
+                      const displayTitle = opt.title[activeLang] || opt.title['EN'] || ''
+                      const displayTag = opt.tag[activeLang] || opt.tag['EN'] || ''
+                      const displayDesc = opt.desc[activeLang] || opt.desc['EN'] || ''
 
                       return (
                         <div

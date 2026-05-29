@@ -9,8 +9,8 @@ import { useLanguageStore } from '@/store/languageStore'
 
 const PAGE_DICT = {
   EN: {
-    settings: '{t.settings}',
-    userId: '{t.userId}'
+    settings: 'Settings',
+    userId: 'User ID:'
   },
   HI: {
     settings: 'सेटिंग्स',
@@ -24,6 +24,7 @@ const PAGE_DICT = {
 
 
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
+import { LanguageToggle } from '@/components/shared/LanguageToggle'
 import ProfileClient from './ProfileClient'
 
 
@@ -57,16 +58,17 @@ export default async function ProfilePage() {
         
         <div className="max-w-md mx-auto relative z-10">
           
-          {/* Top Bar */}
-          <div className="flex justify-between items-center mb-8">
+          {/* Top Bar (Relative with high z-index so dropdowns render above Avatar) */}
+          <div className="flex justify-between items-center mb-8 relative z-50">
             <Link href="/student/dashboard" className="p-2 hover:bg-white/10 rounded-xl transition">
               <ArrowLeft className="w-6 h-6 text-white" />
             </Link>
             <h1 className="text-lg font-bold font-display">{t.settings}</h1>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 p-1 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg">
               <ThemeToggle />
-              <Link href="/student/notifications" className="p-2 hover:bg-white/10 rounded-xl transition cursor-pointer">
-                <Bell className="w-6 h-6 text-white" />
+              <LanguageToggle />
+              <Link href="/student/notifications" className="p-2 hover:bg-white/20 rounded-xl transition cursor-pointer flex items-center justify-center">
+                <Bell className="w-5 h-5 text-white" />
               </Link>
             </div>
           </div>

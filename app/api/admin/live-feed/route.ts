@@ -1,52 +1,53 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server'
+import { db } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
-// Live feed records simulated with relative timings
 export async function GET() {
-  const session = await getServerSession(authOptions)
-  const user = session?.user as { role?: string } | undefined
-  if (!session || user?.role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Forbidden. Admin credentials required.' }, { status: 403 })
-  }
-  const alerts = [
-    {
-      id: `alert-${Date.now()}-1`,
-      type: 'BOOKING',
-      message: 'New admission slot filed by Preeti Patel (MCWG)',
-      relativeTime: '2 mins ago',
-      pulse: true
-    },
-    {
-      id: `alert-${Date.now()}-2`,
-      type: 'BADGE',
-      message: 'Student Aarav Mehta awarded the "Highway Master" gold badge',
-      relativeTime: '8 mins ago',
-      pulse: false
-    },
-    {
-      id: `alert-${Date.now()}-3`,
-      type: 'SESSION',
-      message: 'Clutch Control operations marked completed under Rajesh Sharma',
-      relativeTime: '15 mins ago',
-      pulse: false
-    },
-    {
-      id: `alert-${Date.now()}-4`,
-      type: 'QUIZ',
-      message: 'Theoretical mock test cleared by Kabir Sen (96% Accuracy)',
-      relativeTime: '24 mins ago',
-      pulse: false
-    },
-    {
-      id: `alert-${Date.now()}-5`,
-      type: 'SYSTEM',
-      message: 'Backup pgBouncer synchronized with Neon cloud transaction logs',
-      relativeTime: '45 mins ago',
-      pulse: false
+  try {
+    const session = await getServerSession(authOptions)
+    const user = session?.user as { role?: string } | undefined
+    if (!session || user?.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Forbidden. Admin credentials required.' }, { status: 403 })
     }
-  ]
 
-  return NextResponse.json(alerts, { status: 200 })
+    // Fetch the 5 most recent real activity logs or system notifications from the DB
+    const notifications = await db.notification.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' }
+    })
+
+    const alerts = notifications.map((n, idx) => {
+      const diffMs = Date.now() - n.createdAt.getTime()
+      const diffMins = Math.round(diffMs / 60000)
+      
+      let relativeTime = 'Just now'
+      if (diffMins > 0) {
+        if (diffMins < 60) {
+          relativeTime = `${diffMins} mins ago`
+        } else {
+          const diffHours = Math.round(diffMins / 60)
+          if (diffHours < 24) {
+            relativeTime = `${diffHours} hours ago`
+          } else {
+            relativeTime = `${Math.round(diffHours / 24)} days ago`
+          }
+        }
+      }
+
+      return {
+        id: n.id,
+        type: n.type || 'SYSTEM',
+        message: n.message,
+        relativeTime,
+        pulse: idx === 0
+      }
+    })
+
+    return NextResponse.json(alerts, { status: 200 })
+  } catch (error) {
+    console.error('Live Feed Fetch Error:', error)
+    return NextResponse.json([], { status: 200 })
+  }
 }
-

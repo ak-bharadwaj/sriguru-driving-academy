@@ -124,7 +124,7 @@ export default function StudentTimelinePage() {
                       </div>
                       <div className="text-right flex-shrink-0">
                         <div className="text-xl font-bold text-accent">{dateObj.toLocaleDateString()}</div>
-                        <div className="text-sm text-text-3">{dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                        <div className="text-sm text-text-3">{dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</div>
                       </div>
                     </div>
 
@@ -185,6 +185,7 @@ export default function StudentTimelinePage() {
                     value={newDate}
                     onChange={(e) => setNewDate(e.target.value)}
                     className="bg-void border border-border rounded-xl p-3 text-white focus:outline-none focus:border-primary"
+                    style={{ colorScheme: 'dark' }}
                     required
                   />
                 </div>

@@ -7,22 +7,22 @@ import { useLanguageStore } from '@/store/languageStore'
 
 const PAGE_DICT = {
   EN: {
-    pageTitle: '{t.pageTitle}',
+    pageTitle: 'Reports & Exports',
     pageDesc: 'Download data and view operational reports.',
-    refresh: '{t.refresh}',
-    failedLoad: '{t.failedLoad}',
-    studentReport: '{t.studentReport}',
+    refresh: 'Refresh Data',
+    failedLoad: 'Failed to load report summary.',
+    studentReport: 'Student Report',
     total: 'Total',
-    exportCsv: '{t.exportCsv}',
-    revReport: '{t.revReport}',
-    lifetime: '{t.lifetime}',
+    exportCsv: 'Export CSV',
+    revReport: 'Revenue Report',
+    lifetime: 'Lifetime',
     thisMonth: 'This Month:',
-    sessionReport: '{t.sessionReport}',
-    testReport: '{t.testReport}',
-    passRate: '{t.passRate}',
-    passed: '{t.passed}',
-    failed: '{t.failed}',
-    scheduled: '{t.scheduled}'
+    sessionReport: 'Session Report',
+    testReport: 'Test Results Report',
+    passRate: 'Pass Rate',
+    passed: 'Passed',
+    failed: 'Failed',
+    scheduled: 'Scheduled'
   },
   HI: {
     pageTitle: 'रिपोर्ट और निर्यात',

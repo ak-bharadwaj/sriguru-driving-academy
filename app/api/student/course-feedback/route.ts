@@ -24,20 +24,21 @@ export async function POST(req: Request) {
     const { rating, comment } = await req.json()
 
     // 1. Create Feedback
-    const feedback = await db.courseFeedback.create({
+    const feedback = await db.feedback.create({
       data: {
         studentId: student.id,
-        rating,
-        comment
+        instructorId: student.instructorId || 'SYSTEM',
+        tag: 'course_feedback',
+        content: `Rating: ${rating}. Comment: ${comment}`
       }
     })
 
-    // 2. Check if they already have the COURSE_GRADUATE badge
+    // 2. Check if they already have the ELITE_DRIVER badge
     const existingBadge = await db.studentBadge.findFirst({
       where: {
         studentId: student.id,
         badge: {
-          type: 'COURSE_GRADUATE'
+          type: 'ELITE_DRIVER'
         }
       }
     })
@@ -47,16 +48,17 @@ export async function POST(req: Request) {
     if (!existingBadge) {
       // Find or create the badge
       let badge = await db.badge.findUnique({
-        where: { type: 'COURSE_GRADUATE' }
+        where: { type: 'ELITE_DRIVER' }
       })
       if (!badge) {
         badge = await db.badge.create({
           data: {
-            type: 'COURSE_GRADUATE',
+            type: 'ELITE_DRIVER',
             name: 'Course Graduate',
             description: 'Successfully completed the driving course and provided feedback.',
             icon: 'award', // Default fallback
-            xpReward: 500
+            xpRequired: 0,
+            condition: {}
           }
         })
       }
@@ -71,7 +73,7 @@ export async function POST(req: Request) {
       // Add XP for graduation
       await db.student.update({
         where: { id: student.id },
-        data: { xp: { increment: badge.xpReward } }
+        data: { xp: { increment: 500 } }
       })
 
       const branding = getBranding()

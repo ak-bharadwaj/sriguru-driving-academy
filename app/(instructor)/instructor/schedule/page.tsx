@@ -77,7 +77,7 @@ const PAGE_DICT = {
     completeBtn: 'पूरा करें',
     today: 'आज',
     tomorrow: 'कल',
-    unknown: 'अज्ञात',
+    unknown: 'अज्‍नात',
     defaultTrack: 'डिफ़ॉल्ट ट्रैक'
   },
   TE: {
@@ -114,7 +114,6 @@ const PAGE_DICT = {
   }
 }
 
-
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
 export default function InstructorSchedulePage() {
@@ -127,9 +126,10 @@ export default function InstructorSchedulePage() {
   const [showAttendanceModal, setShowAttendanceModal] = useState<{sessionId: string, studentId: string} | null>(null)
   const [attendanceStatus, setAttendanceStatus] = useState('PRESENT')
   
+  const [sessionDate, setSessionDate] = useState('')
+  const [sessionTime, setSessionTime] = useState('')
   const [newSessionData, setNewSessionData] = useState({
     studentId: '',
-    scheduledAt: '',
     duration: 60,
     lessonType: '',
     notes: ''
@@ -165,16 +165,19 @@ export default function InstructorSchedulePage() {
   const handleCreateSession = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      const combinedDateTime = new Date(`${sessionDate}T${sessionTime}`)
       await fetch('/api/instructor/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...newSessionData,
-          scheduledAt: new Date(newSessionData.scheduledAt).toISOString()
+          scheduledAt: combinedDateTime.toISOString()
         }),
       })
       setShowCreateModal(false)
-      setNewSessionData({ studentId: '', scheduledAt: '', duration: 60, lessonType: '', notes: '' })
+      setNewSessionData({ studentId: '', duration: 60, lessonType: '', notes: '' })
+      setSessionDate('')
+      setSessionTime('')
       mutate()
     } catch (e) {
       console.error(e)
@@ -218,7 +221,7 @@ export default function InstructorSchedulePage() {
     return {
       id: s.id,
       studentId: s.student?.id || '',
-      time: d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
       date: dateStr,
       student: s.student?.name || t.unknown,
       type: s.lessonType,
@@ -237,9 +240,6 @@ export default function InstructorSchedulePage() {
   return (
     <div className="min-h-screen bg-void text-text-1 font-body p-4 sm:p-6 md:p-12 relative overflow-hidden">
       
-      {/* Background Accents */}
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-accent/5 rounded-full blur-[140px] pointer-events-none" />
-
       <div className="max-w-6xl mx-auto z-10 relative">
         
         {/* Header */}
@@ -276,10 +276,10 @@ export default function InstructorSchedulePage() {
         </div>
 
         {/* Timeline Layout */}
-        <div className="relative pl-5 sm:pl-6 md:pl-8 border-l-2 border-border/50">
+        <div className="relative pl-6 sm:pl-8 border-l-2 border-border/60 ml-4 sm:ml-5">
           
           {isLoading && (
-            <div className="py-20 text-center text-text-3">{t.loadingSessions}</div>
+            <div className="py-20 text-center text-text-3 font-medium">{t.loadingSessions}</div>
           )}
 
           {!isLoading && filteredSchedule.map((session: any, idx: number) => {
@@ -307,21 +307,20 @@ export default function InstructorSchedulePage() {
               borderAccent = 'border-primary'
             }
 
+            const solidColorClass = statusBg.replace('/10', '')
+
             return (
               <motion.div
                 key={session.id}
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.1, type: "spring", stiffness: 100 }}
                 className="mb-8 relative"
               >
-                {/* Timeline Dot */}
-                <div className={`absolute -left-[30px] sm:-left-[35px] md:-left-[43px] top-6 w-4 sm:w-5 h-4 sm:h-5 rounded-full border-4 border-void ${statusBg.replace('/10','')} flex items-center justify-center`}>
-                  <div className={`w-2 h-2 rounded-full bg-void`} />
-                </div>
+                {/* Timeline Solid Bullet Dot */}
+                <div className={`absolute -left-[30px] sm:-left-[39px] top-6 w-3 h-3 sm:w-4 sm:h-4 rounded-full border-4 border-void ${solidColorClass} flex items-center justify-center`} />
 
                 {/* Session Card */}
-                <div className={`bg-surface border-l-4 ${borderAccent} border-y border-r border-y-border border-r-border p-4 sm:p-6 rounded-2xl hover:bg-surface-2 transition-colors group flex flex-col lg:flex-row gap-6 lg:items-center justify-between`}>
+                <div className={`bg-surface border border-border border-l-4 ${borderAccent} p-5 rounded-2xl flex flex-col lg:flex-row gap-6 lg:items-center justify-between transition-colors duration-200 hover:bg-surface/90`}>
                   
                   {/* Left Info: Time & Type */}
                   <div className="flex-1">
@@ -330,52 +329,52 @@ export default function InstructorSchedulePage() {
                         <StatusIcon className="w-3.5 h-3.5" />
                         {session.status.replace('_', ' ')}
                       </span>
-                      <span className="text-sm font-data-mono text-text-3">{session.date}</span>
+                      <span className="text-xs font-semibold font-data-mono text-text-3 bg-void px-2.5 py-1 rounded border border-border">{session.date}</span>
                     </div>
                     
-                    <h3 className="text-lg sm:text-xl font-display font-semibold text-white mb-1 group-hover:text-primary transition-colors">
+                    <h3 className="text-lg sm:text-xl font-display font-bold text-text-1 mb-1">
                       {session.time} — {session.type}
                     </h3>
                     
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-text-3 font-data-mono mt-3">
-                      <span className="flex items-center gap-1.5"><User className="w-4 h-4"/> {session.student}</span>
-                      <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4"/> {session.location}</span>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 text-xs sm:text-sm text-text-2 mt-3 font-medium">
+                      <span className="flex items-center gap-2 text-text-2"><User className="w-4 h-4 text-text-3"/> {session.student}</span>
+                      <span className="flex items-center gap-2 text-text-2"><MapPin className="w-4 h-4 text-text-3"/> {session.location}</span>
                     </div>
                   </div>
 
-                {/* Right Actions */}
-                <div className="flex items-center gap-3 pt-4 lg:pt-0 border-t lg:border-t-0 border-border">
-                  {session.status === 'SCHEDULED' && (
-                    <>
-                      <button 
-                        onClick={() => handleUpdateStatus(session.id, 'IN_PROGRESS')}
-                        className="px-4 sm:px-5 py-2.5 bg-primary/10 text-primary border border-primary/20 rounded-xl text-xs sm:text-sm font-semibold hover:bg-primary hover:text-white transition-all w-full lg:w-auto"
-                      >
-                        {t.startSession}
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(session.id)}
-                        className="p-2.5 text-text-3 hover:text-danger bg-surface border border-border rounded-xl transition-colors"
-                      >
-                        <XCircle className="w-5 h-5" />
-                      </button>
-                    </>
-                  )}
-                  {session.status === 'IN_PROGRESS' && (
+                  {/* Right Actions */}
+                  <div className="flex items-center gap-3 pt-4 lg:pt-0 border-t lg:border-t-0 border-border">
+                    {session.status === 'SCHEDULED' && (
+                      <>
+                        <button 
+                          onClick={() => handleUpdateStatus(session.id, 'IN_PROGRESS')}
+                          className="px-4 sm:px-5 py-2.5 bg-primary text-white rounded-xl text-xs sm:text-sm font-semibold hover:bg-primary/95 transition-all w-full lg:w-auto"
+                        >
+                          {t.startSession}
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(session.id)}
+                          className="p-2.5 text-text-3 hover:text-danger bg-surface border border-border rounded-xl transition-all"
+                        >
+                          <XCircle className="w-5 h-5" />
+                        </button>
+                      </>
+                    )}
+                    {session.status === 'IN_PROGRESS' && (
                       <button 
                         onClick={() => setShowAttendanceModal({ sessionId: session.id, studentId: session.studentId })}
-                        className="px-4 sm:px-5 py-2.5 bg-success/20 text-success border border-success/30 rounded-xl text-xs sm:text-sm font-semibold hover:bg-success hover:text-void shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-all w-full lg:w-auto flex items-center gap-2"
+                        className="px-4 sm:px-5 py-2.5 bg-success text-void rounded-xl text-xs sm:text-sm font-bold hover:bg-success/95 transition-all w-full lg:w-auto flex items-center gap-2"
                       >
                         <CheckCircle2 className="w-4 h-4" />
                         {t.markCompleted}
                       </button>
-                  )}
-                  {session.status === 'COMPLETED' && (
-                    <button className="px-4 sm:px-5 py-2.5 bg-surface text-text-2 border border-border rounded-xl text-xs sm:text-sm font-semibold hover:text-white transition-all w-full lg:w-auto">
-                      {t.viewLog}
-                    </button>
-                  )}
-                </div>
+                    )}
+                    {session.status === 'COMPLETED' && (
+                      <button className="px-4 sm:px-5 py-2.5 bg-surface text-text-2 border border-border rounded-xl text-xs sm:text-sm font-semibold hover:text-text-1 hover:bg-surface/85 transition-all w-full lg:w-auto">
+                        {t.viewLog}
+                      </button>
+                    )}
+                  </div>
 
                 </div>
               </motion.div>
@@ -383,10 +382,10 @@ export default function InstructorSchedulePage() {
           })}
           
           {!isLoading && filteredSchedule.length === 0 && (
-            <div className="py-20 text-center border border-border border-dashed rounded-2xl bg-surface/50 ml-4">
+            <div className="py-20 text-center border border-border border-dashed rounded-3xl bg-surface/40 ml-4 backdrop-blur-sm">
               <CalendarIcon className="w-12 h-12 text-text-3 mx-auto mb-4 opacity-50" />
-              <h3 className="text-lg font-semibold text-text-1 mb-2">{t.noSlotsTitle}</h3>
-              <p className="text-text-3">{t.noSlotsDesc}</p>
+              <h3 className="text-lg font-bold text-text-1 mb-2">{t.noSlotsTitle}</h3>
+              <p className="text-text-3 text-sm">{t.noSlotsDesc}</p>
             </div>
           )}
 
@@ -405,7 +404,11 @@ export default function InstructorSchedulePage() {
               className="bg-surface border border-border rounded-3xl p-6 md:p-8 w-full max-w-lg shadow-2xl relative"
             >
               <button 
-                onClick={() => setShowCreateModal(false)}
+                onClick={() => {
+                  setShowCreateModal(false)
+                  setSessionDate('')
+                  setSessionTime('')
+                }}
                 className="absolute top-4 right-4 p-2 text-text-3 hover:text-white bg-surface-2 rounded-full"
               >
                 <XCircle className="w-5 h-5" />
@@ -429,18 +432,29 @@ export default function InstructorSchedulePage() {
                     ))}
                   </select>
                 </div>
-
+ 
                 <div>
                   <label className="block text-sm font-semibold text-text-2 mb-2">{t.dateTimeLabel}</label>
-                  <input 
-                    type="datetime-local" 
-                    required
-                    value={newSessionData.scheduledAt}
-                    onChange={e => setNewSessionData({...newSessionData, scheduledAt: e.target.value})}
-                    className="w-full bg-void border border-border rounded-xl p-3 text-white focus:outline-none focus:border-primary"
-                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    <input 
+                      type="date" 
+                      required
+                      value={sessionDate}
+                      onChange={e => setSessionDate(e.target.value)}
+                      className="w-full bg-void border border-border rounded-xl p-3 text-white focus:outline-none focus:border-primary"
+                      style={{ colorScheme: 'dark' }}
+                    />
+                    <input 
+                      type="time" 
+                      required
+                      value={sessionTime}
+                      onChange={e => setSessionTime(e.target.value)}
+                      className="w-full bg-void border border-border rounded-xl p-3 text-white focus:outline-none focus:border-primary"
+                      style={{ colorScheme: 'dark' }}
+                    />
+                  </div>
                 </div>
-
+ 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-text-2 mb-2">{t.durationLabel}</label>
@@ -466,7 +480,7 @@ export default function InstructorSchedulePage() {
                     />
                   </div>
                 </div>
-
+ 
                 <div>
                   <label className="block text-sm font-semibold text-text-2 mb-2">{t.notesLabel}</label>
                   <textarea 
@@ -477,11 +491,15 @@ export default function InstructorSchedulePage() {
                     placeholder={t.notesPlaceholder}
                   />
                 </div>
-
+ 
                 <div className="mt-4 flex gap-3 justify-end">
                   <button 
                     type="button"
-                    onClick={() => setShowCreateModal(false)}
+                    onClick={() => {
+                      setShowCreateModal(false)
+                      setSessionDate('')
+                      setSessionTime('')
+                    }}
                     className="px-5 py-2.5 rounded-xl text-sm font-semibold text-text-2 hover:bg-surface-2 transition-all"
                   >
                     {t.cancelBtn}
@@ -493,7 +511,7 @@ export default function InstructorSchedulePage() {
                     {t.scheduleSlotBtn}
                   </button>
                 </div>
-
+ 
               </form>
             </motion.div>
           </div>

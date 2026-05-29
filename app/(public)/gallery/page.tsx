@@ -91,20 +91,40 @@ export default function PublicGalleryPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: (idx % 3) * 0.1 }}
-                  className="break-inside-avoid relative group rounded-3xl overflow-hidden aspect-[4/5] md:aspect-[3/4] shadow-xl hover:shadow-2xl transition-all duration-500"
+                  className="break-inside-avoid relative group rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500"
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${img.gradient || 'from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900'} group-hover:scale-105 transition-transform duration-700`} />
-                  
-                  <div className="absolute inset-0 flex items-center justify-center opacity-30">
-                    <ImageIcon className="w-20 h-20 text-white" />
-                  </div>
-                  
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
-                  
-                  <div className="absolute bottom-0 inset-x-0 p-6 sm:p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    <p className="text-white font-bold text-lg sm:text-xl leading-snug">{img.caption}</p>
-                    {img.uploadedAt && <p className="text-white/60 text-xs mt-2">{new Date(img.uploadedAt).toLocaleDateString()}</p>}
-                  </div>
+                  {/* Real uploaded image */}
+                  {img.imageKey && (img.imageKey.startsWith('data:image') || img.imageKey.startsWith('http')) ? (
+                    <div className="relative overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={img.imageKey}
+                        alt={img.caption || 'Gallery image'}
+                        className="w-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        style={{ minHeight: '200px' }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      {img.caption && (
+                        <div className="absolute bottom-0 inset-x-0 p-5 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                          <p className="text-white font-bold text-base leading-snug drop-shadow">{img.caption}</p>
+                          {img.uploadedAt && <p className="text-white/60 text-xs mt-1">{new Date(img.uploadedAt).toLocaleDateString()}</p>}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* Demo / placeholder */
+                    <div className="aspect-[4/5] md:aspect-[3/4]">
+                      <div className={`absolute inset-0 bg-gradient-to-br ${img.gradient || 'from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900'} group-hover:scale-105 transition-transform duration-700`} />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-30">
+                        <ImageIcon className="w-20 h-20 text-white" />
+                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
+                      <div className="absolute bottom-0 inset-x-0 p-6 sm:p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                        <p className="text-white font-bold text-lg sm:text-xl leading-snug">{img.caption}</p>
+                        {img.uploadedAt && <p className="text-white/60 text-xs mt-2">{new Date(img.uploadedAt).toLocaleDateString()}</p>}
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </div>

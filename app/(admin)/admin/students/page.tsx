@@ -6,18 +6,18 @@ import { useLanguageStore } from '@/store/languageStore'
 const PAGE_DICT = {
   EN: {
     pageTitle: 'Student Management',
-    pageDesc: '{t.pageDesc}',
+    pageDesc: 'Manage course fees, driving tests, instructor assignments, and student lifecycle.',
     total: 'Total',
     feePaid: 'Fee Paid',
     unpaid: 'Unpaid',
     testSched: 'Test Scheduled',
     searchPh: 'Search by name, email, or phone...',
-    createStudent: '{t.createStudent}',
+    createStudent: 'Create Student',
     all: 'All',
     noInst: 'No Instructor',
-    loading: '{t.loading}',
-    noStudents: '{t.noStudents}',
-    tryAdjust: '{t.tryAdjust}',
+    loading: 'Loading students...',
+    noStudents: 'No students found',
+    tryAdjust: 'Try adjusting your search or filters.',
     noFeeSet: 'No fee set',
     active: 'ACTIVE',
     completed: 'COMPLETED',
@@ -25,25 +25,25 @@ const PAGE_DICT = {
     test: 'Test:',
     setFee: 'Set Fee',
     recordPayment: 'Record Payment',
-    schedule{t.test} 'Schedule Test',
+    scheduleTest: 'Schedule Test',
     recordResult: 'Record Test Result',
     changeInst: 'Change Instructor',
     assignInst: 'Assign Instructor',
     deactivate: 'Deactivate',
     reactivate: 'Reactivate',
-    payHistory: '{t.payHistory}',
-    noPayRec: '{t.noPayRec}',
-    testHistory: '{t.testHistory}',
-    noTestSched: '{t.noTestSched}',
-    attemptNo: '{t.attemptNo}',
+    payHistory: 'Payment History',
+    noPayRec: 'No payments recorded yet.',
+    testHistory: 'Driving Test History',
+    noTestSched: 'No driving tests scheduled yet.',
+    attemptNo: 'Attempt #',
     enrolled: 'Enrolled:',
     sessions: 'Sessions:',
-    balanceDue: '{t.balanceDue}',
-    recordPayModal: '💰 {t.recordPayment}',
+    balanceDue: 'Balance Due: ₹',
+    recordPayModal: '💰 Record Payment',
     schedTestModal: '🚗 Schedule Driving Test',
     setFeeModal: '📋 Set Course Fee',
     assignModal: '👨‍🏫 Assign Instructor',
-    resultModal: '🏆 {t.recordResult}',
+    resultModal: '🏆 Record Test Result',
     createModal: '👤 Create New Student',
     amount: 'Amount (₹)',
     phAmount: 'e.g. 5000',
@@ -72,7 +72,7 @@ const PAGE_DICT = {
     saving: 'Saving...',
     setFeeBtn: 'Set Fee',
     selInst: 'Select Instructor',
-    noInstSys: '{t.noInstSys}',
+    noInstSys: 'No instructors found in system.',
     chooseInst: 'Choose instructor...',
     assigning: 'Assigning...',
     assignBtn: 'Assign Instructor'
@@ -98,7 +98,7 @@ const PAGE_DICT = {
     test: 'परीक्षा:',
     setFee: 'शुल्क निर्धारित करें',
     recordPayment: 'भुगतान दर्ज करें',
-    schedule{t.test} 'परीक्षा निर्धारित करें',
+    scheduleTest: 'परीक्षा निर्धारित करें',
     recordResult: 'परीक्षा परिणाम दर्ज करें',
     changeInst: 'प्रशिक्षक बदलें',
     assignInst: 'प्रशिक्षक असाइन करें',
@@ -171,7 +171,7 @@ const PAGE_DICT = {
     test: 'పరీక్ష:',
     setFee: 'ఫీజును సెట్ చేయండి',
     recordPayment: 'చెల్లింపును రికార్డ్ చేయండి',
-    schedule{t.test} 'పరీక్షను షెడ్యూల్ చేయండి',
+    scheduleTest: 'పరీక్షను షెడ్యూల్ చేయండి',
     recordResult: 'పరీక్ష ఫలితాన్ని రికార్డ్ చేయండి',
     changeInst: 'బోధకుడిని మార్చండి',
     assignInst: 'బోధకుడిని కేటాయించండి',
@@ -278,9 +278,9 @@ interface StudentData {
   balance: number
   instructorId: string | null
   instructorName: string | null
-  total{t.sessions} number
+  totalSessions: number
   payments: PaymentRecord[]
-  next{t.test} { id: string; testDate: string; testCenter: string | null; attemptNo: number } | null
+  nextTest: { id: string; testDate: string; testCenter: string | null; attemptNo: number } | null
   lastTestResult: { id: string; testDate: string; result: string; attemptNo: number } | null
   drivingTests: TestRecord[]
   status: 'ACTIVE' | 'COMPLETED' | 'DROPPED'
@@ -315,6 +315,7 @@ export default function AdminStudentsPage() {
   const [testForm, setTestForm] = useState({ testDate: '', testCenter: '', notes: '' })
   const [feeForm, setFeeForm] = useState({ courseFee: '', trainingType: '' })
   const [resultForm, setResultForm] = useState({ testId: '', result: 'PASS' as 'PASS' | 'FAIL', notes: '' })
+  const [assignForm, setAssignForm] = useState({ instructorId: '' })
   const [createForm, setCreateForm] = useState({ name: '', email: '', phone: '', trainingType: 'BEGINNER', password: '' })
   const [submitting, setSubmitting] = useState(false)
 
@@ -342,8 +343,8 @@ export default function AdminStudentsPage() {
 
   // Filter logic
   const filtered = students.filter(s => {
-    const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = (s.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (s.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (s.phone && s.phone.includes(searchTerm))
 
     if (!matchesSearch) return false
@@ -679,7 +680,7 @@ export default function AdminStudentsPage() {
                   >
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="w-11 h-11 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-lg flex-shrink-0">
-                        {stu.name.charAt(0)}
+                        {(stu.name || 'U').charAt(0)}
                       </div>
                       <div className="flex flex-col min-w-0">
                         <span className="text-base font-bold text-[rgb(var(--color-text-1))] truncate">{stu.name}</span>
@@ -827,23 +828,23 @@ export default function AdminStudentsPage() {
                                 <p className="text-xs text-slate-400 italic">{t.noTestSched}</p>
                               ) : (
                                 <div className="flex flex-col gap-2 max-h-[200px] overflow-y-auto">
-                                  {stu.drivingTests.map(t => (
-                                    <div key={t.id} className="flex justify-between items-center text-xs bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] p-3 rounded-lg">
+                                  {stu.drivingTests.map(testItem => (
+                                    <div key={testItem.id} className="flex justify-between items-center text-xs bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] p-3 rounded-lg">
                                       <div className="flex flex-col">
                                         <span className="font-bold text-[rgb(var(--color-text-1))]">
-                                          {t.attemptNo}{t.attemptNo}
+                                          {t.attemptNo}{testItem.attemptNo}
                                         </span>
                                         <span className="text-slate-400 mt-0.5">
-                                          {new Date(t.testDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                          {t.testCenter ? ` • ${t.testCenter}` : ''}
+                                          {new Date(testItem.testDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                          {testItem.testCenter ? ` • ${testItem.testCenter}` : ''}
                                         </span>
                                       </div>
                                       <span className={`px-2.5 py-1 rounded-lg font-bold ${
-                                        t.result === 'PASS' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' :
-                                        t.result === 'FAIL' ? 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400' :
+                                        testItem.result === 'PASS' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' :
+                                        testItem.result === 'FAIL' ? 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400' :
                                         'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400'
                                       }`}>
-                                        {t.result}
+                                        {testItem.result}
                                       </span>
                                     </div>
                                   ))}

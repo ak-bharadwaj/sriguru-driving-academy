@@ -1,29 +1,32 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { revalidatePath } from 'next/cache'
 
-export async function POST(request: Request) {
+export const dynamic = 'force-dynamic'
+
+export async function POST(req: Request) {
   try {
-    const { name, phone, message } = await request.json()
-    if (!name || !phone) {
-      return NextResponse.json({ error: 'Name and Phone are required parameters' }, { status: 400 })
+    const body = await req.json()
+    const { name, phone, email, message } = body
+
+    if (!name || !phone || !message) {
+      return NextResponse.json({ error: 'Name, phone, and message are required' }, { status: 400 })
     }
 
-    // Save public inquiries inside the real Inquiry table
     const inquiry = await db.inquiry.create({
       data: {
         name,
         phone,
-        email: `${name.toLowerCase().replace(/\s+/g, '')}@example.com`,
-        message: message || 'Requesting information about courses'
+        email,
+        message
       }
     })
 
-    console.log(`PUBLIC INQUIRY RECEIVED: name: ${name}, phone: ${phone}, message: ${message}`)
+    revalidatePath('/admin/enquiries')
 
-    return NextResponse.json({ success: true, inquiry }, { status: 200 })
+    return NextResponse.json({ success: true, inquiry }, { status: 201 })
   } catch (error) {
-    const errMessage = error instanceof Error ? error.message : 'Unknown error'
-    console.error('Public inquiry submit error:', error)
-    return NextResponse.json({ error: 'Failed to record inquiry', details: errMessage }, { status: 500 })
+    console.error('Inquiry Submission Error:', error)
+    return NextResponse.json({ error: 'Failed to submit inquiry' }, { status: 500 })
   }
 }

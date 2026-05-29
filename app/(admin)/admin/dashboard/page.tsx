@@ -45,6 +45,10 @@ export default async function AdminDashboardPage() {
     where: { status: 'PENDING' }
   })
 
+  const pendingInquiriesCount = await db.inquiry.count({
+    where: { resolved: false }
+  })
+
   const activeInstructors = await db.instructor.count()
 
   const stats = {
@@ -53,6 +57,7 @@ export default async function AdminDashboardPage() {
     sessionsToday,
     sessionsThisWeek,
     pendingBookings: pendingBookingsCount,
+    pendingInquiries: pendingInquiriesCount,
     activeInstructors
   }
 
@@ -135,17 +140,31 @@ export default async function AdminDashboardPage() {
     }
   })
 
-  // 3. Engagement Graph (Mock 7-day data for aesthetics as requested)
-  // Generating simulated graph data ending today
-  const engagementData = Array.from({ length: 7 }).map((_, i) => {
+  // 3. Engagement Graph (Real 7-day data from Database)
+  const engagementData = []
+  for (let i = 6; i >= 0; i--) {
     const d = new Date()
-    d.setDate(d.getDate() - (6 - i))
-    return {
+    d.setDate(d.getDate() - i)
+    d.setHours(0, 0, 0, 0)
+    const nextD = new Date(d)
+    nextD.setDate(d.getDate() + 1)
+
+    // Fetch all XP events for this day
+    const xpEventsDay = await db.xPEvent.findMany({
+      where: {
+        createdAt: { gte: d, lt: nextD }
+      }
+    })
+
+    const xpAwarded = xpEventsDay.reduce((sum, evt) => sum + evt.amount, 0)
+    const activeStudentIds = new Set(xpEventsDay.map(evt => evt.studentId))
+
+    engagementData.push({
       day: d.toLocaleDateString('en-US', { weekday: 'short' }),
-      activeStudents: Math.floor(Math.random() * 30) + 20,
-      xpAwarded: Math.floor(Math.random() * 500) + 200
-    }
-  })
+      activeStudents: activeStudentIds.size,
+      xpAwarded
+    })
+  }
 
   return (
     <AdminDashboardClient 

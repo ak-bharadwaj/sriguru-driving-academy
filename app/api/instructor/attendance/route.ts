@@ -74,6 +74,17 @@ export async function POST(request: Request) {
       data: { status: 'COMPLETED' }
     })
 
+    // 4. Create Notification for the student
+    await db.notification.create({
+      data: {
+        userId: studentId,
+        title: 'Attendance Marked',
+        message: `Your instructor marked you as ${attendanceStatus} for the recent session.`,
+        type: 'SESSION_REMINDER',
+        isRead: false
+      }
+    })
+
     return NextResponse.json({ success: true, attendance }, { status: 200 })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'

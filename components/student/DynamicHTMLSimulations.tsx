@@ -1,8 +1,42 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { RotateCcw, ArrowRight, Check, Play, ShieldAlert, AlertTriangle, Key } from 'lucide-react'
 import { useLanguageStore } from '@/store/languageStore'
+
+/* ScaledCanvas: fits a fixed-width inner canvas into any container width */
+const ScaledCanvas = ({ canvasWidth = 700, children }: { canvasWidth?: number; children: React.ReactNode }) => {
+  const outerRef = useRef<HTMLDivElement>(null)
+  const [scale, setScale] = useState(1)
+
+  useEffect(() => {
+    if (!outerRef.current) return
+    const update = () => {
+      const w = outerRef.current?.clientWidth ?? canvasWidth
+      setScale(Math.min(1, w / canvasWidth))
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(outerRef.current)
+    return () => ro.disconnect()
+  }, [canvasWidth])
+
+  return (
+    <div ref={outerRef} className="w-full h-full overflow-hidden relative flex items-start justify-center">
+      <div
+        style={{
+          width: `${canvasWidth}px`,
+          transformOrigin: 'top center',
+          transform: `scale(${scale})`,
+          flexShrink: 0,
+          height: `${100 / scale}%`,
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
 
 export interface SimulationProps {
   onComplete?: () => void
@@ -568,8 +602,9 @@ export const SteeringControlSimulation: React.FC<SimulationProps> = ({ onComplet
 
   return (
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
-      <div className="flex-1 relative w-full min-h-[300px] bg-[#353839] border-b border-white/5 overflow-hidden flex justify-center">
-        <div className="w-[700px] h-full relative">
+      <div className="flex-1 relative w-full bg-[#353839] border-b border-white/5 overflow-hidden">
+        <ScaledCanvas canvasWidth={700}>
+          <div className="w-[700px] h-full relative" style={{ minHeight: '280px' }}>
           
           <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
           
@@ -578,13 +613,12 @@ export const SteeringControlSimulation: React.FC<SimulationProps> = ({ onComplet
           
           <div className="absolute top-[150px] left-[-1000px] right-[-1000px] h-0 border-t border-dashed border-white/40" />
           
-          {/* CONES: Staggered on left and right sides of the lane to force weaving */}
-          {/* Cone 1: Placed on the top half (left side). Car must steer BELOW it into the right side. */}
+          {/* Cone 1 */}
           <div className="absolute z-10" style={{top:'90px', left:'280px'}}>
             <div className="w-0 h-0 border-l-[10px] border-r-[10px] border-b-[28px] border-l-transparent border-r-transparent border-b-orange-500 drop-shadow-lg" />
             <div className="w-[22px] h-[5px] bg-orange-700 rounded -mt-0.5" />
           </div>
-          {/* Cone 2: Placed on the bottom half (right side). Car must steer ABOVE it into the left side. */}
+          {/* Cone 2 */}
           <div className="absolute z-10" style={{top:'200px', left:'500px'}}>
             <div className="w-0 h-0 border-l-[10px] border-r-[10px] border-b-[28px] border-l-transparent border-r-transparent border-b-orange-500 drop-shadow-lg" />
             <div className="w-[22px] h-[5px] bg-orange-700 rounded -mt-0.5" />
@@ -597,7 +631,8 @@ export const SteeringControlSimulation: React.FC<SimulationProps> = ({ onComplet
              <RealisticCarSVG colorClass="slate" showLights={true} step={step} activeGear={activeGear} />
           </div>
 
-        </div>
+          </div>
+        </ScaledCanvas>
       </div>
 
       <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 z-30">
@@ -694,11 +729,16 @@ export const ClutchControlSimulation: React.FC<SimulationProps> = ({ onComplete 
       }
     }, 100)
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setIsAnimating(false)
       if (step === 4 && onComplete) onComplete()
     }, 1500)
 
+    return () => {
+      clearInterval(rpmInterval)
+      clearInterval(speedInterval)
+      clearTimeout(timer)
+    }
   }, [step])
 
   const handleNext = () => { if (!isAnimating && step < 4) setStep(prev => prev + 1) }
@@ -867,8 +907,9 @@ export const HighwayMergingSimulation: React.FC<SimulationProps> = ({ onComplete
   return (
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
       
-      <div className="flex-1 relative w-full min-h-[300px] bg-[#2a2c2d] border-b border-white/5 overflow-hidden flex justify-center">
-        <div className="w-[700px] h-full relative">
+      <div className="flex-1 relative w-full bg-[#2a2c2d] border-b border-white/5 overflow-hidden">
+        <ScaledCanvas canvasWidth={700}>
+          <div className="w-[700px] h-full relative" style={{ minHeight: '280px' }}>
           
           <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
 
@@ -894,7 +935,8 @@ export const HighwayMergingSimulation: React.FC<SimulationProps> = ({ onComplete
              <RealisticCarSVG colorClass="slate" showLights={true} step={step} activeGear={activeGear} rightBlinker={step === 2} />
           </div>
 
-        </div>
+          </div>
+        </ScaledCanvas>
       </div>
 
       <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 z-30">

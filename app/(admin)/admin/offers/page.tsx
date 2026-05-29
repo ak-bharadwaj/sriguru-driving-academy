@@ -7,16 +7,16 @@ import { useLanguageStore } from '@/store/languageStore'
 
 const PAGE_DICT = {
   EN: {
-    pageTitle: '{t.pageTitle}',
+    pageTitle: 'Promotions Manager',
     pageDesc: 'Create and manage special offers and promotional banners.',
-    newPromo: '{t.newPromo}',
+    newPromo: 'New Promotion',
     noActive: 'No Promotions Active',
     createOne: 'Create a new promotion to boost your sales.',
-    promoCode: '{t.promoCode}',
+    promoCode: 'Promo Code',
     disable: 'Disable',
     enable: 'Enable',
     deleteConfirm: 'Delete this promotion?',
-    modalTitle: '{t.newPromo}',
+    modalTitle: 'New Promotion',
     title: 'Title',
     desc: 'Description',
     discount: 'Discount %',
@@ -200,12 +200,12 @@ export default function PromotionsPage() {
                 className={`relative bg-[rgb(var(--color-surface))] border rounded-2xl p-6 shadow-sm flex flex-col transition-all ${promo.active ? 'border-blue-200 dark:border-blue-800' : 'border-[rgb(var(--color-border))] opacity-75 grayscale-[0.5]'}`}
               >
                 <div className="flex justify-between items-start mb-4">
-                  <span className="px-3 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-bold rounded-lg">{promo.badge}</span>
+                  <span className="px-3 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-bold rounded-lg">{(promo.badge as any)?.[activeLang] || (promo.badge as any)?.EN || promo.badge}</span>
                   <div className={`w-3 h-3 rounded-full ${promo.active ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-300'}`} />
                 </div>
                 
-                <h3 className="text-xl font-bold mb-2">{promo.title}</h3>
-                <p className="text-sm text-[rgb(var(--color-text-3))] mb-6 flex-1 line-clamp-3">{promo.desc}</p>
+                <h3 className="text-xl font-bold mb-2">{(promo.title as any)?.[activeLang] || (promo.title as any)?.EN || promo.title}</h3>
+                <p className="text-sm text-[rgb(var(--color-text-3))] mb-6 flex-1 line-clamp-3">{(promo.desc as any)?.[activeLang] || (promo.desc as any)?.EN || promo.desc}</p>
                 
                 <div className="flex items-center gap-3 mb-6 bg-[rgb(var(--color-void))] p-3 rounded-xl">
                   <div className="text-2xl font-black text-[rgb(var(--color-text-1))]">{promo.discountPercent}%</div>

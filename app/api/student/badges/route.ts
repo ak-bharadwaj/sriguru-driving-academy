@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getServerSession } from 'next-auth'
@@ -40,9 +41,8 @@ export async function GET() {
       name: sb.badge.name,
       description: sb.badge.description,
       iconName: sb.badge.icon,
-      imageUrl: sb.badge.imageUrl,
       rarity: 'Legendary',
-      unlockedAt: sb.createdAt
+      unlockedAt: sb.earnedAt
     }))
 
     let lockedBadges = allDbBadges
@@ -52,7 +52,6 @@ export async function GET() {
         name: b.name,
         description: b.description,
         iconName: b.icon,
-        imageUrl: b.imageUrl,
         rarity: 'Rare'
       }))
 

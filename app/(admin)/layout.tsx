@@ -18,11 +18,13 @@ import {
   Menu,
   X,
   Tag,
+  Settings,
   FileDown
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
 import { LanguageToggle } from '@/components/shared/LanguageToggle'
 import { useLanguageStore } from '@/store/languageStore'
+import { useSettingsStore } from '@/store/settingsStore'
 import { Breadcrumbs } from '@/components/shared/Breadcrumbs'
 
 interface NavItem {
@@ -32,6 +34,51 @@ interface NavItem {
   category: string
 }
 
+/** Shared nav list rendered in both desktop sidebar and mobile drawer */
+function NavItemList({
+  items,
+  pathname,
+  collapsed = false,
+  onNavigate,
+}: {
+  items: NavItem[]
+  pathname: string
+  collapsed?: boolean
+  onNavigate?: () => void
+}) {
+  return (
+    <nav className="flex flex-col gap-1" aria-label="Admin navigation">
+      {items.map((item) => {
+        const isActive = pathname === item.path || (item.path !== '/admin/dashboard' && pathname.startsWith(item.path))
+        const Icon = item.icon
+        return (
+          <Link
+            key={item.path}
+            href={item.path}
+            onClick={onNavigate}
+            title={collapsed ? item.name : undefined}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+              isActive
+                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-semibold'
+                : 'text-[rgb(var(--color-text-2))] hover:text-[rgb(var(--color-text-1))] hover:bg-[rgb(var(--color-border))]/50'
+            }`}
+          >
+            <Icon className={`w-4.5 h-4.5 shrink-0 ${
+              isActive ? 'text-blue-600 dark:text-blue-400' : 'text-[rgb(var(--color-text-3))]'
+            }`} />
+            {!collapsed && (
+              <div className="flex flex-col text-left min-w-0">
+                <span className="text-sm leading-tight truncate">{item.name}</span>
+                <span className="text-[10px] text-[rgb(var(--color-text-3))] mt-0.5 uppercase tracking-wider">{item.category}</span>
+              </div>
+            )}
+          </Link>
+        )
+      })}
+    </nav>
+  )
+}
+
 const ADMIN_NAV_T = {
   EN: [
     { name: 'Console HUD', path: '/admin/dashboard', icon: Activity, category: 'OPERATIONS' },
@@ -39,11 +86,13 @@ const ADMIN_NAV_T = {
     { name: 'Slot Registries', path: '/slots', icon: Calendar, category: 'SCHEDULING' },
     { name: 'Booking Review', path: '/admin/bookings', icon: Users, category: 'OPERATIONS' },
     { name: 'Instructors', path: '/admin/instructors', icon: Users, category: 'OPERATIONS' },
+    { name: 'Enquiries', path: '/admin/enquiries', icon: Users, category: 'OPERATIONS' },
     { name: 'Analytics & Insights', path: '/admin/analytics', icon: Activity, category: 'ANALYTICS' },
     { name: 'Content Dashboard', path: '/admin/content', icon: Layers, category: 'SYSTEM' },
     { name: 'Gamification HQ', path: '/admin/gamification', icon: Database, category: 'SYSTEM' },
     { name: 'Promotions', path: '/admin/offers', icon: Tag, category: 'MARKETING' },
-    { name: 'Reports & Export', path: '/admin/reports', icon: FileDown, category: 'ANALYTICS' }
+    { name: 'Reports & Export', path: '/admin/reports', icon: FileDown, category: 'ANALYTICS' },
+    { name: 'Settings', path: '/admin/settings', icon: Settings, category: 'SYSTEM' }
   ],
   HI: [
     { name: 'कंसोल HUD', path: '/admin/dashboard', icon: Activity, category: 'संचालन' },
@@ -51,11 +100,13 @@ const ADMIN_NAV_T = {
     { name: 'स्लॉट रजिस्ट्रियां', path: '/slots', icon: Calendar, category: 'निर्धारण' },
     { name: 'बुकिंग समीक्षा', path: '/admin/bookings', icon: Users, category: 'संचालन' },
     { name: 'प्रशिक्षक', path: '/admin/instructors', icon: Users, category: 'संचालन' },
+    { name: 'पूछताछ', path: '/admin/enquiries', icon: Users, category: 'संचालन' },
     { name: 'विश्लेषिकी और अंतर्दृष्टि', path: '/admin/analytics', icon: Activity, category: 'विश्लेषिकी' },
     { name: 'सामग्री डैशबोर्ड', path: '/admin/content', icon: Layers, category: 'प्रणाली' },
     { name: 'गेमिफिकेशन मुख्यालय', path: '/admin/gamification', icon: Database, category: 'प्रणाली' },
     { name: 'प्रचार', path: '/admin/offers', icon: Tag, category: 'विपणन' },
-    { name: 'रिपोर्ट और निर्यात', path: '/admin/reports', icon: FileDown, category: 'विश्लेषिकी' }
+    { name: 'रिपोर्ट और निर्यात', path: '/admin/reports', icon: FileDown, category: 'विश्लेषिकी' },
+    { name: 'सेटिंग्स', path: '/admin/settings', icon: Settings, category: 'प्रणाली' }
   ],
   TE: [
     { name: 'కన్సోల్ HUD', path: '/admin/dashboard', icon: Activity, category: 'కార్యకలాపాలు' },
@@ -63,11 +114,13 @@ const ADMIN_NAV_T = {
     { name: 'స్లాట్ రిజిస్ట్రీలు', path: '/slots', icon: Calendar, category: 'షెడ్యూలింగ్' },
     { name: 'బుకింగ్ సమీక్ష', path: '/admin/bookings', icon: Users, category: 'కార్యకలాపాలు' },
     { name: 'బోధకులు', path: '/admin/instructors', icon: Users, category: 'కార్యకలాపాలు' },
+    { name: 'విచారణలు', path: '/admin/enquiries', icon: Users, category: 'కార్యకలాపాలు' },
     { name: 'విశ్లేషణలు & అంతర్దృష్టులు', path: '/admin/analytics', icon: Activity, category: 'విశ్లేషణలు' },
     { name: 'కంటెంట్ డాష్‌బోర్డ్', path: '/admin/content', icon: Layers, category: 'వ్యవస్థ' },
     { name: 'గామిఫికేషన్ హెచ్క్యూ', path: '/admin/gamification', icon: Database, category: 'వ్యవస్థ' },
     { name: 'ప్రమోషన్లు', path: '/admin/offers', icon: Tag, category: 'మార్కెటింగ్' },
-    { name: 'నివేదికలు & ఎగుమతి', path: '/admin/reports', icon: FileDown, category: 'విశ్లేషణలు' }
+    { name: 'నివేదికలు & ఎగుమతి', path: '/admin/reports', icon: FileDown, category: 'విశ్లేషణలు' },
+    { name: 'సెట్టింగులు', path: '/admin/settings', icon: Settings, category: 'వ్యవస్థ' }
   ]
 }
 
@@ -101,15 +154,16 @@ export default function AdminConsoleLayout({
   }
 
   const { language } = useLanguageStore()
+  const { academyName, logoUrl } = useSettingsStore()
   const navItems = ADMIN_NAV_T[language] || ADMIN_NAV_T.EN
 
   const ADMIN_LAYOUT_DICT = {
     EN: {
-      notifications: "Notifications",
-      noNotifs: "No new notifications",
-      navigation: "Navigation",
-      opsMaster: "Ops. Master",
-      adminDeck: "ADMIN DECK"
+      notifications: 'Notifications',
+      noNotifs: 'No new notifications',
+      navigation: 'Navigation',
+      opsMaster: 'Ops Master',
+      adminDeck: 'Admin Deck'
     },
     HI: {
       notifications: "सूचनाएं",
@@ -132,19 +186,22 @@ export default function AdminConsoleLayout({
 
   return (
     <div className="h-full flex flex-col bg-[rgb(var(--color-void))] text-[rgb(var(--color-text-1))] font-sans overflow-hidden transition-colors duration-300">
+
       {/* TOP HEADER CONSOLE BAR */}
-      <header className="sticky top-0 inset-x-0 bg-[rgb(var(--color-surface))]/80 border-b border-[rgb(var(--color-border))] backdrop-blur-xl z-40 flex shrink-0 items-center justify-between px-4 py-3 gap-3 transition-colors duration-300">
+      <header className="sticky top-0 inset-x-0 bg-[rgb(var(--color-surface))]/80 border-b border-[rgb(var(--color-border))] backdrop-blur-xl z-40 flex shrink-0 items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 gap-2 sm:gap-3 transition-colors duration-300">
         <div className="flex items-center gap-3 min-w-0">
           <button 
             onClick={() => setMobileOpen(!mobileOpen)} 
-            className="lg:hidden p-1.5 hover:bg-[rgb(var(--color-border))] border border-[rgb(var(--color-border))] rounded-lg text-[rgb(var(--color-text-3))] hover:text-[rgb(var(--color-text-1))] dark:hover:text-white transition-all"
+            className="flex p-2 bg-[rgb(var(--color-surface))] hover:bg-[rgb(var(--color-border))] border border-[rgb(var(--color-border))] rounded-xl text-[rgb(var(--color-text-1))] shadow-sm transition-all z-[100] relative"
+            aria-label="Open Mobile Menu"
           >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
           
           <div className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse hidden sm:block" />
           <Link href="/admin/dashboard" className="font-bold text-[rgb(var(--color-text-1))] tracking-tight text-sm sm:text-base uppercase flex items-center gap-2 hover:opacity-80 transition-opacity truncate">
-            <span className="truncate">SRI GURU</span>
+            {logoUrl && <img src={logoUrl} alt="Logo" className="w-6 h-6 object-contain hidden sm:block bg-white rounded-full p-0.5" />}
+            <span className="truncate">{academyName}</span>
             <span className="hidden sm:inline text-blue-600 dark:text-blue-400 font-medium text-xs bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800/50 px-2 py-0.5 rounded">OPS CONSOLE v4.5</span>
           </Link>
         </div>
@@ -215,7 +272,7 @@ export default function AdminConsoleLayout({
         
         {/* DESKTOP SIDEBAR */}
         <aside 
-          className={`hidden lg:flex flex-col border-r border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] h-full z-30 transition-all duration-300 overflow-y-auto scrollbar-thin p-4 ${
+          className={`hidden xl:flex flex-col border-r border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] h-full z-30 transition-all duration-300 overflow-y-auto scrollbar-thin p-4 ${
             collapsed ? 'w-20' : 'w-64'
           }`}
         >
@@ -235,47 +292,40 @@ export default function AdminConsoleLayout({
             <div className="h-px bg-[rgb(var(--color-border))]" />
 
             <nav className="flex flex-col gap-3">
-              {navItems.map((item) => {
-                const isActive = pathname === item.path
-                const Icon = item.icon
-                
-                return (
-                  <Link 
-                    key={item.path}
-                    href={item.path}
-                    className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 ${
-                      isActive 
-                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-bold' 
-                        : 'text-[rgb(var(--color-text-2))] hover:text-[rgb(var(--color-text-1))] dark:hover:text-white hover:bg-[rgb(var(--color-surface))]'
-                    }`}
-                  >
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-[rgb(var(--color-text-3))]'}`} />
-                    {!collapsed && (
-                      <div className="flex flex-col text-left">
-                        <span className="text-sm tracking-wide">{item.name}</span>
-                        <span className="text-xs text-[rgb(var(--color-text-3))] dark:text-[rgb(var(--color-text-3))] mt-0.5">{item.category}</span>
-                      </div>
-                    )}
-                  </Link>
-                )
-              })}
+              <NavItemList
+                items={navItems}
+                pathname={pathname}
+                collapsed={collapsed}
+              />
             </nav>
 
             <div className="mt-auto border-t border-[rgb(var(--color-border))] pt-4 flex flex-col gap-2">
               {!collapsed ? (
-                <div className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl p-3 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm">
-                    OP
+                <div className="flex flex-col gap-2">
+                  <div className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl p-3 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm">
+                      OP
+                    </div>
+                    <div className="flex flex-col text-left">
+                      <span className="text-sm font-bold text-[rgb(var(--color-text-1))]">{t.opsMaster}</span>
+                      <span className="text-xs text-[rgb(var(--color-text-3))]">{t.adminDeck}</span>
+                    </div>
                   </div>
-                  <div className="flex flex-col text-left">
-                    <span className="text-sm font-bold text-[rgb(var(--color-text-1))]">{t.opsMaster}</span>
-                    <span className="text-xs text-[rgb(var(--color-text-3))]">{t.adminDeck}</span>
-                  </div>
+                  <button 
+                    onClick={handleLogout}
+                    className="w-full py-2.5 px-3 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/30 rounded-xl text-red-500 hover:text-red-400 flex items-center justify-center gap-2 text-xs font-bold transition-all"
+                  >
+                    <LogOut className="w-4 h-4" /> Sign Out
+                  </button>
                 </div>
               ) : (
-                <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-sm mx-auto">
-                  OP
-                </div>
+                <button 
+                  onClick={handleLogout}
+                  className="w-10 h-10 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/30 text-red-500 flex items-center justify-center mx-auto transition-all"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
               )}
             </div>
           </div>
@@ -287,18 +337,18 @@ export default function AdminConsoleLayout({
             <>
               <motion.div 
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
+                animate={{ opacity: 0.6 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setMobileOpen(false)}
-                className="fixed inset-0 bg-slate-900 z-40 lg:hidden"
+                className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[90] xl:hidden"
               />
               
               <motion.aside 
-                initial={{ x: -280 }}
+                initial={{ x: -320 }}
                 animate={{ x: 0 }}
-                exit={{ x: -280 }}
+                exit={{ x: -320 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="fixed inset-y-0 left-0 w-72 bg-[rgb(var(--color-surface))] border-r border-[rgb(var(--color-border))] z-50 p-5 lg:hidden flex flex-col gap-6 overflow-y-auto shadow-2xl"
+                className="fixed inset-y-0 left-0 w-80 bg-[rgb(var(--color-surface))] border-r border-[rgb(var(--color-border))] z-[100] p-6 xl:hidden flex flex-col gap-6 overflow-y-auto shadow-2xl safe-area-inset-top safe-area-inset-bottom"
               >
                 <div className="flex justify-between items-center">
                   <span className="text-xs uppercase tracking-wider text-[rgb(var(--color-text-3))] font-bold">{t.navigation}</span>
@@ -309,40 +359,28 @@ export default function AdminConsoleLayout({
                 
                 <div className="h-px bg-[rgb(var(--color-border))]" />
 
-                <nav className="flex flex-col gap-3">
-                  {navItems.map((item) => {
-                    const isActive = pathname === item.path
-                    const Icon = item.icon
-                    
-                    return (
-                      <Link 
-                        key={item.path}
-                        href={item.path}
-                        onClick={() => setMobileOpen(false)}
-                        className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
-                          isActive 
-                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-bold' 
-                            : 'text-[rgb(var(--color-text-2))] hover:text-[rgb(var(--color-text-1))] hover:bg-[rgb(var(--color-surface))]'
-                        }`}
-                      >
-                        <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`} />
-                        <div className="flex flex-col">
-                          <span className="text-sm">{item.name}</span>
-                          <span className="text-xs text-[rgb(var(--color-text-3))]">{item.category}</span>
-                        </div>
-                      </Link>
-                    )
-                  })}
-                </nav>
+                <NavItemList
+                  items={navItems}
+                  pathname={pathname}
+                  onNavigate={() => setMobileOpen(false)}
+                />
 
-                <div className="mt-auto bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl p-4 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center font-bold text-sm">
-                    OP
+                <div className="mt-auto flex flex-col gap-3">
+                  <div className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl p-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center font-bold text-sm">
+                      OP
+                    </div>
+                    <div className="flex flex-col text-left">
+                      <span className="text-sm font-bold text-[rgb(var(--color-text-1))]">{t.opsMaster}</span>
+                      <span className="text-xs text-[rgb(var(--color-text-3))]">{t.adminDeck}</span>
+                    </div>
                   </div>
-                  <div className="flex flex-col text-left">
-                    <span className="text-sm font-bold text-[rgb(var(--color-text-1))]">{t.opsMaster}</span>
-                    <span className="text-xs text-[rgb(var(--color-text-3))]">{t.adminDeck}</span>
-                  </div>
+                  <button 
+                    onClick={handleLogout}
+                    className="w-full py-3 px-4 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/30 rounded-xl text-red-500 hover:text-red-400 flex items-center justify-center gap-2 text-sm font-bold transition-all"
+                  >
+                    <LogOut className="w-5 h-5" /> Sign Out
+                  </button>
                 </div>
               </motion.aside>
             </>
@@ -350,11 +388,11 @@ export default function AdminConsoleLayout({
         </AnimatePresence>
 
         {/* MAIN WORKSPACE WRAPPER */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden transition-all duration-300 relative z-10 w-full">
-          <div className="w-full px-4 sm:px-6 pt-6">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden transition-all duration-300 relative z-10 w-full min-h-0">
+          <div className="w-full px-4 sm:px-6 pt-4 sm:pt-6 pb-10" style={{ paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom, 0px))' }}>
             <Breadcrumbs />
+            {children}
           </div>
-          {children}
         </div>
       </div>
     </div>

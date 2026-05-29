@@ -4,6 +4,8 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import bcrypt from 'bcryptjs'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)
@@ -35,8 +37,8 @@ export async function POST(request: Request) {
         avatarUrl: avatarUrl || null,
         instructor: {
           create: {
-            experienceYears: experienceYears ? parseInt(experienceYears) : 0,
-            specialties: 'General Driving' // Default, can be expanded later
+            yearsExp: experienceYears ? parseInt(experienceYears) : 0,
+            specialization: 'General Driving' // Default, can be expanded later
           }
         }
       }

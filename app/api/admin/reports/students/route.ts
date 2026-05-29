@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
@@ -25,7 +26,7 @@ export async function GET(req: Request) {
       `"${s.user.phone || ''}"`,
       s.trainingType,
       s.feeStatus,
-      s.totalPaid || 0,
+      s.courseFee || 0,
       new Date(s.enrolledAt).toISOString().split('T')[0],
       s.status
     ])

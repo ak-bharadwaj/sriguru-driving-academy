@@ -44,6 +44,40 @@ export const DICTIONARIES = {
     'landing.app.title': 'Learn on the go.',
     'landing.app.desc': 'Download the mobile app to access mock tests, track your driving hours, and manage your bookings seamlessly from your phone.',
 
+    // FAQ
+    'faq.1.q': 'How long does the beginner course take?',
+    'faq.1.a': 'The standard beginner course runs for 21 days. This includes 15 practical on-road sessions and 4 theoretical modules designed to prepare you fully for your license exam.',
+    'faq.2.q': 'What is your fee structure?',
+    'faq.2.a': 'We believe in complete transparency. Our fees are clearly listed with no hidden charges. Payments are securely processed at our front desk.',
+    'faq.3.q': 'Do you provide dual-control vehicles?',
+    'faq.3.a': 'Yes, 100% of our training fleet consists of late-model vehicles equipped with professional dual-control systems for your absolute safety.',
+    'faq.4.q': 'Do you help with the driving license test?',
+    'faq.4.a': 'Absolutely. We manage all RTO test scheduling, and you will take your final driving exam in the exact same vehicle you trained in.',
+    'faq.5.q': 'Is pick-up and drop-off available?',
+    'faq.5.a': 'Yes, we offer complimentary door-to-door shuttle service for all our premium and advanced training tiers.',
+
+    // Testimonials
+    'test.1.q': 'The curriculum is meticulously structured. The instructors are incredibly patient, making parallel parking feel completely natural within days.',
+    'test.2.q': 'Passed my driving test on the very first attempt. The mock theory tests on their digital portal are exactly what you need to prepare.',
+    'test.3.q': 'A highly professional academy. The flexible scheduling and the calm demeanor of the instructors made learning to drive a joy.',
+
+    // Quiz
+    'quiz.1.q': 'What should you do when approaching a yellow traffic light?',
+    'quiz.1.o1': 'Speed up to cross',
+    'quiz.1.o2': 'Stop safely if possible',
+    'quiz.1.o3': 'Honk and proceed',
+    'quiz.1.o4': 'Ignore it',
+    'quiz.2.q': 'When are you allowed to pass a vehicle on the right?',
+    'quiz.2.o1': 'Anytime',
+    'quiz.2.o2': 'Never',
+    'quiz.2.o3': 'When they are turning left',
+    'quiz.2.o4': 'On highways only',
+    'quiz.3.q': 'What is the safest following distance in normal conditions?',
+    'quiz.3.o1': '1 second',
+    'quiz.3.o2': '2 seconds',
+    'quiz.3.o3': '3-4 seconds',
+    'quiz.3.o4': '10 seconds',
+
     // Auth
     'auth.title1': 'Secure',
     'auth.title2': 'Access Portal',
@@ -110,6 +144,40 @@ export const DICTIONARIES = {
     'landing.app.title': 'चलते-फिरते सीखें।',
     'landing.app.desc': 'मॉक टेस्ट तक पहुंचने, अपने ड्राइविंग घंटों को ट्रैक करने और अपने फोन से अपने बुकिंग को मूल रूप से प्रबंधित करने के लिए मोबाइल ऐप डाउनलोड करें।',
 
+    // FAQ
+    'faq.1.q': 'शुरुआती कोर्स में कितना समय लगता है?',
+    'faq.1.a': 'मानक शुरुआती कोर्स 21 दिनों का होता है। इसमें आपके लाइसेंस परीक्षा के लिए पूरी तरह से तैयार करने के लिए 15 व्यावहारिक ऑन-रोड सत्र और 4 सैद्धांतिक मॉड्यूल शामिल हैं।',
+    'faq.2.q': 'आपकी फीस संरचना क्या है?',
+    'faq.2.a': 'हम पूर्ण पारदर्शिता में विश्वास करते हैं। हमारी फीस बिना किसी छिपे शुल्क के स्पष्ट रूप से सूचीबद्ध है। भुगतान सुरक्षित रूप से हमारे फ्रंट डेस्क पर संसाधित किए जाते हैं।',
+    'faq.3.q': 'क्या आप दोहरे नियंत्रण वाले वाहन प्रदान करते हैं?',
+    'faq.3.a': 'हाँ, हमारे 100% प्रशिक्षण बेड़े में आपकी पूर्ण सुरक्षा के लिए पेशेवर दोहरे नियंत्रण प्रणाली से लैस आधुनिक वाहन शामिल हैं।',
+    'faq.4.q': 'क्या आप ड्राइविंग लाइसेंस टेस्ट में मदद करते हैं?',
+    'faq.4.a': 'बिल्कुल। हम सभी आरटीओ टेस्ट शेड्यूलिंग का प्रबंधन करते हैं, और आप अपनी अंतिम ड्राइविंग परीक्षा उसी वाहन में देंगे जिसमें आपने प्रशिक्षण लिया था।',
+    'faq.5.q': 'क्या पिक-अप और ड्रॉप-ऑफ उपलब्ध है?',
+    'faq.5.a': 'हाँ, हम अपने सभी प्रीमियम और उन्नत प्रशिक्षण स्तरों के लिए मानार्थ डोर-टू-डोर शटल सेवा प्रदान करते हैं।',
+
+    // Testimonials
+    'test.1.q': 'पाठ्यक्रम सावधानीपूर्वक संरचित है। प्रशिक्षक अविश्वसनीय रूप से धैर्यवान हैं, जिससे कुछ ही दिनों में समानांतर पार्किंग पूरी तरह से स्वाभाविक लगने लगती है।',
+    'test.2.q': 'पहले ही प्रयास में मेरा ड्राइविंग टेस्ट पास हो गया। उनके डिजिटल पोर्टल पर मॉक थ्योरी टेस्ट वही हैं जो आपको तैयारी के लिए चाहिए।',
+    'test.3.q': 'एक उच्च पेशेवर अकादमी। लचीला शेड्यूलिंग और प्रशिक्षकों के शांत व्यवहार ने ड्राइविंग सीखना एक खुशी बना दिया।',
+
+    // Quiz
+    'quiz.1.q': 'पीली ट्रैफिक लाइट के पास पहुँचने पर आपको क्या करना चाहिए?',
+    'quiz.1.o1': 'पार करने के लिए गति बढ़ाएं',
+    'quiz.1.o2': 'यदि संभव हो तो सुरक्षित रूप से रुकें',
+    'quiz.1.o3': 'हॉर्न बजाएं और आगे बढ़ें',
+    'quiz.1.o4': 'इसे अनदेखा करें',
+    'quiz.2.q': 'आपको दाईं ओर से वाहन को पास करने की अनुमति कब है?',
+    'quiz.2.o1': 'किसी भी समय',
+    'quiz.2.o2': 'कभी नहीं',
+    'quiz.2.o3': 'जब वे बाईं ओर मुड़ रहे हों',
+    'quiz.2.o4': 'केवल राजमार्गों पर',
+    'quiz.3.q': 'सामान्य परिस्थितियों में सुरक्षित फॉलोइंग दूरी क्या है?',
+    'quiz.3.o1': '1 सेकंड',
+    'quiz.3.o2': '2 सेकंड',
+    'quiz.3.o3': '3-4 सेकंड',
+    'quiz.3.o4': '10 सेकंड',
+
     // Auth
     'auth.title1': 'सुरक्षित',
     'auth.title2': 'एक्सेस पोर्टल',
@@ -175,6 +243,40 @@ export const DICTIONARIES = {
     'landing.faq.title': 'వివరాలు.',
     'landing.app.title': 'ప్రయాణంలో నేర్చుకోండి.',
     'landing.app.desc': 'మాక్ టెస్ట్‌లను యాక్సెస్ చేయడానికి, మీ డ్రైవింగ్ గంటలను ట్రాక్ చేయడానికి మరియు మీ ఫోన్ నుండి సజావుగా మీ బుకింగ్‌లను నిర్వహించడానికి మొబైల్ యాప్‌ను డౌన్‌లోడ్ చేసుకోండి.',
+
+    // FAQ
+    'faq.1.q': 'ప్రారంభ కోర్సు ఎంతకాలం పడుతుంది?',
+    'faq.1.a': 'ప్రామాణిక ప్రారంభ కోర్సు 21 రోజులు ఉంటుంది. ఇది మీ లైసెన్స్ పరీక్ష కోసం మిమ్మల్ని పూర్తిగా సిద్ధం చేయడానికి 15 ఆచరణాత్మక ఆన్-రోడ్ సెషన్‌లు మరియు 4 సైద్ధాంతిక మాడ్యూల్‌లను కలిగి ఉంటుంది.',
+    'faq.2.q': 'మీ ఫీజు నిర్మాణం ఏమిటి?',
+    'faq.2.a': 'మేము పూర్తి పారదర్శకతను నమ్ముతాము. మా ఫీజులు ఎలాంటి దాచిన ఛార్జీలు లేకుండా స్పష్టంగా జాబితా చేయబడ్డాయి. చెల్లింపులు మా ఫ్రంట్ డెస్క్ వద్ద సురక్షితంగా ప్రాసెస్ చేయబడతాయి.',
+    'faq.3.q': 'మీరు డ్యూయల్-కంట్రోల్ వాహనాలను అందిస్తారా?',
+    'faq.3.a': 'అవును, మా 100% శిక్షణా ఫ్లీట్ మీ సంపూర్ణ భద్రత కోసం వృత్తిపరమైన డ్యూయల్-కంట్రోల్ సిస్టమ్‌లతో అమర్చబడిన ఆధునిక వాహనాలను కలిగి ఉంటుంది.',
+    'faq.4.q': 'డ్రైవింగ్ లైసెన్స్ పరీక్షలో మీరు సహాయం చేస్తారా?',
+    'faq.4.a': 'ఖచ్చితంగా. మేము అన్ని RTO పరీక్షల షెడ్యూల్‌ను నిర్వహిస్తాము మరియు మీరు శిక్షణ పొందిన అదే వాహనంలోనే మీ తుది డ్రైవింగ్ పరీక్షను తీసుకుంటారు.',
+    'faq.5.q': 'పిక్-అప్ మరియు డ్రాప్-ఆఫ్ అందుబాటులో ఉందా?',
+    'faq.5.a': 'అవును, మా అన్ని ప్రీమియం మరియు అధునాతన శిక్షణా శ్రేణుల కోసం మేము ఉచిత డోర్-టు-డోర్ షటిల్ సేవను అందిస్తాము.',
+
+    // Testimonials
+    'test.1.q': 'పాఠ్యాంశాలు ఖచ్చితంగా నిర్మించబడ్డాయి. బోధకులు చాలా ఓపికగా ఉంటారు, సమాంతర పార్కింగ్ కొద్ది రోజుల్లోనే పూర్తిగా సహజంగా అనిపించేలా చేస్తారు.',
+    'test.2.q': 'నా డ్రైవింగ్ పరీక్షలో మొదటి ప్రయత్నంలోనే ఉత్తీర్ణత సాధించాను. వారి డిజిటల్ పోర్టల్‌లోని మాక్ థియరీ పరీక్షలు మీరు సిద్ధం కావడానికి ఖచ్చితంగా అవసరం.',
+    'test.3.q': 'అత్యంత వృత్తిపరమైన అకాడమీ. సౌకర్యవంతమైన షెడ్యూలింగ్ మరియు బోధకుల ప్రశాంతమైన ప్రవర్తన డ్రైవింగ్ నేర్చుకోవడాన్ని ఆనందంగా మార్చింది.',
+
+    // Quiz
+    'quiz.1.q': 'పసుపు ట్రాఫిక్ లైట్‌ను సమీపిస్తున్నప్పుడు మీరు ఏమి చేయాలి?',
+    'quiz.1.o1': 'దాటడానికి వేగాన్ని పెంచండి',
+    'quiz.1.o2': 'వీలైతే సురక్షితంగా ఆపండి',
+    'quiz.1.o3': 'హారన్ కొట్టి ముందుకు సాగండి',
+    'quiz.1.o4': 'దానిని విస్మరించండి',
+    'quiz.2.q': 'కుడి వైపున వాహనాన్ని ఎప్పుడు దాటడానికి మీకు అనుమతి ఉంది?',
+    'quiz.2.o1': 'ఎప్పుడైనా',
+    'quiz.2.o2': 'ఎప్పటికీ లేదు',
+    'quiz.2.o3': 'వారు ఎడమవైపు తిరుగుతున్నప్పుడు',
+    'quiz.2.o4': 'హైవేలపై మాత్రమే',
+    'quiz.3.q': 'సాధారణ పరిస్థితులలో సురక్షితమైన ఫాలోయింగ్ దూరం ఏమిటి?',
+    'quiz.3.o1': '1 సెకను',
+    'quiz.3.o2': '2 సెకన్లు',
+    'quiz.3.o3': '3-4 సెకన్లు',
+    'quiz.3.o4': '10 సెకన్లు',
 
     // Auth
     'auth.title1': 'సురక్షిత',

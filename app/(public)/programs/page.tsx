@@ -178,8 +178,8 @@ export default function ProgramsPage() {
                     </span>
                   </div>
                   
-                  <h3 className="text-2xl font-bold font-display text-text-1 mb-2">{offer.title[language] || offer.title.EN}</h3>
-                  <p className="text-sm text-text-2 mb-8 line-clamp-2 leading-relaxed">{offer.desc[language] || offer.desc.EN}</p>
+                  <h3 className="text-2xl font-bold font-display text-text-1 mb-2">{offer.title[language.toUpperCase() as 'EN'|'HI'|'TE'] || offer.title.EN}</h3>
+                  <p className="text-sm text-text-2 mb-8 line-clamp-2 leading-relaxed">{offer.desc[language.toUpperCase() as 'EN'|'HI'|'TE'] || offer.desc.EN}</p>
                   
                   <div className="flex justify-between items-end">
                     <div>
@@ -205,8 +205,9 @@ export default function ProgramsPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {courses.map((course, idx) => {
-              const displayTitle = course.title[language] || course.title.EN
-              const displayDesc = course.desc[language] || course.desc.EN
+              const lang = language.toUpperCase() as 'EN' | 'HI' | 'TE'
+              const displayTitle = course.title[lang] || course.title.EN
+              const displayDesc = course.desc[lang] || course.desc.EN
               const milestones = getMilestones(course.category)
               const pathString = getCircuitSVGPath(course.category)
 

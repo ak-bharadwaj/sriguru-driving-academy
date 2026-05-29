@@ -38,59 +38,60 @@ import { useLanguageStore } from '@/store/languageStore'
 
 const PAGE_DICT = {
   EN: {
-    acqHub: {t.acqHub},
-    academyTitle: "{t.academyTitle}",
-    academyDesc: "{t.academyDesc}",
-    studentCadet: "{t.studentCadet}",
+    acqHub: "Acquisition Hub",
+    academyTitle: "Academy Learning Center",
+    academyDesc: "Toggle between theory study and active practical driving simulations.",
+    studentCadet: "Student Cadet:",
     level: "LEVEL",
-    practicalTraining: "{t.practicalTraining}",
-    rtoMaterial: "{t.rtoMaterial}",
-    seekingDb: "{t.seekingDb}",
-    dbStalled: "{t.dbStalled}",
-    retryConnection: "{t.retryConnection}",
+    practicalTraining: "Practical Training",
+    rtoMaterial: "RTO Material",
+    mockExam: "Mock Exam",
+    seekingDb: "Seeking database...",
+    dbStalled: "Database connection stalled",
+    retryConnection: "Retry Connection",
     availableTasks: "Available Tasks:",
     skills: "Skills",
-    resetProgress: "{t.resetProgress}",
-    mastered: "{t.mastered}",
+    resetProgress: "Reset Progress",
+    mastered: "Mastered",
     xp: "XP",
     phase: "PHASE:",
-    beginTraining: "{t.beginTraining}",
-    searchTheory: t.searchTheory,
-    searchSigns: t.searchSigns,
-    theoryQA: "{t.theoryQA}",
-    roadSigns: "{t.roadSigns}",
-    noQuestions: "{t.noQuestions}",
+    beginTraining: "Begin Training",
+    searchTheory: "Search theory questions...",
+    searchSigns: "Search road signs...",
+    theoryQA: "Theory Q&A",
+    roadSigns: "Road Signs",
+    noQuestions: "No questions match your search.",
     question: "QUESTION",
     of: "OF",
-    previous: "{t.previous}",
-    next: "{t.next}",
-    rtoRationale: "{t.rtoRationale}",
+    previous: "Previous",
+    next: "Next",
+    rtoRationale: "EXPLANATION",
     category: "CATEGORY:",
-    selectAnswer: "{t.selectAnswer}",
-    noSignboards: "{t.noSignboards}",
+    selectAnswer: "Select an answer above",
+    noSignboards: "No signboards match your search.",
     all: "All",
     signs: "Signs",
     parking: "Parking",
     emergencies: "Emergencies",
     laws: "Laws",
-    rtoValidation: "{t.rtoValidation}",
+    rtoValidation: "RTO VALIDATION CHALLENGE",
     masterPrefix: 'To master "',
     masterSuffix: '", verify you understand the core regulatory practice:',
     fullyCompleted: "I have fully completed and understand this module.",
     needReview: "I need to review instructions again.",
-    excellent: "{t.excellent}",
-    masterySuccess: "{t.masterySuccess}",
-    incorrect: "{t.incorrect}",
-    checkMirror: "{t.checkMirror}",
-    stepByStep: "{t.stepByStep}",
-    mistakeAlert: "{t.mistakeAlert}",
-    safetyWarning: "{t.safetyWarning}",
-    backToSteps: "{t.backToSteps}",
-    tryAgain: "{t.tryAgain}",
-    verifyAnswer: "{t.verifyAnswer}",
-    closeDetails: "{t.closeDetails}",
-    runSimFirst: "{t.runSimFirst}",
-    takeChallenge: "{t.takeChallenge}"
+    excellent: "Excellent!",
+    masterySuccess: "Mastery verification successful. Adding +",
+    incorrect: "Incorrect.",
+    checkMirror: "Check mirror instructions and try again.",
+    stepByStep: "Step-by-Step Guide",
+    mistakeAlert: "Mistake Alert:",
+    safetyWarning: "Safety Warning:",
+    backToSteps: "Back to Steps",
+    tryAgain: "Try Again",
+    verifyAnswer: "Verify Answer",
+    closeDetails: "Close Details",
+    runSimFirst: "Run Simulation First",
+    takeChallenge: "Take Challenge"
   },
   HI: {
     acqHub: "अधिग्रहण केंद्र",
@@ -100,6 +101,7 @@ const PAGE_DICT = {
     level: "स्तर",
     practicalTraining: "व्यावहारिक प्रशिक्षण",
     rtoMaterial: "RTO परीक्षण सामग्री",
+    mockExam: "मॉक परीक्षा",
     seekingDb: "डेटाबेस पथ खोज रहे हैं...",
     dbStalled: "डेटाबेस कनेक्शन रुका हुआ है",
     retryConnection: "पुनः प्रयास करें",
@@ -119,7 +121,7 @@ const PAGE_DICT = {
     of: "का",
     previous: "पिछला",
     next: "अगला",
-    rtoRationale: "RTO तर्क:",
+    rtoRationale: "स्पष्टीकरण:",
     category: "श्रेणी:",
     selectAnswer: "एक उत्तर चुनें",
     noSignboards: "आपके चयनित फ़िल्टर से कोई भी साइनबोर्ड मेल উভয় मेल नहीं खाता।",
@@ -155,6 +157,7 @@ const PAGE_DICT = {
     level: "స్థాయి",
     practicalTraining: "ప్రాక్టికల్ శిక్షణ",
     rtoMaterial: "RTO పరీక్ష మెటీరియల్",
+    mockExam: "మాక్ పరీక్ష",
     seekingDb: "డేటాబేస్ మార్గాలను వెతుకుతోంది...",
     dbStalled: "డేటాబేస్ కనెక్షన్ నిలిచిపోయింది",
     retryConnection: "మళ్లీ ప్రయత్నించండి",
@@ -174,7 +177,7 @@ const PAGE_DICT = {
     of: "యొక్క",
     previous: "మునుపటి",
     next: "తర్వాత",
-    rtoRationale: "RTO హేతుబద్ధత:",
+    rtoRationale: "వివరణ:",
     category: "వర్గం:",
     selectAnswer: "సమాధానాన్ని ఎంచుకోండి",
     noSignboards: "మీరు ఎంచుకున్న ఫిల్టర్‌లకు ఏ సైన్‌బోర్డ్‌లు సరిపోలలేదు.",
@@ -205,6 +208,7 @@ const PAGE_DICT = {
 }
 
 import { useXPStore } from '@/lib/stores/xp-store'
+import Link from 'next/link'
 
 // Import components
 import { ParallelParkingSimulation } from '@/components/student/ParallelParkingSimulation'
@@ -429,7 +433,6 @@ export default function StudentLearnPortal() {
     }
   }, [])
 
-  // Mark skill as mastered
   const handleMasterSkill = (card: LearningCardData) => {
     if (!completedIds.includes(card.id)) {
       const next = [...completedIds, card.id]
@@ -437,13 +440,13 @@ export default function StudentLearnPortal() {
       localStorage.setItem('completed_skills', JSON.stringify(next))
       addXP(card.xpReward)
       addToast({
-        title: 'Skill {t.mastered}!',
+        title: `Skill ${t.mastered}!`,
         description: `Gained +${card.xpReward} XP for mastering.`,
         type: 'xp'
       })
     } else {
       addToast({
-        title: 'Already {t.mastered}',
+        title: `Already ${t.mastered}`,
         description: 'You have already collected XP for this skill.',
         type: 'xp'
       })
@@ -528,6 +531,51 @@ export default function StudentLearnPortal() {
     }
   }
 
+  const getSmartExplanation = (q: QuizQuestionItem) => {
+    const qText = q.question.toLowerCase()
+    const ans = q.options[q.correctIndex]
+    
+    if (qText.includes("uncontrolled intersection") || qText.includes("right of way")) {
+      return `At uncontrolled intersections, the universal rule is to yield to vehicles approaching from your right. This prevents deadlocks and ensures a systematic flow of traffic without signals.`
+    }
+    if (qText.includes("overtaking")) {
+      return `Overtaking must strictly be done from the right side because India follows left-hand traffic. Overtaking from the left creates severe blind-spot hazards.`
+    }
+    if (qText.includes("u-turn")) {
+      return `U-turns require a wide turning radius and temporarily expose your vehicle to oncoming traffic. You must ensure the road is completely clear before executing it.`
+    }
+    if (qText.includes("pedestrian") || qText.includes("zebra crossing")) {
+      return `Pedestrians always have the highest priority on the road. You must completely stop at zebra crossings to ensure their absolute safety.`
+    }
+    if (qText.includes("emergency") || qText.includes("ambulance") || qText.includes("fire")) {
+      return `Emergency vehicles are on life-saving missions. It is your legal and moral obligation to pull over to the left and clear a path immediately.`
+    }
+    if (qText.includes("speed")) {
+      return `Speed limits are scientifically calculated based on road conditions, pedestrian density, and braking distance. Exceeding them exponentially increases the risk of fatal accidents.`
+    }
+    if (qText.includes("fog") || qText.includes("night") || qText.includes("rain")) {
+      return `Low visibility conditions drastically reduce your reaction time. Using low-beams prevents blinding oncoming drivers, and maintaining a larger following distance gives you crucial braking time.`
+    }
+    if (qText.includes("mobile") || qText.includes("phone")) {
+      return `Using a mobile phone causes severe cognitive and visual distraction. It dramatically increases reaction time and is a leading cause of fatal accidents.`
+    }
+    if (qText.includes("horn") || qText.includes("honk")) {
+      return `Horns should only be used to warn others of imminent danger, not out of frustration. Honking near hospitals or schools is strictly prohibited to prevent noise pollution.`
+    }
+    if (qText.includes("lane")) {
+      return `Lane discipline is crucial for highway safety. Always use indicators before changing lanes and ensure the blind spot is clear to prevent sideswipes.`
+    }
+    if (qText.includes("parking")) {
+      return `Parking regulations ensure roads remain clear for moving traffic and emergency vehicles. Parking near intersections, bridges, or fire hydrants creates dangerous bottlenecks.`
+    }
+    if (qText.includes("alcohol") || qText.includes("drunk")) {
+      return `Alcohol severely impairs motor skills, judgment, and reaction times. Driving under the influence is a major criminal offense due to the extreme danger it poses.`
+    }
+
+    // Professional Fallback
+    return `According to Motor Vehicles Act guidelines regarding ${q.topic.toLowerCase()}, the mandated action is "${ans}". This regulatory standard is enforced to maintain predictable driver behavior and minimize collision risks.`
+  }
+
   return (
     <div className="min-h-screen bg-void text-text-1 relative pb-24 overflow-x-hidden font-body">
       
@@ -565,20 +613,20 @@ export default function StudentLearnPortal() {
         {/* ----------------------------------------------------
             TAB NAVIGATION BAR (Sleek Glassmorphic Pill)
             ---------------------------------------------------- */}
-        <div className="w-full max-w-md bg-surface/60 border border-border/80 p-1.5 rounded-full flex gap-1 shadow-md backdrop-blur-sm self-center">
+        <div className="w-full max-w-2xl flex flex-wrap justify-center gap-2 sm:gap-3 self-center">
           <button
             onClick={() => {
               setActiveSection('practical')
               setSearchQuery('')
             }}
-            className={`flex-1 py-2.5 rounded-full text-xs font-bold font-display uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
+            className={`flex-1 min-w-[140px] max-w-[200px] py-3 px-4 rounded-full text-[11px] sm:text-xs font-bold font-display uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-sm ${
               activeSection === 'practical'
-                ? 'bg-primary text-white shadow-md shadow-primary/20'
-                : 'text-text-2 hover:text-text-1 hover:bg-void/40'
+                ? 'bg-primary border border-primary text-white shadow-primary/20'
+                : 'bg-surface/60 border border-border/80 text-text-2 hover:text-text-1 backdrop-blur-sm'
             }`}
           >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>{t.practicalTraining}</span>
+            <BookOpen className="w-4 h-4 shrink-0" />
+            <span className="whitespace-nowrap">{t.practicalTraining}</span>
           </button>
           
           <button
@@ -586,15 +634,23 @@ export default function StudentLearnPortal() {
               setActiveSection('rto')
               setSearchQuery('')
             }}
-            className={`flex-1 py-2.5 rounded-full text-xs font-bold font-display uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
+            className={`flex-1 min-w-[140px] max-w-[200px] py-3 px-4 rounded-full text-[11px] sm:text-xs font-bold font-display uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-sm ${
               activeSection === 'rto'
-                ? 'bg-primary text-white shadow-md shadow-primary/20'
-                : 'text-text-2 hover:text-text-1 hover:bg-void/40'
+                ? 'bg-primary border border-primary text-white shadow-primary/20'
+                : 'bg-surface/60 border border-border/80 text-text-2 hover:text-text-1 backdrop-blur-sm'
             }`}
           >
-            <FileText className="w-3.5 h-3.5" />
-            <span>{t.rtoMaterial}</span>
+            <FileText className="w-4 h-4 shrink-0" />
+            <span className="whitespace-nowrap">{t.rtoMaterial}</span>
           </button>
+          
+          <Link
+            href="/student/rto"
+            className="flex-1 min-w-[140px] max-w-[200px] py-3 px-4 rounded-full text-[11px] sm:text-xs font-bold font-display uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-sm bg-surface/60 border border-border/80 text-text-2 hover:text-text-1 backdrop-blur-sm"
+          >
+            <AwardIcon className="w-4 h-4 text-accent shrink-0" />
+            <span className="whitespace-nowrap text-accent">{t.mockExam}</span>
+          </Link>
         </div>
 
 {/* ----------------------------------------------------
@@ -674,18 +730,18 @@ export default function StudentLearnPortal() {
 
                         {/* Title and details */}
                         <div className="mt-3 relative z-10 flex-1 flex flex-col justify-end">
-                          <span className="text-[9px] font-mono text-text-3 uppercase tracking-wider block">
+                          <span className="text-[11px] font-mono text-text-3 uppercase tracking-wider block">
                             {t.phase} {card.phase}
                           </span>
-                          <h3 className="text-base font-extrabold text-text-1 font-display tracking-tight leading-snug group-hover:text-primary transition-colors mt-0.5">
+                          <h3 className="text-lg font-extrabold text-text-1 font-display tracking-tight leading-snug group-hover:text-primary transition-colors mt-1">
                             {card.title}
                           </h3>
                         </div>
 
                         {/* Card bottom arrow */}
-                        <div className="flex justify-between items-center border-t border-border/40 pt-3 mt-3 w-full text-[10px] font-mono text-text-3 group-hover:text-primary transition-colors">
+                        <div className="flex justify-between items-center border-t border-border/40 pt-3 mt-3 w-full text-xs font-mono font-bold text-text-3 group-hover:text-primary transition-colors">
                           <span>{t.beginTraining}</span>
-                          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </div>
 
                         {/* Subtle interactive grid line overlays */}
@@ -852,7 +908,7 @@ export default function StudentLearnPortal() {
                               >
                                 <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 sm:p-5 mt-5 text-sm text-text-1 leading-relaxed">
                                   <span className="font-bold text-primary uppercase font-mono tracking-wider block mb-2 text-xs">{t.rtoRationale}</span>
-                                  {currentQ.explanation}
+                                  {getSmartExplanation(currentQ)}
                                 </div>
                               </motion.div>
                             )}
@@ -933,7 +989,7 @@ export default function StudentLearnPortal() {
           const hasSim = ['parallel-parking', 'reverse-parking', 'vehicle-startup', 'steering-control', 'clutch-control', 'highway-merging'].includes(selectedCard.slug)
           
           return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+            <div className="fixed inset-0 z-[200] flex flex-col">
               
               {/* Backdrop */}
               <motion.div
@@ -941,31 +997,45 @@ export default function StudentLearnPortal() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setSelectedCard(null)}
-                className="absolute inset-0 bg-void/90 backdrop-blur-md"
+                className="absolute inset-0 bg-void/95 backdrop-blur-lg"
               />
 
-              {/* Modal Container */}
+              {/* Full-screen modal */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-                className="relative w-full max-w-3xl bg-surface border border-border rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[90vh] md:h-[600px] z-10"
+                initial={{ opacity: 0, y: '100%' }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: '100%' }}
+                transition={{ type: 'spring', stiffness: 300, damping: 35 }}
+                className="relative w-full h-full flex flex-col bg-surface z-10 overflow-hidden sm:max-w-2xl sm:mx-auto sm:my-auto sm:h-[92vh] sm:rounded-[2rem] sm:border sm:border-border shadow-2xl"
               >
+                {/* Close button — top right, above everything */}
+                <button
+                  onClick={() => setSelectedCard(null)}
+                  className="absolute top-3 right-3 z-50 p-2.5 bg-void/80 border border-border/60 rounded-full text-text-2 hover:text-white transition-colors shadow-lg"
+                >
+                  <X className="w-5 h-5" />
+                </button>
 
-                {/* Body (Desktop): Instruction Checklist, Warning & Actions */}
-                <div className="w-full flex flex-col h-full p-5 sm:p-6 md:p-8 bg-surface overflow-y-auto">
-                  
-                  {/* Close Modal Button */}
-                  <button
-                    onClick={() => setSelectedCard(null)}
-                    className="absolute top-4 right-4 p-2 bg-void/60 hover:bg-white/[0.04] border border-border rounded-full text-text-3 hover:text-text-1 z-50 transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                {/* === SIMULATION PANEL === visual (300px min) + 90px control bar = 420px min */}
+                {hasSim ? (
+                  <div className="w-full bg-void border-b border-border/40 flex items-stretch justify-center relative overflow-hidden shrink-0" style={{ height: 'max(420px, 60vh)' }}>
+                    {selectedCard.slug === 'parallel-parking' && <ParallelParkingSimulation onComplete={() => setSimCompleted(true)} />}
+                    {selectedCard.slug === 'reverse-parking' && <ReverseBayParkingSimulation onComplete={() => setSimCompleted(true)} />}
+                    {selectedCard.slug === 'vehicle-startup' && <VehicleStartupSimulation onComplete={() => setSimCompleted(true)} />}
+                    {selectedCard.slug === 'steering-control' && <SteeringControlSimulation onComplete={() => setSimCompleted(true)} />}
+                    {selectedCard.slug === 'clutch-control' && <ClutchControlSimulation onComplete={() => setSimCompleted(true)} />}
+                    {selectedCard.slug === 'highway-merging' && <HighwayMergingSimulation onComplete={() => setSimCompleted(true)} />}
+                  </div>
+                ) : (
+                  /* Top spacer for non-sim cards */
+                  <div className="h-12 shrink-0" />
+                )}
+
+                {/* === INSTRUCTIONS PANEL === scrollable middle */}
+                <div className="w-full flex-1 min-h-0 overflow-y-auto p-5">
 
                   {/* Header */}
-                  <div className="w-full border-b border-border/40 pb-4 pr-6">
+                  <div className="w-full border-b border-border/40 pb-4 pr-10">
                     <span className="text-[9px] font-mono text-primary bg-primary/10 px-2 py-0.5 rounded-full font-bold uppercase inline-block">
                       {selectedCard.category}
                     </span>
@@ -991,7 +1061,7 @@ export default function StudentLearnPortal() {
                               {t.rtoValidation}
                             </span>
                             <h4 className="text-xs font-extrabold text-text-1 leading-relaxed">
-                              {selectedCard.quizQuestion || `{t.masterPrefix}{selectedCard.title}{t.masterSuffix}`}
+                              {selectedCard.quizQuestion || `${t.masterPrefix}${selectedCard.title}${t.masterSuffix}`}
                             </h4>
                           </div>
 

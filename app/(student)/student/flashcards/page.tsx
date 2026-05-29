@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import React, { useState } from 'react'
 import Image from 'next/image'
@@ -20,7 +20,7 @@ const PAGE_DICT = {
     rule: 'RULE',
     info: 'INFO',
     title: 'All Flashcards Verification',
-    desc: (count: number) => \Displaying all \ interactive 3D Flashcards. Click any card to flip.\
+    desc: (count: number) => `Displaying all ${count} interactive 3D Flashcards. Click any card to flip.`
   },
   HI: {
     card: 'कार्ड',
@@ -30,7 +30,7 @@ const PAGE_DICT = {
     rule: 'नियम',
     info: 'जानकारी',
     title: 'सभी फ्लैशकार्ड सत्यापन',
-    desc: (count: number) => \सभी \ 3D फ्लैशकार्ड दिखा रहा है। पलटने के लिए किसी भी कार्ड पर क्लिक करें।\
+    desc: (count: number) => `सभी ${count} 3D फ्लैशकार्ड दिखा रहा है। पलटने के लिए किसी भी कार्ड पर क्लिक करें।`
   },
   TE: {
     card: 'కార్డు',
@@ -40,7 +40,7 @@ const PAGE_DICT = {
     rule: 'నియమం',
     info: 'సమాచారం',
     title: 'అన్ని ఫ్లాష్‌కార్డ్‌ల ధృవీకరణ',
-    desc: (count: number) => \అన్ని \ 3D ఫ్లాష్‌కార్డ్‌లను ప్రదర్శిస్తోంది. తిప్పడానికి ఏదైనా కార్డ్‌పై క్లిక్ చేయండి.\
+    desc: (count: number) => `అన్ని ${count} 3D ఫ్లాష్‌కార్డ్‌లను ప్రదర్శిస్తోంది. తిప్పడానికి ఏదైనా కార్డ్‌పై క్లిక్ చేయండి.`
   }
 }
 
@@ -142,7 +142,7 @@ export default function VerifyFlashcardsPage() {
                                        : 'bg-[#34c759]'
                                        
                       return (
-                        <div className={\w-28 h-28 \ \ flex items-center justify-center border-4 border-white shadow-lg\}>
+                        <div className={`w-28 h-28 ${shapeClass} ${colorClass} flex items-center justify-center border-4 border-white shadow-lg`}>
                           <span className="text-white font-bold text-[10px] uppercase text-center px-1">{activeSign.name}</span>
                         </div>
                       )

@@ -5,20 +5,36 @@ import { authOptions } from "@/lib/auth";
 const f = createUploadthing();
 
 export const ourFileRouter = {
+  // Profile picture uploads (for all users)
   profilePicture: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
     .middleware(async () => {
-      const session = await getServerSession(authOptions);
-      if (!session || !session.user) throw new Error("Unauthorized");
-      return { userId: (session.user as any).id, role: (session.user as any).role };
+      try {
+        const session = await getServerSession(authOptions);
+        return { userId: session?.user ? (session.user as any).id : "anonymous" };
+      } catch (e) {
+        return { userId: "anonymous" };
+      }
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Upload complete for userId:", metadata.userId);
-      console.log("file url", file.url);
-      
-      // We will handle the DB update in the Client Component after the upload finishes
-      // to keep it flexible, or we could do it here directly.
-      // But for simplicity we return the URL and update it via Server Action.
-      return { uploadedBy: metadata.userId, url: file.url };
+      console.log("Profile picture upload complete for userId:", metadata.userId);
+      console.log("file url", file.ufsUrl);
+      return { uploadedBy: metadata.userId, url: file.ufsUrl };
+    }),
+
+  // Gallery image uploads (for admin)
+  galleryImage: f({ image: { maxFileSize: "8MB", maxFileCount: 1 } })
+    .middleware(async () => {
+      try {
+        const session = await getServerSession(authOptions);
+        return { userId: session?.user ? (session.user as any).id : "anonymous" };
+      } catch (e) {
+        return { userId: "anonymous" };
+      }
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log("Gallery image upload complete for userId:", metadata.userId);
+      console.log("file url", file.ufsUrl);
+      return { uploadedBy: metadata.userId, url: file.ufsUrl };
     }),
 } satisfies FileRouter;
 

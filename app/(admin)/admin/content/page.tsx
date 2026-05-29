@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Edit2, Trash2, Tag, Book, Activity, AlertCircle, Save, Image as ImageIcon } from 'lucide-react'
+import { Plus, Edit2, Trash2, Tag, Book, Activity, AlertCircle, Save, Image as ImageIcon, Upload, Loader2 } from 'lucide-react'
 import { Course, Offer } from '@/lib/data/academyStore'
 import { useLanguageStore } from '@/store/languageStore'
+import { useUploadThing } from '@/lib/uploadthing'
 
 const PAGE_DICT = {
   EN: {
@@ -106,7 +107,25 @@ export default function ContentManagementPage() {
   
   const [showGalleryModal, setShowGalleryModal] = useState(false)
   const [newImage, setNewImage] = useState({ imageKey: '', caption: '' })
+  const [editingCourse, setEditingCourse] = useState<any>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
+
+  const { startUpload } = useUploadThing('galleryImage', {
+    onClientUploadComplete: (res) => {
+      const url = res?.[0]?.url
+      if (url) {
+        setUploadedImageUrl(url)
+        setNewImage(prev => ({ ...prev, imageKey: url }))
+      }
+      setIsUploadingImage(false)
+    },
+    onUploadError: (err) => {
+      console.error('Upload error:', err)
+      setIsUploadingImage(false)
+    }
+  })
 
   useEffect(() => {
     fetchData()
@@ -142,8 +161,31 @@ export default function ContentManagementPage() {
     }
   }
 
+  const handleUpdateCourse = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingCourse) return
+    setSubmitting(true)
+    try {
+      const res = await fetch('/api/admin/courses', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingCourse)
+      })
+      if (res.ok) {
+        await fetchData()
+        setEditingCourse(null)
+      } else {
+        alert('Failed to update course. Ensure the API supports PUT requests.')
+      }
+    } catch (err) {
+      console.error(err)
+    }
+    setSubmitting(false)
+  }
+
   const handleUploadGallery = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!newImage.imageKey) return
     setSubmitting(true)
     try {
       const res = await fetch('/api/admin/gallery', {
@@ -155,11 +197,20 @@ export default function ContentManagementPage() {
         await fetchData()
         setShowGalleryModal(false)
         setNewImage({ imageKey: '', caption: '' })
+        setUploadedImageUrl(null)
       }
     } catch (err) {
       console.error(err)
     }
     setSubmitting(false)
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setIsUploadingImage(true)
+    setUploadedImageUrl(null)
+    await startUpload([file])
   }
 
   const handleDeleteImage = async (id: string) => {
@@ -249,7 +300,7 @@ export default function ContentManagementPage() {
                 {courses.map((course: any) => (
                   <div key={course.id} className="bg-surface border border-border p-6 rounded-3xl flex flex-col relative group transition-all hover:border-primary/50">
                     <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-1.5 bg-void/80 hover:bg-white/10 rounded-lg text-text-2 transition-all"><Edit2 className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => setEditingCourse({...course})} className="p-1.5 bg-void/80 hover:bg-white/10 rounded-lg text-text-2 transition-all"><Edit2 className="w-3.5 h-3.5" /></button>
                       <button className="p-1.5 bg-void/80 hover:bg-danger/20 hover:text-danger rounded-lg text-text-2 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
 
@@ -345,8 +396,12 @@ export default function ContentManagementPage() {
                 {gallery.map((img) => (
                   <div key={img.id} className="bg-surface border border-border p-4 rounded-3xl flex flex-col relative group transition-all hover:border-success/50">
                     <div className="aspect-square bg-void border border-border rounded-2xl mb-4 flex items-center justify-center relative overflow-hidden">
-                      <ImageIcon className="w-12 h-12 text-text-3 opacity-30" />
-                      {/* You can render an actual img tag if imageKey is a valid URL */}
+                      {img.imageKey.startsWith('data:image') || img.imageKey.startsWith('http') ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={img.imageKey} alt={img.caption} className="w-full h-full object-cover" />
+                      ) : (
+                        <ImageIcon className="w-12 h-12 text-text-3 opacity-30" />
+                      )}
                     </div>
                     
                     <h3 className="text-sm font-display font-bold text-text-1 mb-2 line-clamp-2 min-h-[40px]">{img.caption || t.noCaption}</h3>
@@ -367,7 +422,7 @@ export default function ContentManagementPage() {
       )}
 
       {showGalleryModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowGalleryModal(false)}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => { setShowGalleryModal(false); setUploadedImageUrl(null); setNewImage({ imageKey: '', caption: '' }) }}>
           <div className="bg-surface border border-border rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="p-5 border-b border-border flex justify-between items-center bg-void/50">
               <h3 className="font-bold text-lg text-white">{t.addGalleryImage}</h3>
@@ -375,15 +430,116 @@ export default function ContentManagementPage() {
             <form onSubmit={handleUploadGallery} className="p-5 flex flex-col gap-4">
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold text-text-3 uppercase tracking-wider">{t.imageUrlKey}</label>
-                <input required type="text" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-success outline-none text-white w-full" value={newImage.imageKey} onChange={e => setNewImage({...newImage, imageKey: e.target.value})} placeholder={t.imageUrlPlaceholder} />
+                <label className={`flex items-center justify-center gap-3 w-full py-3 px-4 rounded-xl cursor-pointer border-2 border-dashed transition-all ${
+                  isUploadingImage
+                    ? 'border-success bg-success/10 cursor-wait'
+                    : uploadedImageUrl
+                    ? 'border-success bg-success/5'
+                    : 'border-border bg-void hover:border-success/50'
+                }`}>
+                  {isUploadingImage ? (
+                    <><Loader2 className="w-5 h-5 animate-spin text-success" /><span className="text-sm text-success font-semibold">Uploading...</span></>
+                  ) : uploadedImageUrl ? (
+                    <><ImageIcon className="w-5 h-5 text-success" /><span className="text-sm text-success font-semibold">Image uploaded! ✓</span></>
+                  ) : (
+                    <><Upload className="w-5 h-5 text-text-3" /><span className="text-sm text-text-2">Click to upload image</span></>
+                  )}
+                  <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isUploadingImage} />
+                </label>
+                {uploadedImageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={uploadedImageUrl} alt="Preview" className="w-full h-32 object-cover rounded-xl mt-1" />
+                )}
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold text-text-3 uppercase tracking-wider">{t.captionLabel}</label>
                 <input type="text" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-success outline-none text-white w-full" value={newImage.caption} onChange={e => setNewImage({...newImage, caption: e.target.value})} placeholder={t.captionPlaceholder} />
               </div>
               <div className="pt-2">
-                <button type="submit" disabled={submitting} className="w-full py-3 bg-success text-void font-bold rounded-xl hover:bg-success/90 transition-colors disabled:opacity-50">
-                  {submitting ? t.adding : t.addImage}
+                <button type="submit" disabled={submitting || isUploadingImage || !uploadedImageUrl} className="w-full py-3 bg-success text-void font-bold rounded-xl hover:bg-success/90 transition-colors disabled:opacity-50">
+                  {submitting ? t.adding : isUploadingImage ? 'Uploading...' : !uploadedImageUrl ? 'Upload an image first' : t.addImage}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {editingCourse && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setEditingCourse(null)}>
+          <div className="bg-surface border border-border rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="p-5 border-b border-border flex justify-between items-center bg-void/50">
+              <h3 className="font-bold text-lg text-white">✏️ Edit Course</h3>
+              <button type="button" onClick={() => setEditingCourse(null)} className="text-text-3 hover:text-white text-xl leading-none">&times;</button>
+            </div>
+            <form onSubmit={handleUpdateCourse} className="p-5 flex flex-col gap-4 max-h-[80vh] overflow-y-auto">
+              <p className="text-xs text-text-3 font-mono">Fields marked * are shown on the website</p>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Title (English) *</label>
+                <input required type="text" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-primary outline-none text-white w-full"
+                  value={editingCourse.title?.EN || ''}
+                  onChange={e => setEditingCourse({...editingCourse, title: {...editingCourse.title, EN: e.target.value}})} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Title (Hindi)</label>
+                <input type="text" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-primary outline-none text-white w-full"
+                  value={editingCourse.title?.HI || ''}
+                  onChange={e => setEditingCourse({...editingCourse, title: {...editingCourse.title, HI: e.target.value}})} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Title (Telugu)</label>
+                <input type="text" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-primary outline-none text-white w-full"
+                  value={editingCourse.title?.TE || ''}
+                  onChange={e => setEditingCourse({...editingCourse, title: {...editingCourse.title, TE: e.target.value}})} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Description (English) *</label>
+                <textarea rows={3} className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-primary outline-none text-white w-full resize-none"
+                  value={editingCourse.desc?.EN || ''}
+                  onChange={e => setEditingCourse({...editingCourse, desc: {...editingCourse.desc, EN: e.target.value}})} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Description (Hindi)</label>
+                <textarea rows={2} className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-primary outline-none text-white w-full resize-none"
+                  value={editingCourse.desc?.HI || ''}
+                  onChange={e => setEditingCourse({...editingCourse, desc: {...editingCourse.desc, HI: e.target.value}})} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Description (Telugu)</label>
+                <textarea rows={2} className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-primary outline-none text-white w-full resize-none"
+                  value={editingCourse.desc?.TE || ''}
+                  onChange={e => setEditingCourse({...editingCourse, desc: {...editingCourse.desc, TE: e.target.value}})} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Duration Tag * — e.g. "21 Days"</label>
+                <input type="text" placeholder="e.g. 21 Days" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-primary outline-none text-white w-full"
+                  value={editingCourse.tag?.EN || ''}
+                  onChange={e => setEditingCourse({...editingCourse, tag: {...editingCourse.tag, EN: e.target.value, HI: editingCourse.tag?.HI || e.target.value, TE: editingCourse.tag?.TE || e.target.value}})} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Category *</label>
+                <select className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-primary outline-none text-white w-full"
+                  value={editingCourse.category}
+                  onChange={e => setEditingCourse({...editingCourse, category: e.target.value})}>
+                  <option value="BEGINNER">BEGINNER</option>
+                  <option value="ADVANCED">ADVANCED</option>
+                  <option value="RTO_FAST_TRACK">RTO FAST TRACK</option>
+                </select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Price (₹) *</label>
+                <input required type="number" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-primary outline-none text-white w-full"
+                  value={editingCourse.price}
+                  onChange={e => setEditingCourse({...editingCourse, price: parseInt(e.target.value) || 0})} />
+              </div>
+              <div className="flex items-center gap-3 bg-void/50 border border-border rounded-xl p-3">
+                <input type="checkbox" id="activeCourse" checked={editingCourse.active} onChange={e => setEditingCourse({...editingCourse, active: e.target.checked})} className="w-4 h-4 rounded border-border accent-primary" />
+                <label htmlFor="activeCourse" className="text-sm text-white font-medium">Course is Active &amp; Visible on website</label>
+              </div>
+              <div className="pt-2">
+                <button type="submit" disabled={submitting} className="w-full py-3 bg-primary text-void font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50">
+                  {submitting ? 'Saving...' : 'Save All Changes'}
                 </button>
               </div>
             </form>

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server'
 import { getBranding, saveBranding } from '@/lib/data/academyStore'
 import { getServerSession } from 'next-auth'

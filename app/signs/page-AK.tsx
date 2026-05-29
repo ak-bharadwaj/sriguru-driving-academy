@@ -3,11 +3,6 @@ import path from 'path'
 import React from 'react'
 import SignsClient from './SignsClient'
 
-export const metadata = {
-  title: 'Interactive Road Signs | Sri Guru Driving Academy',
-  description: 'Interactive material design flashcards for learning RTO road signs.',
-}
-
 export default async function SignsPage() {
   const signsDir = path.join(process.cwd(), 'public', 'signs')
   let files: string[] = []

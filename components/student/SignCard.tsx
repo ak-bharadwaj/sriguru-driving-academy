@@ -27,6 +27,9 @@ interface SignCardProps {
   onStartQuiz?: () => void
 }
 
+// Fallback component extracted to module scope
+const FallbackComponent = () => null
+
 export const SignCard: React.FC<SignCardProps> = ({
   signKey,
   name,
@@ -44,7 +47,6 @@ export const SignCard: React.FC<SignCardProps> = ({
   const [isOpen, setIsOpen] = useState(false)
 
   // Retrieve the custom SVG component if it exists
-  const FallbackComponent = () => null
   const SVGIcon = (signKey && RoadSigns[signKey])
     ? (RoadSigns[signKey] as React.ComponentType<{ size: number; glow?: boolean; limit?: number; state?: 'red' | 'amber' | 'green' }>) 
     : FallbackComponent
@@ -52,7 +54,16 @@ export const SignCard: React.FC<SignCardProps> = ({
   // Render a CSS fallback shape with a distinct Lucide icon if no image or SVG is present
   const renderShape = (size: number) => {
     if (imagePath) {
-      return <Image src={imagePath} alt={name} width={size} height={size} className="object-contain drop-shadow-md" />
+      return (
+        <div className="relative w-full h-full flex items-center justify-center">
+          <Image 
+            src={imagePath} 
+            alt={name} 
+            fill 
+            className="object-contain drop-shadow-md" 
+          />
+        </div>
+      )
     }
     if (signKey) {
       if (signKey === 'SPEED_LIMIT') return <SVGIcon size={size} limit={limit} />

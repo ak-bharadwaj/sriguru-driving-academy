@@ -124,36 +124,63 @@ export default function AnalyticsPage() {
       {/* Top Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[
-          { label: t.activeStudents, value: data?.topStats?.activeStudents || '0', change: '+12%', icon: Users, up: true, color: 'text-primary' },
-          { label: t.weeklyRevenue, value: data?.topStats?.weeklyRevenue || '₹0', change: '+8.4%', icon: Activity, up: true, color: 'text-success' },
-          { label: t.avgCompletion, value: data?.topStats?.avgCompletion || '0 Days', change: '-2 Days', icon: Clock, up: true, color: 'text-accent' },
-          { label: t.rtoPassRate, value: data?.topStats?.rtoPassRate || '0%', change: '-1.1%', icon: ShieldCheck, up: false, color: 'text-danger' }
-        ].map((stat, idx) => (
-          <motion.div 
-            key={idx}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.1 }}
-            className="bg-surface border border-border rounded-3xl p-6 relative overflow-hidden group"
-          >
-            <div className="absolute right-4 top-4 opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-500 scale-110 group-hover:scale-125">
-              <stat.icon className="w-24 h-24 text-text-1" />
-            </div>
-            <div className="flex justify-between items-start mb-4">
-              <span className="text-xs font-mono uppercase tracking-widest text-text-3">{stat.label}</span>
-              <div className={`p-2 rounded-xl bg-void border border-border ${stat.color}`}>
-                <stat.icon className="w-4 h-4" />
+          { 
+            label: t.activeStudents, 
+            value: data?.topStats?.activeStudents || '0', 
+            change: data?.topStats?.activeStudentsGrowth || '0.0%', 
+            icon: Users, 
+            color: 'text-primary' 
+          },
+          { 
+            label: t.weeklyRevenue, 
+            value: data?.topStats?.weeklyRevenue || '₹0', 
+            change: data?.topStats?.weeklyRevenueGrowth || '0.0%', 
+            icon: Activity, 
+            color: 'text-success' 
+          },
+          { 
+            label: t.avgCompletion, 
+            value: data?.topStats?.avgCompletion || '0 Days', 
+            change: data?.topStats?.avgCompletionGrowth || '0.0%', 
+            icon: Clock, 
+            color: 'text-accent' 
+          },
+          { 
+            label: t.rtoPassRate, 
+            value: data?.topStats?.rtoPassRate || '0%', 
+            change: data?.topStats?.rtoPassRateGrowth || '0.0%', 
+            icon: ShieldCheck, 
+            color: 'text-danger' 
+          }
+        ].map((stat, idx) => {
+          const isPositive = stat.change.startsWith('+') || stat.change === '0.0%' || stat.change.startsWith('0.0%');
+          return (
+            <motion.div 
+              key={idx}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              className="bg-surface border border-border rounded-3xl p-6 relative overflow-hidden group"
+            >
+              <div className="absolute right-4 top-4 opacity-[0.03] group-hover:opacity-[0.08] transition-all duration-500 scale-110 group-hover:scale-125">
+                <stat.icon className="w-24 h-24 text-text-1" />
               </div>
-            </div>
-            <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-display font-extrabold text-text-1">{stat.value}</span>
-              <span className={`flex items-center text-xs font-bold font-mono ${stat.up ? 'text-success' : 'text-danger'}`}>
-                {stat.up ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                {stat.change}
-              </span>
-            </div>
-          </motion.div>
-        ))}
+              <div className="flex justify-between items-start mb-4">
+                <span className="text-xs font-mono uppercase tracking-widest text-text-3">{stat.label}</span>
+                <div className={`p-2 rounded-xl bg-void border border-border ${stat.color}`}>
+                  <stat.icon className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="flex items-baseline gap-3">
+                <span className="text-3xl font-display font-extrabold text-text-1">{stat.value}</span>
+                <span className={`flex items-center text-xs font-bold font-mono ${isPositive ? 'text-success' : 'text-danger'}`}>
+                  {isPositive ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+                  {stat.change}
+                </span>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

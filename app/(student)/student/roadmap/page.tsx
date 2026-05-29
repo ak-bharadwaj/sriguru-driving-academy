@@ -18,7 +18,8 @@ import {
   RotateCcw,
   TrendingUp
 } from 'lucide-react'
-import { useRTOStore } from '@/lib/stores/rto-store'\nimport { useLanguageStore } from '@/store/languageStore'
+import { useRTOStore } from '@/lib/stores/rto-store'
+import { useLanguageStore } from '@/store/languageStore'
 
 const PAGE_DICT = {
   EN: {

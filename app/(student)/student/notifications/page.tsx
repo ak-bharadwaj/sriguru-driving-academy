@@ -2,88 +2,161 @@ import React from 'react'
 import { db } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { Bell, ArrowLeft } from 'lucide-react'
+import { Bell, ArrowLeft, Trophy, CalendarClock, ShieldCheck, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 
-
+// Mock Data for demonstration purposes if DB is empty
+const MOCK_NOTIFICATIONS = [
+  {
+    id: '1',
+    title: 'Upcoming Session Alert',
+    message: 'Your driving session with Capt. Vikram starts in 30 minutes. Please report to Zone A.',
+    type: 'SCHEDULE',
+    isRead: false,
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: '2',
+    title: 'Achievement Unlocked!',
+    message: 'You earned the "Smooth Operator" badge for perfect clutch control.',
+    type: 'GAMIFICATION',
+    isRead: false,
+    createdAt: new Date(Date.now() - 3600000).toISOString() // 1 hour ago
+  },
+  {
+    id: '3',
+    title: 'RTO Mock Exam Passed',
+    message: 'Congratulations! You scored 95% on your theoretical mock exam.',
+    type: 'ACADEMIC',
+    isRead: true,
+    createdAt: new Date(Date.now() - 86400000).toISOString() // 1 day ago
+  },
+  {
+    id: '4',
+    title: 'Course Fee Received',
+    message: 'We have received your payment of $250.00. Receipt #48291.',
+    type: 'SYSTEM',
+    isRead: true,
+    createdAt: new Date(Date.now() - 172800000).toISOString() // 2 days ago
+  }
+]
 
 export default async function NotificationsPage() {
   const session = await getServerSession(authOptions)
-  if (!session?.user?.email) return null
+  let notifications: any[] = []
 
-  const user = await db.user.findUnique({
-    where: { email: session.user.email }
-  })
+  if (session?.user?.email) {
+    const user = await db.user.findUnique({
+      where: { email: session.user.email }
+    })
 
-  if (!user) return null
+    if (user) {
+      notifications = await db.notification.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' },
+        take: 50
+      })
 
-  const notifications = await db.notification.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: 'desc' },
-    take: 50
-  })
+      // Mark all as read when visited
+      await db.notification.updateMany({
+        where: { userId: user.id, isRead: false },
+        data: { isRead: true }
+      })
+    }
+  }
 
-  // Mark all as read when visited
-  await db.notification.updateMany({
-    where: { userId: user.id, isRead: false },
-    data: { isRead: true }
-  })
+  // Use mock data if database is empty for demonstration purposes
+  if (notifications.length === 0) {
+    notifications = MOCK_NOTIFICATIONS
+  }
 
   return (
-    <div className="min-h-screen bg-[rgb(var(--color-void))] font-body text-[rgb(var(--color-text-1))] pb-28 relative overflow-hidden">
+    <div className="min-h-screen bg-void font-body text-text-1 pb-28 relative overflow-x-hidden pt-12">
       
       {/* -----------------------------
-          YELLOW DECORATIVE ACCENTS
+          BACKGROUND EFFECTS
           ----------------------------- */}
-      {/* Large circle left side */}
-      <div className="absolute top-[30%] -left-[150px] w-[300px] h-[300px] bg-app-yellow/80 rounded-full -z-10" />
-      
-      {/* Small circle top right */}
-      <div className="absolute -top-16 -right-16 w-48 h-48 bg-app-yellow/80 rounded-full -z-10" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
 
       {/* -----------------------------
           HEADER BAR
           ----------------------------- */}
-      <div className="pt-12 pb-6 px-6 relative z-10 max-w-md mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <Link href="/student/dashboard" className="p-2 hover:bg-[rgb(var(--color-border))] rounded-xl transition">
-            <ArrowLeft className="w-6 h-6 text-[rgb(var(--color-text-1))]" />
+      <div className="max-w-2xl mx-auto px-6 relative z-10 mb-8">
+        <div className="flex justify-between items-center mb-6">
+          <Link href="/student/dashboard" className="w-10 h-10 flex items-center justify-center bg-surface hover:bg-border/50 border border-border rounded-xl transition-all">
+            <ArrowLeft className="w-5 h-5 text-text-1" />
           </Link>
-          <h1 className="text-lg font-bold font-display">Notification</h1>
-          <div className="p-2 bg-[rgb(var(--color-primary))] rounded-full">
-            <Bell className="w-5 h-5 text-white" />
+          <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center border border-primary/30 shadow-[0_0_15px_rgba(37,99,235,0.4)]">
+            <Bell className="w-6 h-6 text-primary animate-pulse" />
           </div>
         </div>
 
-        <h2 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))] px-1">All notification</h2>
+        <h1 className="text-3xl font-extrabold font-display text-white tracking-tight">Notifications</h1>
+        <p className="text-text-3 text-sm mt-1">Stay updated on your learning journey.</p>
       </div>
 
       {/* -----------------------------
           NOTIFICATIONS LIST
           ----------------------------- */}
-      <div className="max-w-md mx-auto px-5 relative z-10 flex flex-col gap-4">
-        {notifications.length === 0 ? (
-          <div className="text-center py-12 text-[rgb(var(--color-text-3))] italic">You have no notifications yet.</div>
-        ) : (
-          notifications.map(notif => (
-            <div key={notif.id} className="bg-[rgb(var(--color-surface))] rounded-[24px] shadow-app p-5 border border-[rgb(var(--color-border))] relative overflow-hidden flex flex-col gap-2">
-              {/* Optional blue accent bar for unread */}
+      <div className="max-w-2xl mx-auto px-6 relative z-10 flex flex-col gap-4">
+        {notifications.map(notif => {
+          let Icon = Bell
+          let iconColor = 'text-primary'
+          let bgColor = 'bg-primary/10 border-primary/20'
+
+          if (notif.type === 'SCHEDULE') {
+            Icon = CalendarClock
+            iconColor = 'text-emerald-500'
+            bgColor = 'bg-emerald-500/10 border-emerald-500/20'
+          } else if (notif.type === 'GAMIFICATION') {
+            Icon = Trophy
+            iconColor = 'text-amber-500'
+            bgColor = 'bg-amber-500/10 border-amber-500/20'
+          } else if (notif.type === 'ACADEMIC') {
+            Icon = ShieldCheck
+            iconColor = 'text-accent'
+            bgColor = 'bg-accent/10 border-accent/20'
+          } else if (notif.type === 'SYSTEM') {
+            Icon = CheckCircle2
+            iconColor = 'text-text-3'
+            bgColor = 'bg-surface border-border'
+          }
+
+          return (
+            <div 
+              key={notif.id} 
+              className={`relative p-5 rounded-2xl border flex gap-4 transition-all hover:bg-surface/80 ${
+                notif.isRead ? 'bg-void border-border opacity-70' : 'bg-surface border-border shadow-lg shadow-black/20'
+              }`}
+            >
+              {/* Unread indicator */}
               {!notif.isRead && (
-                <div className="absolute top-0 bottom-0 left-0 w-1.5 bg-[rgb(var(--color-primary))]" />
+                <div className="absolute top-1/2 -translate-y-1/2 left-0 w-1 h-8 bg-primary rounded-r-full shadow-[0_0_10px_rgba(37,99,235,0.8)]" />
               )}
               
-              <h3 className="font-bold text-[rgb(var(--color-text-1))] text-sm">{notif.title}</h3>
-              <p className="text-xs text-[rgb(var(--color-text-2))] leading-relaxed">
-                {notif.message}
-              </p>
-              
-              <span className="text-[10px] text-[rgb(var(--color-text-3))] font-medium mt-1">
-                {new Date(notif.createdAt).toLocaleDateString()}
-              </span>
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${bgColor}`}>
+                <Icon className={`w-6 h-6 ${iconColor}`} />
+              </div>
+
+              <div className="flex-1 flex flex-col justify-center">
+                <div className="flex justify-between items-start gap-2">
+                  <h3 className={`font-bold text-sm md:text-base ${notif.isRead ? 'text-text-2' : 'text-white'}`}>
+                    {notif.title}
+                  </h3>
+                  <span className="text-[10px] text-text-3 font-mono shrink-0 pt-1">
+                    {new Date(notif.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <p className={`text-xs md:text-sm mt-1 leading-relaxed ${notif.isRead ? 'text-text-3' : 'text-text-2'}`}>
+                  {notif.message}
+                </p>
+              </div>
             </div>
-          ))
-        )}
+          )
+        })}
       </div>
+
     </div>
   )
 }

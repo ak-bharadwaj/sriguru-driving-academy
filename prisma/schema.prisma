@@ -8,6 +8,499 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  phone         String?        @unique
+  passwordHash  String
+  role          Role
+  name          String
+  avatarUrl     String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  lastActiveAt  DateTime?
+  admin         Admin?
+  instructor    Instructor?
+  notifications Notification[]
+  student       Student?
+
+  @@index([role])
+  @@index([email])
+}
+
+model Student {
+  id              String                  @id @default(cuid())
+  userId          String                  @unique
+  instructorId    String?
+  trainingType    TrainingType            @default(BEGINNER)
+  enrolledAt      DateTime                @default(now())
+  xp              Int                     @default(0)
+  level           Int                     @default(1)
+  streakDays      Int                     @default(0)
+  lastStreakAt    DateTime?
+  courseFee       Float?
+  feeStatus       PaymentStatus           @default(PENDING)
+  confidenceScore Float                   @default(0)
+  hasOnboarded    Boolean                 @default(false)
+  status          StudentStatus           @default(ACTIVE)
+  activityLogs    ActivityLog[]
+  attendance      Attendance[]
+  bookings        Booking[]
+  CourseFeedback  CourseFeedback?
+  drivingTests    DrivingTest[]
+  feedback        Feedback[]
+  progress        LearningProgress[]
+  notifications   Notification[]
+  payments        Payment[]
+  quizAttempts    QuizAttempt[]
+  sessions        Session[]
+  sessionNotes    SessionNote[]
+  skillMastery    SkillMastery[]
+  instructor      Instructor?             @relation(fields: [instructorId], references: [id])
+  user            User                    @relation(fields: [userId], references: [id])
+  badges          StudentBadge[]
+  cardProgress    StudentCardProgress[]
+  dailyChallenges StudentDailyChallenge[]
+  roadmapNodes    StudentRoadmapNode[]
+  xpEvents        XPEvent[]
+
+  @@index([userId])
+  @@index([instructorId])
+}
+
+model Instructor {
+  id             String          @id @default(cuid())
+  userId         String          @unique
+  bio            String?
+  specialization String?
+  yearsExp       Int             @default(0)
+  coachingNotes  CoachingNote[]
+  user           User            @relation(fields: [userId], references: [id])
+  dailyLogs      InstructorLog[]
+  sessions       Session[]
+  slots          Slot[]
+  students       Student[]
+
+  @@index([userId])
+}
+
+model Admin {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Session {
+  id            String         @id @default(cuid())
+  studentId     String
+  instructorId  String
+  slotId        String?
+  scheduledAt   DateTime
+  duration      Int            @default(60)
+  status        SessionStatus  @default(SCHEDULED)
+  lessonType    String
+  notes         String?
+  completedAt   DateTime?
+  createdAt     DateTime       @default(now())
+  skillsCovered String[]
+  attendance    Attendance?
+  coachingNotes CoachingNote[]
+  instructor    Instructor     @relation(fields: [instructorId], references: [id])
+  slot          Slot?          @relation(fields: [slotId], references: [id])
+  student       Student        @relation(fields: [studentId], references: [id])
+  studentNotes  SessionNote[]
+
+  @@index([studentId])
+  @@index([instructorId])
+  @@index([scheduledAt])
+}
+
+model Attendance {
+  id        String           @id @default(cuid())
+  sessionId String           @unique
+  studentId String
+  status    AttendanceStatus
+  markedAt  DateTime         @default(now())
+  markedBy  String
+  session   Session          @relation(fields: [sessionId], references: [id])
+  student   Student          @relation(fields: [studentId], references: [id])
+
+  @@index([studentId])
+}
+
+model Feedback {
+  id             String   @id @default(cuid())
+  studentId      String
+  instructorId   String
+  tag            String
+  content        String
+  skillScores    Json?
+  createdAt      DateTime @default(now())
+  studentVisible Boolean  @default(true)
+  student        Student  @relation(fields: [studentId], references: [id])
+
+  @@index([studentId])
+}
+
+model InstructorLog {
+  id            String     @id @default(cuid())
+  instructorId  String
+  date          DateTime   @default(now())
+  content       String
+  skillsCovered Json?
+  instructor    Instructor @relation(fields: [instructorId], references: [id])
+
+  @@unique([instructorId, date])
+  @@index([instructorId])
+}
+
+model LearningCard {
+  id             String             @id @default(cuid())
+  slug           String             @unique
+  title          String
+  category       String
+  phase          RoadmapPhase
+  xpReward       Int                @default(10)
+  steps          Json
+  commonMistakes Json
+  instructorTips Json
+  safetyWarnings Json
+  quizQuestion   String
+  quizOptions    Json
+  quizAnswer     String
+  orderIndex     Int
+  progress       LearningProgress[]
+
+  @@index([phase])
+  @@index([category])
+}
+
+model LearningProgress {
+  id          String       @id @default(cuid())
+  studentId   String
+  cardId      String
+  completed   Boolean      @default(false)
+  quizPassed  Boolean      @default(false)
+  completedAt DateTime?
+  card        LearningCard @relation(fields: [cardId], references: [id])
+  student     Student      @relation(fields: [studentId], references: [id])
+
+  @@unique([studentId, cardId])
+  @@index([studentId])
+}
+
+model RoadmapNode {
+  id                String               @id @default(cuid())
+  title             String
+  description       String
+  phase             RoadmapPhase
+  orderIndex        Int
+  icon              String
+  requiredCardSlugs Json
+  unlockThreshold   Float                @default(0.8)
+  studentNodes      StudentRoadmapNode[]
+
+  @@index([phase])
+}
+
+model StudentRoadmapNode {
+  id          String      @id @default(cuid())
+  studentId   String
+  nodeId      String
+  status      NodeStatus  @default(LOCKED)
+  unlockedAt  DateTime?
+  completedAt DateTime?
+  node        RoadmapNode @relation(fields: [nodeId], references: [id])
+  student     Student     @relation(fields: [studentId], references: [id])
+
+  @@unique([studentId, nodeId])
+  @@index([studentId])
+}
+
+model RTOQuestion {
+  id          String        @id @default(cuid())
+  question    String
+  options     Json
+  answer      String
+  category    String
+  difficulty  String        @default("medium")
+  signSlug    String?
+  explanation String?
+  attempts    QuizAttempt[]
+
+  @@index([category])
+}
+
+model QuizAttempt {
+  id         String      @id @default(cuid())
+  studentId  String
+  questionId String
+  answer     String
+  correct    Boolean
+  createdAt  DateTime    @default(now())
+  question   RTOQuestion @relation(fields: [questionId], references: [id])
+  student    Student     @relation(fields: [studentId], references: [id])
+
+  @@index([studentId])
+  @@index([questionId])
+}
+
+model XPEvent {
+  id        String   @id @default(cuid())
+  studentId String
+  amount    Int
+  reason    String
+  createdAt DateTime @default(now())
+  student   Student  @relation(fields: [studentId], references: [id])
+
+  @@index([studentId])
+  @@index([createdAt])
+}
+
+model Badge {
+  id          String         @id @default(cuid())
+  type        BadgeType      @unique
+  name        String
+  description String
+  icon        String
+  xpRequired  Int            @default(0)
+  condition   Json
+  students    StudentBadge[]
+}
+
+model StudentBadge {
+  id        String   @id @default(cuid())
+  studentId String
+  badgeId   String
+  earnedAt  DateTime @default(now())
+  badge     Badge    @relation(fields: [badgeId], references: [id])
+  student   Student  @relation(fields: [studentId], references: [id])
+
+  @@unique([studentId, badgeId])
+  @@index([studentId])
+}
+
+model Slot {
+  id           String       @id @default(cuid())
+  instructorId String
+  trainingType TrainingType
+  maxCapacity  Int          @default(5)
+  currentCount Int          @default(0)
+  status       SlotStatus   @default(DRAFT)
+  dayOfWeek    String
+  time         String
+  bookings     Booking[]
+  sessions     Session[]
+  instructor   Instructor   @relation(fields: [instructorId], references: [id])
+
+  @@unique([dayOfWeek, time, trainingType, instructorId])
+  @@index([status])
+}
+
+model Booking {
+  id            String         @id @default(cuid())
+  studentId     String?
+  slotId        String?
+  name          String
+  phone         String
+  email         String
+  trainingType  TrainingType
+  status        BookingStatus  @default(PENDING)
+  reference     String         @unique @default(cuid())
+  notes         String?
+  createdAt     DateTime       @default(now())
+  reviewedAt    DateTime?
+  reviewedBy    String?
+  preferredTime PreferredTime?
+  slot          Slot?          @relation(fields: [slotId], references: [id])
+  student       Student?       @relation(fields: [studentId], references: [id])
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  studentId String?
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  student   Student?         @relation(fields: [studentId], references: [id])
+  user      User             @relation(fields: [userId], references: [id])
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+model Inquiry {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  email     String?
+  message   String
+  createdAt DateTime @default(now())
+  resolved  Boolean  @default(false)
+}
+
+model Payment {
+  id         String   @id @default(cuid())
+  studentId  String
+  amount     Float
+  method     String
+  note       String?
+  receivedAt DateTime @default(now())
+  recordedBy String
+  student    Student  @relation(fields: [studentId], references: [id])
+
+  @@index([studentId])
+  @@index([receivedAt])
+}
+
+model DrivingTest {
+  id          String     @id @default(cuid())
+  studentId   String
+  testDate    DateTime
+  type        String     @default("PRACTICAL")
+  testCenter  String?
+  result      TestResult @default(SCHEDULED)
+  attemptNo   Int        @default(1)
+  notes       String?
+  scheduledBy String
+  createdAt   DateTime   @default(now())
+  student     Student    @relation(fields: [studentId], references: [id])
+
+  @@index([studentId])
+  @@index([testDate])
+}
+
+model Announcement {
+  id         String   @id @default(cuid())
+  title      String
+  message    String
+  expiryDate DateTime
+  createdAt  DateTime @default(now())
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  studentId String
+  action    String
+  xpEarned  Int      @default(0)
+  createdAt DateTime @default(now())
+  student   Student  @relation(fields: [studentId], references: [id])
+
+  @@index([studentId])
+  @@index([createdAt])
+}
+
+model DailyChallenge {
+  id       String   @id @default(cuid())
+  date     DateTime @unique
+  tasks    Json
+  xpReward Int      @default(25)
+}
+
+model StudentDailyChallenge {
+  id             String   @id @default(cuid())
+  studentId      String
+  date           DateTime
+  completedTasks Json
+  claimed        Boolean  @default(false)
+  student        Student  @relation(fields: [studentId], references: [id])
+
+  @@unique([studentId, date])
+  @@index([studentId])
+}
+
+model CoachingNote {
+  id           String     @id @default(cuid())
+  sessionId    String
+  instructorId String
+  note         String
+  createdAt    DateTime   @default(now())
+  instructor   Instructor @relation(fields: [instructorId], references: [id])
+  session      Session    @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId])
+  @@index([instructorId])
+}
+
+model SessionNote {
+  id        String   @id @default(cuid())
+  sessionId String
+  studentId String
+  note      String
+  createdAt DateTime @default(now())
+  session   Session  @relation(fields: [sessionId], references: [id])
+  student   Student  @relation(fields: [studentId], references: [id])
+
+  @@index([sessionId])
+  @@index([studentId])
+}
+
+model Promotion {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  active      Boolean   @default(true)
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model Vehicle {
+  id        String   @id @default(cuid())
+  name      String
+  type      String
+  imageKey  String?
+  features  Json?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model GalleryImage {
+  id         String   @id @default(cuid())
+  imageKey   String
+  caption    String?
+  uploadedAt DateTime @default(now())
+}
+
+model StudentCardProgress {
+  id         String   @id @default(cuid())
+  studentId  String
+  cardKey    String
+  studied    Boolean  @default(false)
+  quizPassed Boolean  @default(false)
+  updatedAt  DateTime @updatedAt
+  student    Student  @relation(fields: [studentId], references: [id])
+
+  @@unique([studentId, cardKey])
+  @@index([studentId])
+}
+
+model SkillMastery {
+  id           String   @id @default(cuid())
+  studentId    String
+  skillKey     String
+  masteryLevel String   @default("Novice")
+  updatedAt    DateTime @updatedAt
+  student      Student  @relation(fields: [studentId], references: [id])
+
+  @@unique([studentId, skillKey])
+  @@index([studentId])
+}
+
+model CourseFeedback {
+  id        String   @id
+  studentId String   @unique
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  Student   Student  @relation(fields: [studentId], references: [id])
+}
+
 enum Role {
   STUDENT
   INSTRUCTOR
@@ -56,6 +549,7 @@ enum BadgeType {
   CONSISTENT_LEARNER
   SAFETY_CHAMPION
   QUIZ_MASTER
+  COURSE_GRADUATE
 }
 
 enum NotificationType {
@@ -100,27 +594,6 @@ enum NodeStatus {
   COMPLETED
 }
 
-model User {
-  id           String      @id @default(cuid())
-  email        String      @unique
-  phone        String?     @unique
-  passwordHash String
-  role         Role
-  name         String
-  avatarUrl    String?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  lastActiveAt DateTime?
-
-  student      Student?
-  instructor   Instructor?
-  admin        Admin?
-  notifications Notification[]
-
-  @@index([role])
-  @@index([email])
-}
-
 enum PaymentStatus {
   PENDING
   PARTIAL
@@ -132,480 +605,4 @@ enum TestResult {
   SCHEDULED
   PASS
   FAIL
-}
-
-model Student {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  user         User     @relation(fields: [userId], references: [id])
-  instructorId String?
-  instructor   Instructor? @relation(fields: [instructorId], references: [id])
-  trainingType TrainingType @default(BEGINNER)
-  enrolledAt   DateTime @default(now())
-
-  status       StudentStatus @default(ACTIVE)
-  hasOnboarded Boolean @default(false)
-  confidenceScore Float @default(0)
-
-  // Fee & Plan tracking
-  courseFee    Float?
-  feeStatus    PaymentStatus @default(PENDING)
-
-  xp           Int      @default(0)
-  level        Int      @default(1)
-  streakDays   Int      @default(0)
-  lastStreakAt DateTime?
-  
-  sessions     Session[]
-  attendance   Attendance[]
-  feedback     Feedback[]
-  xpEvents     XPEvent[]
-  badges       StudentBadge[]
-  bookings     Booking[]
-  progress     LearningProgress[]
-  roadmapNodes StudentRoadmapNode[]
-  quizAttempts QuizAttempt[]
-  notifications Notification[]
-  payments     Payment[]
-  drivingTests DrivingTest[]
-  
-  activityLogs ActivityLog[]
-  dailyChallenges StudentDailyChallenge[]
-  sessionNotes SessionNote[]
-  cardProgress StudentCardProgress[]
-  skillMastery SkillMastery[]
-
-  @@index([userId])
-  @@index([instructorId])
-}
-
-model Instructor {
-  id       String   @id @default(cuid())
-  userId   String   @unique
-  user     User     @relation(fields: [userId], references: [id])
-  bio      String?
-  specialization String?
-  yearsExp Int      @default(0)
-
-  students  Student[]
-  sessions  Session[]
-  slots     Slot[]
-  dailyLogs InstructorLog[]
-  coachingNotes CoachingNote[]
-
-  @@index([userId])
-}
-
-model Admin {
-  id     String @id @default(cuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
-}
-
-model Session {
-  id           String        @id @default(cuid())
-  studentId    String
-  student      Student       @relation(fields: [studentId], references: [id])
-  instructorId String
-  instructor   Instructor    @relation(fields: [instructorId], references: [id])
-  slotId       String?
-  slot         Slot?         @relation(fields: [slotId], references: [id])
-  scheduledAt  DateTime
-  duration     Int           @default(60)
-  status       SessionStatus @default(SCHEDULED)
-  lessonType   String
-  notes        String?
-  completedAt  DateTime?
-  createdAt    DateTime      @default(now())
-  skillsCovered String[]
-
-  attendance   Attendance?
-  studentNotes SessionNote[]
-  coachingNotes CoachingNote[]
-
-  @@index([studentId])
-  @@index([instructorId])
-  @@index([scheduledAt])
-}
-
-model Attendance {
-  id        String           @id @default(cuid())
-  sessionId String           @unique
-  session   Session          @relation(fields: [sessionId], references: [id])
-  studentId String
-  student   Student          @relation(fields: [studentId], references: [id])
-  status    AttendanceStatus
-  markedAt  DateTime         @default(now())
-  markedBy  String
-
-  @@index([studentId])
-}
-
-model Feedback {
-  id           String   @id @default(cuid())
-  studentId    String
-  student      Student  @relation(fields: [studentId], references: [id])
-  instructorId String
-  tag          String
-  content      String
-  skillScores  Json?
-  studentVisible Boolean @default(true)
-  createdAt    DateTime @default(now())
-
-  @@index([studentId])
-}
-
-model InstructorLog {
-  id           String     @id @default(cuid())
-  instructorId String
-  instructor   Instructor @relation(fields: [instructorId], references: [id])
-  date         DateTime   @default(now())
-  content      String
-  skillsCovered Json?
-
-  @@index([instructorId])
-  @@unique([instructorId, date])
-}
-
-model LearningCard {
-  id           String  @id @default(cuid())
-  slug         String  @unique
-  title        String
-  category     String
-  phase        RoadmapPhase
-  xpReward     Int     @default(10)
-  steps        Json
-  commonMistakes Json
-  instructorTips Json
-  safetyWarnings Json
-  quizQuestion  String
-  quizOptions   Json
-  quizAnswer    String
-  orderIndex    Int
-
-  progress     LearningProgress[]
-
-  @@index([phase])
-  @@index([category])
-}
-
-model LearningProgress {
-  id        String   @id @default(cuid())
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id])
-  cardId    String
-  card      LearningCard @relation(fields: [cardId], references: [id])
-  completed Boolean  @default(false)
-  quizPassed Boolean @default(false)
-  completedAt DateTime?
-
-  @@unique([studentId, cardId])
-  @@index([studentId])
-}
-
-model RoadmapNode {
-  id          String       @id @default(cuid())
-  title       String
-  description String
-  phase       RoadmapPhase
-  orderIndex  Int
-  icon        String
-  requiredCardSlugs Json
-  unlockThreshold Float   @default(0.8)
-
-  studentNodes StudentRoadmapNode[]
-
-  @@index([phase])
-}
-
-model StudentRoadmapNode {
-  id        String     @id @default(cuid())
-  studentId String
-  student   Student    @relation(fields: [studentId], references: [id])
-  nodeId    String
-  node      RoadmapNode @relation(fields: [nodeId], references: [id])
-  status    NodeStatus @default(LOCKED)
-  unlockedAt DateTime?
-  completedAt DateTime?
-
-  @@unique([studentId, nodeId])
-  @@index([studentId])
-}
-
-model RTOQuestion {
-  id         String   @id @default(cuid())
-  question   String
-  options    Json
-  answer     String
-  category   String
-  difficulty String   @default("medium")
-  signSlug   String?
-  explanation String?
-
-  attempts   QuizAttempt[]
-
-  @@index([category])
-}
-
-model QuizAttempt {
-  id         String   @id @default(cuid())
-  studentId  String
-  student    Student  @relation(fields: [studentId], references: [id])
-  questionId String
-  question   RTOQuestion @relation(fields: [questionId], references: [id])
-  answer     String
-  correct    Boolean
-  createdAt  DateTime @default(now())
-
-  @@index([studentId])
-  @@index([questionId])
-}
-
-model XPEvent {
-  id        String   @id @default(cuid())
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id])
-  amount    Int
-  reason    String
-  createdAt DateTime @default(now())
-
-  @@index([studentId])
-  @@index([createdAt])
-}
-
-model Badge {
-  id          String    @id @default(cuid())
-  type        BadgeType @unique
-  name        String
-  description String
-  icon        String
-  xpRequired  Int       @default(0)
-  condition   Json
-
-  students    StudentBadge[]
-}
-
-model StudentBadge {
-  id        String   @id @default(cuid())
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id])
-  badgeId   String
-  badge     Badge    @relation(fields: [badgeId], references: [id])
-  earnedAt  DateTime @default(now())
-
-  @@unique([studentId, badgeId])
-  @@index([studentId])
-}
-
-model Slot {
-  id           String     @id @default(cuid())
-  instructorId String
-  instructor   Instructor @relation(fields: [instructorId], references: [id])
-  trainingType TrainingType
-  date         DateTime
-  startTime    String
-  endTime      String
-  maxCapacity  Int        @default(1)
-  currentCount Int        @default(0)
-  status       SlotStatus @default(DRAFT)
-
-  sessions     Session[]
-  bookings     Booking[]
-
-  @@index([date])
-  @@index([status])
-}
-
-model Booking {
-  id           String        @id @default(cuid())
-  studentId    String?
-  student      Student?      @relation(fields: [studentId], references: [id])
-  slotId       String?
-  slot         Slot?         @relation(fields: [slotId], references: [id])
-  name         String
-  phone        String
-  email        String
-  trainingType TrainingType
-  status       BookingStatus @default(PENDING)
-  preferredTime PreferredTime?
-  reference    String        @unique @default(cuid())
-  notes        String?
-  createdAt    DateTime      @default(now())
-  reviewedAt   DateTime?
-  reviewedBy   String?
-
-  @@index([status])
-  @@index([createdAt])
-}
-
-model Notification {
-  id        String           @id @default(cuid())
-  userId    String
-  user      User             @relation(fields: [userId], references: [id])
-  studentId String?
-  student   Student?         @relation(fields: [studentId], references: [id])
-  type      NotificationType
-  title     String
-  message   String
-  isRead    Boolean          @default(false)
-  createdAt DateTime         @default(now())
-
-  @@index([userId, isRead])
-  @@index([createdAt])
-}
-
-model Inquiry {
-  id        String   @id @default(cuid())
-  name      String
-  phone     String
-  email     String?
-  message   String
-  createdAt DateTime @default(now())
-  resolved  Boolean  @default(false)
-}
-
-model Payment {
-  id          String   @id @default(cuid())
-  studentId   String
-  student     Student  @relation(fields: [studentId], references: [id])
-  amount      Float
-  method      String   // CASH, UPI, CARD, BANK_TRANSFER
-  note        String?
-  receivedAt  DateTime @default(now())
-  recordedBy  String   // Admin user ID who recorded it
-
-  @@index([studentId])
-  @@index([receivedAt])
-}
-
-model DrivingTest {
-  id          String     @id @default(cuid())
-  studentId   String
-  student     Student    @relation(fields: [studentId], references: [id])
-  testDate    DateTime
-  testCenter  String?
-  result      TestResult @default(SCHEDULED)
-  attemptNo   Int        @default(1)
-  notes       String?
-  scheduledBy String     // Admin user ID
-  createdAt   DateTime   @default(now())
-
-  @@index([studentId])
-  @@index([testDate])
-}
-
-model Announcement {
-  id         String   @id @default(cuid())
-  title      String
-  message    String
-  expiryDate DateTime
-  createdAt  DateTime @default(now())
-}
-
-model ActivityLog {
-  id        String   @id @default(cuid())
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id])
-  action    String
-  xpEarned  Int      @default(0)
-  createdAt DateTime @default(now())
-
-  @@index([studentId])
-  @@index([createdAt])
-}
-
-model DailyChallenge {
-  id        String   @id @default(cuid())
-  date      DateTime @unique
-  tasks     Json     
-  xpReward  Int      @default(25)
-}
-
-model StudentDailyChallenge {
-  id        String   @id @default(cuid())
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id])
-  date      DateTime
-  completedTasks Json 
-  claimed   Boolean  @default(false)
-
-  @@unique([studentId, date])
-  @@index([studentId])
-}
-
-model CoachingNote {
-  id           String     @id @default(cuid())
-  sessionId    String
-  session      Session    @relation(fields: [sessionId], references: [id])
-  instructorId String
-  instructor   Instructor @relation(fields: [instructorId], references: [id])
-  note         String
-  createdAt    DateTime   @default(now())
-
-  @@index([sessionId])
-  @@index([instructorId])
-}
-
-model SessionNote {
-  id        String   @id @default(cuid())
-  sessionId String
-  session   Session  @relation(fields: [sessionId], references: [id])
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id])
-  note      String
-  createdAt DateTime @default(now())
-
-  @@index([sessionId])
-  @@index([studentId])
-}
-
-model Promotion {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  active      Boolean  @default(true)
-  expiresAt   DateTime?
-  createdAt   DateTime @default(now())
-}
-
-model Vehicle {
-  id        String   @id @default(cuid())
-  name      String
-  type      String   
-  imageKey  String?
-  features  Json?
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-}
-
-model GalleryImage {
-  id         String   @id @default(cuid())
-  imageKey   String
-  caption    String?
-  uploadedAt DateTime @default(now())
-}
-
-model StudentCardProgress {
-  id         String   @id @default(cuid())
-  studentId  String
-  student    Student  @relation(fields: [studentId], references: [id])
-  cardKey    String
-  studied    Boolean  @default(false)
-  quizPassed Boolean  @default(false)
-  updatedAt  DateTime @updatedAt
-
-  @@unique([studentId, cardKey])
-  @@index([studentId])
-}
-
-model SkillMastery {
-  id           String   @id @default(cuid())
-  studentId    String
-  student      Student  @relation(fields: [studentId], references: [id])
-  skillKey     String
-  masteryLevel String   @default("Novice") 
-  updatedAt    DateTime @updatedAt
-
-  @@unique([studentId, skillKey])
-  @@index([studentId])
 }

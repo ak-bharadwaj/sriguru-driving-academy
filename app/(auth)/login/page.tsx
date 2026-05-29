@@ -87,7 +87,7 @@ export default function CentralLoginHub() {
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-primary/20 via-void to-void" />
         <div className="absolute -top-[20%] -right-[10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[120px]" />
         <div className="absolute -bottom-[20%] -left-[10%] w-[60%] h-[60%] bg-accent/10 rounded-full blur-[140px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('/images/grid.svg')] opacity-5" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-5" />
       </div>
 
       {/* ----------------------------------------------------

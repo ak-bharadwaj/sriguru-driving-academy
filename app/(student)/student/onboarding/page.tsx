@@ -64,10 +64,25 @@ export default function OnboardingFlow() {
     }
   }
 
-  const finishOnboarding = () => {
+  const finishOnboarding = async () => {
     setIsCompleting(true)
-    // Simulate API call to save preferences
-    setTimeout(() => {
+    
+    try {
+      const response = await fetch('/api/student/onboard', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          experience: selections['experience'],
+          goals: selections['goals']
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to complete onboarding')
+      }
+
       addXP(50)
       addToast({
         title: 'Profile Calibrated',
@@ -75,7 +90,15 @@ export default function OnboardingFlow() {
         type: 'xp'
       })
       router.push('/student/dashboard')
-    }, 2000)
+    } catch (err) {
+      console.error(err)
+      setIsCompleting(false)
+      addToast({
+        title: 'Error',
+        description: 'Connection failed. Please try again.',
+        type: 'error'
+      })
+    }
   }
 
   const step = ONBOARDING_STEPS[currentStep]
@@ -100,9 +123,6 @@ export default function OnboardingFlow() {
             />
           ))}
         </div>
-        <span className="text-data-mono text-text-3 text-sm">
-          SYS_CALIBRATION_0{currentStep + 1}
-        </span>
       </div>
 
       <AnimatePresence mode="wait">

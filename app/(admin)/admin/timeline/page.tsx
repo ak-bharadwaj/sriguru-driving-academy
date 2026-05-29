@@ -13,7 +13,7 @@ const PAGE_DICT = {
     loading: '{t.loading}',
     dateTime: '{t.dateTime}',
     center: 'Center',
-    notAssigned: t.notAssigned,
+    notAssigned: 'Not Assigned',
     status: 'Status',
     attempt: 'Attempt',
     edit: 'Edit',
@@ -240,7 +240,7 @@ export default function AdminTimelinePage() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 flex-grow w-full md:w-auto">
                     <div className="flex flex-col">
                       <span className="text-xs text-text-3 font-bold uppercase mb-1">{t.dateTime}</span>
-                      <span className="font-semibold text-text-1">{dateObj.toLocaleDateString()} {dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span className="font-semibold text-text-1">{dateObj.toLocaleDateString()} {dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-xs text-text-3 font-bold uppercase mb-1">{t.center}</span>
@@ -323,6 +323,7 @@ export default function AdminTimelinePage() {
                       value={editTest.testDate || ''}
                       onChange={(e) => setEditTest({...editTest, testDate: e.target.value})}
                       className="bg-void border border-border rounded-xl p-3 text-white focus:outline-none focus:border-primary"
+                      style={{ colorScheme: 'dark' }}
                       required
                     />
                   </div>

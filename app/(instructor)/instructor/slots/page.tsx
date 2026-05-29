@@ -1,3 +1,5 @@
+"use client"
+
 import React from 'react'
 import SlotManagerClient from '@/app/(admin)/admin/slots/SlotManagerClient'
 import { useLanguageStore } from '@/store/languageStore'
@@ -15,10 +17,6 @@ const PAGE_DICT = {
     pageTitle: 'బ్యాచ్ & కెపాసిటీ ఓవర్‌రైడ్',
     pageDesc: 'మీ బ్యాచ్‌ల లభ్యతను నియంత్రించండి మరియు పాత ఆఫ్‌లైన్ విద్యార్థుల కోసం సామర్థ్యాన్ని బ్లాక్ చేయండి.',
   }
-}
-
-export const metadata = {
-  title: 'Batch Management | Instructor Dashboard',
 }
 
 export default function InstructorSlotsPage() {

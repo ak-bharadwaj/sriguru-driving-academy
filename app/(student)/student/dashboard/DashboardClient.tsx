@@ -35,10 +35,12 @@ const DASHBOARD_DICT = {
     simDesc: "Practice advanced maneuvers",
     flashTitle: "Flashcards",
     flashDesc: "Review your active rules",
-    learningHub: "Learning Hub",
-    theoryMods: "Theory Modules",
+    gameTitle: "Interactive Learning",
+    gameDesc: "Practice interactive driving scenarios",
+    learningHub: "RTO Preparation",
+    theoryMods: "Theory Questions",
     theoryDesc: "Complete interactive road safety theory lessons.",
-    rtoHub: "RTO Learning Hub",
+    rtoHub: "Traffic Signs",
     rtoDesc: "Master road signs and take mock simulation tests.",
     schedule: "Schedule Training",
     schedDesc: "Book upcoming practical sessions with your instructor.",
@@ -76,10 +78,12 @@ const DASHBOARD_DICT = {
     simDesc: "उन्नत युद्धाभ्यास का अभ्यास करें",
     flashTitle: "फ्लैशकार्ड",
     flashDesc: "अपने सक्रिय नियमों की समीक्षा करें",
-    learningHub: "लर्निंग हब",
-    theoryMods: "सिद्धांत मॉड्यूल",
+    gameTitle: "ड्राइविंग गेम्स",
+    gameDesc: "इंटरैक्टिव ड्राइविंग मिनी-गेम खेलें",
+    learningHub: "RTO तैयारी",
+    theoryMods: "सिद्धांत प्रश्न",
     theoryDesc: "इंटरएक्टिव सड़क सुरक्षा सिद्धांत पाठ पूर्ण करें।",
-    rtoHub: "RTO लर्निंग हब",
+    rtoHub: "ट्रैफिक संकेत",
     rtoDesc: "सड़क संकेतों में महारत हासिल करें और मॉक सिमुलेशन टेस्ट लें।",
     schedule: "प्रशिक्षण अनुसूची",
     schedDesc: "अपने प्रशिक्षक के साथ आगामी व्यावहारिक सत्र बुक करें।",
@@ -117,10 +121,12 @@ const DASHBOARD_DICT = {
     simDesc: "అధునాతన విన్యాసాలను ప్రాక్టీస్ చేయండి",
     flashTitle: "ఫ్లాష్‌కార్డ్‌లు",
     flashDesc: "మీ క్రియాశీల నియమాలను సమీక్షించండి",
-    learningHub: "లెర్నింగ్ హబ్",
-    theoryMods: "థియరీ మాడ్యూల్స్",
+    gameTitle: "డ్రైవింగ్ ఆటలు",
+    gameDesc: "ఇంటరాక్టివ్ డ్రైవింగ్ మినీ-గేమ్స్ ఆడండి",
+    learningHub: "RTO తయారీ",
+    theoryMods: "థియరీ ప్రశ్నలు",
     theoryDesc: "ఇంటరాక్టివ్ రోడ్ సేఫ్టీ థియరీ పాఠాలను పూర్తి చేయండి.",
-    rtoHub: "RTO లెర్నింగ్ హబ్",
+    rtoHub: "ట్రాఫిక్ సంకేతాలు",
     rtoDesc: "రహదారి సంకేతాలను నేర్చుకోండి మరియు మాక్ సిమ్యులేషన్ పరీక్షలు తీసుకోండి.",
     schedule: "శిక్షణ షెడ్యూల్",
     schedDesc: "మీ బోధకుడితో రాబోయే ప్రాక్టికల్ సెషన్‌లను బుక్ చేయండి.",
@@ -173,11 +179,12 @@ interface StudentDashboardProps {
       lessonType: string
       instructorName: string
     } | null
-    nextTest?: {
+    drivingTests: {
       id: string
       testDate: string
+      type: string
       testCenter: string
-    } | null
+    }[]
     roadmapProgress: RoadmapPhaseData[]
     quickStats: {
       totalAttended: number
@@ -238,6 +245,7 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
   )
 
   const student = dbData.student
+  const nextSession = dbData.nextSession
   
   const totalCards = dbData.roadmapProgress.reduce((acc, curr) => acc + curr.total, 0)
   const completedCards = dbData.roadmapProgress.reduce((acc, curr) => acc + curr.completed, 0)
@@ -419,7 +427,7 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
         <div className="mt-8 mb-4">
           <h3 className="text-xl font-bold font-display text-[rgb(var(--color-text-1))] mb-4 px-1">{t.interactivePractice}</h3>
           <div className="flex flex-col gap-4">
-            <Link href="/student/simulations" className="group relative block overflow-hidden rounded-[32px] bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] shadow-app hover:shadow-app-hover transition-all duration-300 hover:-translate-y-1">
+            <Link href="/student/simulator" className="group relative block overflow-hidden rounded-[32px] bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] shadow-app hover:shadow-app-hover transition-all duration-300 hover:-translate-y-1">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="p-6 sm:p-8 flex items-center gap-6">
                 <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform duration-500 shrink-0">
@@ -441,6 +449,32 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
                 <div className="flex-1">
                   <h4 className="text-xl font-display font-bold text-[rgb(var(--color-text-1))] mb-1 group-hover:text-rose-600 transition-colors">{t.flashTitle}</h4>
                   <p className="text-sm text-[rgb(var(--color-text-2))]">{t.flashDesc}</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link href="/student/rto" className="group relative block overflow-hidden rounded-[32px] bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] shadow-app hover:shadow-app-hover transition-all duration-300 hover:-translate-y-1">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="p-6 sm:p-8 flex items-center gap-6">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform duration-500 shrink-0">
+                  <Award className="w-8 h-8 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-xl font-display font-bold text-[rgb(var(--color-text-1))] mb-1 group-hover:text-amber-600 transition-colors">RTO Mock Exam</h4>
+                  <p className="text-sm text-[rgb(var(--color-text-2))]">Test your knowledge with official theory questions.</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link href="/student/simulations" className="group relative block overflow-hidden rounded-[32px] bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] shadow-app hover:shadow-app-hover transition-all duration-300 hover:-translate-y-1">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="p-6 sm:p-8 flex items-center gap-6">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-500 shrink-0">
+                  <Gamepad2 className="w-8 h-8 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-xl font-display font-bold text-[rgb(var(--color-text-1))] mb-1 group-hover:text-blue-600 transition-colors">{t.gameTitle}</h4>
+                  <p className="text-sm text-[rgb(var(--color-text-2))]">{t.gameDesc}</p>
                 </div>
               </div>
             </Link>
@@ -499,18 +533,18 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
               </div>
             )}
 
-            <div className="bg-app-yellow text-[rgb(var(--color-void))] rounded-[24px] p-6 w-[240px] flex-shrink-0 relative overflow-hidden shadow-app-hover flex flex-col justify-between">
+            <div className="bg-app-yellow text-slate-900 rounded-[24px] p-6 w-[240px] flex-shrink-0 relative overflow-hidden shadow-app-hover flex flex-col justify-between">
               <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/40 rounded-full blur-xl" />
               <div>
                 <div className="w-12 h-12 bg-white/40 rounded-full flex items-center justify-center mb-4 backdrop-blur-md">
                   <Award className="w-6 h-6" />
                 </div>
-                <p className="text-[rgb(var(--color-void))]/70 text-sm font-bold uppercase tracking-wider">{t.instructor}</p>
+                <p className="text-slate-800 text-sm font-bold uppercase tracking-wider">{t.instructor}</p>
               </div>
               <div>
                 <p className="font-bold text-2xl font-display leading-tight">{student.instructorName || t.unassigned}</p>
                 <div className="flex items-center gap-2 mt-3">
-                  <span className="text-xs font-bold px-3 py-1.5 bg-[rgb(var(--color-void))]/10 rounded-full backdrop-blur-md">{t.activeCoach}</span>
+                  <span className="text-xs font-bold px-3 py-1.5 bg-black/10 rounded-full backdrop-blur-md">{t.activeCoach}</span>
                 </div>
               </div>
             </div>

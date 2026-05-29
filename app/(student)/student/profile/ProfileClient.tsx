@@ -1,10 +1,11 @@
 "use client"
 
 import React, { useState } from 'react'
-import { Edit2, Save, X, Loader2, Camera, Shield, User, LogOut } from 'lucide-react'
+import { Edit2, Save, X, Loader2, Camera, Shield, User, LogOut, Upload } from 'lucide-react'
 import { updateProfile, updateAvatar, changePassword } from './actions'
 import { signOut } from 'next-auth/react'
 import toast from 'react-hot-toast'
+import { useUploadThing } from '@/lib/uploadthing'
 
 interface ProfileClientProps {
   initialUser: {
@@ -25,10 +26,42 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
     phone: initialUser.phone || ''
   })
   const [avatarUrl, setAvatarUrl] = useState(initialUser.avatarUrl || null)
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
   
   const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [passwordForm, setPasswordForm] = useState({ newPassword: '', confirmPassword: '' })
   const [isPasswordSaving, setIsPasswordSaving] = useState(false)
+
+  const { startUpload } = useUploadThing("profilePicture", {
+    onClientUploadComplete: async (res) => {
+      const url = res?.[0]?.url
+      if (url) {
+        try {
+          const updateRes = await updateAvatar(url)
+          if (updateRes.success) {
+            setAvatarUrl(url)
+            toast.success('Profile picture updated!')
+          } else {
+            toast.error('Failed to save avatar URL to profile.')
+          }
+        } catch (err) {
+          toast.error('Failed to update profile.')
+        }
+      }
+      setIsUploadingAvatar(false)
+    },
+    onUploadError: (err) => {
+      toast.error(`Upload failed: ${err.message}`)
+      setIsUploadingAvatar(false)
+    },
+  })
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setIsUploadingAvatar(true)
+    await startUpload([file])
+  }
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -73,27 +106,6 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
     }
   }
 
-  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = async (event) => {
-      const base64 = event.target?.result as string
-      try {
-         const updateRes = await updateAvatar(base64)
-         if (updateRes.success) {
-           setAvatarUrl(base64)
-           toast.success('Avatar updated successfully!')
-         } else {
-           toast.error('Failed to update avatar in database.')
-         }
-      } catch(err) {
-         toast.error('Upload failed')
-      }
-    }
-    reader.readAsDataURL(file)
-  }
-
   return (
     <div className="bg-[rgb(var(--color-surface))] rounded-[28px] shadow-app p-6 border border-[rgb(var(--color-border))] relative z-10 transition-colors duration-300">
       <div className="flex justify-between items-center mb-6">
@@ -133,7 +145,12 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
         {/* AVATAR DISPLAY */}
         <div className="flex items-center gap-4 mb-2">
           {avatarUrl ? (
-            <img src={avatarUrl} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-[rgb(var(--color-primary))]" />
+            // eslint-disable-next-line @next/next/no-img-element
+            <img 
+              src={avatarUrl} 
+              alt="Profile" 
+              className="w-16 h-16 rounded-full object-cover border-2 border-[rgb(var(--color-primary))]" 
+            />
           ) : (
             <div className="w-16 h-16 rounded-full bg-[rgb(var(--color-void))] border-2 border-dashed border-[rgb(var(--color-border))] flex items-center justify-center text-[rgb(var(--color-text-3))]">
               <User className="w-6 h-6" />
@@ -194,25 +211,38 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
           <span className="text-sm text-[rgb(var(--color-text-1))] font-medium">{initialUser.id.substring(0, 8)}</span>
         </div>
 
-        {/* AVATAR UPLOAD */}
+        {/* AVATAR UPLOAD — uses UploadThing CDN */}
         <div className="flex flex-col gap-3 pt-2">
           <span className="text-sm font-semibold text-[rgb(var(--color-text-2))] flex items-center gap-2">
             <Camera className="w-4 h-4" /> Update Profile Picture
           </span>
-          <div className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-2xl p-4">
+          <label className={`
+            flex items-center justify-center gap-3 w-full py-3 px-4 rounded-2xl cursor-pointer border-2 border-dashed transition-all
+            ${isUploadingAvatar 
+              ? 'border-[rgb(var(--color-primary))] bg-[rgb(var(--color-primary))]/10 cursor-wait' 
+              : 'border-[rgb(var(--color-border))] bg-[rgb(var(--color-void))] hover:border-[rgb(var(--color-primary))] hover:bg-[rgb(var(--color-primary))]/5'
+            }
+          `}>
+            {isUploadingAvatar ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin text-[rgb(var(--color-primary))]" />
+                <span className="text-sm text-[rgb(var(--color-primary))] font-semibold">Uploading to cloud...</span>
+              </>
+            ) : (
+              <>
+                <Upload className="w-5 h-5 text-[rgb(var(--color-text-3))]" />
+                <span className="text-sm text-[rgb(var(--color-text-2))] font-medium">Click to upload new photo</span>
+              </>
+            )}
             <input 
               type="file" 
               accept="image/*"
               onChange={handleAvatarUpload}
-              className="block w-full text-sm text-[rgb(var(--color-text-3))]
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-[rgb(var(--color-primary))] file:text-white
-                hover:file:bg-[rgb(var(--color-primary))]/80
-                cursor-pointer"
+              disabled={isUploadingAvatar}
+              className="hidden"
             />
-          </div>
+          </label>
+          <p className="text-[10px] text-[rgb(var(--color-text-3))] font-mono">Max 4MB. PNG, JPG or WEBP. Stored securely on cloud.</p>
         </div>
       </div>
 

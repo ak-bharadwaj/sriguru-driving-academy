@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Users, Calendar, AlertTriangle, UserCheck, 
@@ -249,34 +250,27 @@ export default function AdminDashboardClient({
   const maxActive = Math.max(...engagementData.map(d => d.activeStudents), 1)
   
   return (
-    <div className="min-h-screen bg-[rgb(var(--color-void))] text-[rgb(var(--color-text-1))] relative pb-20 overflow-x-hidden pt-28">
-      {/* -----------------------------
-          BLUE CURVED HEADER
-          ----------------------------- */}
-      <div className="bg-[rgb(var(--color-primary))] rounded-b-[40px] pt-12 pb-32 px-6 relative overflow-hidden text-white shadow-md -mx-6 -mt-28">
-        {/* Decorative background curves */}
-        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/10 rounded-full blur-2xl transform translate-x-1/3 -translate-y-1/3" />
-        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-white/5 rounded-full blur-3xl transform -translate-x-1/3 translate-y-1/3" />
-        
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-            <div>
-              <p className="text-white/80 font-medium text-lg">{t.adminWorkspace}</p>
-              <h1 className="text-3xl font-bold font-display mt-1">{t.academyHQ}</h1>
-              <p className="text-white/60 text-sm mt-1 max-w-xl">{t.cmdCenter}</p>
-            </div>
-            <div className="px-5 py-2.5 bg-white text-[rgb(var(--color-primary))] rounded-2xl text-sm font-bold shadow-lg">
-              {t.systemOnline}
-            </div>
+    <div className="w-full flex flex-col gap-6 text-[rgb(var(--color-text-1))]">
+
+      {/* CLEAN FLAT ENTERPRISE PAGE HEADER */}
+      <div className="border-b border-[rgb(var(--color-border))]/60 pb-6 mb-2">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+          <div>
+            <p className="text-[rgb(var(--color-primary))] font-mono text-xs uppercase tracking-widest font-bold">{t.adminWorkspace}</p>
+            <h1 className="text-2xl md:text-3xl font-extrabold font-display tracking-tight text-[rgb(var(--color-text-1))] mt-1">{t.academyHQ}</h1>
+            <p className="text-[rgb(var(--color-text-3))] text-xs md:text-sm mt-1.5 max-w-xl">{t.cmdCenter}</p>
+          </div>
+          <div className="px-5 py-2.5 bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl text-sm font-bold shadow-sm">
+            {t.systemOnline}
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 flex flex-col gap-8 -mt-20 relative z-10">
+      <div className="w-full flex flex-col gap-8 relative z-10">
 
         {/* ZONE 1: Command Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 flex flex-col gap-2 backdrop-blur-md">
+          <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 flex flex-col gap-2">
             <span className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider flex items-center gap-2">
               <Users className="w-3.5 h-3.5 text-[rgb(var(--color-primary))]" /> {t.totalStudents}
             </span>
@@ -286,7 +280,7 @@ export default function AdminDashboardClient({
             </div>
           </div>
 
-          <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 flex flex-col gap-2 backdrop-blur-md">
+          <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 flex flex-col gap-2">
             <span className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider flex items-center gap-2">
               <Calendar className="w-3.5 h-3.5 text-emerald-500" /> {t.sessions}
             </span>
@@ -296,25 +290,27 @@ export default function AdminDashboardClient({
             </div>
           </div>
 
-          <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 flex flex-col gap-2 backdrop-blur-md relative overflow-hidden">
-            {stats.pendingBookings > 0 && (
-              <div className="absolute top-0 right-0 w-12 h-12 bg-rose-500/10 rounded-bl-3xl flex justify-center items-start p-2">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
-                </span>
+          <Link href="/admin/enquiries" className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 flex flex-col gap-2 relative overflow-hidden hover:border-rose-500/50 hover:bg-[rgb(var(--color-border))]/30 transition-all cursor-pointer group">
+            <div className="w-full h-full flex flex-col gap-2">
+              {stats.pendingInquiries > 0 && (
+                <div className="absolute top-0 right-0 w-12 h-12 bg-rose-500/10 rounded-bl-3xl flex justify-center items-start p-2">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+                  </span>
+                </div>
+              )}
+              <span className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider flex items-center gap-2 group-hover:text-rose-400 transition-colors">
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-500" /> {t.enquiries}
+              </span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-extrabold text-[rgb(var(--color-text-1))]">{Number(stats.pendingInquiries) || 0}</span>
+                <span className="text-xs font-medium text-[rgb(var(--color-text-2))]">{t.pendingReview}</span>
               </div>
-            )}
-            <span className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider flex items-center gap-2">
-              <AlertTriangle className="w-3.5 h-3.5 text-rose-500" /> {t.enquiries}
-            </span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-[rgb(var(--color-text-1))]">{stats.pendingBookings}</span>
-              <span className="text-xs font-medium text-[rgb(var(--color-text-2))]">{t.pendingReview}</span>
             </div>
-          </div>
+          </Link>
 
-          <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 flex flex-col gap-2 backdrop-blur-md">
+          <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 flex flex-col gap-2">
             <span className="text-xs font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider flex items-center gap-2">
               <UserCheck className="w-3.5 h-3.5 text-amber-500" /> {t.instructors}
             </span>
@@ -331,7 +327,7 @@ export default function AdminDashboardClient({
           <div className="xl:col-span-1 flex flex-col gap-6">
             
             {/* ZONE 2: Pending Actions (Bookings) */}
-            <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-6 shadow-sm flex flex-col gap-5 backdrop-blur-md relative">
+            <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-6 shadow-sm flex flex-col gap-5 relative">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))] flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" /> {t.pendingActions}
@@ -370,7 +366,7 @@ export default function AdminDashboardClient({
             </div>
 
             {/* ZONE 6: Recent Activity (System Logs) */}
-            <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-6 shadow-sm flex flex-col gap-5 backdrop-blur-md flex-1">
+            <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-6 shadow-sm flex flex-col gap-5 flex-1">
               <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))] flex items-center gap-2">
                 <Activity className="w-4 h-4 text-[rgb(var(--color-text-3))]" /> {t.recentActivity}
               </h3>
@@ -396,7 +392,7 @@ export default function AdminDashboardClient({
           <div className="xl:col-span-2 flex flex-col gap-6">
             
             {/* ZONE 3: Engagement Graph */}
-            <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-6 shadow-sm flex flex-col gap-5 backdrop-blur-md">
+            <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-6 shadow-sm flex flex-col gap-5">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))] flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-[rgb(var(--color-primary))]" /> {t.engagementTrends}
@@ -436,7 +432,7 @@ export default function AdminDashboardClient({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               {/* ZONE 4: Top Students (Leaderboard) */}
-              <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-6 shadow-sm flex flex-col gap-5 backdrop-blur-md">
+              <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-6 shadow-sm flex flex-col gap-5">
                 <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))] flex items-center gap-2">
                   <Award className="w-4 h-4 text-amber-500" /> {t.topStudents}
                 </h3>
@@ -465,7 +461,7 @@ export default function AdminDashboardClient({
               </div>
 
               {/* ZONE 5: Instructor Load */}
-              <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-6 shadow-sm flex flex-col gap-5 backdrop-blur-md">
+              <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-3xl p-6 shadow-sm flex flex-col gap-5">
                 <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))] flex items-center gap-2">
                   <Sliders className="w-4 h-4 text-emerald-500" /> {t.instructorLoad}
                 </h3>
