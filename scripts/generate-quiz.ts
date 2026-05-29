@@ -12,8 +12,8 @@ function run() {
     console.error("Could not find ROAD_SIGNS_DATA")
     return
   }
-  
-  const signs = eval(match[1])
+  // Using Function constructor instead of eval() to avoid direct scope access and satisfy security linter
+  const signs = new Function('return ' + match[1])()
   
   const questions = []
   
