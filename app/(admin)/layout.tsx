@@ -83,7 +83,7 @@ const ADMIN_NAV_T = {
   EN: [
     { name: 'Console HUD', path: '/admin/dashboard', icon: Activity, category: 'OPERATIONS' },
     { name: 'Student Directory', path: '/admin/students', icon: Users, category: 'Students' },
-    { name: 'Slot Registries', path: '/slots', icon: Calendar, category: 'SCHEDULING' },
+    { name: 'Slot Registries', path: '/admin/slots', icon: Calendar, category: 'SCHEDULING' },
     { name: 'Booking Review', path: '/admin/bookings', icon: Users, category: 'OPERATIONS' },
     { name: 'Instructors', path: '/admin/instructors', icon: Users, category: 'OPERATIONS' },
     { name: 'Enquiries', path: '/admin/enquiries', icon: Users, category: 'OPERATIONS' },
@@ -97,7 +97,7 @@ const ADMIN_NAV_T = {
   HI: [
     { name: 'कंसोल HUD', path: '/admin/dashboard', icon: Activity, category: 'संचालन' },
     { name: 'छात्र निर्देशिका', path: '/admin/students', icon: Users, category: 'छात्र' },
-    { name: 'स्लॉट रजिस्ट्रियां', path: '/slots', icon: Calendar, category: 'निर्धारण' },
+    { name: 'स्लॉट रजिस्ट्रियां', path: '/admin/slots', icon: Calendar, category: 'निर्धारण' },
     { name: 'बुकिंग समीक्षा', path: '/admin/bookings', icon: Users, category: 'संचालन' },
     { name: 'प्रशिक्षक', path: '/admin/instructors', icon: Users, category: 'संचालन' },
     { name: 'पूछताछ', path: '/admin/enquiries', icon: Users, category: 'संचालन' },
@@ -111,7 +111,7 @@ const ADMIN_NAV_T = {
   TE: [
     { name: 'కన్సోల్ HUD', path: '/admin/dashboard', icon: Activity, category: 'కార్యకలాపాలు' },
     { name: 'విద్యార్థుల డైరెక్టరీ', path: '/admin/students', icon: Users, category: 'విద్యార్థులు' },
-    { name: 'స్లాట్ రిజిస్ట్రీలు', path: '/slots', icon: Calendar, category: 'షెడ్యూలింగ్' },
+    { name: 'స్లాట్ రిజిస్ట్రీలు', path: '/admin/slots', icon: Calendar, category: 'షెడ్యూలింగ్' },
     { name: 'బుకింగ్ సమీక్ష', path: '/admin/bookings', icon: Users, category: 'కార్యకలాపాలు' },
     { name: 'బోధకులు', path: '/admin/instructors', icon: Users, category: 'కార్యకలాపాలు' },
     { name: 'విచారణలు', path: '/admin/enquiries', icon: Users, category: 'కార్యకలాపాలు' },

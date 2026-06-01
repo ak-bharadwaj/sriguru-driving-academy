@@ -6,6 +6,23 @@ import bcrypt from 'bcryptjs'
 
 export const dynamic = 'force-dynamic'
 
+export async function GET() {
+  try {
+    const instructors = await db.instructor.findMany({
+      include: { user: { select: { id: true, name: true, email: true } } }
+    })
+    const formatted = instructors.map(ins => ({
+      id: ins.id,
+      userId: ins.userId,
+      name: ins.user.name,
+      email: ins.user.email
+    }))
+    return NextResponse.json(formatted, { status: 200 })
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to fetch instructors' }, { status: 500 })
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)

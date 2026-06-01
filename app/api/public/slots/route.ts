@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/rate-limit'
 import { getServerSession } from 'next-auth'
@@ -25,7 +26,8 @@ export async function GET(request: Request) {
     // so there is only 1 unified time schedule.
     const slots = await db.slot.findMany({
       where: { trainingType: 'BEGINNER' },
-      include: { instructor: { include: { user: true } } }
+      include: { instructor: { include: { user: true } } },
+      orderBy: { dayOfWeek: 'asc' }
     })
     
     const results = slots.map(slot => ({
@@ -43,7 +45,7 @@ export async function GET(request: Request) {
     return NextResponse.json(results, { 
       status: 200,
       headers: {
-        'Cache-Control': 's-maxage=60, stale-while-revalidate'
+        'Cache-Control': 'no-store, max-age=0, must-revalidate'
       }
     })
   } catch (error) {

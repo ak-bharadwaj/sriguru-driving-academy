@@ -10,6 +10,17 @@ import { Course, Offer } from '@/lib/data/academyStore'
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 const HOURS = ['8AM', '10AM', '12PM', '2PM', '4PM', '6PM']
 
+const formatFriendlyDate = (dateStr: string) => {
+  if (!dateStr) return ''
+  try {
+    const d = new Date(dateStr)
+    if (isNaN(d.getTime())) return dateStr
+    return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
+  } catch {
+    return dateStr
+  }
+}
+
 interface SlotItem {
   id: string
   dayOfWeek: string
@@ -193,7 +204,7 @@ export default function PublicBookingSystem() {
   // Step 3: Slots grid selection
   const [slots, setSlots] = useState<SlotItem[]>([])
   const [selectedSlot, setSelectedSlot] = useState<SlotItem | null>(null)
-  const [activeDay, setActiveDay] = useState(DAYS[0])
+  const [activeDay, setActiveDay] = useState('')
   const [loadingSlots, setLoadingSlots] = useState(false)
 
   // Step 4: Submission Success overlay
@@ -311,12 +322,17 @@ export default function PublicBookingSystem() {
   useEffect(() => {
     if (step === 3) {
       setLoadingSlots(true)
-      const courseObj = courses.find(c => c.id === selectedType)
-      const slotQueryType = courseObj ? (courseObj.title.EN || selectedType) : selectedType
-      fetch(`/api/public/slots?type=${encodeURIComponent(slotQueryType)}`)
+      fetch(`/api/public/slots`)
         .then(res => res.json())
         .then(data => {
-          setSlots(data)
+          const activeOrFull = data.filter((s: SlotItem) => s.status !== 'CLOSED')
+          setSlots(activeOrFull)
+          if (activeOrFull.length > 0) {
+            const dates = Array.from(new Set(activeOrFull.map((s: SlotItem) => s.dayOfWeek))).sort()
+            if (dates.length > 0) {
+              setActiveDay(dates[0])
+            }
+          }
           setLoadingSlots(false)
         })
         .catch(e => {
@@ -324,7 +340,7 @@ export default function PublicBookingSystem() {
           setLoadingSlots(false)
         })
     }
-  }, [step, selectedType, courses])
+  }, [step])
 
   // Inline Validators (Triggered on keystroke)
   const validateField = (field: 'name' | 'phone' | 'email', value: string) => {
@@ -651,67 +667,84 @@ export default function PublicBookingSystem() {
                 ) : (
                   <div className="flex flex-col gap-4">
                     {/* Day Tabs (Horizontal Scroll) */}
-                    <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-none border-b border-border/50">
-                      {DAYS.map(day => {
-                        const isActive = activeDay === day
+                    {(() => {
+                      const uniqueDates = Array.from(new Set(slots.map(s => s.dayOfWeek))).sort()
+
+                      if (uniqueDates.length === 0) {
                         return (
-                          <button
-                            key={day}
-                            onClick={() => setActiveDay(day)}
-                            className={`px-4 py-2 rounded-t-xl text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-all duration-200 border-b-2 ${
-                              isActive 
-                                ? 'bg-primary/10 text-primary border-primary' 
-                                : 'text-text-3 border-transparent hover:bg-white/[0.02] hover:text-text-2'
-                            }`}
-                          >
-                            {day.substring(0, 3)}
-                          </button>
+                          <div className="text-center py-12 bg-void/50 border border-dashed border-border rounded-2xl flex flex-col items-center justify-center gap-2">
+                            <span className="text-[10px] font-mono uppercase tracking-wider text-text-3 font-bold">No slots active currently</span>
+                            <p className="text-xs text-text-2 max-w-xs px-4">There are no operational calendar slots published yet. Please contact Sri Guru Driving Academy support to schedule sessions.</p>
+                          </div>
                         )
-                      })}
-                    </div>
+                      }
 
-                    {/* Time Slots Grid for Active Day */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {HOURS.map(hour => {
-                        const matchingSlot = slots.find(s => s.dayOfWeek === activeDay && s.time === hour)
-                        const isSelected = Boolean(matchingSlot && selectedSlot?.id === matchingSlot.id)
-                        const isFull = matchingSlot?.status === 'FULL'
-                        const isClosed = matchingSlot?.status === 'CLOSED' || matchingSlot?.status === 'DRAFT'
-                        
-                        let buttonStyle = 'bg-surface border-border hover:border-primary text-text-2'
-                        let cursorStyle = 'cursor-pointer hover:shadow-lg hover:-translate-y-0.5'
-                        let clickHandler = () => {
-                          if (matchingSlot) setSelectedSlot(matchingSlot)
-                        }
+                      const activeSlotsForDay = slots.filter(s => s.dayOfWeek === activeDay)
 
-                        if (isSelected) {
-                          buttonStyle = 'bg-accent border-accent text-void font-bold shadow-lg shadow-accent/20'
-                          cursorStyle = 'cursor-default'
-                        } else if (isFull) {
-                          buttonStyle = 'bg-void/40 border-border/40 text-text-3 opacity-40'
-                          cursorStyle = 'cursor-not-allowed'
-                          clickHandler = () => {}
-                        } else if (isClosed || !matchingSlot) {
-                          buttonStyle = 'bg-void/10 border-border/10 text-text-3 opacity-20'
-                          cursorStyle = 'cursor-not-allowed'
-                          clickHandler = () => {}
-                        }
+                      return (
+                        <>
+                          <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-none border-b border-border/50">
+                            {uniqueDates.map(dateStr => {
+                              const isActive = activeDay === dateStr
+                              return (
+                                <button
+                                  key={dateStr}
+                                  onClick={() => setActiveDay(dateStr)}
+                                  type="button"
+                                  className={`px-4 py-2 rounded-t-xl text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-all duration-200 border-b-2 ${
+                                    isActive 
+                                      ? 'bg-primary/10 text-primary border-primary' 
+                                      : 'text-text-3 border-transparent hover:bg-white/[0.02] hover:text-text-2'
+                                  }`}
+                                >
+                                  {formatFriendlyDate(dateStr)}
+                                </button>
+                              )
+                            })}
+                          </div>
 
-                        return (
-                          <button
-                            key={hour}
-                            onClick={clickHandler}
-                            type="button"
-                            className={`flex flex-col items-center justify-center p-4 border rounded-2xl transition-all duration-300 select-none ${buttonStyle} ${cursorStyle}`}
-                          >
-                            <span className="text-sm font-bold font-mono">{hour}</span>
-                            <span className="text-[9px] uppercase tracking-wider mt-1 opacity-80 font-bold">
-                              {isFull ? t.full : isSelected ? t.selected : (!matchingSlot || isClosed) ? t.unavailable : t.active}
-                            </span>
-                          </button>
-                        )
-                      })}
-                    </div>
+                          {/* Time Slots Grid for Active Day */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                            {activeSlotsForDay.map(matchingSlot => {
+                              const isSelected = Boolean(selectedSlot?.id === matchingSlot.id)
+                              const isFull = matchingSlot.currentBooked >= matchingSlot.maxCapacity
+                              
+                              let buttonStyle = 'bg-surface border-border hover:border-primary text-text-2'
+                              let cursorStyle = 'cursor-pointer hover:shadow-lg hover:-translate-y-0.5'
+                              let clickHandler = () => setSelectedSlot(matchingSlot)
+
+                              if (isSelected) {
+                                buttonStyle = 'bg-accent border-accent text-void font-bold shadow-lg shadow-accent/20'
+                                cursorStyle = 'cursor-default'
+                              } else if (isFull) {
+                                buttonStyle = 'bg-void/40 border-border/40 text-text-3 opacity-40'
+                                cursorStyle = 'cursor-not-allowed'
+                                clickHandler = () => {}
+                              }
+
+                              return (
+                                <button
+                                  key={matchingSlot.id}
+                                  onClick={clickHandler}
+                                  type="button"
+                                  className={`flex flex-col items-start p-4 border rounded-2xl transition-all duration-300 select-none ${buttonStyle} ${cursorStyle}`}
+                                >
+                                  <span className="text-sm font-bold font-mono">{matchingSlot.time}</span>
+                                  <div className="flex justify-between items-center w-full mt-2 border-t border-border/20 pt-2">
+                                    <span className="text-[9px] uppercase tracking-wider opacity-85 font-bold">
+                                      {isFull ? t.full : isSelected ? t.selected : t.active}
+                                    </span>
+                                    <span className="text-[9px] font-mono text-text-3">
+                                      {matchingSlot.currentBooked} / {matchingSlot.maxCapacity} Booked
+                                    </span>
+                                  </div>
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </>
+                      )
+                    })()}
                   </div>
                 )}
 
@@ -795,7 +828,7 @@ export default function PublicBookingSystem() {
                     <Calendar className="w-5 h-5 text-primary flex-shrink-0" />
                     <div>
                       <span className="font-bold text-text-1 uppercase font-mono">{t.scheduledSlot}</span>{' '}
-                      <span className="text-text-1">{selectedSlot?.dayOfWeek}</span> at <span className="text-text-1">{selectedSlot?.time}</span> ({t.maxCap} {selectedSlot?.maxCapacity})
+                      <span className="text-text-1">{formatFriendlyDate(selectedSlot?.dayOfWeek)}</span> at <span className="text-text-1">{selectedSlot?.time}</span> ({t.maxCap} {selectedSlot?.maxCapacity})
                     </div>
                   </div>
 

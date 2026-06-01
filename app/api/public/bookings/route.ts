@@ -63,7 +63,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { name, phone, email, trainingType } = await request.json()
+    const { name, phone, email, trainingType, slotId } = await request.json()
     if (!name || !phone || !email || !trainingType) {
       return NextResponse.json({ error: 'Missing mandatory booking details' }, { status: 400 })
     }
@@ -122,7 +122,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // 2. Create the booking entry and link it to the student
+    // 2. Create the booking entry and link it to the student & slot
     const newBooking = await db.booking.create({
       data: {
         id: `bk-${bookingRef}`,
@@ -131,9 +131,18 @@ export async function POST(request: Request) {
         phone,
         trainingType: trainingType as import('@prisma/client').TrainingType,
         status: 'PENDING',
-        studentId
+        studentId,
+        slotId
       }
     })
+
+    // 3. Increment the matching slot's booked counter
+    if (slotId) {
+      await db.slot.update({
+        where: { id: slotId },
+        data: { currentCount: { increment: 1 } }
+      })
+    }
 
     return NextResponse.json({
       success: true,
