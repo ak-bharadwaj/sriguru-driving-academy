@@ -299,20 +299,30 @@ export default function SlotManagerClient() {
                     const dayLabel = DAYS.indexOf(day) === 0 ? 'Monday' : DAYS.indexOf(day) === 1 ? 'Tuesday' : DAYS.indexOf(day) === 2 ? 'Wednesday' : DAYS.indexOf(day) === 3 ? 'Thursday' : DAYS.indexOf(day) === 4 ? 'Friday' : DAYS.indexOf(day) === 5 ? 'Saturday' : 'Sunday'
                     const slot = slots.find(s => s.dayOfWeek === dayLabel && s.time === hour)
                     const isActive = !!slot
+                    
+                    let cellStyle = 'bg-[rgb(var(--color-void))]/50 border-dashed border-[rgb(var(--color-border))] hover:bg-[rgb(var(--color-surface))] hover:border-[rgb(var(--color-primary))]/50 text-[rgb(var(--color-text-3))]'
+                    let labelColor = 'text-[rgb(var(--color-primary))]'
+                    
+                    if (isActive) {
+                      if (slot.status === 'CLOSED') {
+                        cellStyle = 'bg-[rgb(var(--color-danger))]/15 border-[rgb(var(--color-danger))]/40 hover:border-[rgb(var(--color-danger))] group text-[rgb(var(--color-danger))]'
+                        labelColor = 'text-[rgb(var(--color-danger))]'
+                      } else {
+                        // Operational active slot: premium success emerald-green color palette!
+                        cellStyle = 'bg-[rgb(var(--color-success))]/15 border-[rgb(var(--color-success))]/40 hover:border-[rgb(var(--color-success))] group text-[rgb(var(--color-success))]'
+                        labelColor = 'text-[rgb(var(--color-success))]'
+                      }
+                    }
 
                     return (
                       <div 
                         key={day}
                         onClick={() => openSlotModal(dayLabel, hour)}
-                        className={`h-16 rounded-xl border flex flex-col items-center justify-center cursor-pointer transition-all ${
-                          isActive 
-                            ? 'bg-[rgb(var(--color-primary))]/10 border-[rgb(var(--color-primary))]/30 hover:border-[rgb(var(--color-primary))] group' 
-                            : 'bg-[rgb(var(--color-void))]/50 border-dashed border-[rgb(var(--color-border))] hover:bg-[rgb(var(--color-surface))] hover:border-[rgb(var(--color-primary))]/50'
-                        }`}
+                        className={`h-16 rounded-xl border flex flex-col items-center justify-center cursor-pointer transition-all ${cellStyle}`}
                       >
                         {isActive ? (
                           <>
-                            <span className="text-[10px] font-bold text-[rgb(var(--color-primary))] uppercase">{slot.status}</span>
+                            <span className={`text-[10px] font-bold uppercase ${labelColor}`}>{slot.status}</span>
                             <span className="text-[9px] font-mono text-[rgb(var(--color-text-2))] mt-1 group-hover:text-[rgb(var(--color-text-1))]">
                               {slot.currentBooked} / {slot.maxCapacity} Booked
                             </span>
