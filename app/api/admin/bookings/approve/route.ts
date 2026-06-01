@@ -29,6 +29,17 @@ export async function PUT(request: Request) {
       let existingUser = await db.user.findUnique({ where: { email: booking.email } })
       
       if (!existingUser) {
+        // Calculate the registration number (YYYY_NN)
+        const currentYear = new Date().getFullYear()
+        const startOfYear = new Date(currentYear, 0, 1)
+        const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59)
+        const countThisYear = await db.student.count({
+          where: {
+            enrolledAt: { gte: startOfYear, lte: endOfYear }
+          }
+        })
+        const regNo = `${currentYear}_${String(countThisYear + 1).padStart(2, '0')}`
+
         // Create new user & student
         const passwordHash = await bcrypt.hash('default', 10)
         
@@ -46,6 +57,7 @@ export async function PUT(request: Request) {
             passwordHash,
             student: {
               create: {
+                regNo,
                 trainingType: booking.trainingType,
                 status: 'ACTIVE',
                 courseFee,
@@ -60,14 +72,47 @@ export async function PUT(request: Request) {
         const studentRecord = await db.student.findUnique({ where: { userId: existingUser.id } })
         if (studentRecord) {
           studentId = studentRecord.id
+          
+          let updateData: any = {}
           if (instructorId) {
-            await db.student.update({ where: { id: studentId }, data: { instructorId } })
+            updateData.instructorId = instructorId
           }
+          if (!studentRecord.regNo) {
+            const currentYear = new Date().getFullYear()
+            const startOfYear = new Date(currentYear, 0, 1)
+            const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59)
+            const countThisYear = await db.student.count({
+              where: {
+                enrolledAt: { gte: startOfYear, lte: endOfYear }
+              }
+            })
+            updateData.regNo = `${currentYear}_${String(countThisYear + 1).padStart(2, '0')}`
+          }
+          
+          await db.student.update({ where: { id: studentId }, data: updateData })
         }
       }
-    } else if (instructorId) {
-       // If student already exists, just update their instructor
-       await db.student.update({ where: { id: studentId }, data: { instructorId } })
+    } else {
+       // If student already exists, update their instructor and ensure regNo is assigned if missing
+       const studentRecord = await db.student.findUnique({ where: { id: studentId } })
+       let updateData: any = {}
+       if (instructorId) {
+         updateData.instructorId = instructorId
+       }
+       if (studentRecord && !studentRecord.regNo) {
+         const currentYear = new Date().getFullYear()
+         const startOfYear = new Date(currentYear, 0, 1)
+         const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59)
+         const countThisYear = await db.student.count({
+           where: {
+             enrolledAt: { gte: startOfYear, lte: endOfYear }
+           }
+         })
+         updateData.regNo = `${currentYear}_${String(countThisYear + 1).padStart(2, '0')}`
+       }
+       if (Object.keys(updateData).length > 0) {
+         await db.student.update({ where: { id: studentId }, data: updateData })
+       }
     }
 
     // 2. Mark booking as APPROVED

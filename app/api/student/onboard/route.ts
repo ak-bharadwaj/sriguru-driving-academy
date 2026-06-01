@@ -26,9 +26,9 @@ export async function POST(req: Request) {
     if (goals === 'fast') {
       trainingType = 'RTO_FAST_TRACK'
     } else if (goals === 'defensive') {
-      trainingType = 'DEFENSIVE'
-    } else if (goals === 'license' && experience === 'refresher') {
-      trainingType = 'REFRESHER'
+      trainingType = 'ADVANCED'
+    } else if (goals === 'license') {
+      trainingType = 'RTO_FAST_TRACK'
     }
 
     // Find the student profile
