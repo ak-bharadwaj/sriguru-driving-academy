@@ -63,7 +63,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { name, phone, email, trainingType, slotId } = await request.json()
+    const { name, phone, email, trainingType, slotId, password } = await request.json()
     if (!name || !phone || !email || !trainingType) {
       return NextResponse.json({ error: 'Missing mandatory booking details' }, { status: 400 })
     }
@@ -87,9 +87,9 @@ export async function POST(request: Request) {
       })
       regNo = `${currentYear}_${String(countThisYear + 1).padStart(2, '0')}`
 
-      // Create new user & student with default password sriguru123
+      // Create new user & student with custom or default password sriguru123
       const bcrypt = require('bcryptjs')
-      const passwordHash = await bcrypt.hash('sriguru123', 10)
+      const passwordHash = await bcrypt.hash(password || 'sriguru123', 10)
       
       let courseFee = 8999
       if (trainingType === 'ADVANCED') courseFee = 6500
