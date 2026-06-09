@@ -72,7 +72,7 @@ export async function POST(request: Request) {
     let regNo = 'N/A'
     
     // 1. Check if user already exists
-    let existingUser = await db.user.findUnique({ where: { email } })
+    const existingUser = await db.user.findUnique({ where: { email } })
     let studentId = null
 
     if (!existingUser) {

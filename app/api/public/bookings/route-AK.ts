@@ -56,7 +56,7 @@ export async function POST(request: Request) {
     }
 
     const bookingRef = crypto.randomUUID().split('-')[0].toUpperCase()
-    let userCreated = false
+    const userCreated = false
 
     try {
       // 1. Check if user already exists

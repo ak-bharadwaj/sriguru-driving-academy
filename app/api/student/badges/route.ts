@@ -52,7 +52,7 @@ export async function GET() {
       COURSE_GRADUATE: 'Legendary'
     }
     
-    let earnedBadges = studentBadges.map(sb => ({
+    const earnedBadges = studentBadges.map(sb => ({
       id: sb.badge.id,
       type: sb.badge.type,
       name: sb.badge.name,

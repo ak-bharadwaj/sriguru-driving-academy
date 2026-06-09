@@ -1111,7 +1111,7 @@ export default function StudentLearnPortal() {
                               <div className="flex flex-col gap-2">
                                 {[t.fullyCompleted, t.needReview].map((option, idx) => {
                                   const isSelected = selectedAnswerIndex === idx
-                                  let optClass = isSelected ? 'bg-primary/10 border-primary text-primary font-bold' : 'bg-void/40 border-border text-text-2'
+                                  const optClass = isSelected ? 'bg-primary/10 border-primary text-primary font-bold' : 'bg-void/40 border-border text-text-2'
                                   return (
                                     <button
                                       key={idx}

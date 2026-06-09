@@ -1012,7 +1012,7 @@ export function ParkingSimulator() {
     const centerX = rect.left + rect.width / 2
     const dx = e.clientX - centerX
     const maxDrag = rect.width / 2
-    let normalized = dx / maxDrag
+    const normalized = dx / maxDrag
     inputRef.current.steerAngle = Math.max(-1, Math.min(1, normalized))
   }
 

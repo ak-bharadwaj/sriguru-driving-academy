@@ -119,7 +119,7 @@ export const authOptions: NextAuthOptions = {
           let dbUserId = 'mock-instructor-id-123';
           let dbUserName = 'Rajesh Kumar (Mock)';
           try {
-            let dbUser = await prisma.user.findUnique({ where: { email } });
+            const dbUser = await prisma.user.findUnique({ where: { email } });
             if (dbUser) {
               dbUserId = dbUser.id;
               dbUserName = dbUser.name;

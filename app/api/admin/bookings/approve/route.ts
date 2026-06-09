@@ -26,7 +26,7 @@ export async function PUT(request: Request) {
     let studentId = booking.studentId
 
     if (!studentId) {
-      let existingUser = await db.user.findUnique({ where: { email: booking.email } })
+      const existingUser = await db.user.findUnique({ where: { email: booking.email } })
       
       if (!existingUser) {
         // Calculate the registration number (YYYY_NN)
@@ -73,7 +73,7 @@ export async function PUT(request: Request) {
         if (studentRecord) {
           studentId = studentRecord.id
           
-          let updateData: any = {}
+          const updateData: any = {}
           if (instructorId) {
             updateData.instructorId = instructorId
           }
@@ -95,7 +95,7 @@ export async function PUT(request: Request) {
     } else {
        // If student already exists, update their instructor and ensure regNo is assigned if missing
        const studentRecord = await db.student.findUnique({ where: { id: studentId } })
-       let updateData: any = {}
+       const updateData: any = {}
        if (instructorId) {
          updateData.instructorId = instructorId
        }
