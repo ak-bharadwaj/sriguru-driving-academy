@@ -1,10 +1,9 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server'
+import { BadgeType } from '@prisma/client'
 import { db } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-
-
 
 export async function GET() {
   try {
@@ -18,7 +17,12 @@ export async function GET() {
       select: {
         id: true,
         xp: true,
-        level: true
+        level: true,
+        user: {
+          select: {
+            name: true
+          }
+        }
       }
     })
 
@@ -35,13 +39,26 @@ export async function GET() {
     const allDbBadges = await db.badge.findMany()
     
     const earnedBadgeIds = studentBadges.map(sb => sb.badgeId)
+
+    const RARITY_MAP: Record<string, string> = {
+      PARKING_EXPERT: 'Rare',
+      SIGNAL_MASTER: 'Common',
+      ELITE_DRIVER: 'Legendary',
+      PERFECT_ATTENDANCE: 'Common',
+      ROAD_PRO: 'Rare',
+      CONSISTENT_LEARNER: 'Common',
+      SAFETY_CHAMPION: 'Rare',
+      QUIZ_MASTER: 'Rare',
+      COURSE_GRADUATE: 'Legendary'
+    }
     
     let earnedBadges = studentBadges.map(sb => ({
       id: sb.badge.id,
+      type: sb.badge.type,
       name: sb.badge.name,
       description: sb.badge.description,
       iconName: sb.badge.icon,
-      rarity: 'Legendary',
+      rarity: RARITY_MAP[sb.badge.type] || 'Common',
       unlockedAt: sb.earnedAt
     }))
 
@@ -49,24 +66,26 @@ export async function GET() {
       .filter(b => !earnedBadgeIds.includes(b.id))
       .map(b => ({
         id: b.id,
+        type: b.type,
         name: b.name,
         description: b.description,
         iconName: b.icon,
-        rarity: 'Rare'
+        rarity: RARITY_MAP[b.type] || 'Common'
       }))
 
     // Provide some defaults if the DB is empty, so the UI doesn't look empty
     if (allDbBadges.length === 0) {
       const mockBadges = [
-        { id: 'b1', name: 'First Ignition', description: 'Complete your first drive session.', iconName: 'Star', rarity: 'Common' },
-        { id: 'b2', name: 'Flawless Parker', description: 'Execute a perfect parallel park 3 times.', iconName: 'Car', rarity: 'Epic' },
-        { id: 'b4', name: 'Night Owl', description: 'Complete 5 night driving sessions.', iconName: 'Moon', rarity: 'Uncommon' },
-        { id: 'b5', name: 'Steering Master', description: 'Demonstrate advanced steering control.', iconName: 'Shield', rarity: 'Legendary' }
+        { id: 'b1', type: BadgeType.PARKING_EXPERT, name: 'Parking Expert', description: 'Mastered all parking techniques.', iconName: 'parking', rarity: 'Rare' },
+        { id: 'b2', type: BadgeType.SIGNAL_MASTER, name: 'Signal Master', description: 'Scored 100% on signal quiz.', iconName: 'traffic-light', rarity: 'Common' },
+        { id: 'b3', type: BadgeType.ELITE_DRIVER, name: 'Elite Driver', description: 'Reached Level 10.', iconName: 'star', rarity: 'Legendary' },
+        { id: 'b4', type: BadgeType.PERFECT_ATTENDANCE, name: 'Perfect Attendance', description: '10 sessions without absence.', iconName: 'calendar-check', rarity: 'Common' }
       ]
       lockedBadges = mockBadges
     }
 
     return NextResponse.json({
+      studentName: student.user.name,
       earnedBadges,
       lockedBadges,
       progress: {

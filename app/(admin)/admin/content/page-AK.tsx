@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Edit2, Trash2, Tag, Book, Activity, AlertCircle, Save, Image as ImageIcon } from 'lucide-react'
 import { Course, Offer } from '@/lib/data/academyStore'
+import { toast } from 'react-hot-toast'
 
 export default function ContentManagementPage() {
   const [activeTab, setActiveTab] = useState<'COURSES' | 'OFFERS' | 'GALLERY' | 'BRANDING'>('COURSES')
@@ -87,7 +88,7 @@ export default function ContentManagementPage() {
         body: JSON.stringify(branding)
       })
       if (res.ok) {
-        alert('Branding updated successfully!')
+        toast.success('Branding updated successfully!')
       }
     } catch (err) {
       console.error(err)

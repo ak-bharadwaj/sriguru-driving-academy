@@ -4,20 +4,21 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Filter, Plus, Calendar, Edit3, MapPin, X, CheckCircle, FileWarning, Clock } from 'lucide-react'
 import { useLanguageStore } from '@/store/languageStore'
+import { toast } from 'react-hot-toast'
 
 const PAGE_DICT = {
   EN: {
-    pageTitle: '{t.pageTitle}',
-    pageDesc: '{t.pageDesc}',
+    pageTitle: 'Exam Timeline',
+    pageDesc: 'Manage all upcoming and past driving exams.',
     searchPh: 'Search student...',
-    loading: '{t.loading}',
-    dateTime: '{t.dateTime}',
+    loading: 'Loading timeline data...',
+    dateTime: 'Date & Time',
     center: 'Center',
     notAssigned: 'Not Assigned',
     status: 'Status',
     attempt: 'Attempt',
     edit: 'Edit',
-    noTests: '{t.noTests}',
+    noTests: 'No exams match your search.',
     editExam: 'Edit Exam',
     scheduleExam: 'Schedule Exam',
     student: 'Student:',
@@ -164,9 +165,10 @@ export default function AdminTimelinePage() {
       if (res.ok) {
         await fetchTests()
         setIsEditModalOpen(false)
+        toast.success('Exam saved successfully!')
       } else {
         const err = await res.json()
-        alert(err.error || t.failSave)
+        toast.error(err.error || t.failSave)
       }
     } catch (e) {
       console.error(e)
@@ -279,8 +281,14 @@ export default function AdminTimelinePage() {
             })}
 
             {filteredTests.length === 0 && (
-              <div className="text-center py-20 text-text-3 border border-dashed border-border rounded-2xl">
-                {t.noTests}
+              <div className="text-center py-16 border border-dashed border-border rounded-2xl flex flex-col items-center gap-4">
+                <div className="w-14 h-14 rounded-xl bg-surface border border-border flex items-center justify-center text-text-3">
+                  <Calendar className="w-7 h-7" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-base font-bold text-text-1">{t.noTests}</p>
+                  <p className="text-sm text-text-3">Scheduled driving exams will appear here.</p>
+                </div>
               </div>
             )}
           </div>

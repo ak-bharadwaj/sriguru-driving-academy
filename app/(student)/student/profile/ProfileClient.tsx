@@ -19,6 +19,12 @@ interface ProfileClientProps {
 }
 
 export default function ProfileClient({ initialUser }: ProfileClientProps) {
+  const trainingTypeLabel: Record<string, string> = {
+    BEGINNER: 'Beginner',
+    ADVANCED: 'Advanced',
+    RTO_FAST_TRACK: 'RTO Fast Track',
+  }
+
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [formData, setFormData] = useState({
@@ -69,11 +75,12 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
       const res = await updateProfile(formData)
       if (res.success) {
         setIsEditing(false)
+        toast.success('Profile saved successfully!')
       } else {
-        alert(res.error)
+        toast.error(res.error || 'Failed to save profile.')
       }
     } catch (e) {
-      alert('Failed to save profile.')
+      toast.error('Failed to save profile.')
     } finally {
       setIsSaving(false)
     }
@@ -202,7 +209,7 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
         {/* COURSE (Readonly) */}
         <div className="flex justify-between items-center border-b border-[rgb(var(--color-border))] pb-4">
           <span className="text-sm font-semibold text-[rgb(var(--color-text-2))]">Course:</span>
-          <span className="text-sm text-[rgb(var(--color-text-1))] font-medium text-right max-w-[180px] truncate">{initialUser.trainingType} Training</span>
+          <span className="text-sm text-[rgb(var(--color-text-1))] font-medium text-right max-w-[180px] truncate">{trainingTypeLabel[initialUser.trainingType] || initialUser.trainingType} Training</span>
         </div>
         
         {/* REG NO (Readonly) */}

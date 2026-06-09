@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Award, Zap, Award as BadgeIcon } from 'lucide-react'
+import { Award, Zap, Award as BadgeIcon, XCircle } from 'lucide-react'
 import { useXPStore } from '@/lib/stores/xp-store'
 
 export const XPToast: React.FC = () => {
@@ -32,6 +32,7 @@ export const XPToast: React.FC = () => {
         {pendingToasts.map((toast) => {
           const isXP = toast.type === 'xp'
           const isLevel = toast.type === 'level'
+          const isError = toast.type === 'error'
 
           return (
             <motion.div
@@ -43,9 +44,11 @@ export const XPToast: React.FC = () => {
               className={`p-3 rounded-xl border backdrop-blur-md flex items-center gap-2.5 shadow-xl relative overflow-hidden pointer-events-auto ${
                 isLevel 
                   ? 'bg-success/90 border-success/40 text-white shadow-success/15'
-                  : isXP
-                    ? 'bg-surface/90 border-accent/30 text-accent shadow-accent/15'
-                    : 'bg-surface/90 border-primary/30 text-primary shadow-primary/15'
+                  : isError
+                    ? 'bg-danger/90 border-danger/40 text-white shadow-danger/15'
+                    : isXP
+                      ? 'bg-surface/90 border-accent/30 text-accent shadow-accent/15'
+                      : 'bg-surface/90 border-primary/30 text-primary shadow-primary/15'
               }`}
             >
               {/* Glow accent */}
@@ -55,12 +58,16 @@ export const XPToast: React.FC = () => {
               <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${
                 isLevel 
                   ? 'bg-white/10 text-white' 
-                  : isXP 
-                    ? 'bg-accent/10 text-accent' 
-                    : 'bg-primary/10 text-primary'
+                  : isError
+                    ? 'bg-white/10 text-white'
+                    : isXP 
+                      ? 'bg-accent/10 text-accent' 
+                      : 'bg-primary/10 text-primary'
               }`}>
                 {isLevel ? (
                   <Zap className="w-3 h-3 fill-current text-success-foreground" />
+                ) : isError ? (
+                  <XCircle className="w-3.5 h-3.5 fill-current text-danger-foreground" />
                 ) : isXP ? (
                   <Award className="w-3 h-3 fill-current" />
                 ) : (
@@ -71,7 +78,7 @@ export const XPToast: React.FC = () => {
               {/* Content description */}
               <div className="flex flex-col text-left flex-1 min-w-0">
                 <span className="text-[9px] font-mono uppercase tracking-widest text-text-3 font-semibold leading-none">
-                  {isLevel ? 'RANK UP' : isXP ? 'REWARD' : 'CRITERION'}
+                  {isLevel ? 'RANK UP' : isError ? 'ERROR' : isXP ? 'REWARD' : 'CRITERION'}
                 </span>
                 <h4 className="text-xs font-bold mt-0.5 leading-snug truncate font-display text-text-1">
                   {toast.title}

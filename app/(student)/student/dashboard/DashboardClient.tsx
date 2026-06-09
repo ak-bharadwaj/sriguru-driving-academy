@@ -19,6 +19,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useXPStore } from '@/lib/stores/xp-store'
 import { useLanguageStore } from '@/store/languageStore'
+import { useNotifications } from '@/hooks/useNotifications'
 
 const DASHBOARD_DICT = {
   EN: {
@@ -214,6 +215,8 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
   const activeLang = language.toUpperCase() as keyof typeof DASHBOARD_DICT
   const t = DASHBOARD_DICT[activeLang] || DASHBOARD_DICT.EN
   
+  const { unreadCount } = useNotifications()
+  
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState<string[]>([])
   const [showFeedbackModal, setShowFeedbackModal] = useState(false)
   const [feedbackRating, setFeedbackRating] = useState(0)
@@ -246,6 +249,7 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
 
   const student = dbData.student
   const nextSession = dbData.nextSession
+  const nextTest = dbData.drivingTests && dbData.drivingTests.length > 0 ? dbData.drivingTests[0] : null
   
   const totalCards = dbData.roadmapProgress.reduce((acc, curr) => acc + curr.total, 0)
   const completedCards = dbData.roadmapProgress.reduce((acc, curr) => acc + curr.completed, 0)
@@ -315,8 +319,10 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
             <div className="flex items-center gap-4">
               <Link href="/student/notifications" className="relative w-12 h-12 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors backdrop-blur-md">
                 <Bell className="w-6 h-6 text-white" />
-                {activeAnnouncements.length > 0 && (
-                  <span className="absolute top-2 right-3 w-2.5 h-2.5 bg-red-500 rounded-full border border-[rgb(var(--color-primary))]"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full border border-white text-[10px] font-bold flex items-center justify-center text-white">
+                    {unreadCount}
+                  </span>
                 )}
               </Link>
               <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-white/20 shadow-lg">
@@ -549,14 +555,14 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
               </div>
             </div>
 
-            {dbData.nextTest && (
+            {nextTest && (
               <div className="bg-rose-500 text-white rounded-[24px] p-6 w-[240px] flex-shrink-0 relative overflow-hidden shadow-app-hover">
                 <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-white/20 rounded-full blur-xl" />
-                <h4 className="text-4xl font-bold font-display">{new Date(dbData.nextTest.testDate).getDate()}</h4>
-                <p className="text-white/80 text-sm mt-1 mb-6">{new Date(dbData.nextTest.testDate).toLocaleString('default', { month: 'short', year: 'numeric' })}</p>
+                <h4 className="text-4xl font-bold font-display">{new Date(nextTest.testDate).getDate()}</h4>
+                <p className="text-white/80 text-sm mt-1 mb-6">{new Date(nextTest.testDate).toLocaleString('default', { month: 'short', year: 'numeric' })}</p>
                 
                 <p className="font-semibold uppercase text-xs tracking-widest text-white/90">{t.officialTest}</p>
-                <p className="font-bold font-display text-lg mt-1">{dbData.nextTest.testCenter}</p>
+                <p className="font-bold font-display text-lg mt-1">{nextTest.testCenter}</p>
               </div>
             )}
           </div>

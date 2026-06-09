@@ -59,6 +59,7 @@ export interface BrandingState {
   logoUrl: string
   contactPhone: string
   contactUrl: string
+  academyName?: string
 }
 
 const DATA_DIR = path.join(process.cwd(), 'lib', 'data')
@@ -196,7 +197,8 @@ const DEFAULT_STUDENT_STATE: StudentState = {
 const DEFAULT_BRANDING: BrandingState = {
   logoUrl: '',
   contactPhone: '+919876543210',
-  contactUrl: 'https://wa.me/919876543210'
+  contactUrl: 'https://wa.me/919876543210',
+  academyName: 'Sri Guru Academy'
 }
 
 interface AcademyData {

@@ -199,7 +199,8 @@ export default function FleetManagementPage() {
                 {filteredFleet.map((vehicle, idx) => (
                   <motion.tr 
                     key={vehicle.id}
-                    initial={{ opacity: 0, opacity: 1 }} // Simplified for performance
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     className="border-b border-border/50 hover:bg-white/[0.02] transition-colors group"
                   >
                     <td className="p-5">

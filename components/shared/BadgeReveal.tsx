@@ -2,12 +2,24 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Award, Share2, Check, X } from 'lucide-react'
+import { Share2, Check, X } from 'lucide-react'
+import { useSession } from 'next-auth/react'
+
 import { useXPStore } from '@/lib/stores/xp-store'
+import { useSettingsStore } from '@/store/settingsStore'
+import { BadgeVisual } from '@/components/shared/BadgeVisual'
 
 export const BadgeReveal: React.FC = () => {
   const { pendingBadgeReveal, setPendingBadgeReveal } = useXPStore()
+  const { academyName, logoUrl } = useSettingsStore()
+  const { data: session } = useSession()
+  
   const [copied, setCopied] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Auto reset copied state
   useEffect(() => {
@@ -18,10 +30,12 @@ export const BadgeReveal: React.FC = () => {
 
   if (!pendingBadgeReveal) return null
 
+  const currentStudentName = session?.user?.name || 'Active Cadet'
+
   const handleShare = async () => {
     try {
       await navigator.clipboard.writeText(
-        `Sri Guru Driving Academy: I unlocked the "${pendingBadgeReveal.name}" badge! 🚀 check out srigurudriving.com`
+        `${academyName}: I unlocked my verified digital credential "${pendingBadgeReveal.name}"! 🚀 check out srigurudriving.com`
       )
       setCopied(true)
     } catch (e) {
@@ -31,6 +45,9 @@ export const BadgeReveal: React.FC = () => {
 
   // Create array of 30 mock confetti particle offsets
   const confettiArray = Array.from({ length: 30 })
+
+  const activeAcademyName = mounted ? academyName : 'Sri Guru Driving Academy'
+  const activeLogoUrl = mounted ? logoUrl : null
 
   return (
     <AnimatePresence>
@@ -92,57 +109,36 @@ export const BadgeReveal: React.FC = () => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.8, y: -40 }}
           transition={{ type: 'spring', stiffness: 350, damping: 20 }}
-          className="relative bg-surface border border-border rounded-[36px] p-6 md:p-10 text-center max-w-sm w-full shadow-[0_24px_50px_rgba(245,158,11,0.15)] z-20 overflow-hidden"
+          className="relative max-w-sm w-full z-20"
         >
           {/* Top-right close button */}
           <button
             onClick={() => setPendingBadgeReveal(null)}
-            className="absolute top-4 right-4 p-2 bg-void/50 hover:bg-white/[0.04] border border-border rounded-full text-text-3 hover:text-text-1 transition-all duration-200"
+            className="absolute top-4 right-4 p-2 bg-void/80 hover:bg-white/[0.06] border border-border/80 rounded-full text-text-3 hover:text-text-1 transition-all duration-200 z-50 shadow-md"
           >
             <X className="w-4 h-4" />
           </button>
 
-          {/* Golden Badge Ring scaling from 0 to full with spring */}
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 280, damping: 18, delay: 0.15 }}
-            className="relative flex justify-center mb-6 mt-4"
-          >
-            <div className="absolute inset-0 bg-accent/20 rounded-full blur-2xl animate-pulse" />
-            <div className="w-[100px] h-[100px] rounded-full bg-accent/10 border-2 border-accent/40 flex items-center justify-center text-accent relative z-10">
-              <Award className="w-12 h-12 text-accent fill-accent/10" />
-            </div>
-          </motion.div>
+          {/* Render the full-size Credential Badge Certificate Card */}
+          <BadgeVisual
+            type={pendingBadgeReveal.type || pendingBadgeReveal.name.toUpperCase().replace(/ /g, '_')}
+            rarity={pendingBadgeReveal.rarity || 'Common'}
+            isEarned={true}
+            logoUrl={activeLogoUrl}
+            academyName={activeAcademyName}
+            studentName={currentStudentName}
+            unlockedAt={pendingBadgeReveal.unlockedAt || new Date().toISOString()}
+            size="lg"
+            className="shadow-[0_24px_60px_rgba(251,191,36,0.18)]"
+          />
 
-          {/* Badge name + description fading in after 400ms */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.4 }}
-            className="flex flex-col gap-2"
-          >
-            <span className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">ACHIEVEMENT REGISTERED</span>
-            <h3 className="text-2xl font-extrabold text-text-1 font-display tracking-tight leading-tight uppercase">
-              {pendingBadgeReveal.name}
-            </h3>
-            <p className="text-xs text-text-2 font-body mt-2 leading-relaxed px-2">
-              {pendingBadgeReveal.description}
-            </p>
-          </motion.div>
-
-          {/* Actions */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3, delay: 0.6 }}
-            className="flex gap-3 w-full mt-8 border-t border-border pt-6"
-          >
+          {/* Actions - floated below the certificate card */}
+          <div className="flex gap-3 w-full mt-4 bg-surface/90 border border-border/60 rounded-2xl p-4 shadow-lg backdrop-blur-md">
             <button
               onClick={() => setPendingBadgeReveal(null)}
-              className="flex-1 py-3 bg-void border border-border hover:bg-white/[0.02] text-text-2 hover:text-text-1 font-bold text-xs rounded-xl transition-all duration-300"
+              className="flex-1 py-3 bg-void border border-border/60 hover:bg-white/[0.02] text-text-2 hover:text-text-1 font-bold text-xs rounded-xl transition-all duration-300"
             >
-              Close
+              Dismiss
             </button>
             <button
               onClick={handleShare}
@@ -160,8 +156,7 @@ export const BadgeReveal: React.FC = () => {
                 </>
               )}
             </button>
-          </motion.div>
-
+          </div>
         </motion.div>
       </div>
     </AnimatePresence>

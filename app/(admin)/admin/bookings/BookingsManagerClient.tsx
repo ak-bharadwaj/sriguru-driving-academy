@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
-import { Check, X, UserCheck, AlertTriangle, Clock, MapPin } from 'lucide-react'
+import { Check, X, UserCheck, AlertTriangle, Clock, MapPin, ClipboardList } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import { useLanguageStore } from '@/store/languageStore'
@@ -76,9 +76,8 @@ interface BookingData {
   createdAt: string
   slotId?: string | null
   slot?: {
-    date: Date
-    startTime: string
-    endTime: string
+    dayOfWeek: string
+    time: string
   } | null
 }
 
@@ -159,8 +158,14 @@ export default function BookingsManagerClient({
       </div>
       
       {initialBookings.length === 0 ? (
-        <div className="bg-[rgb(var(--color-void))] border border-dashed border-[rgb(var(--color-border))] rounded-2xl p-8 flex flex-col items-center justify-center text-center">
-          <p className="text-sm font-medium text-[rgb(var(--color-text-2))]">{t.noBookings}</p>
+        <div className="bg-[rgb(var(--color-void))] border border-dashed border-[rgb(var(--color-border))] rounded-2xl p-16 flex flex-col items-center justify-center text-center gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] flex items-center justify-center text-[rgb(var(--color-text-3))]">
+            <ClipboardList className="w-8 h-8" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <p className="text-base font-bold text-[rgb(var(--color-text-1))]">{t.noBookings}</p>
+            <p className="text-sm text-[rgb(var(--color-text-3))] max-w-xs">New student booking requests will appear here for your review and approval.</p>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -188,7 +193,7 @@ export default function BookingsManagerClient({
                     <span className="text-[rgb(var(--color-text-2))] font-bold flex items-center gap-1">
                       <Clock className="w-3 h-3" /> {t.slot}
                     </span>
-                    <span className="text-[rgb(var(--color-text-1))] font-medium">{new Date(b.slot.date).toLocaleDateString()} {t.at} {b.slot.startTime}</span>
+                    <span className="text-[rgb(var(--color-text-1))] font-medium">{b.slot.dayOfWeek} @ {b.slot.time}</span>
                   </div>
                 )}
                 <div className="flex justify-between">

@@ -33,7 +33,7 @@
   /* Dark Mode Color Tokens - LUXURIOUS OBSIDIAN SPACE MODE */
   --color-void: 9 13 26;         /* Deep Obsidian Black-Blue #090D1A */
   --color-surface: 18 24 41;     /* Dark Slate Blue #121829 */
-  --color-border: 30 41 59;      /* Crisp Dark Border #1E293B */
+  --color-border: 38 52 74;      /* Crisp Dark Border #26344A (Higher Contrast) */
   --color-primary: 69 121 255;   /* Figma App Blue #4579FF */
   --color-accent: 251 191 36;    /* Amber 400 */
   --color-success: 52 211 153;   /* Emerald 400 */
@@ -58,6 +58,11 @@ h1, h2, h3, h4, h5, h6 {
 
 code, pre {
   font-family: var(--font-mono), monospace;
+}
+
+select, option {
+  background-color: rgb(var(--color-surface)) !important;
+  color: rgb(var(--color-text-1)) !important;
 }
 
 /* Custom interactive scrollbar */

@@ -2,28 +2,17 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Award,
-  Mountain,
-  BookOpen,
-  Moon,
-  CalendarCheck,
-  Car,
-  Route,
-  Zap,
-  Lock,
-  X,
-  ShieldCheck,
-  Star
-} from 'lucide-react'
+import { X } from 'lucide-react'
 
 import { useLanguageStore } from '@/store/languageStore'
+import { useSettingsStore } from '@/store/settingsStore'
+import { BadgeVisual } from '@/components/shared/BadgeVisual'
 
 const PAGE_DICT = {
   EN: {
     dashboard: 'Gamification Dashboard',
     title: 'Achievement Badges',
-    desc: 'Collect prestigious badges by mastering driving skills, passing theory exams, and maintaining perfect attendance.',
+    desc: 'Collect prestigious digital credentials by mastering driving skills, passing theory exams, and maintaining perfect attendance.',
     progress: 'Student Progress',
     earned: 'Earned',
     nextProgress: 'Next badge progress',
@@ -36,7 +25,7 @@ const PAGE_DICT = {
   HI: {
     dashboard: 'गेमिफिकेशन डैशबोर्ड',
     title: 'उपलब्धि बैज',
-    desc: 'ड्राइविंग कौशल में महारत हासिल करके, थ्योरी परीक्षा पास करके और सही उपस्थिति बनाए रखकर प्रतिष्ठित बैज एकत्र करें।',
+    desc: 'ड्राइविंग कौशल में महारत हासिल करके, थ्योरी परीक्षा पास करके और सही उपस्थिति बनाए रखकर प्रतिष्ठित डिजिटल क्रेडेंशियल एकत्र करें।',
     progress: 'छात्र की प्रगति',
     earned: 'अर्जित',
     nextProgress: 'अगले बैज की प्रगति',
@@ -49,7 +38,7 @@ const PAGE_DICT = {
   TE: {
     dashboard: 'గేమిఫికేషన్ డాష్‌బోర్డ్',
     title: 'సాధన బ్యాడ్జీలు',
-    desc: 'డ్రైవింగ్ నైపుణ్యాలను సాధించడం ద్వారా, థియరీ పరీక్షలను ఉత్తీర్ణత సాధించడం ద్వారా మరియు సరైన హాజరును కొనసాగించడం ద్వారా ప్రతిష్టాత్మక బ్యాడ్జీలను సేకరించండి.',
+    desc: 'డ్రైవింగ్ నైపుణ్యాలను సాధించడం ద్వారా, థియరీ పరీక్షలను ఉత్తీర్ణత సాధించడం ద్వారా మరియు సరైన హాజరును కొనసాగించడం ద్వారా ప్రతిష్టాత్మక డిజిటల్ ఆధారాలను సేకరించండి.',
     progress: 'విద్యార్థి పురోగతి',
     earned: 'సంపాదించారు',
     nextProgress: 'తదుపరి బ్యాడ్జ్ పురోగతి',
@@ -57,12 +46,8 @@ const PAGE_DICT = {
     locked: 'లాక్',
     achieved: 'సాధించారు',
     rarity: 'అరుదైన తరగతి',
-    unlocked: 'అన్‌లాక్ చేయబడింది:'
+    unlocked: 'అన్లాక్ చేయబడింది:'
   }
-}
-
-const ICON_MAP: Record<string, React.ElementType> = {
-  Award, Mountain, BookOpen, Moon, CalendarCheck, Car, Route, Zap, ShieldCheck, Star
 }
 
 export default function BadgesPage() {
@@ -70,11 +55,19 @@ export default function BadgesPage() {
   const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
   const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
 
+  const { academyName, logoUrl } = useSettingsStore()
+
   const [selectedBadge, setSelectedBadge] = useState<any>(null)
   const [earnedBadges, setEarnedBadges] = useState<any[]>([])
   const [lockedBadges, setLockedBadges] = useState<any[]>([])
+  const [studentName, setStudentName] = useState('Active Cadet')
   const [progress, setProgress] = useState({ xp: 0, nextBadgeXp: 1000 })
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     async function fetchBadges() {
@@ -85,6 +78,7 @@ export default function BadgesPage() {
           setEarnedBadges(data.earnedBadges || [])
           setLockedBadges(data.lockedBadges || [])
           if (data.progress) setProgress(data.progress)
+          if (data.studentName) setStudentName(data.studentName)
         }
       } catch (e) {
         console.error(e)
@@ -100,6 +94,10 @@ export default function BadgesPage() {
   const totalCount = earnedBadges.length + lockedBadges.length
   const ALL_BADGES = [...earnedBadges, ...lockedBadges]
 
+  // Safe hydration defaults
+  const activeAcademyName = mounted ? academyName : 'Sri Guru Driving Academy'
+  const activeLogoUrl = mounted ? logoUrl : null
+
   return (
     <div className="min-h-screen bg-void text-text-1 relative pb-20 overflow-x-hidden font-body selection:bg-primary/30">
       {/* Background ambient glow */}
@@ -110,11 +108,11 @@ export default function BadgesPage() {
         {/* Header */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-8">
           <div>
-            <span className="text-xs font-mono uppercase tracking-widest text-accent">{t.dashboard}</span>
-            <h1 className="text-4xl font-extrabold text-text-1 font-display tracking-tight mt-1">
+            <span className="text-xs font-mono uppercase tracking-widest text-accent font-bold">{t.dashboard}</span>
+            <h1 className="text-4xl font-extrabold text-text-1 font-display tracking-tight mt-1 uppercase">
               {t.title}
             </h1>
-            <p className="text-sm text-text-2 mt-2 max-w-xl font-body">
+            <p className="text-sm text-text-2 mt-2 max-w-xl font-body leading-relaxed">
               {t.desc}
             </p>
           </div>
@@ -139,79 +137,55 @@ export default function BadgesPage() {
           </div>
         </header>
 
-        {/* Badges Grid */}
-        <div className="mt-12 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-          {ALL_BADGES.map((badge, idx) => {
-            const isEarned = earnedBadgeIds.includes(badge.id)
-            const Icon = ICON_MAP[badge.iconName] || Award
+        {/* Loading Spinner */}
+        {loading ? (
+          <div className="flex justify-center items-center py-32">
+            <div className="w-10 h-10 border-4 border-t-accent border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          /* Badges Grid */
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            {ALL_BADGES.map((badge, idx) => {
+              const isEarned = earnedBadgeIds.includes(badge.id)
+              const badgeType = badge.type || badge.name.toUpperCase().replace(/ /g, '_')
 
-            return (
-              <motion.div
-                key={badge.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                onClick={() => setSelectedBadge(badge)}
-                className={`relative p-6 rounded-3xl border cursor-pointer group transition-all duration-300 flex flex-col items-center text-center ${
-                  isEarned
-                    ? 'bg-surface border-border hover:border-accent hover:shadow-[0_8px_30px_rgba(245,158,11,0.15)]'
-                    : 'bg-void border-border/40 hover:border-border grayscale opacity-60 hover:opacity-100 hover:grayscale-0'
-                }`}
-              >
-                {!isEarned && (
-                  <div className="absolute top-4 right-4 bg-void/80 p-1.5 rounded-full border border-border">
-                    <Lock className="w-3 h-3 text-text-3" />
-                  </div>
-                )}
-
-                {isEarned && (
-                  <div className="absolute top-0 right-0 w-full h-full bg-accent/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                )}
-
-                <div className={`w-20 h-20 rounded-2xl flex items-center justify-center rotate-45 mb-6 shadow-xl ${
-                  isEarned ? 'bg-gradient-to-br from-accent/20 to-primary/20 border-2 border-accent/30' : 'bg-surface border border-border'
-                }`}>
-                  <div className="-rotate-45">
-                    {badge.imageUrl ? (
-                      <img src={badge.imageUrl} alt={badge.name} className={`w-10 h-10 object-contain ${isEarned ? 'drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'opacity-50 grayscale'}`} />
-                    ) : (
-                      <Icon className={`w-8 h-8 ${isEarned ? 'text-accent drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'text-text-3'}`} />
-                    )}
-                  </div>
-                </div>
-
-                <h3 className={`text-sm font-bold tracking-tight mb-1 ${isEarned ? 'text-text-1' : 'text-text-2'}`}>
-                  {badge.name}
-                </h3>
-
-                <span className={`text-[10px] font-mono uppercase tracking-wider ${
-                  badge.rarity === 'Legendary' ? 'text-primary' : badge.rarity === 'Rare' ? 'text-accent' : 'text-text-3'
-                }`}>
-                  {badge.rarity}
-                </span>
-
-                {isEarned && badge.unlockedAt && (
-                  <div className="mt-4 text-[9px] text-text-3 font-mono bg-void border border-border px-2 py-1 rounded">
-                    {t.unlocked} {new Date(badge.unlockedAt).toLocaleDateString()}
-                  </div>
-                )}
-              </motion.div>
-            )
-          })}
-        </div>
+              return (
+                <motion.div
+                  key={badge.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  onClick={() => setSelectedBadge(badge)}
+                  className="cursor-pointer group block"
+                >
+                  <BadgeVisual
+                    type={badgeType}
+                    rarity={badge.rarity}
+                    isEarned={isEarned}
+                    logoUrl={activeLogoUrl}
+                    academyName={activeAcademyName}
+                    studentName={studentName}
+                    unlockedAt={badge.unlockedAt}
+                    size="md"
+                  />
+                </motion.div>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* Badge Detail Modal */}
       <AnimatePresence>
         {selectedBadge && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 font-body">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedBadge(null)}
-              className="absolute inset-0 bg-void/85 backdrop-blur-md"
+              className="absolute inset-0 bg-void/90 backdrop-blur-md"
             />
 
             {/* Modal card */}
@@ -220,70 +194,26 @@ export default function BadgesPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 30 }}
               transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-              className="relative w-full max-w-sm bg-surface border border-border rounded-3xl p-8 overflow-hidden shadow-[0_24px_50px_rgba(0,0,0,0.8)] text-center flex flex-col items-center z-10"
+              className="relative w-full max-w-sm overflow-hidden z-10"
             >
-              {earnedBadgeIds.includes(selectedBadge.id) && (
-                <div className="absolute inset-0 bg-gradient-to-b from-accent/10 to-transparent pointer-events-none" />
-              )}
-
               {/* Close button */}
               <button
                 onClick={() => setSelectedBadge(null)}
-                className="absolute top-4 right-4 p-2 bg-void/50 hover:bg-white/[0.04] border border-border rounded-full text-text-3 hover:text-text-1 transition-all duration-200 z-10"
+                className="absolute top-4 right-4 p-2 bg-void/80 hover:bg-white/[0.06] border border-border/80 rounded-full text-text-3 hover:text-text-1 transition-all duration-200 z-50 shadow-md"
               >
                 <X className="w-4 h-4" />
               </button>
 
-              {/* Badge icon */}
-              <div className={`w-28 h-28 rounded-3xl flex items-center justify-center rotate-45 mb-8 shadow-2xl relative z-10 ${
-                earnedBadgeIds.includes(selectedBadge.id)
-                  ? 'bg-gradient-to-br from-accent/30 to-primary/20 border-2 border-accent shadow-accent/20'
-                  : 'bg-void border-2 border-border'
-              }`}>
-                <div className="-rotate-45">
-                  {selectedBadge.imageUrl ? (
-                    <img
-                      src={selectedBadge.imageUrl}
-                      alt={selectedBadge.name}
-                      className={`w-14 h-14 object-contain ${earnedBadgeIds.includes(selectedBadge.id) ? 'drop-shadow-[0_0_12px_rgba(245,158,11,0.8)]' : 'opacity-50 grayscale'}`}
-                    />
-                  ) : (
-                    React.createElement(ICON_MAP[selectedBadge.iconName] || Award, {
-                      className: `w-12 h-12 ${earnedBadgeIds.includes(selectedBadge.id) ? 'text-accent drop-shadow-[0_0_12px_rgba(245,158,11,0.8)]' : 'text-text-3'}`
-                    })
-                  )}
-                </div>
-              </div>
-
-              {/* Status + name */}
-              <div className="relative z-10 w-full">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <ShieldCheck className={`w-4 h-4 ${earnedBadgeIds.includes(selectedBadge.id) ? 'text-success' : 'text-text-3'}`} />
-                  <span className="text-xs font-mono uppercase tracking-widest text-text-3">
-                    {earnedBadgeIds.includes(selectedBadge.id) ? t.achieved : t.locked}
-                  </span>
-                </div>
-
-                <h2 className="text-2xl font-extrabold text-text-1 font-display tracking-tight">
-                  {selectedBadge.name}
-                </h2>
-
-                <p className="text-sm text-text-2 mt-3 mb-6 font-body leading-relaxed px-2">
-                  {selectedBadge.description}
-                </p>
-
-                {/* Rarity row */}
-                <div className="w-full bg-void border border-border rounded-xl p-4 flex justify-between items-center">
-                  <span className="text-xs font-mono text-text-3 uppercase tracking-wider">{t.rarity}</span>
-                  <div className="flex items-center gap-1.5">
-                    <Star className={`w-3.5 h-3.5 ${
-                      selectedBadge.rarity === 'Legendary' ? 'text-primary fill-primary' :
-                      selectedBadge.rarity === 'Rare' ? 'text-accent fill-accent' : 'text-text-3'
-                    }`} />
-                    <span className="text-sm font-bold text-text-1">{selectedBadge.rarity}</span>
-                  </div>
-                </div>
-              </div>
+              <BadgeVisual
+                type={selectedBadge.type || selectedBadge.name.toUpperCase().replace(/ /g, '_')}
+                rarity={selectedBadge.rarity}
+                isEarned={earnedBadgeIds.includes(selectedBadge.id)}
+                logoUrl={activeLogoUrl}
+                academyName={activeAcademyName}
+                studentName={studentName}
+                unlockedAt={selectedBadge.unlockedAt}
+                size="lg"
+              />
             </motion.div>
           </div>
         )}

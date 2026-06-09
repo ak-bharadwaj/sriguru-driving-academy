@@ -14,7 +14,7 @@ export default async function AdminBookingsPage() {
     pendingBookings = await db.booking.findMany({
       where: { status: 'PENDING' },
       include: {
-        slot: { select: { date: true, startTime: true, endTime: true } }
+        slot: { select: { dayOfWeek: true, time: true } }
       },
       orderBy: { createdAt: 'desc' }
     })

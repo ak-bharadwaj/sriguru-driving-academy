@@ -13,7 +13,7 @@ import {
 import * as RoadSigns from '@/lib/icons/road-signs'
 
 interface SignCardProps {
-  signKey?: keyof typeof RoadSigns
+  signKey?: string
   name: string
   category: string
   meaning: string
@@ -47,8 +47,8 @@ export const SignCard: React.FC<SignCardProps> = ({
   const [isOpen, setIsOpen] = useState(false)
 
   // Retrieve the custom SVG component if it exists
-  const SVGIcon = (signKey && RoadSigns[signKey])
-    ? (RoadSigns[signKey] as React.ComponentType<{ size: number; glow?: boolean; limit?: number; state?: 'red' | 'amber' | 'green' }>) 
+  const SVGIcon = (signKey && RoadSigns[signKey as keyof typeof RoadSigns])
+    ? (RoadSigns[signKey as keyof typeof RoadSigns] as React.ComponentType<{ size: number; glow?: boolean; limit?: number; state?: 'red' | 'amber' | 'green' }>) 
     : FallbackComponent
 
   // Render a CSS fallback shape with a distinct Lucide icon if no image or SVG is present

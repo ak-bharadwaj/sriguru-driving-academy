@@ -17,6 +17,7 @@ interface CommandStats {
   sessionsThisWeek: number
   pendingBookings: number
   activeInstructors: number
+  pendingInquiries: number
 }
 
 interface Booking {

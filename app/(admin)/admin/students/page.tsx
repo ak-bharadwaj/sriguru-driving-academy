@@ -226,6 +226,7 @@ const PAGE_DICT = {
 }
 
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'react-hot-toast'
 import { 
   Search, 
   Filter,
@@ -502,8 +503,9 @@ export default function AdminStudentsPage() {
       if (res.ok) {
         await fetchStudents()
         closeModal()
+        toast.success('Student created successfully!')
       } else {
-        alert(data.error || 'Failed to create student')
+        toast.error(data.error || 'Failed to create student')
       }
     } catch (e) { console.error(e) }
     setSubmitting(false)
@@ -890,11 +892,11 @@ export default function AdminStudentsPage() {
               {/* Close button */}
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-bold text-[rgb(var(--color-text-1))]">
-                  {modal === 'payment' && '💰 {t.recordPayment}'}
+                  {modal === 'payment' && `💰 ${t.recordPayment}`}
                   {modal === 'test' && t.schedTestModal}
                   {modal === 'fee' && t.setFeeModal}
                   {modal === 'assign' && t.assignModal}
-                  {modal === 'result' && '🏆 {t.recordResult}'}
+                  {modal === 'result' && `🏆 ${t.recordResult}`}
                   {modal === 'create' && t.createModal}
                 </h3>
                 <button onClick={closeModal} className="p-2 hover:bg-[rgb(var(--color-border))] rounded-xl transition-colors">
@@ -1115,7 +1117,7 @@ export default function AdminStudentsPage() {
                   <button type="submit" disabled={submitting}
                     className="px-5 py-3 bg-[rgb(var(--color-primary))] text-white font-bold text-sm rounded-xl transition-colors shadow-sm hover:bg-[rgb(var(--color-primary))]/90 disabled:opacity-50 mt-2"
                   >
-                    {submitting ? 'Creating...' : '{t.createStudent}'}
+                    {submitting ? 'Creating...' : t.createStudent}
                   </button>
                 </form>
               )}

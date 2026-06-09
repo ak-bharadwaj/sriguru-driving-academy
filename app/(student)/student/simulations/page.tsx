@@ -97,12 +97,24 @@ const SimSection = ({ num, title, height = 700, isActive, onToggle, children }: 
   </section>
 )
 
+import { useXPStore } from '@/lib/stores/xp-store'
+
 export default function VerifyAllPage() {
   const [activeSim, setActiveSim] = useState<string | null>(null)
   
   const { language } = useLanguageStore()
   const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
   const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
+  
+  const { addToast } = useXPStore()
+
+  const handleComplete = () => {
+    addToast({
+      title: 'Simulation Complete',
+      description: t.simCompleted,
+      type: 'badge'
+    })
+  }
 
   return (
     <div className="min-h-screen bg-void text-text-1 p-8 overflow-y-auto pb-32">
@@ -114,27 +126,27 @@ export default function VerifyAllPage() {
         </div>
 
         <SimSection num="1" title={t.parallelParking} isActive={activeSim === '1'} onToggle={() => setActiveSim(activeSim === '1' ? null : '1')}>
-          <ParallelParkingSimulation onComplete={() => alert(t.simCompleted)} />
+          <ParallelParkingSimulation onComplete={handleComplete} />
         </SimSection>
 
         <SimSection num="2" title={t.reverseBayParking} isActive={activeSim === '2'} onToggle={() => setActiveSim(activeSim === '2' ? null : '2')}>
-          <ReverseBayParkingSimulation onComplete={() => alert(t.simCompleted)} />
+          <ReverseBayParkingSimulation onComplete={handleComplete} />
         </SimSection>
 
         <SimSection num="3" title={t.vehicleStartup} height={480} isActive={activeSim === '3'} onToggle={() => setActiveSim(activeSim === '3' ? null : '3')}>
-          <VehicleStartupSimulation onComplete={() => alert(t.simCompleted)} />
+          <VehicleStartupSimulation onComplete={handleComplete} />
         </SimSection>
 
         <SimSection num="4" title={t.steeringControl} isActive={activeSim === '4'} onToggle={() => setActiveSim(activeSim === '4' ? null : '4')}>
-          <SteeringControlSimulation onComplete={() => alert(t.simCompleted)} />
+          <SteeringControlSimulation onComplete={handleComplete} />
         </SimSection>
 
         <SimSection num="5" title={t.clutchControl} isActive={activeSim === '5'} onToggle={() => setActiveSim(activeSim === '5' ? null : '5')}>
-          <ClutchControlSimulation onComplete={() => alert(t.simCompleted)} />
+          <ClutchControlSimulation onComplete={handleComplete} />
         </SimSection>
 
         <SimSection num="6" title={t.highwayMerging} isActive={activeSim === '6'} onToggle={() => setActiveSim(activeSim === '6' ? null : '6')}>
-          <HighwayMergingSimulation onComplete={() => alert(t.simCompleted)} />
+          <HighwayMergingSimulation onComplete={handleComplete} />
         </SimSection>
 
         <div className="border-t-2 border-dashed border-border pt-12">
@@ -143,19 +155,19 @@ export default function VerifyAllPage() {
         </div>
 
         <SimSection num="7" title={t.threePointTurn} isActive={activeSim === '7'} onToggle={() => setActiveSim(activeSim === '7' ? null : '7')}>
-          <ThreePointTurnSimulation onComplete={() => alert(t.simCompleted)} />
+          <ThreePointTurnSimulation onComplete={handleComplete} />
         </SimSection>
 
         <SimSection num="8" title={t.emergencyBraking} isActive={activeSim === '8'} onToggle={() => setActiveSim(activeSim === '8' ? null : '8')}>
-          <EmergencyBrakingSimulation onComplete={() => alert(t.simCompleted)} />
+          <EmergencyBrakingSimulation onComplete={handleComplete} />
         </SimSection>
 
         <SimSection num="9" title={t.roundabout} isActive={activeSim === '9'} onToggle={() => setActiveSim(activeSim === '9' ? null : '9')}>
-          <RoundaboutSimulation onComplete={() => alert(t.simCompleted)} />
+          <RoundaboutSimulation onComplete={handleComplete} />
         </SimSection>
 
         <SimSection num="10" title={t.nightDriving} height={460} isActive={activeSim === '10'} onToggle={() => setActiveSim(activeSim === '10' ? null : '10')}>
-          <NightDrivingSimulation onComplete={() => alert(t.simCompleted)} />
+          <NightDrivingSimulation onComplete={handleComplete} />
         </SimSection>
 
       </div>

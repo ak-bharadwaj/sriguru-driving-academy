@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, MapPin, Edit3, X, CheckCircle, Clock, FileWarning } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 
 interface DrivingTest {
   id: string
@@ -52,9 +53,10 @@ export default function StudentTimelinePage() {
       if (res.ok) {
         await fetchTests()
         setEditTest(null)
+        toast.success('Exam rescheduled successfully!')
       } else {
         const err = await res.json()
-        alert(err.error || 'Failed to reschedule')
+        toast.error(err.error || 'Failed to reschedule')
       }
     } catch (e) {
       console.error(e)

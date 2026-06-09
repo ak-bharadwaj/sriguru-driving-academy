@@ -311,7 +311,7 @@ export const LearningCard: React.FC<LearningCardProps> = ({
                   transition={{ delay: 0.1 * sIdx, ease: 'easeOut' }}
                   className="flex gap-2.5 items-start"
                 >
-                  <span className="w-4.5 h-4.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] font-mono font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="w-5 h-5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[9px] font-mono font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                     {sIdx + 1}
                   </span>
                   <p className="text-[11px] text-text-2 leading-relaxed font-body">{step}</p>

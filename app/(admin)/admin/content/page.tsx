@@ -6,6 +6,7 @@ import { Plus, Edit2, Trash2, Tag, Book, Activity, AlertCircle, Save, Image as I
 import { Course, Offer } from '@/lib/data/academyStore'
 import { useLanguageStore } from '@/store/languageStore'
 import { useUploadThing } from '@/lib/uploadthing'
+import { toast } from 'react-hot-toast'
 
 const PAGE_DICT = {
   EN: {
@@ -174,8 +175,9 @@ export default function ContentManagementPage() {
       if (res.ok) {
         await fetchData()
         setEditingCourse(null)
+        toast.success('Course updated successfully!')
       } else {
-        alert('Failed to update course. Ensure the API supports PUT requests.')
+        toast.error('Failed to update course. Ensure the API supports PUT requests.')
       }
     } catch (err) {
       console.error(err)

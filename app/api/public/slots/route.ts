@@ -61,9 +61,90 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized.' }, { status: 403 })
     }
 
-    const { dayOfWeek, time, maxCapacity, currentBooked, instructorId, status } = await request.json()
+    const body = await request.json()
     
-    // Always default instructor to first instructor if not provided
+    // Handle Batch Creation Mode
+    if (body.isBatch) {
+      const { startDate, endDate, weekdays, times, maxCapacity, instructorId, status } = body
+      
+      let assignedInstructorId = instructorId
+      if (!assignedInstructorId) {
+        const firstInstructor = await db.instructor.findFirst()
+        if (firstInstructor) {
+          assignedInstructorId = firstInstructor.id
+        } else {
+          return NextResponse.json({ error: 'No instructor found to assign slots.' }, { status: 400 })
+        }
+      }
+
+      if (!startDate || !endDate || !Array.isArray(weekdays) || !Array.isArray(times) || times.length === 0) {
+        return NextResponse.json({ error: 'Invalid batch configuration.' }, { status: 400 })
+      }
+
+      const checkDays = weekdays.map((d: string) => d.trim().toUpperCase())
+      const start = new Date(startDate)
+      const end = new Date(endDate)
+      
+      if (isNaN(start.getTime()) || isNaN(end.getTime()) || start > end) {
+        return NextResponse.json({ error: 'Invalid date range.' }, { status: 400 })
+      }
+
+      const createdSlots = []
+      const current = new Date(start)
+      current.setHours(12, 0, 0, 0)
+      
+      const safeEnd = new Date(end)
+      safeEnd.setHours(12, 0, 0, 0)
+
+      while (current <= safeEnd) {
+        const dayOfWeekName = current.toLocaleDateString('en-US', { weekday: 'long' })
+        const dayOfWeekShort = current.toLocaleDateString('en-US', { weekday: 'short' })
+        
+        const isMatched = checkDays.includes(dayOfWeekName.toUpperCase()) || 
+                          checkDays.includes(dayOfWeekShort.toUpperCase()) ||
+                          checkDays.some((d: string) => dayOfWeekName.toUpperCase().startsWith(d))
+
+        if (isMatched) {
+          const y = current.getFullYear()
+          const m = String(current.getMonth() + 1).padStart(2, '0')
+          const dy = String(current.getDate()).padStart(2, '0')
+          const dateStr = `${y}-${m}-${dy}`
+
+          for (const timeStr of times) {
+            const existing = await db.slot.findFirst({
+              where: {
+                dayOfWeek: dateStr,
+                time: timeStr,
+                trainingType: 'BEGINNER',
+                instructorId: assignedInstructorId
+              }
+            })
+
+            if (!existing) {
+              const newSlot = await db.slot.create({
+                data: {
+                  dayOfWeek: dateStr,
+                  time: timeStr,
+                  trainingType: 'BEGINNER',
+                  maxCapacity: maxCapacity || 5,
+                  currentCount: 0,
+                  status: status || 'ACTIVE',
+                  instructorId: assignedInstructorId
+                }
+              })
+              createdSlots.push(newSlot)
+            }
+          }
+        }
+        current.setDate(current.getDate() + 1)
+      }
+
+      return NextResponse.json({ success: true, count: createdSlots.length }, { status: 200 })
+    }
+
+    // Handle Single Creation Mode
+    const { dayOfWeek, time, maxCapacity, currentBooked, instructorId, status } = body
+    
     let assignedInstructorId = instructorId
     if (!assignedInstructorId) {
       const firstInstructor = await db.instructor.findFirst()
@@ -74,7 +155,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // Always create slot under 'BEGINNER' trainingType for the single master calendar
     const newSlot = await db.slot.create({
       data: {
         dayOfWeek,
@@ -116,5 +196,59 @@ export async function PUT(request: Request) {
   } catch (error) {
     console.error("Slots PUT error", error)
     return NextResponse.json({ error: 'Slot modification failed' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user || ((session.user as any).role !== 'ADMIN' && (session.user as any).role !== 'INSTRUCTOR')) {
+      return NextResponse.json({ error: 'Unauthorized.' }, { status: 403 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    const dayOfWeek = searchParams.get('dayOfWeek')
+
+    if (id) {
+      const slot = await db.slot.findUnique({
+        where: { id },
+        include: { bookings: { where: { status: { in: ['PENDING', 'APPROVED'] } } } }
+      })
+
+      if (!slot) {
+        return NextResponse.json({ error: 'Slot not found.' }, { status: 404 })
+      }
+
+      if (slot.bookings.length > 0 || slot.currentCount > 0) {
+        return NextResponse.json({ error: 'Cannot delete a slot with active bookings.' }, { status: 400 })
+      }
+
+      await db.slot.delete({ where: { id } })
+      return NextResponse.json({ success: true, message: 'Slot deleted successfully.' }, { status: 200 })
+    }
+
+    if (dayOfWeek) {
+      const slotsForDay = await db.slot.findMany({
+        where: { dayOfWeek, trainingType: 'BEGINNER' },
+        include: { bookings: { where: { status: { in: ['PENDING', 'APPROVED'] } } } }
+      })
+
+      const hasBookings = slotsForDay.some(s => s.bookings.length > 0 || s.currentCount > 0)
+      if (hasBookings) {
+        return NextResponse.json({ error: 'Cannot purge date. Some slots contain active bookings.' }, { status: 400 })
+      }
+
+      await db.slot.deleteMany({
+        where: { dayOfWeek, trainingType: 'BEGINNER' }
+      })
+
+      return NextResponse.json({ success: true, message: 'Slots for day purged successfully.' }, { status: 200 })
+    }
+
+    return NextResponse.json({ error: 'Missing parameters. Provide id or dayOfWeek.' }, { status: 400 })
+  } catch (error) {
+    console.error("Slots DELETE error:", error)
+    return NextResponse.json({ error: 'Deletion failed.' }, { status: 500 })
   }
 }

@@ -7,6 +7,8 @@ export interface Badge {
   unlockedAt: string
   icon: string
   customImage?: string
+  type?: string
+  rarity?: string
 }
 
 export interface ToastMessage {

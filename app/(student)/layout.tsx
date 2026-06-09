@@ -15,6 +15,8 @@ import { LanguageToggle } from '@/components/shared/LanguageToggle'
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
 import { GuidedTour } from '@/components/shared/GuidedTour'
 
+import { useNotifications } from '@/hooks/useNotifications'
+
 type NavTab = {
   label: string
   labelHI: string
@@ -38,6 +40,9 @@ export default function StudentPortalLayout({ children }: { children: React.Reac
   const pathname = usePathname()
   const { language } = useLanguageStore()
   const lang = language.toUpperCase()
+  
+  // Call useNotifications to register native browser notifications and poll in the background
+  useNotifications()
 
   const hideNav = HIDDEN_NAV_PATHS.includes(pathname)
 

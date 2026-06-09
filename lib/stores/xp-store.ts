@@ -6,13 +6,16 @@ export interface Badge {
   description: string
   unlockedAt: string
   icon: string
+  customImage?: string
+  type?: string
+  rarity?: string
 }
 
 export interface ToastMessage {
   id: string
   title: string
   description: string
-  type: 'xp' | 'badge' | 'level'
+  type: 'xp' | 'badge' | 'level' | 'error'
   xpAmount?: number
 }
 

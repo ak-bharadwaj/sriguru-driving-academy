@@ -625,7 +625,7 @@ export default function RTOLearningCenter() {
                     <div className="w-[140px] h-[140px] flex items-center justify-center drop-shadow-[0_4px_12px_rgba(0,0,0,0.3)] relative">
                       {(() => {
                         const activeSign = ROAD_SIGNS_DATA[currentFlashIdx]
-                        const SVGComponent = activeSign.signKey ? RoadSigns[activeSign.signKey] : null
+                        const SVGComponent = activeSign.signKey ? RoadSigns[activeSign.signKey as keyof typeof RoadSigns] : null
                         if (activeSign.imagePath) {
                           return <Image src={activeSign.imagePath} alt="Sign" width={140} height={140} className="object-contain" />
                         } else if (SVGComponent) {

@@ -25,6 +25,7 @@ import { ThemeToggle } from '@/components/shared/ThemeToggle'
 import { LanguageToggle } from '@/components/shared/LanguageToggle'
 import { useLanguageStore } from '@/store/languageStore'
 import { useSettingsStore } from '@/store/settingsStore'
+import { useNotifications } from '@/hooks/useNotifications'
 import { Breadcrumbs } from '@/components/shared/Breadcrumbs'
 
 interface NavItem {
@@ -63,7 +64,7 @@ function NavItemList({
                 : 'text-[rgb(var(--color-text-2))] hover:text-[rgb(var(--color-text-1))] hover:bg-[rgb(var(--color-border))]/50'
             }`}
           >
-            <Icon className={`w-4.5 h-4.5 shrink-0 ${
+            <Icon className={`w-5 h-5 shrink-0 ${
               isActive ? 'text-blue-600 dark:text-blue-400' : 'text-[rgb(var(--color-text-3))]'
             }`} />
             {!collapsed && (
@@ -135,12 +136,7 @@ export default function AdminConsoleLayout({
   const [mobileOpen, setMobileOpen] = useState(false)
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false)
   
-  const [notifications, setNotifications] = useState([
-    { id: 1, text: 'System backup completed successfully.', time: '2m ago', read: false },
-    { id: 2, text: 'New instructor registration pending review.', time: '1h ago', read: false }
-  ])
-
-  const unreadCount = notifications.filter(n => !n.read).length
+  const { notifications, unreadCount, markAllAsRead } = useNotifications()
 
   const handleLogout = async () => {
     await signOut({ callbackUrl: '/login' })
@@ -149,7 +145,7 @@ export default function AdminConsoleLayout({
   const handleNotifClick = () => {
     setNotifDropdownOpen(!notifDropdownOpen)
     if (!notifDropdownOpen) {
-      setNotifications(notifications.map(n => ({ ...n, read: true })))
+      markAllAsRead()
     }
   }
 
@@ -244,9 +240,10 @@ export default function AdminConsoleLayout({
                       <div className="p-4 text-center text-[rgb(var(--color-text-3))] text-sm">{t.noNotifs}</div>
                     ) : (
                       notifications.map(n => (
-                        <div key={n.id} className="p-3 border-b border-slate-50 dark:border-slate-800 hover:bg-[rgb(var(--color-surface))] flex flex-col gap-1 transition-colors">
-                          <p className="text-sm text-[rgb(var(--color-text-2))]">{n.text}</p>
-                          <span className="text-xs text-slate-400">{n.time}</span>
+                        <div key={n.id} className="p-3 border-b border-slate-50 dark:border-slate-800 hover:bg-[rgb(var(--color-surface))]/50 flex flex-col gap-1 transition-colors">
+                          <p className="text-xs font-bold text-[rgb(var(--color-text-1))]">{n.title}</p>
+                          <p className="text-xs text-[rgb(var(--color-text-2))]">{n.message}</p>
+                          <span className="text-[10px] text-slate-400">{new Date(n.time).toLocaleDateString()}</span>
                         </div>
                       ))
                     )}

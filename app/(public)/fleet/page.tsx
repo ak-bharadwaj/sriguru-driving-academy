@@ -326,7 +326,7 @@ export default function FleetPage() {
                   <ul className="flex flex-col gap-3.5">
                     {vehicle.features.map((feat, i) => (
                       <li key={i} className="flex items-start gap-3">
-                        <CheckCircle2 className="w-4.5 h-4.5 text-primary flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                         <span className="text-slate-600 dark:text-text-2 text-sm">{feat}</span>
                       </li>
                     ))}

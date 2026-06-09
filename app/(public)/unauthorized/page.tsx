@@ -59,7 +59,7 @@ export default function UnauthorizedAccess() {
           >
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-danger/10 border border-danger/20 flex items-center justify-center text-danger group-hover:scale-105 transition-transform duration-200">
-                <KeyRound className="w-4.5 h-4.5" />
+                <KeyRound className="w-5 h-5" />
               </div>
               <div className="flex flex-col">
                 <span className="text-xs font-bold text-text-1 group-hover:text-danger transition-colors duration-200">

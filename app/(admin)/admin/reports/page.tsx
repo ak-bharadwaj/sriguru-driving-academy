@@ -1,9 +1,11 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { FileDown, Users, IndianRupee, Calendar, Award, RefreshCw } from 'lucide-react'
 import { useLanguageStore } from '@/store/languageStore'
+import html2canvas from 'html2canvas'
+import { jsPDF } from 'jspdf'
 
 const PAGE_DICT = {
   EN: {
@@ -77,10 +79,15 @@ export default function AdminReportsPage() {
 
   const [stats, setStats] = useState<SummaryStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isExportingPdf, setIsExportingPdf] = useState(false)
+  const reportsGridRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch('/api/admin/reports/summary')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`API error: ${res.status}`)
+        return res.json()
+      })
       .then(data => setStats(data))
       .catch(console.error)
       .finally(() => setLoading(false))
@@ -88,6 +95,32 @@ export default function AdminReportsPage() {
 
   const handleDownload = (type: string) => {
     window.location.href = `/api/admin/reports/${type}?format=csv`
+  }
+
+  const handleExportPdf = async () => {
+    if (!reportsGridRef.current) return
+    setIsExportingPdf(true)
+    try {
+      const canvas = await html2canvas(reportsGridRef.current, {
+        scale: 2.5,
+        useCORS: true,
+        backgroundColor: '#090d1a' // Obsidian dark bg match
+      })
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      })
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+      pdf.save('Operational_Reports_Summary.pdf')
+    } catch (err) {
+      console.error('PDF Export Error:', err)
+    } finally {
+      setIsExportingPdf(false)
+    }
   }
 
   return (
@@ -99,12 +132,26 @@ export default function AdminReportsPage() {
             <h1 className="text-3xl font-bold tracking-tight text-[rgb(var(--color-text-1))]">{t.pageTitle}</h1>
             <p className="text-[rgb(var(--color-text-3))] text-sm mt-1">{t.pageDesc}</p>
           </div>
-          <button 
-            onClick={() => window.location.reload()}
-            className="flex items-center gap-2 px-4 py-2 bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-xl text-sm font-bold shadow-sm hover:bg-[rgb(var(--color-surface))] transition-colors"
-          >
-            <RefreshCw className="w-4 h-4" /> {t.refresh}
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={handleExportPdf}
+              disabled={isExportingPdf || loading || !stats}
+              className="flex items-center gap-2 px-4 py-2 bg-[rgb(var(--color-primary))] hover:bg-[rgb(var(--color-primary))]/90 disabled:opacity-50 text-white rounded-xl text-sm font-bold shadow-sm transition-all"
+            >
+              {isExportingPdf ? (
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <FileDown className="w-4 h-4" />
+              )}
+              {isExportingPdf ? 'Generating PDF...' : 'Export PDF Report'}
+            </button>
+            <button 
+              onClick={() => window.location.reload()}
+              className="flex items-center gap-2 px-4 py-2 bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-xl text-sm font-bold shadow-sm hover:bg-[rgb(var(--color-surface))] transition-colors"
+            >
+              <RefreshCw className="w-4 h-4" /> {t.refresh}
+            </button>
+          </div>
         </div>
 
         {loading ? (
@@ -112,9 +159,20 @@ export default function AdminReportsPage() {
             <RefreshCw className="w-8 h-8 animate-spin" />
           </div>
         ) : !stats ? (
-          <div className="py-20 text-center text-[rgb(var(--color-text-3))]">{t.failedLoad}</div>
+          <div className="py-20 flex flex-col items-center gap-4 text-center">
+            <div className="w-14 h-14 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 flex items-center justify-center text-red-500">
+              <RefreshCw className="w-7 h-7" />
+            </div>
+            <div>
+              <p className="text-base font-bold text-[rgb(var(--color-text-1))]">{t.failedLoad}</p>
+              <p className="text-sm text-[rgb(var(--color-text-3))] mt-1">Check your connection or try refreshing.</p>
+            </div>
+            <button onClick={() => window.location.reload()} className="px-4 py-2 bg-[rgb(var(--color-primary))] text-white font-bold rounded-xl text-sm hover:bg-[rgb(var(--color-primary))]/90 transition-colors">
+              {t.refresh}
+            </button>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div ref={reportsGridRef} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* {t.studentReport} */}
             <motion.div initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-6 shadow-sm flex flex-col">
@@ -127,9 +185,12 @@ export default function AdminReportsPage() {
               <div className="flex-1 flex flex-col gap-4 mb-6">
                 <div className="text-3xl font-bold">{stats.students.total} <span className="text-sm font-medium text-[rgb(var(--color-text-3))]">{t.total}</span></div>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {stats.students.byType.map(t => (
-                    <span key={t.type} className="px-3 py-1 bg-[rgb(var(--color-border))] rounded-lg text-xs font-bold">{t.type}: {t.count}</span>
-                  ))}
+                  {stats.students.byType.map(item => {
+                    const typeLabels: Record<string, string> = { BEGINNER: 'Beginner', ADVANCED: 'Advanced', RTO_FAST_TRACK: 'RTO Fast Track' }
+                    return (
+                      <span key={item.type} className="px-3 py-1 bg-[rgb(var(--color-border))] rounded-lg text-xs font-bold">{typeLabels[item.type] || item.type}: {item.count}</span>
+                    )
+                  })}
                 </div>
               </div>
               <button onClick={() => handleDownload('students')} className="mt-auto w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-bold rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors">

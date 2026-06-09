@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
-import { Check, Mail, Phone, Clock, Search, Filter } from 'lucide-react'
+import { Check, Mail, Phone, Clock, Search, MessageSquare } from 'lucide-react'
 
 type Inquiry = {
   id: string
@@ -84,8 +84,14 @@ export default function EnquiriesClient({ initialInquiries }: { initialInquiries
       {/* List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredInquiries.length === 0 ? (
-          <div className="col-span-full py-12 text-center text-[rgb(var(--color-text-3))] border border-dashed border-[rgb(var(--color-border))] rounded-2xl bg-[rgb(var(--color-surface))]">
-            No enquiries found matching your criteria.
+          <div className="col-span-full py-14 text-center border border-dashed border-[rgb(var(--color-border))] rounded-2xl bg-[rgb(var(--color-surface))] flex flex-col items-center gap-4">
+            <div className="w-14 h-14 rounded-xl bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] flex items-center justify-center text-[rgb(var(--color-text-3))]">
+              <MessageSquare className="w-7 h-7" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <p className="text-base font-bold text-[rgb(var(--color-text-1))]">No enquiries found</p>
+              <p className="text-sm text-[rgb(var(--color-text-3))]">Incoming contact requests will appear here.</p>
+            </div>
           </div>
         ) : (
           filteredInquiries.map(inquiry => (

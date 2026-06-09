@@ -64,7 +64,9 @@ export default async function InstructorDashboardPage() {
       drivingTests: {
         select: {
           id: true,
+          type: true,
           testDate: true,
+          testCenter: true,
           result: true
         }
       },
@@ -114,7 +116,13 @@ export default async function InstructorDashboardPage() {
       skills,
       dailyLog,
       feeStatus: s.feeStatus,
-      drivingTests: s.drivingTests,
+      drivingTests: s.drivingTests.map(dt => ({
+        id: dt.id,
+        type: dt.type,
+        testDate: dt.testDate.toISOString().split('T')[0],
+        testCenter: dt.testCenter || 'N/A',
+        result: dt.result
+      })),
       todaySession: todaySession ? {
         id: todaySession.id,
         studentId: s.id,

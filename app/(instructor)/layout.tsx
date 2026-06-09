@@ -3,10 +3,12 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Award, Users, Calendar, MessageSquare, TrendingUp, Zap } from 'lucide-react'
+import { Award, Users, Calendar, MessageSquare, TrendingUp, Zap, Bell } from 'lucide-react'
 import { useLanguageStore } from '@/store/languageStore'
 import { LanguageToggle } from '@/components/shared/LanguageToggle'
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
+import { useNotifications } from '@/hooks/useNotifications'
+import { motion, AnimatePresence } from 'framer-motion'
 
 type NavTab = {
   label: string
@@ -31,6 +33,9 @@ export default function InstructorConsoleLayout({ children }: { children: React.
   const lang = language.toUpperCase()
 
   const [mounted, setMounted] = React.useState(false)
+  const [notifDropdownOpen, setNotifDropdownOpen] = React.useState(false)
+  const { notifications, unreadCount, markAllAsRead } = useNotifications()
+
   React.useEffect(() => {
     setMounted(true)
   }, [])
@@ -47,16 +52,62 @@ export default function InstructorConsoleLayout({ children }: { children: React.
     return pathname === tab.path || pathname.startsWith(tab.path + '/')
   }
 
+  const handleNotifClick = () => {
+    setNotifDropdownOpen(!notifDropdownOpen)
+    if (!notifDropdownOpen) {
+      markAllAsRead()
+    }
+  }
+
   return (
     <div className="w-full flex flex-col bg-[rgb(var(--color-void))] relative font-body text-[rgb(var(--color-text-1))] transition-colors duration-300">
 
       {/* Main Content */}
       <div className="flex-1 relative z-10 pb-24 pt-4 px-4 sm:px-6 md:px-8">
         <div className="max-w-4xl mx-auto w-full">
-          {/* Top bar: Language & Theme toggle */}
-          <div className="flex justify-end items-center gap-2 mb-4">
+          {/* Top bar: Language, Theme & Notifications toggle */}
+          <div className="flex justify-end items-center gap-2 mb-4 relative z-50">
             <ThemeToggle />
             <LanguageToggle />
+            
+            <button 
+              onClick={handleNotifClick}
+              className="relative p-2 bg-[rgb(var(--color-surface))] hover:bg-[rgb(var(--color-border))]/50 border border-[rgb(var(--color-border))] rounded-xl text-[rgb(var(--color-text-2))] shadow-sm transition-all duration-200"
+            >
+              <Bell className="w-5 h-5 text-[rgb(var(--color-text-2))]" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* Notifications Dropdown */}
+            <AnimatePresence>
+              {notifDropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute top-full mt-2 right-0 w-72 bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-xl shadow-xl overflow-hidden z-50 text-left"
+                >
+                  <div className="px-4 py-3 border-b border-[rgb(var(--color-border))] font-semibold text-sm">Notifications</div>
+                  <div className="flex flex-col max-h-64 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-4 text-center text-[rgb(var(--color-text-3))] text-sm">No new notifications</div>
+                    ) : (
+                      notifications.map(n => (
+                        <div key={n.id} className="p-3 border-b border-slate-50 dark:border-slate-800 hover:bg-[rgb(var(--color-surface))]/50 flex flex-col gap-1 transition-colors">
+                          <p className="text-xs font-bold text-[rgb(var(--color-text-1))]">{n.title}</p>
+                          <p className="text-xs text-[rgb(var(--color-text-2))]">{n.message}</p>
+                          <span className="text-[10px] text-slate-400">{new Date(n.time).toLocaleDateString()}</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           {children}
         </div>

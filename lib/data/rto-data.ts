@@ -14,6 +14,9 @@ export interface RoadSignItem {
   rule: string;
   imagePath: string;
   signKey: string;
+  fallbackShape?: string;
+  fallbackColor?: string;
+  steps?: string[];
 }
 
 export const ROAD_SIGNS_DATA: RoadSignItem[] = [
