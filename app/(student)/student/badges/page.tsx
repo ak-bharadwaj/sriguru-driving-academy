@@ -194,12 +194,12 @@ export default function BadgesPage() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 30 }}
               transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-              className="relative w-full max-w-sm overflow-hidden z-10"
+              className="relative w-full max-w-2xl overflow-hidden z-10"
             >
               {/* Close button */}
               <button
                 onClick={() => setSelectedBadge(null)}
-                className="absolute top-4 right-4 p-2 bg-void/80 hover:bg-white/[0.06] border border-border/80 rounded-full text-text-3 hover:text-text-1 transition-all duration-200 z-50 shadow-md"
+                className="absolute top-4 right-4 p-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-full text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all duration-200 z-50 shadow-md"
               >
                 <X className="w-4 h-4" />
               </button>

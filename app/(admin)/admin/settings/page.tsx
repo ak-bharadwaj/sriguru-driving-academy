@@ -6,10 +6,24 @@ import { Settings, Upload, Save, CheckCircle2, Building2, Image as ImageIcon } f
 import { useSettingsStore } from '@/store/settingsStore'
 
 export default function SettingsPage() {
-  const { academyName, logoUrl, setAcademyName, setLogoUrl } = useSettingsStore()
+  const { 
+    academyName, 
+    logoUrl, 
+    instagramUrl, 
+    facebookUrl, 
+    twitterUrl, 
+    setAcademyName, 
+    setLogoUrl, 
+    setInstagramUrl, 
+    setFacebookUrl, 
+    setTwitterUrl 
+  } = useSettingsStore()
   
   const [localName, setLocalName] = useState(academyName)
   const [localLogo, setLocalLogo] = useState<string | null>(logoUrl)
+  const [localInstagram, setLocalInstagram] = useState(instagramUrl)
+  const [localFacebook, setLocalFacebook] = useState(facebookUrl)
+  const [localTwitter, setLocalTwitter] = useState(twitterUrl)
   const [isSaved, setIsSaved] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -27,6 +41,9 @@ export default function SettingsPage() {
   const handleSave = () => {
     setAcademyName(localName)
     setLogoUrl(localLogo)
+    setInstagramUrl(localInstagram)
+    setFacebookUrl(localFacebook)
+    setTwitterUrl(localTwitter)
     setIsSaved(true)
     setTimeout(() => setIsSaved(false), 3000)
   }
@@ -134,6 +151,62 @@ export default function SettingsPage() {
 
           <hr className="border-border/50 my-2" />
 
+          {/* Social Branding Channels */}
+          <div className="flex flex-col gap-6 text-left">
+            <label className="flex items-center gap-2 text-sm font-bold text-text-1 uppercase tracking-wider font-mono">
+              Social Branding Channels
+            </label>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Instagram */}
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 text-xs font-semibold text-text-2 font-mono">
+                  <InstagramIcon className="w-4 h-4 text-pink-500" />
+                  Instagram URL
+                </label>
+                <input 
+                  type="text" 
+                  value={localInstagram}
+                  onChange={(e) => setLocalInstagram(e.target.value)}
+                  placeholder="https://instagram.com/yourhandle"
+                  className="bg-void border border-border rounded-xl px-5 py-3.5 text-xs text-text-1 focus:outline-none focus:border-primary/50 transition-colors"
+                />
+              </div>
+
+              {/* Facebook */}
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 text-xs font-semibold text-text-2 font-mono">
+                  <FacebookIcon className="w-4 h-4 text-blue-500" />
+                  Facebook URL
+                </label>
+                <input 
+                  type="text" 
+                  value={localFacebook}
+                  onChange={(e) => setLocalFacebook(e.target.value)}
+                  placeholder="https://facebook.com/yourhandle"
+                  className="bg-void border border-border rounded-xl px-5 py-3.5 text-xs text-text-1 focus:outline-none focus:border-primary/50 transition-colors"
+                />
+              </div>
+
+              {/* Twitter */}
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 text-xs font-semibold text-text-2 font-mono">
+                  <TwitterIcon className="w-4 h-4 text-sky-400" />
+                  Twitter URL
+                </label>
+                <input 
+                  type="text" 
+                  value={localTwitter}
+                  onChange={(e) => setLocalTwitter(e.target.value)}
+                  placeholder="https://twitter.com/yourhandle"
+                  className="bg-void border border-border rounded-xl px-5 py-3.5 text-xs text-text-1 focus:outline-none focus:border-primary/50 transition-colors"
+                />
+              </div>
+            </div>
+          </div>
+
+          <hr className="border-border/50 my-2" />
+
           {/* Save Action */}
           <div className="flex justify-end items-center gap-4">
             {isSaved && (
@@ -158,5 +231,31 @@ export default function SettingsPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  )
+}
+
+function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  )
+}
+
+function TwitterIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
+    </svg>
   )
 }

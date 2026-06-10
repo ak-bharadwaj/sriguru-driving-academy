@@ -109,12 +109,12 @@ export const BadgeReveal: React.FC = () => {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.8, y: -40 }}
           transition={{ type: 'spring', stiffness: 350, damping: 20 }}
-          className="relative max-w-sm w-full z-20"
+          className="relative max-w-2xl w-full z-20"
         >
           {/* Top-right close button */}
           <button
             onClick={() => setPendingBadgeReveal(null)}
-            className="absolute top-4 right-4 p-2 bg-void/80 hover:bg-white/[0.06] border border-border/80 rounded-full text-text-3 hover:text-text-1 transition-all duration-200 z-50 shadow-md"
+            className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-full text-slate-500 hover:text-slate-800 transition-all duration-200 z-50 shadow-md"
           >
             <X className="w-4 h-4" />
           </button>
