@@ -69,7 +69,7 @@ const BOOKING_DICT = {
     baseFee: "Base tuition fee",
     promoDed: "Promo deduction",
     totalDue: "Total tuition due",
-    secureProcess: "🔒 Registration securely processed via Sri Guru Driving Academy.",
+    secureProcess: "🔒 Registration securely processed via Sri Guru Driving School.",
     promoDesk: "Promo Voucher Desk",
     deductionApp: "Deduction Applied",
     enterPromo: "ENTER PROMO CODE",
@@ -758,7 +758,7 @@ export default function PublicBookingSystem() {
                         return (
                           <div className="text-center py-12 bg-void/50 border border-dashed border-border rounded-2xl flex flex-col items-center justify-center gap-2">
                             <span className="text-[10px] font-mono uppercase tracking-wider text-text-3 font-bold">No slots active currently</span>
-                            <p className="text-xs text-text-2 max-w-xs px-4">There are no operational calendar slots published yet. Please contact Sri Guru Driving Academy support to schedule sessions.</p>
+                            <p className="text-xs text-text-2 max-w-xs px-4">There are no operational calendar slots published yet. Please contact Sri Guru Driving School support to schedule sessions.</p>
                           </div>
                         )
                       }

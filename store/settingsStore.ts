@@ -17,8 +17,8 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      academyName: 'Sri Guru Driving Academy',
-      logoUrl: null,
+      academyName: 'Sri Guru Driving School',
+      logoUrl: '/logo.png',
       instagramUrl: 'https://instagram.com/srigurudriving',
       facebookUrl: 'https://facebook.com/srigurudriving',
       twitterUrl: 'https://twitter.com/srigurudriving',
@@ -29,7 +29,7 @@ export const useSettingsStore = create<SettingsState>()(
       setTwitterUrl: (url) => set({ twitterUrl: url }),
     }),
     {
-      name: 'academy-settings',
+      name: 'academy-settings-v2',
     }
   )
 )

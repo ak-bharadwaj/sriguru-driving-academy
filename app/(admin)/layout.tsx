@@ -196,7 +196,7 @@ export default function AdminConsoleLayout({
           
           <div className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse hidden sm:block" />
           <Link href="/admin/dashboard" className="font-bold text-[rgb(var(--color-text-1))] tracking-tight text-sm sm:text-base uppercase flex items-center gap-2 hover:opacity-80 transition-opacity truncate">
-            {logoUrl && <img src={logoUrl} alt="Logo" className="w-6 h-6 object-contain hidden sm:block bg-white rounded-full p-0.5" />}
+            {logoUrl && <img src={logoUrl} alt="Logo" className="w-8 h-8 object-contain bg-white rounded-full p-0.5 border border-slate-200" />}
             <span className="truncate">{academyName}</span>
             <span className="hidden sm:inline text-blue-600 dark:text-blue-400 font-medium text-xs bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800/50 px-2 py-0.5 rounded">OPS CONSOLE v4.5</span>
           </Link>

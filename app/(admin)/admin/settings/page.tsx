@@ -86,7 +86,7 @@ export default function SettingsPage() {
               type="text" 
               value={localName}
               onChange={(e) => setLocalName(e.target.value)}
-              placeholder="e.g. Sri Guru Driving Academy"
+              placeholder="e.g. Sri Guru Driving School"
               className="bg-void border border-border rounded-xl px-5 py-3.5 text-text-1 focus:outline-none focus:border-primary/50 transition-colors"
             />
             <p className="text-[10px] text-text-3 font-mono">This name will appear in the navigation bar and on official certificates.</p>

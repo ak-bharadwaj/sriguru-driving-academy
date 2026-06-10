@@ -54,15 +54,17 @@ export function GlobalTopNav() {
         : 'bg-transparent'
     }`}>
       {/* Logo */}
-      <Link href="/" className="flex items-center gap-3 group shrink-0">
-        <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+      <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shadow-md shadow-black/10 group-hover:scale-105 transition-transform duration-300 overflow-hidden bg-white border border-slate-200 shrink-0">
           {logoUrl ? (
-            <img src={logoUrl} alt="Academy Logo" className="w-full h-full object-cover bg-white" />
+            <img src={logoUrl} alt="Academy Logo" className="w-[92%] h-[92%] object-contain" />
           ) : (
-            <Car className="w-4 h-4 text-white" />
+            <div className="w-full h-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center">
+              <Car className="w-5 h-5 text-white" />
+            </div>
           )}
         </div>
-        <span className="font-display font-bold text-[14px] sm:text-[15px] leading-tight text-text-1 group-hover:text-violet-400 transition-colors duration-300 hidden sm:block">
+        <span className="font-display font-bold text-[13px] sm:text-[15px] leading-tight text-text-1 group-hover:text-violet-400 transition-colors duration-300">
           {academyName}
         </span>
       </Link>

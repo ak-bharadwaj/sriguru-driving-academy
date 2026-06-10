@@ -63,7 +63,7 @@ export const GuidedTour = () => {
               element: '#nav-profile',
               popover: {
                 title: 'Your Profile',
-                description: 'Customize your settings, view your earned badges, and track your overall driving academy journey.',
+                description: 'Customize your settings, view your earned badges, and track your overall driving school journey.',
                 side: 'top',
                 align: 'center'
               }

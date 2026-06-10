@@ -1,4 +1,4 @@
-# Sri Guru Driving Academy — Architecture Bible
+# Sri Guru Driving School — Architecture Bible
 
 ## Read this at the start of EVERY Claude Code session.
 

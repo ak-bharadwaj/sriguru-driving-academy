@@ -787,7 +787,7 @@ async function main() {
   }
 
   console.log('Seeded 50 RTO Questions successfully.')
-  console.log('Database Seeding Completed Successfully! Enjoy Sri Guru Driving Academy.')
+  console.log('Database Seeding Completed Successfully! Enjoy Sri Guru Driving School.')
 }
 
 main()

@@ -95,7 +95,7 @@ export default function BadgesPage() {
   const ALL_BADGES = [...earnedBadges, ...lockedBadges]
 
   // Safe hydration defaults
-  const activeAcademyName = mounted ? academyName : 'Sri Guru Driving Academy'
+  const activeAcademyName = mounted ? academyName : 'Sri Guru Driving School'
   const activeLogoUrl = mounted ? logoUrl : null
 
   return (

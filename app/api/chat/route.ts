@@ -77,13 +77,13 @@ export async function POST(request: Request) {
     // 3. CONVERSATIONAL
     // -----------------------------------------------------
     else if (lowerMsg.match(/^(hi|hello|hey|greetings)/)) {
-      reply = "Hello there! 👋 I'm the Sri Guru Driving Academy assistant. I can guide you around the app or answer any questions you have about driving rules. What can I help you with?"
+      reply = "Hello there! 👋 I'm the Sri Guru Driving School assistant. I can guide you around the app or answer any questions you have about driving rules. What can I help you with?"
     }
     else if (lowerMsg.match(/(thank you|thanks|thx)/)) {
       reply = "You're very welcome! Drive safe! 🚗"
     }
     else if (lowerMsg.match(/(who are you|what are you|bot or human)/)) {
-      reply = "I am an AI assistant built specifically for the Driving Academy! I know everything about the RTO handbook and where to find things in this app."
+      reply = "I am an AI assistant built specifically for the Driving School! I know everything about the RTO handbook and where to find things in this app."
     }
 
     // Add a slight delay to simulate AI processing time

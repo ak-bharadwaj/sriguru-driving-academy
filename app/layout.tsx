@@ -31,7 +31,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sri Guru Driving Academy",
+  title: "Sri Guru Driving School",
   description: "Learn to drive with high-fidelity gamified instruction, analytics, and elite rewards.",
   manifest: "/manifest.json",
 };

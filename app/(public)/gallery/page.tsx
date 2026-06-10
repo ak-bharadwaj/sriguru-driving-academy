@@ -164,7 +164,7 @@ export default function PublicGalleryPage() {
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
         <div className="max-w-3xl mx-auto relative z-10">
           <h2 className="text-3xl md:text-5xl font-black mb-6">Ready to hit the road?</h2>
-          <p className="text-blue-100 text-lg mb-10 max-w-xl mx-auto">Join thousands of confident drivers who started their journey with Sri Guru Driving Academy.</p>
+          <p className="text-blue-100 text-lg mb-10 max-w-xl mx-auto">Join thousands of confident drivers who started their journey with Sri Guru Driving School.</p>
           <Link href="/book" className="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-600 rounded-2xl font-bold text-lg hover:bg-blue-50 hover:scale-105 transition-all shadow-xl">
             Book Your Demo <ArrowRight className="w-5 h-5" />
           </Link>

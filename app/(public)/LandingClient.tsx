@@ -154,7 +154,7 @@ export default function LandingClient({ courses, instructors, branding, gallery 
 
   const scrollToBooking = () => window.location.href = '/booking'
 
-  const academyName = branding?.academyName || "Sri Guru Academy"
+  const academyName = branding?.academyName || "Sri Guru Driving School"
   const logoUrl = branding?.logoUrl
 
   return (
@@ -626,6 +626,18 @@ export default function LandingClient({ courses, instructors, branding, gallery 
                 <div>
                   <h4 className="font-medium">Email Support</h4>
                   <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">support@sriguru.in</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-medium">Visit Our School</h4>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+                    Shop No.27282-P2, Near Anu Hospital,<br className="hidden sm:inline" />
+                    Bommalasatram, Kadapa Road, Nandyal
+                  </p>
                 </div>
               </div>
             </div>

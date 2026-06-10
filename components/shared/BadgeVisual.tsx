@@ -33,7 +33,7 @@ export const BadgeVisual: React.FC<BadgeVisualProps> = ({
   type,
   rarity = 'Common',
   isEarned,
-  academyName = 'Sri Guru Driving Academy',
+  academyName = 'Sri Guru Driving School',
   studentName = 'Alex Johnson',
   unlockedAt,
   size = 'md',
@@ -263,8 +263,8 @@ export const BadgeVisual: React.FC<BadgeVisualProps> = ({
   }
 
   const handleShare = async () => {
-    const shareTitle = `Sri Guru Driving Academy - Verified Badge`
-    const shareText = `I just earned the ${BADGE_TITLES[type] || type.replace(/_/g, ' ')} digital credential at Sri Guru Driving Academy! Serial: ${credentialId} #driving #badges #gamified`
+    const shareTitle = `Sri Guru Driving School - Verified Badge`
+    const shareText = `I just earned the ${BADGE_TITLES[type] || type.replace(/_/g, ' ')} digital credential at Sri Guru Driving School! Serial: ${credentialId} #driving #badges #gamified`
     
     if (navigator.share) {
       try {
@@ -465,12 +465,12 @@ export const BadgeVisual: React.FC<BadgeVisualProps> = ({
                 <input 
                   type="text" 
                   readOnly 
-                  value={`I earned the ${badgeTitle} digital badge at Sri Guru Academy! Serial: ${credentialId}`}
+                  value={`I earned the ${badgeTitle} digital badge at Sri Guru Driving School! Serial: ${credentialId}`}
                   className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-slate-700 dark:text-slate-300 flex-1 outline-none"
                 />
                 <button 
                   onClick={() => {
-                    navigator.clipboard.writeText(`I earned the ${badgeTitle} digital badge at Sri Guru Driving Academy! Serial: ${credentialId}`);
+                    navigator.clipboard.writeText(`I earned the ${badgeTitle} digital badge at Sri Guru Driving School! Serial: ${credentialId}`);
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                     toast.success('Text copied to clipboard!');
@@ -484,7 +484,7 @@ export const BadgeVisual: React.FC<BadgeVisualProps> = ({
               <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider mt-2">Publish To Handles</span>
               <div className="grid grid-cols-3 gap-2">
                 <a 
-                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin : '')}&quote=${encodeURIComponent(`I earned the ${badgeTitle} digital badge at Sri Guru Driving Academy! Serial: ${credentialId}`)}`}
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin : '')}&quote=${encodeURIComponent(`I earned the ${badgeTitle} digital badge at Sri Guru Driving School! Serial: ${credentialId}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex flex-col items-center justify-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition-all gap-1.5"
@@ -494,7 +494,7 @@ export const BadgeVisual: React.FC<BadgeVisualProps> = ({
                 </a>
 
                 <a 
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`I earned the ${badgeTitle} digital badge at Sri Guru Driving Academy! Serial: ${credentialId} #driving #gamification`)}`}
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`I earned the ${badgeTitle} digital badge at Sri Guru Driving School! Serial: ${credentialId} #driving #gamification`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex flex-col items-center justify-center p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition-all gap-1.5"

@@ -46,7 +46,7 @@ export const BadgeReveal: React.FC = () => {
   // Create array of 30 mock confetti particle offsets
   const confettiArray = Array.from({ length: 30 })
 
-  const activeAcademyName = mounted ? academyName : 'Sri Guru Driving Academy'
+  const activeAcademyName = mounted ? academyName : 'Sri Guru Driving School'
   const activeLogoUrl = mounted ? logoUrl : null
 
   return (
