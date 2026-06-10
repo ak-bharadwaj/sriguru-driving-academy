@@ -158,14 +158,23 @@ export default function LandingClient({ courses, instructors, branding, gallery 
   const logoUrl = branding?.logoUrl
 
   return (
-    <div className="w-full min-h-screen bg-slate-50 dark:bg-[#030014] text-slate-900 dark:text-slate-50 font-body selection:bg-violet-500/30 selection:text-violet-900 dark:selection:text-violet-100 relative overflow-x-hidden">
+    <div 
+      className="w-full min-h-screen bg-slate-50 dark:bg-[#030014] text-slate-900 dark:text-slate-50 font-body selection:bg-violet-500/30 selection:text-violet-900 dark:selection:text-violet-100 relative overflow-x-hidden"
+      style={{
+        backgroundImage: `
+          radial-gradient(circle at 10% 0%, rgba(139, 92, 246, 0.08) 0%, transparent 45%),
+          radial-gradient(circle at 90% 100%, rgba(6, 182, 212, 0.08) 0%, transparent 45%),
+          radial-gradient(circle at 30% 50%, rgba(217, 70, 239, 0.05) 0%, transparent 40%)
+        `
+      }}
+    >
       
       {/* ----------------------------------------------------
           AURORA MESH GRADIENTS (Global Background - Responsive Fidelity)
           ---------------------------------------------------- */}
-      <div className="fixed top-[-20%] left-[-10%] w-[80vw] md:w-[60vw] h-[80vw] md:h-[60vw] rounded-full bg-violet-500/15 md:bg-violet-500/20 dark:bg-violet-600/15 md:dark:bg-violet-600/20 blur-[80px] md:blur-[140px] pointer-events-none mix-blend-multiply dark:mix-blend-screen z-0 will-change-transform" />
-      <div className="fixed bottom-[-10%] right-[-10%] w-[70vw] md:w-[50vw] h-[70vw] md:h-[50vw] rounded-full bg-cyan-500/15 md:bg-cyan-500/20 dark:bg-teal-500/10 md:dark:bg-teal-500/15 blur-[80px] md:blur-[140px] pointer-events-none mix-blend-multiply dark:mix-blend-screen z-0 will-change-transform" />
-      <div className="fixed top-[40%] left-[20%] w-[60vw] md:w-[40vw] h-[60vw] md:h-[40vw] rounded-full bg-fuchsia-500/10 md:bg-fuchsia-500/10 dark:bg-fuchsia-600/10 md:dark:bg-fuchsia-600/15 blur-[80px] md:blur-[140px] pointer-events-none mix-blend-multiply dark:mix-blend-screen z-0 will-change-transform" />
+      <div className="fixed top-[-20%] left-[-10%] w-[80vw] md:w-[60vw] h-[80vw] md:h-[60vw] rounded-full bg-violet-500/15 md:bg-violet-500/20 dark:bg-violet-600/15 md:dark:bg-violet-600/20 blur-[80px] md:blur-[140px] pointer-events-none mix-blend-multiply dark:mix-blend-screen z-0 will-change-transform hidden md:block" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[70vw] md:w-[50vw] h-[70vw] md:h-[50vw] rounded-full bg-cyan-500/15 md:bg-cyan-500/20 dark:bg-teal-500/10 md:dark:bg-teal-500/15 blur-[80px] md:blur-[140px] pointer-events-none mix-blend-multiply dark:mix-blend-screen z-0 will-change-transform hidden md:block" />
+      <div className="fixed top-[40%] left-[20%] w-[60vw] md:w-[40vw] h-[60vw] md:h-[40vw] rounded-full bg-fuchsia-500/10 md:bg-fuchsia-500/10 dark:bg-fuchsia-600/10 md:dark:bg-fuchsia-600/15 blur-[80px] md:blur-[140px] pointer-events-none mix-blend-multiply dark:mix-blend-screen z-0 will-change-transform hidden md:block" />
 
       {/* ----------------------------------------------------
           PHOTOGRAPHIC HERO SECTION (SPATIAL GLASS)
