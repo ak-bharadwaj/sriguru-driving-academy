@@ -70,8 +70,24 @@ export function AmbientBackground() {
         }}
       />
 
+      {/* Mobile-only static, high-performance background gradient to replace heavy animated orbs */}
+      <div 
+        className="absolute inset-0 md:hidden pointer-events-none"
+        style={{
+          backgroundImage: isDark
+            ? `
+              radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.15) 0%, transparent 60%),
+              radial-gradient(circle at 90% 90%, rgba(217, 70, 239, 0.12) 0%, transparent 60%)
+            `
+            : `
+              radial-gradient(circle at 10% 10%, rgba(165, 180, 252, 0.2) 0%, transparent 60%),
+              radial-gradient(circle at 90% 90%, rgba(245, 208, 254, 0.18) 0%, transparent 60%)
+            `
+        }}
+      />
+
       {/* 2. Interactive Fluid Mesh Gradient Fields (Pure HTML/CSS - NO SVGs for high performance) */}
-      <div className="absolute inset-0 overflow-hidden z-0">
+      <div className="absolute inset-0 overflow-hidden z-0 hidden md:block">
         
         {/* Orb 1: Top Left */}
         <motion.div
@@ -196,7 +212,7 @@ export function AmbientBackground() {
       </div>
 
       {/* 3. Subtle volumetric light sweeps to add premium depth */}
-      <div className="absolute inset-0 opacity-[0.25] dark:opacity-[0.35]">
+      <div className="absolute inset-0 opacity-[0.25] dark:opacity-[0.35] hidden md:block">
         <motion.div
           animate={{ x: ["-100%", "100%"] }}
           transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
