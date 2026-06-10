@@ -21,11 +21,11 @@ export function LanguageToggle() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="px-3 py-2 rounded-full bg-surface border border-border shadow-sm hover:border-primary transition-colors duration-300 flex items-center justify-center text-text-2 hover:text-text-1 gap-2 group"
+        className="p-2 md:px-3 md:py-2 rounded-full bg-surface border border-border shadow-sm hover:border-primary transition-colors duration-300 flex items-center justify-center text-text-2 hover:text-text-1 gap-1.5 md:gap-2 group"
         aria-label="Select Language"
       >
         <Globe className="w-4 h-4 text-primary group-hover:drop-shadow-[0_0_8px_rgba(99,102,241,0.6)] transition-all" />
-        <span className="text-xs font-bold font-display">{currentLang.code}</span>
+        <span className="text-xs font-bold font-display hidden md:inline">{currentLang.code}</span>
       </button>
 
       <AnimatePresence>

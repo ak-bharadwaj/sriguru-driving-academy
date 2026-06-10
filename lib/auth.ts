@@ -1,11 +1,8 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
-import { PrismaClient } from '@prisma/client'
+import { db as prisma } from '@/lib/db'
 import bcrypt from 'bcryptjs'
-
-// Use global prisma instance if available to avoid multiple connections in development
-const prisma = new PrismaClient()
 
 // Simple in-memory rate limiting map
 const loginAttempts = new Map<string, { count: number; timestamp: number }>()

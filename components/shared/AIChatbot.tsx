@@ -220,7 +220,7 @@ export function AIChatbot() {
           onClick={() => setIsOpen(true)}
           className="w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.4)] hover:shadow-[0_0_30px_rgba(56,189,248,0.6)] transition-shadow"
         >
-          <MessageSquare className="w-6 h-6" />
+          <Bot className="w-6 h-6 animate-pulse" />
         </motion.button>
       )}
 

@@ -243,7 +243,7 @@ export default function LandingClient({ courses, instructors, branding, gallery 
       {/* ----------------------------------------------------
           BENTO GRID: SPATIAL FEATURES
           ---------------------------------------------------- */}
-      <section className="py-32 px-6 relative z-10">
+      <section className="py-14 md:py-32 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="mb-20">
             <h2 className="font-display text-4xl md:text-6xl font-medium tracking-tighter mb-6">{t('landing.features.title')}</h2>
@@ -301,7 +301,7 @@ export default function LandingClient({ courses, instructors, branding, gallery 
       {/* ----------------------------------------------------
           SPATIAL CURRICULUM
           ---------------------------------------------------- */}
-      <section id="courses" className="py-32 px-6 relative z-10 border-t border-black/5 dark:border-white/5">
+      <section id="courses" className="py-14 md:py-32 px-6 relative z-10 border-t border-black/5 dark:border-white/5">
         <div className="max-w-7xl mx-auto">
           <div className="mb-20">
             <h2 className="font-display text-4xl md:text-6xl font-medium tracking-tighter mb-6">{t('landing.curriculum.title')}</h2>
@@ -364,7 +364,7 @@ export default function LandingClient({ courses, instructors, branding, gallery 
       {/* ----------------------------------------------------
           INTERACTIVE KNOWLEDGE CHECK
           ---------------------------------------------------- */}
-      <section className="py-32 px-6 relative z-10 border-t border-black/5 dark:border-white/5">
+      <section className="py-14 md:py-32 px-6 relative z-10 border-t border-black/5 dark:border-white/5">
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-16">
             <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tighter mb-4">{t('landing.quiz.title')}</h2>
@@ -434,7 +434,7 @@ export default function LandingClient({ courses, instructors, branding, gallery 
       {/* ----------------------------------------------------
           IMMERSIVE GALLERY
           ---------------------------------------------------- */}
-      <section id="gallery" className="py-32 px-6 relative z-10 border-t border-black/5 dark:border-white/5">
+      <section id="gallery" className="py-14 md:py-32 px-6 relative z-10 border-t border-black/5 dark:border-white/5">
         <div className="max-w-7xl mx-auto">
           <div className="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
@@ -531,7 +531,7 @@ export default function LandingClient({ courses, instructors, branding, gallery 
       {/* ----------------------------------------------------
           TESTIMONIALS & FAQ
           ---------------------------------------------------- */}
-      <section className="py-32 px-6 relative z-10 border-t border-black/5 dark:border-white/5">
+      <section className="py-14 md:py-32 px-6 relative z-10 border-t border-black/5 dark:border-white/5">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20">
             
           {/* Reviews Side */}
@@ -602,7 +602,7 @@ export default function LandingClient({ courses, instructors, branding, gallery 
       {/* ----------------------------------------------------
           CONTACT ENQUIRY FORM
           ---------------------------------------------------- */}
-      <section id="contact" className="py-32 px-6 relative z-10 border-t border-black/5 dark:border-white/5">
+      <section id="contact" className="py-14 md:py-32 px-6 relative z-10 border-t border-black/5 dark:border-white/5">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-16">
           <div className="flex-1">
             <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tighter mb-6">Have Questions?</h2>
@@ -690,7 +690,7 @@ export default function LandingClient({ courses, instructors, branding, gallery 
       {/* ----------------------------------------------------
           DOWNLOAD APP CTA (SPATIAL)
           ---------------------------------------------------- */}
-      <section id="download-app" className="py-32 px-6 relative z-10">
+      <section id="download-app" className="py-14 md:py-32 px-6 relative z-10">
         <div className="max-w-5xl mx-auto">
           <div className="bg-gradient-to-br from-indigo-900 to-violet-900 rounded-[3rem] p-12 md:p-20 relative overflow-hidden shadow-2xl">
             {/* Glowing orbs inside the dark box */}
