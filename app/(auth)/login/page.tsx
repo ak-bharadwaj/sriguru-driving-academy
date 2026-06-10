@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation'
 import { Lock, Mail, Loader2, ArrowRight, ShieldCheck, CarFront } from 'lucide-react'
 import Image from 'next/image'
 import { useTranslation } from '@/hooks/useTranslation'
+import { Capacitor } from '@capacitor/core'
+import { GoogleSignIn } from '@capawesome/capacitor-google-sign-in'
 
 // ELEGANT SPRING VARIANTS
 const fadeUpSpring = {
@@ -69,6 +71,44 @@ export default function CentralLoginHub() {
   const handleGoogleLogin = async () => {
     setIsAuthenticating(true)
     setErrorMsg('')
+    
+    // NATIVE CAPACITOR APP FLOW
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const result = await GoogleSignIn.signIn()
+        if (result.email) {
+          const res = await signIn('credentials', {
+            redirect: false,
+            email: result.email,
+            name: result.displayName || '',
+            avatarUrl: result.imageUrl || '',
+            isGoogleNative: 'true',
+            password: 'google-auth-bypass-secure' // dummy password required by NextAuth structure
+          })
+          
+          if (res?.error) {
+            setErrorMsg('Authentication failed on server.')
+            setIsAuthenticating(false)
+          } else {
+            const session = await getSession()
+            const role = (session?.user as { role?: string })?.role
+            if (role === 'ADMIN') router.push('/admin/students')
+            else if (role === 'INSTRUCTOR') router.push('/instructor/schedule')
+            else router.push('/student/dashboard')
+          }
+        } else {
+          setErrorMsg('No email associated with this Google account.')
+          setIsAuthenticating(false)
+        }
+      } catch (e: any) {
+        console.error("Native Google sign-in failed", e)
+        setErrorMsg('Google native sign-in failed.')
+        setIsAuthenticating(false)
+      }
+      return
+    }
+
+    // WEB BROWSER FLOW
     try {
       // signIn with Google will redirect; role-based redirect handled in middleware
       await signIn('google', { callbackUrl: '/student/dashboard' })

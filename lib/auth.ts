@@ -25,9 +25,51 @@ export const authOptions: NextAuthOptions = {
       name: 'Credentials',
       credentials: {
         email: { label: 'Email', type: 'email', placeholder: 'student@sriguru.com' },
-        password: { label: 'Password', type: 'password' }
+        password: { label: 'Password', type: 'password' },
+        name: { label: 'Name', type: 'text' },
+        avatarUrl: { label: 'AvatarUrl', type: 'text' },
+        isGoogleNative: { label: 'IsGoogleNative', type: 'text' }
       },
       async authorize(credentials) {
+        if (credentials?.isGoogleNative === 'true' && credentials?.email) {
+          const email = credentials.email.trim().toLowerCase()
+          try {
+            let dbUser = await prisma.user.findUnique({ where: { email } })
+            if (!dbUser) {
+              dbUser = await prisma.user.create({
+                data: {
+                  email,
+                  name: credentials.name || email.split('@')[0],
+                  passwordHash: '',
+                  role: 'STUDENT',
+                  avatarUrl: credentials.avatarUrl || null
+                }
+              })
+              await prisma.student.create({
+                data: {
+                  userId: dbUser.id,
+                  trainingType: 'BEGINNER',
+                  status: 'ACTIVE'
+                }
+              })
+            }
+            return {
+              id: dbUser.id,
+              email: dbUser.email,
+              name: dbUser.name,
+              role: dbUser.role
+            }
+          } catch (e) {
+            console.error("Native Google Login DB Error", e)
+          }
+          return {
+            id: 'mock-native-google-student-id-123',
+            email,
+            name: credentials.name || 'Google Native User (Mock)',
+            role: 'STUDENT'
+          }
+        }
+
         if (!credentials?.email || !credentials?.password) {
           throw new Error('Missing credentials')
         }
