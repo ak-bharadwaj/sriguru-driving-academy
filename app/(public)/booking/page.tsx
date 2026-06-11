@@ -1130,6 +1130,9 @@ export default function PublicBookingSystem() {
                   <p className="text-xs text-text-2 leading-relaxed mt-2 font-body px-4">
                     {t.trialVerified}
                   </p>
+                  <p className="text-xs text-primary leading-relaxed font-semibold font-body px-4 max-w-sm mt-1">
+                    {bookingResult.msg}
+                  </p>
                 </div>
 
                 <div className="w-full bg-void/60 border border-border p-5 rounded-2xl text-left flex flex-col gap-3 font-mono text-xs">

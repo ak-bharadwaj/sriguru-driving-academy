@@ -158,7 +158,9 @@ export async function POST(request: Request) {
       success: true,
       bookingRef,
       regNo,
-      message: "Registration successful! You now have instant access to your student portal using password: sriguru123"
+      message: password
+        ? "Registration successful! You now have instant access to your student portal using your chosen password."
+        : "Registration successful! You now have instant access to your student portal using default password: sriguru123"
     }, { status: 200 })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
