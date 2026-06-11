@@ -68,6 +68,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing mandatory booking details' }, { status: 400 })
     }
 
+    // Map course ID to schema's TrainingType enum
+    let mappedTrainingType: import('@prisma/client').TrainingType = 'BEGINNER'
+    if (trainingType === 'course-beginner' || trainingType === 'BEGINNER') {
+      mappedTrainingType = 'BEGINNER'
+    } else if (trainingType === 'course-advanced' || trainingType === 'ADVANCED') {
+      mappedTrainingType = 'ADVANCED'
+    } else if (trainingType === 'course-rto' || trainingType === 'RTO_FAST_TRACK') {
+      mappedTrainingType = 'RTO_FAST_TRACK'
+    }
+
     const bookingRef = Math.random().toString(36).substring(2, 10).toUpperCase()
     let regNo = 'N/A'
     
@@ -91,9 +101,9 @@ export async function POST(request: Request) {
       const bcrypt = require('bcryptjs')
       const passwordHash = await bcrypt.hash(password || 'sriguru123', 10)
       
-      let courseFee = 8999
-      if (trainingType === 'ADVANCED') courseFee = 6500
-      if (trainingType === 'RTO_FAST_TRACK') courseFee = 4999
+      let courseFee = 4999
+      if (mappedTrainingType === 'ADVANCED') courseFee = 6999
+      if (mappedTrainingType === 'RTO_FAST_TRACK') courseFee = 2999
 
       const newUser = await db.user.create({
         data: {
@@ -105,7 +115,7 @@ export async function POST(request: Request) {
           student: {
             create: {
               regNo,
-              trainingType: trainingType as any,
+              trainingType: mappedTrainingType,
               status: 'ACTIVE',
               courseFee
             }
@@ -129,7 +139,7 @@ export async function POST(request: Request) {
         name,
         email,
         phone,
-        trainingType: trainingType as import('@prisma/client').TrainingType,
+        trainingType: mappedTrainingType,
         status: 'PENDING',
         studentId,
         slotId

@@ -419,9 +419,14 @@ export default function PublicBookingSystem() {
           msg: data.message
         })
         setStep(5) // Move to full page success display state
+      } else {
+        const errData = await res.json().catch(() => ({}))
+        const errMsg = errData?.error || "An unexpected error occurred during submission."
+        toast.error(errMsg)
       }
     } catch (e) {
       console.error(e)
+      toast.error("Failed to connect to the server. Please check your internet connection.")
     } finally {
       setSubmitting(false)
     }
