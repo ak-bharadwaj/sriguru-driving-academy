@@ -141,15 +141,6 @@ export default function CentralLoginHub() {
       >
         {/* Brand Header */}
         <div className="flex flex-col items-center justify-center mb-10 text-center">
-          <motion.div 
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', delay: 0.1, stiffness: 200 }}
-            className="w-16 h-16 bg-gradient-to-br from-primary to-blue-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-primary/30 mb-6 relative group overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-            <CarFront className="w-8 h-8 text-white" />
-          </motion.div>
           <h1 className="text-3xl sm:text-4xl font-display font-extrabold tracking-tight text-text-1 mb-2">
             {t('auth.title1')} <span className="text-primary">{t('auth.title2')}</span>
           </h1>
@@ -281,18 +272,14 @@ export default function CentralLoginHub() {
 
         </motion.div>
 
-        {/* Bottom Trust Badge */}
+        {/* Bottom Support Link */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 1 }}
-          className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 text-center"
+          className="mt-8 flex items-center justify-center text-center"
         >
-          <div className="flex items-center gap-2 px-4 py-2 bg-surface/50 rounded-full border border-border backdrop-blur-sm">
-            <ShieldCheck className="w-4 h-4 text-success" />
-            <span className="text-[11px] font-mono text-text-2 uppercase tracking-wider">{t('auth.security')}</span>
-          </div>
-          <button type="button" className="text-xs text-text-3 font-medium hover:text-primary transition-colors">
+          <button type="button" className="text-xs text-text-2 hover:text-primary font-semibold transition-colors duration-200">
             {t('auth.support')}
           </button>
         </motion.div>
