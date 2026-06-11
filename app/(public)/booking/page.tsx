@@ -427,6 +427,18 @@ export default function PublicBookingSystem() {
           ref: data.bookingRef,
           msg: data.message
         })
+        
+        // Auto-login the user in the background so they can go directly to the dashboard
+        try {
+          await signIn('credentials', {
+            redirect: false,
+            email,
+            password: password || 'sriguru123'
+          })
+        } catch (authErr) {
+          console.error("Background auto-login failed:", authErr)
+        }
+
         setStep(5) // Move to full page success display state
       } else {
         const errData = await res.json().catch(() => ({}))
@@ -1147,10 +1159,10 @@ export default function PublicBookingSystem() {
                 </div>
 
                 <button
-                  onClick={() => window.location.href = '/login'}
+                  onClick={() => window.location.href = '/student/dashboard'}
                   className="px-6 py-3 bg-primary hover:bg-primary/95 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all duration-200 mt-4"
                 >
-                  Go to Login
+                  Go to Dashboard
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </motion.div>
