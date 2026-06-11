@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Calendar, Clock, User, Car, MapPin, CheckCircle2, Circle, Trophy } from 'lucide-react'
 import { useLanguageStore } from '@/store/languageStore'
@@ -14,7 +14,9 @@ const PAGE_DICT = {
     vehicle: 'Training Vehicle',
     timing: 'Daily Slot',
     location: 'Reporting Area',
-    syllabusTitle: '21-Day Mastery Syllabus',
+    syllabusTitleBeginner: '21-Day Mastery Syllabus',
+    syllabusTitleAdvanced: '14-Day Advanced Syllabus',
+    syllabusTitleRto: '7-Day RTO Bootcamp Syllabus',
     day: 'Day',
     completed: 'Completed',
     today: 'Today',
@@ -27,7 +29,9 @@ const PAGE_DICT = {
     vehicle: 'प्रशिक्षण वाहन',
     timing: 'दैनिक स्लॉट',
     location: 'रिपोर्टिंग क्षेत्र',
-    syllabusTitle: '21-दिवसीय महारत पाठ्यक्रम',
+    syllabusTitleBeginner: '21-दिवसीय महारत पाठ्यक्रम',
+    syllabusTitleAdvanced: '14-दिवसीय उन्नत पाठ्यक्रम',
+    syllabusTitleRto: '7-दिवसीय RTO बूटकैंप पाठ्यक्रम',
     day: 'दिन',
     completed: 'पूरा हुआ',
     today: 'आज',
@@ -40,7 +44,9 @@ const PAGE_DICT = {
     vehicle: 'శిక్షణ వాహనం',
     timing: 'రోజువారీ స్లాట్',
     location: 'రిపోర్టింగ్ ప్రాంతం',
-    syllabusTitle: '21-రోజుల నైపుణ్య సిలబస్',
+    syllabusTitleBeginner: '21-రోజుల నైపుణ్య సిలబస్',
+    syllabusTitleAdvanced: '14-రోజుల అధునాతన సిలబస్',
+    syllabusTitleRto: '7-రోజుల RTO బూట్‌క్యాంప్ సిలబస్',
     day: 'రోజు',
     completed: 'పూర్తయింది',
     today: 'నేడు',
@@ -78,8 +84,63 @@ export default function SchedulePage() {
   const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
   const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
 
-  // Mock student state (Day 5)
-  const currentDay = 5
+  const [student, setStudent] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/student/dashboard')
+      .then(res => res.json())
+      .then(data => {
+        setStudent(data)
+        setLoading(false)
+      })
+      .catch(err => {
+        console.error(err)
+        setLoading(false)
+      })
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-void flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-4 border-slate-800 border-t-primary animate-spin" />
+          <span className="text-xs font-mono uppercase tracking-widest text-primary">Loading Schedule...</span>
+        </div>
+      </div>
+    )
+  }
+
+  const trainingType = student?.trainingType || 'BEGINNER'
+  const durationDays = trainingType === 'ADVANCED' ? 14 : trainingType === 'RTO_FAST_TRACK' ? 7 : 21
+  const currentDay = Math.min((student?.totalAttended || 0) + 1, durationDays + 1)
+  const timingTime = student?.bookings?.[0]?.slot?.time || student?.bookings?.[0]?.preferredTime || '07:00 AM'
+
+  let vehicleName = 'Maruti Swift (Dual Control)'
+  let vehicleDesc = 'Manual Transmission LMV'
+  if (trainingType === 'ADVANCED') {
+    vehicleName = 'Hyundai i20 (Dual Control)'
+    vehicleDesc = 'Defensive Manual/Automatic LMV'
+  } else if (trainingType === 'RTO_FAST_TRACK') {
+    vehicleName = 'Maruti Alto (RTO Spec)'
+    vehicleDesc = 'RTO Track Exam Ready Car'
+  }
+
+  const syllabusTitle = trainingType === 'ADVANCED' ? t.syllabusTitleAdvanced
+                      : trainingType === 'RTO_FAST_TRACK' ? t.syllabusTitleRto
+                      : t.syllabusTitleBeginner
+
+  const syllabusList = SYLLABUS.slice(0, durationDays)
+
+  const getRecurrenceNotice = () => {
+    if (activeLang === 'HI') {
+      return `दैनिक स्लॉट नीति: आपका चयनित स्लॉट (${timingTime}) आपके पूरे ${durationDays}-दिवसीय पाठ्यक्रम के लिए हर दिन इसी समय आपकी दैनिक सीट सुरक्षित करता है।`
+    }
+    if (activeLang === 'TE') {
+      return `రోజువారీ స్లాట్ విధానం: మీరు ఎంచుకున్న స్లాట్ (${timingTime}) మీ మొత్తం ${durationDays}-రోజుల కోర్సు కోసం ప్రతిరోజు ఇదే సమయానికి మీ రోజువారీ సీటును రిజర్వ్ చేస్తుంది.`
+    }
+    return `Daily Recurrence: Your selected slot (${timingTime}) reserves your daily seat at this exact hour every single day for your entire ${durationDays}-day course duration.`
+  }
 
   return (
     <div className="min-h-screen bg-void text-text-1 pb-32 pt-20 px-4 md:px-8 font-body">
@@ -110,7 +171,7 @@ export default function SchedulePage() {
                 </div>
                 <div>
                   <p className="text-xs font-mono text-text-3 uppercase">{t.instructor}</p>
-                  <p className="text-lg font-bold">Capt. Vikram Singh</p>
+                  <p className="text-lg font-bold">{student?.instructor?.name || 'Capt. Vikram Singh'}</p>
                   <p className="text-sm text-accent">15+ Years Experience</p>
                 </div>
               </div>
@@ -121,8 +182,8 @@ export default function SchedulePage() {
                 </div>
                 <div>
                   <p className="text-xs font-mono text-text-3 uppercase">{t.vehicle}</p>
-                  <p className="text-lg font-bold">Maruti Swift (Dual Control)</p>
-                  <p className="text-sm text-text-2">Manual Transmission</p>
+                  <p className="text-lg font-bold">{vehicleName}</p>
+                  <p className="text-sm text-text-2">{vehicleDesc}</p>
                 </div>
               </div>
             </div>
@@ -135,7 +196,7 @@ export default function SchedulePage() {
                 </div>
                 <div>
                   <p className="text-xs font-mono text-text-3 uppercase">{t.timing}</p>
-                  <p className="text-2xl font-display font-bold text-primary">07:00 AM</p>
+                  <p className="text-2xl font-display font-bold text-primary">{timingTime}</p>
                   <p className="text-sm text-text-2">Monday - Saturday (1 Hour)</p>
                 </div>
               </div>
@@ -151,14 +212,23 @@ export default function SchedulePage() {
                 </div>
               </div>
             </div>
+
+            {/* Dynamic Daily Recurrence Notice */}
+            <div className="col-span-1 md:col-span-2 bg-primary/5 border border-primary/20 p-4 rounded-2xl flex items-start gap-3 mt-2">
+              <span className="text-lg leading-none shrink-0 mt-0.5">📅</span>
+              <div className="text-xs leading-relaxed text-text-2 font-mono">
+                <strong className="text-text-1 uppercase font-bold block mb-1">Recurrence Implication</strong>
+                {getRecurrenceNotice()}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* 21-Day Syllabus Timeline */}
+        {/* Syllabus Timeline */}
         <div className="mb-6 flex justify-between items-end">
-          <h2 className="text-2xl font-display font-bold">{t.syllabusTitle}</h2>
+          <h2 className="text-2xl font-display font-bold">{syllabusTitle}</h2>
           <span className="text-sm font-mono text-primary font-bold bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-            {currentDay - 1} / 21 {t.completed}
+            {Math.min(currentDay - 1, durationDays)} / {durationDays} {t.completed}
           </span>
         </div>
 
@@ -167,7 +237,7 @@ export default function SchedulePage() {
           <div className="absolute left-[34px] md:left-[42px] top-4 bottom-4 w-1 bg-surface border-r border-border" />
 
           <div className="space-y-8 relative">
-            {SYLLABUS.map((day, idx) => {
+            {syllabusList.map((day, idx) => {
               const dayNum = idx + 1
               const isCompleted = dayNum < currentDay
               const isToday = dayNum === currentDay

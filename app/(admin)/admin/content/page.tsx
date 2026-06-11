@@ -306,7 +306,12 @@ export default function ContentManagementPage() {
                       <button className="p-1.5 bg-void/80 hover:bg-danger/20 hover:text-danger rounded-lg text-text-2 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
 
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-primary mb-2">{course.category}</span>
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <span className="text-[10px] font-mono uppercase tracking-widest text-primary">{course.category}</span>
+                      <span className="px-2 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-extrabold uppercase tracking-wider">
+                        {course.tag?.[activeLang] || course.tag?.EN || (typeof course.tag === 'string' ? course.tag : '')}
+                      </span>
+                    </div>
                     <h3 className="text-xl font-display font-bold text-text-1 leading-tight">{course.title?.[activeLang] || course.title?.EN || course.title}</h3>
                     <p className="text-sm text-text-2 mt-3 mb-6 line-clamp-3">{course.desc?.[activeLang] || course.desc?.EN || course.desc}</p>
                     

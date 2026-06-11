@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Check, CheckCircle, ArrowRight, User, Phone, Mail, Clock, ArrowLeft, BookOpen, Award, Zap, Lock, Eye, EyeOff } from 'lucide-react'
+import { Calendar, Check, CheckCircle, ArrowRight, User, Phone, Mail, Clock, ArrowLeft, BookOpen, Award, Zap, Lock, Eye, EyeOff, Info } from 'lucide-react'
 import { signIn, useSession } from 'next-auth/react'
 import toast from 'react-hot-toast'
 import { useLanguageStore } from '@/store/languageStore'
@@ -82,7 +82,10 @@ const BOOKING_DICT = {
     bookingConf: "Booking Confirmed!",
     trialVerified: "Your trial slot registration has been verified by the Sri Guru dashboard.",
     refId: "REFERENCE ID:",
-    viewDash: "View Dashboard"
+    viewDash: "View Dashboard",
+    dailyPolicyTitle: "📅 Daily Recurrence Policy",
+    dailyPolicyDesc: "Selecting a slot reserves your daily seat at this exact hour every day for the entire course duration.",
+    summaryNote: "Note: Your selection implies daily attendance at this exact hour every single day for the entire program duration."
   },
   HI: {
     scheduleTrial: "ट्रायल सत्र अनुसूची करें",
@@ -133,7 +136,10 @@ const BOOKING_DICT = {
     bookingConf: "बुकिंग की पुष्टि हो गई!",
     trialVerified: "आपके ट्रायल स्लॉट पंजीकरण को श्री गुरु डैशबोर्ड द्वारा सत्यापित किया गया है।",
     refId: "संदर्भ आईडी:",
-    viewDash: "डैशबोर्ड देखें"
+    viewDash: "डैशबोर्ड देखें",
+    dailyPolicyTitle: "📅 दैनिक पुनरावृत्ति नीति",
+    dailyPolicyDesc: "एक स्लॉट चुनने से पाठ्यक्रम की पूरी अवधि के लिए हर दिन इसी सटीक समय पर आपकी दैनिक सीट सुरक्षित हो जाती है।",
+    summaryNote: "नोट: आपके चयन का अर्थ है कि कार्यक्रम की पूरी अवधि के लिए हर दिन इसी सटीक समय पर दैनिक उपस्थिति आवश्यक है।"
   },
   TE: {
     scheduleTrial: "ట్రయల్ సెషన్‌ను షెడ్యూల్ చేయండి",
@@ -184,7 +190,10 @@ const BOOKING_DICT = {
     bookingConf: "బుకింగ్ నిర్ధారించబడింది!",
     trialVerified: "మీ ట్రయల్ స్లాట్ రిజిస్ట్రేషన్ శ్రీ గురు డాష్‌బోర్డ్ ద్వారా ధృవీకరించబడింది.",
     refId: "రిఫరెన్స్ ID:",
-    viewDash: "డాష్‌బోర్డ్ చూడండి"
+    viewDash: "డాష్‌బోర్డ్ చూడండి",
+    dailyPolicyTitle: "📅 రోజువారీ పునరావృత విధానం",
+    dailyPolicyDesc: "ఒక స్లాట్‌ను ఎంచుకోవడం ద్వారా కోర్సు యొక్క మొత్తం వ్యవధిలో ప్రతిరోజూ ఇదే ఖచ్చితమైన సమయానికి మీ రోజువారీ సీటు రిజర్వ్ చేయబడుతుంది.",
+    summaryNote: "గమనిక: మీరు ఎంచుకున్న సమయం అంటే ప్రోగ్రామ్ యొక్క మొత్తం వ్యవధిలో ప్రతిరోజూ ఇదే ఖచ్చితమైన గంటకు రోజువారీ హాజరు కావాలి."
   }
 }
 
@@ -685,7 +694,10 @@ export default function PublicBookingSystem() {
                                 <span className="text-sm font-bold text-text-1">{displayTitle}</span>
                                 <span className="px-2 py-0.5 rounded-full bg-void text-[9px] font-bold text-accent border border-border">₹{opt.price}</span>
                               </div>
-                              <span className="text-[10px] text-text-3 mt-0.5 font-mono">{displayTag} · {displayDesc}</span>
+                              <div className="flex flex-wrap items-center gap-2 mt-1">
+                                <span className="px-2 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-extrabold uppercase tracking-wider">{displayTag}</span>
+                                <span className="text-[10px] text-text-3 font-mono">{displayDesc}</span>
+                              </div>
                             </div>
                           </div>
 
@@ -746,6 +758,14 @@ export default function PublicBookingSystem() {
                 <div>
                   <h3 className="text-lg font-bold text-text-1 uppercase font-display">{t.step3Title}</h3>
                   <p className="text-[10px] text-text-3 mt-1 font-mono uppercase">{t.step3Desc}</p>
+                </div>
+
+                <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 flex items-start gap-3 mt-1">
+                  <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <div className="text-xs text-text-2 leading-relaxed">
+                    <strong className="text-text-1 uppercase font-mono block mb-1">{t.dailyPolicyTitle}</strong>
+                    {t.dailyPolicyDesc}
+                  </div>
                 </div>
 
                 {loadingSlots ? (
@@ -919,6 +939,10 @@ export default function PublicBookingSystem() {
                       <span className="font-bold text-text-1 uppercase font-mono">{t.scheduledSlot}</span>{' '}
                       <span className="text-text-1">{formatFriendlyDate(selectedSlot?.dayOfWeek || '')}</span> at <span className="text-text-1">{selectedSlot?.time}</span> ({t.maxCap} {selectedSlot?.maxCapacity})
                     </div>
+                  </div>
+
+                  <div className="text-[10px] text-text-3 font-mono leading-relaxed bg-void/50 border border-border/40 p-3.5 rounded-xl">
+                    ⚠️ {t.summaryNote}
                   </div>
 
                   {/* Receipt breakdown ledger */}

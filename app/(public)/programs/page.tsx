@@ -231,7 +231,7 @@ export default function ProgramsPage() {
                           {course.category} Program
                         </span>
                         <span className="flex items-center gap-1.5 text-xs font-mono font-bold text-text-2 bg-surface px-3 py-1.5 rounded-full border border-white/5">
-                          <Clock className="w-3.5 h-3.5" /> {t.duration}
+                          <Clock className="w-3.5 h-3.5" /> {course.tag[lang] || course.tag.EN}
                         </span>
                       </div>
 
