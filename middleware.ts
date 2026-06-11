@@ -19,6 +19,36 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
+  const role = (token.role as string) || 'STUDENT'
+
+  // Enforce role authorization for pages & APIs
+  if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
+    if (role !== 'ADMIN') {
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
+      return NextResponse.redirect(new URL('/unauthorized', request.url))
+    }
+  }
+
+  if (pathname.startsWith('/instructor') || pathname.startsWith('/api/instructor')) {
+    if (role !== 'INSTRUCTOR' && role !== 'ADMIN') {
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
+      return NextResponse.redirect(new URL('/unauthorized', request.url))
+    }
+  }
+
+  if (pathname.startsWith('/student') || pathname.startsWith('/api/student')) {
+    if (role !== 'STUDENT' && role !== 'ADMIN') {
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      }
+      return NextResponse.redirect(new URL('/unauthorized', request.url))
+    }
+  }
+
   // Redirect root role paths to their respective dashboards
   if (pathname === '/admin') {
     return NextResponse.redirect(new URL('/admin/dashboard', request.url))
