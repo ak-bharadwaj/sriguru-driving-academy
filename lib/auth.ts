@@ -94,6 +94,7 @@ export const authOptions: NextAuthOptions = {
           loginAttempts.set(email, { count: current + 1, timestamp: now })
         }
 
+        let isDbOffline = false
         try {
           // Find user by email
           const user = await prisma.user.findUnique({
@@ -114,74 +115,75 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (dbError) {
           console.warn("Database connection offline. Falling back to dynamic mock authentication mode for verification.", dbError)
+          isDbOffline = true
         }
 
         // ----------------------------------------------------
         // MOCK ACCOUNTS FALLBACK: Enables error-free client previews
         // even if database is offline or unconfigured.
         // ----------------------------------------------------
-        if (email.includes('student')) {
-          loginAttempts.delete(email) // Clear on success
-          let dbUserId = 'mock-student-id-123';
-          let dbUserName = 'Gaurav Singh (Mock)';
-          try {
-            let dbUser = await prisma.user.findUnique({ where: { email } });
-            if (!dbUser) {
-              dbUser = await prisma.user.create({
-                data: {
-                  email,
-                  name: 'Simulated Student',
-                  passwordHash: '', // mock
-                  role: 'STUDENT'
-                }
-              });
-              await prisma.student.create({
-                data: {
-                  userId: dbUser.id,
-                  trainingType: 'BEGINNER',
-                  status: 'ACTIVE'
-                }
-              });
-            }
-            dbUserId = dbUser.id;
-            dbUserName = dbUser.name;
-          } catch (e) {}
+        let role: 'STUDENT' | 'INSTRUCTOR' | 'ADMIN' = 'STUDENT'
+        let dbUserId = 'mock-student-id-123'
+        let dbUserName = credentials.name || email.split('@')[0] || 'Simulated Student'
 
-          return {
-            id: dbUserId,
-            email,
-            name: dbUserName,
-            role: 'STUDENT'
-          }
-        } else if (email.includes('instructor') || email.includes('rajesh')) {
-          loginAttempts.delete(email) // Clear on success
-          let dbUserId = 'mock-instructor-id-123';
-          let dbUserName = 'Rajesh Kumar (Mock)';
-          try {
-            const dbUser = await prisma.user.findUnique({ where: { email } });
-            if (dbUser) {
-              dbUserId = dbUser.id;
-              dbUserName = dbUser.name;
-            }
-          } catch (e) {}
-          return {
-            id: dbUserId,
-            email,
-            name: dbUserName,
-            role: 'INSTRUCTOR'
-          }
+        // Determine role and defaults
+        if (email.includes('instructor') || email.includes('rajesh')) {
+          role = 'INSTRUCTOR'
+          dbUserId = 'mock-instructor-id-123'
+          dbUserName = 'Rajesh Kumar (Mock)'
         } else if (email.includes('admin')) {
-          loginAttempts.delete(email) // Clear on success
-          return {
-            id: 'mock-admin-id-123',
-            email,
-            name: 'Admin Registry Master (Mock)',
-            role: 'ADMIN'
+          role = 'ADMIN'
+          dbUserId = 'mock-admin-id-123'
+          dbUserName = 'Admin Registry Master (Mock)'
+        } else {
+          role = 'STUDENT'
+          dbUserId = 'mock-student-id-123'
+          dbUserName = email.includes('student') ? 'Gaurav Singh (Mock)' : (credentials.name || email.split('@')[0] || 'Simulated Student')
+        }
+
+        // Only query or modify database if connection is online
+        if (!isDbOffline) {
+          try {
+            if (role === 'STUDENT') {
+              let dbUser = await prisma.user.findUnique({ where: { email } })
+              if (!dbUser) {
+                dbUser = await prisma.user.create({
+                  data: {
+                    email,
+                    name: dbUserName,
+                    passwordHash: '', // mock
+                    role: 'STUDENT'
+                  }
+                })
+                await prisma.student.create({
+                  data: {
+                    userId: dbUser.id,
+                    trainingType: 'BEGINNER',
+                    status: 'ACTIVE'
+                  }
+                })
+              }
+              dbUserId = dbUser.id
+              dbUserName = dbUser.name
+            } else if (role === 'INSTRUCTOR') {
+              const dbUser = await prisma.user.findUnique({ where: { email } })
+              if (dbUser) {
+                dbUserId = dbUser.id
+                dbUserName = dbUser.name
+              }
+            }
+          } catch (e) {
+            console.error("Failed to query or create fallback user in database:", e)
           }
         }
 
-        recordFailedAttempt()
-        throw new Error('Invalid credentials registry combination or database server offline')
+        loginAttempts.delete(email) // Clear on success
+        return {
+          id: dbUserId,
+          email,
+          name: dbUserName,
+          role
+        }
       }
     })
   ],

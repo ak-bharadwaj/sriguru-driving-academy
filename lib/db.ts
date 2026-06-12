@@ -7,8 +7,14 @@ const globalForPrisma = global as unknown as { prisma: PrismaClient }
 const getOptimizedDbUrl = () => {
   const url = process.env.DATABASE_URL || ''
   if (!url) return url
-  if (url.includes('connection_limit=')) return url
-  return url + (url.includes('?') ? '&' : '?') + 'connection_limit=1'
+  let optimized = url
+  if (!optimized.includes('connection_limit=')) {
+    optimized = optimized + (optimized.includes('?') ? '&' : '?') + 'connection_limit=1'
+  }
+  if (!optimized.includes('connect_timeout=')) {
+    optimized = optimized + (optimized.includes('?') ? '&' : '?') + 'connect_timeout=3'
+  }
+  return optimized
 }
 
 export const db = globalForPrisma.prisma || new PrismaClient({
