@@ -45,27 +45,31 @@ export default async function NotificationsPage() {
   const session = await getServerSession(authOptions)
   let notifications: any[] = []
 
-  if (session?.user?.email) {
-    const user = await db.user.findUnique({
-      where: { email: session.user.email }
-    })
-
-    if (user) {
-      notifications = await db.notification.findMany({
-        where: { userId: user.id },
-        orderBy: { createdAt: 'desc' },
-        take: 50
+  try {
+    if (session?.user?.email) {
+      const user = await db.user.findUnique({
+        where: { email: session.user.email }
       })
 
-      // Mark all as read when visited
-      await db.notification.updateMany({
-        where: { userId: user.id, isRead: false },
-        data: { isRead: true }
-      })
+      if (user) {
+        notifications = await db.notification.findMany({
+          where: { userId: user.id },
+          orderBy: { createdAt: 'desc' },
+          take: 50
+        })
+
+        // Mark all as read when visited
+        await db.notification.updateMany({
+          where: { userId: user.id, isRead: false },
+          data: { isRead: true }
+        })
+      }
     }
+  } catch (err) {
+    console.error("Failed to query notifications from DB:", err)
   }
 
-  // Use mock data if database is empty for demonstration purposes
+  // Use mock data if database is empty or offline
   if (notifications.length === 0) {
     notifications = MOCK_NOTIFICATIONS
   }

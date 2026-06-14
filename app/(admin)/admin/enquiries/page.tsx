@@ -4,9 +4,14 @@ import EnquiriesClient from './EnquiriesClient'
 export const dynamic = 'force-dynamic'
 
 export default async function EnquiriesPage() {
-  const inquiries = await db.inquiry.findMany({
-    orderBy: { createdAt: 'desc' }
-  })
+  let inquiries: any[] = []
+  try {
+    inquiries = await db.inquiry.findMany({
+      orderBy: { createdAt: 'desc' }
+    })
+  } catch (err) {
+    console.error("Failed to fetch enquiries from DB:", err)
+  }
 
   return (
     <div className="space-y-6">
