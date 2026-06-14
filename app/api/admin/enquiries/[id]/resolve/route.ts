@@ -4,7 +4,12 @@ import { getToken } from 'next-auth/jwt'
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
-    const token = await getToken({ req: req as any, secret: process.env.NEXTAUTH_SECRET || 'srigurusecretkey1234567890' })
+    const isSecure = req.url.startsWith('https://') || req.headers.get('x-forwarded-proto') === 'https'
+    const token = await getToken({ 
+      req: req as any, 
+      secret: process.env.NEXTAUTH_SECRET || 'srigurusecretkey1234567890',
+      secureCookie: isSecure
+    })
     if (!token || token.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

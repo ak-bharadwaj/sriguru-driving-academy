@@ -3,12 +3,12 @@ import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { getToken } from 'next-auth/jwt';
 
-;
-
 export async function GET(req: NextRequest) {
+  const isSecure = req.url.startsWith('https://') || req.headers.get('x-forwarded-proto') === 'https';
   const token = await getToken({ 
     req, 
-    secret: process.env.NEXTAUTH_SECRET || 'srigurusecretkey1234567890' 
+    secret: process.env.NEXTAUTH_SECRET || 'srigurusecretkey1234567890',
+    secureCookie: isSecure
   });
 
   if (!token) {
