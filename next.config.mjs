@@ -9,6 +9,9 @@ const withPWA = withPWAInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || 'srigurusecretkey1234567890',
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
