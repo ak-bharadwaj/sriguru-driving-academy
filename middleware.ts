@@ -3,14 +3,36 @@ import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  if (pathname === '/admin/debug-middleware') {
+    const isSecure = process.env.NODE_ENV === 'production'
+    const token = await getToken({ 
+      req: request, 
+      secret: process.env.NEXTAUTH_SECRET || 'srigurusecretkey1234567890',
+      secureCookie: isSecure
+    })
+    const cookiesList: Record<string, string> = {}
+    request.cookies.getAll().forEach(c => {
+      cookiesList[c.name] = c.value
+    })
+    return NextResponse.json({
+      runtime: 'Edge',
+      isSecure,
+      envNextAuthSecretExists: !!process.env.NEXTAUTH_SECRET,
+      envNextAuthSecretLength: process.env.NEXTAUTH_SECRET ? process.env.NEXTAUTH_SECRET.length : 0,
+      cookiesPresent: Object.keys(cookiesList),
+      token
+    })
+  }
+
   const isSecure = process.env.NODE_ENV === 'production'
   const token = await getToken({ 
     req: request, 
     secret: process.env.NEXTAUTH_SECRET || 'srigurusecretkey1234567890',
     secureCookie: isSecure
   })
-  
-  const { pathname } = request.nextUrl
+
 
   // If there's no token, redirect to login
   if (!token) {
