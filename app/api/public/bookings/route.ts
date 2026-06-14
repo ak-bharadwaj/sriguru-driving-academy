@@ -13,6 +13,11 @@ function getClientIP(request: Request) {
 
 export async function GET(request: Request) {
   try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user || ((session.user as any).role !== 'ADMIN' && (session.user as any).role !== 'INSTRUCTOR')) {
+      return NextResponse.json({ error: 'Unauthorized.' }, { status: 403 })
+    }
+
     const list = await db.booking.findMany({
       orderBy: { createdAt: 'desc' },
       select: {
