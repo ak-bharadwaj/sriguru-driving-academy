@@ -4,7 +4,7 @@ import { getToken } from 'next-auth/jwt'
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
-    const isSecure = req.url.startsWith('https://') || req.headers.get('x-forwarded-proto') === 'https'
+    const isSecure = process.env.NODE_ENV === 'production'
     const token = await getToken({ 
       req: req as any, 
       secret: process.env.NEXTAUTH_SECRET || 'srigurusecretkey1234567890',

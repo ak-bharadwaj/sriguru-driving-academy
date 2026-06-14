@@ -4,7 +4,7 @@ import { db } from '@/lib/db';
 import { getToken } from 'next-auth/jwt';
 
 export async function GET(req: NextRequest) {
-  const isSecure = req.url.startsWith('https://') || req.headers.get('x-forwarded-proto') === 'https';
+  const isSecure = process.env.NODE_ENV === 'production';
   const token = await getToken({ 
     req, 
     secret: process.env.NEXTAUTH_SECRET || 'srigurusecretkey1234567890',

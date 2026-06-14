@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
 export async function middleware(request: NextRequest) {
-  const isSecure = request.url.startsWith('https://') || request.headers.get('x-forwarded-proto') === 'https'
+  const isSecure = process.env.NODE_ENV === 'production'
   const token = await getToken({ 
     req: request, 
     secret: process.env.NEXTAUTH_SECRET || 'srigurusecretkey1234567890',
