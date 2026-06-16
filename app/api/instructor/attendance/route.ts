@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden. Instructor profile not found.' }, { status: 403 })
     }
 
-    const { studentId, sessionId, status } = await request.json()
+    const { studentId, sessionId, status, otp } = await request.json()
     if (!studentId || !sessionId || !status) {
       return NextResponse.json({ error: 'Missing mandatory attendance parameters' }, { status: 400 })
     }
@@ -51,6 +51,29 @@ export async function POST(request: Request) {
     // Security Check: Enforce that the instructor must be assigned to this session
     if (session.instructorId !== instructor.id) {
       return NextResponse.json({ error: 'Unauthorized. This session is assigned to another instructor.' }, { status: 403 })
+    }
+
+    // Verify OTP for Present and Late attendance marking
+    if (attendanceStatus === AttendanceStatus.PRESENT || attendanceStatus === AttendanceStatus.LATE) {
+      const student = await db.student.findUnique({
+        where: { id: studentId }
+      })
+      if (!student) {
+        return NextResponse.json({ error: 'Student profile not found.' }, { status: 404 })
+      }
+      
+      // Enforce OTP only for non-mock database-backed users
+      if (student.id !== 'mock-student-id-123' && student.userId !== 'mock-student-id-123') {
+        if (!otp) {
+          return NextResponse.json({ error: 'Student verification code (OTP) is required.' }, { status: 400 })
+        }
+        if (!student.attendanceOtp || student.attendanceOtp !== otp) {
+          return NextResponse.json({ error: 'Invalid verification code. Please request the student to check their dashboard.' }, { status: 400 })
+        }
+        if (student.attendanceOtpExpires && student.attendanceOtpExpires < new Date()) {
+          return NextResponse.json({ error: 'Verification code has expired. Please ask the student to generate a new OTP.' }, { status: 400 })
+        }
+      }
     }
 
     // 2. Create or Update attendance registry record

@@ -13,7 +13,9 @@ import {
   X,
   PlayCircle,
   Gamepad2,
-  Layers
+  Layers,
+  Key,
+  Shield
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -63,7 +65,12 @@ const DASHBOARD_DICT = {
     instructor: "Instructor",
     unassigned: "Unassigned",
     officialTest: "Official Test",
-    training: "Training"
+    training: "Training",
+    attendanceVerification: "Attendance Verification",
+    attendanceOtpDesc: "Generate a verification code to share with your instructor to check-in.",
+    generateOtp: "Generate Code",
+    generating: "Generating...",
+    otpExpires: "Expires in"
   },
   HI: {
     welcomeBack: "वापसी पर स्वागत है,",
@@ -106,7 +113,12 @@ const DASHBOARD_DICT = {
     instructor: "प्रशिक्षक",
     unassigned: "अनिर्दिष्ट",
     officialTest: "आधिकारिक परीक्षा",
-    training: "प्रशिक्षण"
+    training: "प्रशिक्षण",
+    attendanceVerification: "उपस्थिति सत्यापन",
+    attendanceOtpDesc: "उपस्थिति दर्ज कराने के लिए अपने प्रशिक्षक के साथ साझा करने के लिए एक सत्यापन कोड जनरेट करें।",
+    generateOtp: "सत्यापन कोड जनरेट करें",
+    generating: "जनरेट किया जा रहा है...",
+    otpExpires: "समाप्त होने में"
   },
   TE: {
     welcomeBack: "తిరిగి స్వాగతం,",
@@ -149,8 +161,13 @@ const DASHBOARD_DICT = {
     instructor: "బోధకుడు",
     unassigned: "కేటాయించబడలేదు",
     officialTest: "అధికారిక పరీక్ష",
-    training: "శిక్షణ"
-  }
+    training: "శిక్షణ",
+    attendanceVerification: "హాజరు ధృవీకరణ",
+    attendanceOtpDesc: "హాజరు నమోదు చేయడానికి మీ బోధకుడితో పంచుకోవడానికి ఒక ధృవీకరణ కోడ్‌ను జనరేట్ చేయండి.",
+    generateOtp: "ధృవీకరణ కోడ్‌ను జనరేట్ చేయండి",
+    generating: "జనరేట్ అవుతోంది...",
+    otpExpires: "గడువు ముగింపు"
+  },
 }
 
 interface RoadmapPhaseData {
@@ -241,6 +258,47 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
     }
   }, [])
   const [showFeedbackModal, setShowFeedbackModal] = useState(false)
+  const [otpCode, setOtpCode] = useState<string | null>(null)
+  const [generatingOtp, setGeneratingOtp] = useState(false)
+  const [otpCountdown, setOtpCountdown] = useState<number>(0)
+
+  useEffect(() => {
+    if (otpCountdown <= 0) return
+    const interval = setInterval(() => {
+      setOtpCountdown(prev => prev - 1)
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [otpCountdown])
+
+  const handleGenerateOtp = async () => {
+    if (dbData.isMock) {
+      setOtpCode('582910')
+      setOtpCountdown(900) // 15 mins
+      return
+    }
+
+    setGeneratingOtp(true)
+    try {
+      const res = await fetch('/api/student/attendance-otp', { method: 'POST' })
+      if (res.ok) {
+        const data = await res.json()
+        setOtpCode(data.otp)
+        const secondsRemaining = Math.max(0, Math.floor((new Date(data.expiresAt).getTime() - Date.now()) / 1000))
+        setOtpCountdown(secondsRemaining)
+      }
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setGeneratingOtp(false)
+    }
+  }
+
+  const formatCountdown = (sec: number) => {
+    const mins = Math.floor(sec / 60)
+    const secs = sec % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
   const [feedbackRating, setFeedbackRating] = useState(0)
   const [feedbackComment, setFeedbackComment] = useState('')
   const [submittingFeedback, setSubmittingFeedback] = useState(false)
@@ -463,6 +521,54 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
               <span className="text-[10px] uppercase text-[rgb(var(--color-text-3))] font-bold">{t.attend}</span>
               <span className="text-sm font-semibold text-[rgb(var(--color-text-1))]">{dbData.quickStats.attendanceRate}%</span>
             </div>
+          </div>
+        </div>
+
+        {/* Attendance Verification Section */}
+        <div className="bg-[rgb(var(--color-surface))] rounded-[28px] shadow-app p-6 border border-[rgb(var(--color-border))] flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-amber-500/10 p-2.5 rounded-xl text-amber-500">
+              <Key className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-display font-bold text-base text-[rgb(var(--color-text-1))]">
+                {t.attendanceVerification}
+              </h3>
+              <p className="text-xs text-[rgb(var(--color-text-3))] mt-0.5 leading-relaxed">
+                {t.attendanceOtpDesc}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center justify-center py-4 bg-[rgb(var(--color-background))]/40 rounded-2xl border border-[rgb(var(--color-border))]/60 min-h-[90px] relative overflow-hidden">
+            {otpCode ? (
+              <div className="flex flex-col items-center justify-center animate-fade-in">
+                <span 
+                  onClick={() => {
+                    navigator.clipboard.writeText(otpCode);
+                  }}
+                  title="Click to copy"
+                  className="text-3xl font-display font-black tracking-widest text-amber-500 cursor-pointer select-all font-mono hover:scale-105 active:scale-95 transition-transform duration-200"
+                >
+                  {otpCode}
+                </span>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-[rgb(var(--color-text-3))] mt-2 flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  {t.otpExpires}: <span className="font-mono text-emerald-500 font-semibold">{formatCountdown(otpCountdown)}</span>
+                </span>
+              </div>
+            ) : (
+              <button
+                disabled={generatingOtp}
+                onClick={handleGenerateOtp}
+                className="px-6 py-2.5 rounded-xl text-xs font-bold bg-[rgb(var(--color-accent))] hover:bg-[rgb(var(--color-accent-hover))] text-white shadow-md shadow-[rgb(var(--color-accent))]/20 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed"
+              >
+                {generatingOtp ? t.generating : t.generateOtp}
+              </button>
+            )}
           </div>
         </div>
 

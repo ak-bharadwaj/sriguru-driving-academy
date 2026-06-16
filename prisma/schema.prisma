@@ -59,6 +59,8 @@ model Student {
   skillMastery    SkillMastery[]
   instructor      Instructor?             @relation(fields: [instructorId], references: [id])
   user            User                    @relation(fields: [userId], references: [id])
+  attendanceOtp        String?
+  attendanceOtpExpires DateTime?
   badges          StudentBadge[]
   cardProgress    StudentCardProgress[]
   dailyChallenges StudentDailyChallenge[]

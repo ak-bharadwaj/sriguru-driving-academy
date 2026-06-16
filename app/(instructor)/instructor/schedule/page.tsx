@@ -45,8 +45,12 @@ const PAGE_DICT = {
     completeBtn: 'Complete',
     today: 'Today',
     tomorrow: 'Tomorrow',
+    defaultTrack: 'Default Track',
     unknown: 'Unknown',
-    defaultTrack: 'Default Track'
+    markAbsent: 'Mark Absent',
+    extendSession: 'Extend +15m',
+    otpLabel: 'Student OTP Code',
+    otpPlaceholder: 'e.g. 123456'
   },
   HI: {
     pageTitle: 'अनुसूची प्रबंधन',
@@ -77,8 +81,12 @@ const PAGE_DICT = {
     completeBtn: 'पूरा करें',
     today: 'आज',
     tomorrow: 'कल',
+    defaultTrack: 'डिफ़ॉल्ट ट्रैक',
     unknown: 'अज्‍नात',
-    defaultTrack: 'डिफ़ॉल्ट ट्रैक'
+    markAbsent: 'अनुपस्थित चिह्नित करें',
+    extendSession: '+15 मिनट बढ़ाएं',
+    otpLabel: 'छात्र ओटीपी कोड',
+    otpPlaceholder: 'जैसे 123456'
   },
   TE: {
     pageTitle: 'షెడ్యూల్ నిర్వహణ',
@@ -109,9 +117,13 @@ const PAGE_DICT = {
     completeBtn: 'పూర్తి చేయండి',
     today: 'ఈరోజు',
     tomorrow: 'రేపు',
+    defaultTrack: 'డిఫాల్ట్ ట్రాక్',
     unknown: 'తెలియదు',
-    defaultTrack: 'డిఫాల్ట్ ట్రాక్'
-  }
+    markAbsent: 'గైర్హాజరుగా గుర్తించండి',
+    extendSession: '+15 నిమిషాలు పొడిగించు',
+    otpLabel: 'విద్యార్థి OTP కోడ్',
+    otpPlaceholder: 'ఉదా. 123456'
+  },
 }
 
 const fetcher = (url: string) => fetch(url).then(r => r.json())
@@ -125,6 +137,8 @@ export default function InstructorSchedulePage() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showAttendanceModal, setShowAttendanceModal] = useState<{sessionId: string, studentId: string} | null>(null)
   const [attendanceStatus, setAttendanceStatus] = useState('PRESENT')
+  const [otpInput, setOtpInput] = useState('')
+  const [attendanceError, setAttendanceError] = useState<string | null>(null)
   
   const [sessionDate, setSessionDate] = useState('')
   const [sessionTime, setSessionTime] = useState('')
@@ -187,17 +201,64 @@ export default function InstructorSchedulePage() {
   const handleMarkAttendance = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!showAttendanceModal) return
+    setAttendanceError(null)
     try {
-      await fetch('/api/instructor/attendance', {
+      const res = await fetch('/api/instructor/attendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           studentId: showAttendanceModal.studentId,
           sessionId: showAttendanceModal.sessionId,
-          status: attendanceStatus
+          status: attendanceStatus,
+          otp: (attendanceStatus === 'PRESENT' || attendanceStatus === 'LATE') ? otpInput : undefined
         }),
       })
+      if (!res.ok) {
+        const errData = await res.json()
+        setAttendanceError(errData.error || 'Failed to mark attendance')
+        return
+      }
       setShowAttendanceModal(null)
+      setOtpInput('')
+      mutate()
+    } catch (e) {
+      console.error(e)
+      setAttendanceError('Network error or server failed to process request.')
+    }
+  }
+
+  const handleDirectMarkAbsent = async (sessionId: string, studentId: string) => {
+    try {
+      const res = await fetch('/api/instructor/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          studentId,
+          sessionId,
+          status: 'ABSENT'
+        }),
+      })
+      if (!res.ok) {
+        const errData = await res.json()
+        alert(errData.error || 'Failed to mark absent')
+      }
+      mutate()
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const handleExtendSession = async (sessionId: string, currentDuration: number) => {
+    try {
+      const res = await fetch(`/api/instructor/sessions/${sessionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ duration: currentDuration + 15 }),
+      })
+      if (!res.ok) {
+        const errData = await res.json()
+        alert(errData.error || 'Failed to extend session')
+      }
       mutate()
     } catch (e) {
       console.error(e)
@@ -226,7 +287,8 @@ export default function InstructorSchedulePage() {
       student: s.student?.name || t.unknown,
       type: s.lessonType,
       status: s.status,
-      location: t.defaultTrack // Backend doesn't store this directly yet
+      location: t.defaultTrack, // Backend doesn't store this directly yet
+      duration: s.duration
     }
   })
 
@@ -343,14 +405,20 @@ export default function InstructorSchedulePage() {
                   </div>
 
                   {/* Right Actions */}
-                  <div className="flex items-center gap-3 pt-4 lg:pt-0 border-t lg:border-t-0 border-border">
+                  <div className="flex items-center gap-3 pt-4 lg:pt-0 border-t lg:border-t-0 border-border w-full lg:w-auto">
                     {session.status === 'SCHEDULED' && (
-                      <>
+                      <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
                         <button 
                           onClick={() => handleUpdateStatus(session.id, 'IN_PROGRESS')}
-                          className="px-4 sm:px-5 py-2.5 bg-primary text-white rounded-xl text-xs sm:text-sm font-semibold hover:bg-primary/95 transition-all w-full lg:w-auto"
+                          className="px-4 sm:px-5 py-2.5 bg-primary text-white rounded-xl text-xs sm:text-sm font-semibold hover:bg-primary/95 transition-all w-full lg:w-auto whitespace-nowrap"
                         >
                           {t.startSession}
+                        </button>
+                        <button 
+                          onClick={() => handleDirectMarkAbsent(session.id, session.studentId)}
+                          className="px-4 sm:px-5 py-2.5 bg-surface-2 text-text-2 border border-border rounded-xl text-xs sm:text-sm font-semibold hover:text-danger hover:border-danger/30 hover:bg-danger/5 transition-all w-full lg:w-auto whitespace-nowrap"
+                        >
+                          {t.markAbsent}
                         </button>
                         <button 
                           onClick={() => handleDelete(session.id)}
@@ -358,16 +426,28 @@ export default function InstructorSchedulePage() {
                         >
                           <XCircle className="w-5 h-5" />
                         </button>
-                      </>
+                      </div>
                     )}
                     {session.status === 'IN_PROGRESS' && (
-                      <button 
-                        onClick={() => setShowAttendanceModal({ sessionId: session.id, studentId: session.studentId })}
-                        className="px-4 sm:px-5 py-2.5 bg-success text-void rounded-xl text-xs sm:text-sm font-bold hover:bg-success/95 transition-all w-full lg:w-auto flex items-center gap-2"
-                      >
-                        <CheckCircle2 className="w-4 h-4" />
-                        {t.markCompleted}
-                      </button>
+                      <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                        <button 
+                          onClick={() => handleExtendSession(session.id, session.duration)}
+                          className="px-4 sm:px-5 py-2.5 bg-surface-2 text-text-2 border border-border rounded-xl text-xs sm:text-sm font-semibold hover:text-accent hover:border-accent/30 hover:bg-accent/5 transition-all w-full lg:w-auto whitespace-nowrap"
+                        >
+                          {t.extendSession}
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setAttendanceError(null)
+                            setOtpInput('')
+                            setShowAttendanceModal({ sessionId: session.id, studentId: session.studentId })
+                          }}
+                          className="px-4 sm:px-5 py-2.5 bg-success text-void rounded-xl text-xs sm:text-sm font-bold hover:bg-success/95 transition-all w-full lg:w-auto flex items-center justify-center gap-2 whitespace-nowrap"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          {t.markCompleted}
+                        </button>
+                      </div>
                     )}
                     {session.status === 'COMPLETED' && (
                       <button className="px-4 sm:px-5 py-2.5 bg-surface text-text-2 border border-border rounded-xl text-xs sm:text-sm font-semibold hover:text-text-1 hover:bg-surface/85 transition-all w-full lg:w-auto">
@@ -543,7 +623,10 @@ export default function InstructorSchedulePage() {
                   <label className="block text-sm font-semibold text-text-2 mb-2">{t.statusLabel}</label>
                   <select 
                     value={attendanceStatus}
-                    onChange={e => setAttendanceStatus(e.target.value)}
+                    onChange={e => {
+                      setAttendanceStatus(e.target.value)
+                      setAttendanceError(null)
+                    }}
                     className="w-full bg-void border border-border rounded-xl p-3 text-white focus:outline-none focus:border-primary"
                   >
                     <option value="PRESENT">{t.statusPresent}</option>
@@ -551,6 +634,32 @@ export default function InstructorSchedulePage() {
                     <option value="ABSENT">{t.statusAbsent}</option>
                   </select>
                 </div>
+
+                {(attendanceStatus === 'PRESENT' || attendanceStatus === 'LATE') && (
+                  <div className="animate-fade-in">
+                    <label className="block text-sm font-semibold text-text-2 mb-2">{t.otpLabel}</label>
+                    <input 
+                      type="text" 
+                      required
+                      maxLength={6}
+                      pattern="\d{6}"
+                      placeholder={t.otpPlaceholder}
+                      value={otpInput}
+                      onChange={e => {
+                        setOtpInput(e.target.value.replace(/\D/g, ''))
+                        setAttendanceError(null)
+                      }}
+                      className="w-full bg-void border border-border rounded-xl p-3 text-white tracking-widest text-center font-mono font-bold text-xl focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                )}
+
+                {attendanceError && (
+                  <div className="p-3 bg-danger/10 border border-danger/20 text-danger rounded-xl text-xs flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{attendanceError}</span>
+                  </div>
+                )}
 
                 <div className="mt-4 flex gap-3 justify-end">
                   <button 
