@@ -211,6 +211,7 @@ export default function PublicBookingSystem() {
   
   // Real-time inline validations
   const [errors, setErrors] = useState({ name: '', phone: '', email: '' })
+  const [passwordError, setPasswordError] = useState('')
 
   const { data: session } = useSession()
 
@@ -402,9 +403,15 @@ export default function PublicBookingSystem() {
     
     // Validate password for manual signups
     if (!session?.user && (!password || password.trim().length < 6)) {
+      if (!password) {
+        setPasswordError('Password is required')
+      } else {
+        setPasswordError('Password must be at least 6 characters')
+      }
       toast.error("Please enter a secure password of at least 6 characters.")
       return
     }
+    setPasswordError('')
     
     setSubmitting(true)
     try {
@@ -985,13 +992,19 @@ export default function PublicBookingSystem() {
 
                 {/* Choose Account Password Card (Only for manual registrants) */}
                 {!session?.user && (
-                  <div className="border border-border/60 bg-void/50 p-5 rounded-2xl flex flex-col gap-3 shadow-[0_0_15px_rgba(var(--color-primary),0.04)]">
+                  <div className={`border bg-void/50 p-5 rounded-2xl flex flex-col gap-3 shadow-[0_0_15px_rgba(var(--color-primary),0.04)] transition-all duration-300 ${
+                    passwordError ? 'border-rose-500/50 shadow-[0_0_15px_rgba(239,68,68,0.08)]' : 'border-border/60'
+                  }`}>
                     <div className="flex items-center justify-between border-b border-border/40 pb-2">
                       <span className="text-[10px] font-mono text-text-3 uppercase tracking-wider font-bold flex items-center gap-1.5">
-                        <Lock className="w-3.5 h-3.5 text-accent animate-pulse" />
+                        <Lock className={`w-3.5 h-3.5 animate-pulse ${passwordError ? 'text-rose-500' : 'text-accent'}`} />
                         Choose Account Password
                       </span>
-                      <span className="text-[8px] font-mono bg-primary/20 text-primary border border-primary/30 px-2 py-0.5 rounded uppercase font-bold">
+                      <span className={`text-[8px] font-mono border px-2 py-0.5 rounded uppercase font-bold transition-colors ${
+                        passwordError 
+                          ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' 
+                          : 'bg-primary/20 text-primary border-primary/30'
+                      }`}>
                         Required
                       </span>
                     </div>
@@ -1003,8 +1016,17 @@ export default function PublicBookingSystem() {
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter at least 6 characters"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-void/70 border border-border/60 focus:border-primary pl-4 pr-10 py-3 rounded-xl text-xs text-text-1 placeholder-text-3 outline-none transition-all duration-200"
+                        onChange={(e) => {
+                          setPassword(e.target.value)
+                          if (e.target.value.trim().length >= 6) {
+                            setPasswordError('')
+                          }
+                        }}
+                        className={`w-full bg-void/70 pl-4 pr-10 py-3 rounded-xl text-xs text-text-1 placeholder-text-3 outline-none transition-all duration-200 border ${
+                          passwordError 
+                            ? 'border-rose-500/60 focus:border-rose-500 ring-1 ring-rose-500/20' 
+                            : 'border-border/60 focus:border-primary'
+                        }`}
                       />
                       <button
                         type="button"
@@ -1014,6 +1036,11 @@ export default function PublicBookingSystem() {
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
+                    {passwordError && (
+                      <span className="text-[9px] text-rose-400 font-mono font-bold mt-1">
+                        ⚠️ {passwordError}
+                      </span>
+                    )}
                   </div>
                 )}
 
