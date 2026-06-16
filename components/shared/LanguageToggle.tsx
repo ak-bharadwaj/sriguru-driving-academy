@@ -31,11 +31,11 @@ export function LanguageToggle() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="absolute top-full right-0 mt-2 p-2 w-32 bg-surface/90 backdrop-blur-xl border border-border rounded-2xl shadow-2xl flex flex-col gap-1 z-[1100]"
+            className="absolute bottom-full right-0 mb-2 p-2 w-32 bg-surface/90 backdrop-blur-xl border border-border rounded-2xl shadow-2xl flex flex-col gap-1 z-[1100]"
           >
             {LANGUAGES.map((lang) => (
               <button

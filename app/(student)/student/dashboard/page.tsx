@@ -88,7 +88,8 @@ export default async function StudentDashboardPage() {
         correctAttempts,
         recentBadges,
         allCards,
-        announcements
+        announcements,
+        pendingBooking
       ] = await Promise.all([
         // 1. Fetch upcoming session
         db.session.findFirst({
@@ -144,7 +145,18 @@ export default async function StudentDashboardPage() {
 
         // 5. Fetch Global Cached Data (0ms DB Time)
         getGlobalCards(),
-        getGlobalAnnouncements()
+        getGlobalAnnouncements(),
+
+        // 6. Fetch pending trial booking
+        db.booking.findFirst({
+          where: {
+            studentId: student.id,
+            status: 'PENDING'
+          },
+          include: {
+            slot: true
+          }
+        })
       ])
 
       // Process Progress
@@ -182,6 +194,15 @@ export default async function StudentDashboardPage() {
           lessonType: nextSession.lessonType,
           instructorName: nextSession.instructor.user.name,
         } : null,
+        pendingBooking: pendingBooking ? {
+          id: pendingBooking.id,
+          status: pendingBooking.status,
+          trainingType: pendingBooking.trainingType,
+          slot: pendingBooking.slot ? {
+            dayOfWeek: pendingBooking.slot.dayOfWeek,
+            time: pendingBooking.slot.time
+          } : null
+        } : null,
         drivingTests: drivingTests.map(t => ({
           id: t.id,
           testDate: t.testDate.toISOString(),
@@ -216,6 +237,7 @@ export default async function StudentDashboardPage() {
 
   // Fallback to high-fidelity mock data if database was offline or student profile is missing
   if (!dbData) {
+    const isDemoUser = userEmail === 'student@demo.com'
     dbData = {
       isMock: true,
       student: {
@@ -223,40 +245,41 @@ export default async function StudentDashboardPage() {
         name: userName,
         email: userEmail,
         avatarUrl: null,
-        xp: 340,
-        level: 3,
-        streakDays: 5,
-        instructorName: 'Rajesh Kumar (Mock)',
+        xp: isDemoUser ? 340 : 0,
+        level: isDemoUser ? 3 : 1,
+        streakDays: isDemoUser ? 5 : 0,
+        instructorName: isDemoUser ? 'Rajesh Kumar (Mock)' : 'Unassigned (Mock)',
         status: 'ACTIVE',
         hasProvidedFeedback: false
       },
-      nextSession: {
+      nextSession: isDemoUser ? {
         id: 'mock-session-1',
         scheduledAt: new Date(Date.now() + 86400000).toISOString(), // Tomorrow
         lessonType: 'PRACTICAL',
         instructorName: 'Rajesh Kumar (Mock)'
-      },
-      drivingTests: [
+      } : null,
+      pendingBooking: null, // client will load from localStorage if mock
+      drivingTests: isDemoUser ? [
         {
           id: 'mock-test-1',
           testDate: new Date(Date.now() + 86400000 * 3).toISOString(), // 3 days later
           type: 'PRACTICAL',
           testCenter: 'Secunderabad RTO Track'
         }
-      ],
+      ] : [],
       roadmapProgress: [
-        { phase: 'BEGINNER', total: 6, completed: 6, percent: 100 },
-        { phase: 'INTERMEDIATE', total: 5, completed: 3, percent: 60 },
+        { phase: 'BEGINNER', total: 6, completed: isDemoUser ? 6 : 0, percent: isDemoUser ? 100 : 0 },
+        { phase: 'INTERMEDIATE', total: 5, completed: isDemoUser ? 3 : 0, percent: isDemoUser ? 60 : 0 },
         { phase: 'ADVANCED', total: 4, completed: 0, percent: 0 },
         { phase: 'RTO', total: 3, completed: 0, percent: 0 }
       ],
       quickStats: {
-        totalAttended: 9,
-        attendanceRate: 90,
-        quizAccuracy: 85,
-        cardsCompleted: 9
+        totalAttended: isDemoUser ? 9 : 0,
+        attendanceRate: isDemoUser ? 90 : 0,
+        quizAccuracy: isDemoUser ? 85 : 0,
+        cardsCompleted: isDemoUser ? 9 : 0
       },
-      recentBadges: [
+      recentBadges: isDemoUser ? [
         {
           id: 'badge-1',
           name: 'First Perfect Parallel Park',
@@ -271,7 +294,7 @@ export default async function StudentDashboardPage() {
           icon: 'Signpost',
           earnedAt: new Date(Date.now() - 86400000 * 2).toISOString()
         }
-      ],
+      ] : [],
       announcements: [
         {
           id: 'ann-1',

@@ -43,8 +43,8 @@ const DASHBOARD_DICT = {
     theoryDesc: "Complete interactive road safety theory lessons.",
     rtoHub: "Traffic Signs",
     rtoDesc: "Master road signs and take mock simulation tests.",
-    schedule: "Schedule Training",
-    schedDesc: "Book upcoming practical sessions with your instructor.",
+    schedule: "Daily Plan & Attendance",
+    schedDesc: "Manage your 21-day syllabus, view daily timings, and track attendance records.",
     achievements: "Achievements",
     achDesc: "View earned badges and progression milestones.",
     dashboardHub: "Dashboard Hub",
@@ -86,8 +86,8 @@ const DASHBOARD_DICT = {
     theoryDesc: "इंटरएक्टिव सड़क सुरक्षा सिद्धांत पाठ पूर्ण करें।",
     rtoHub: "ट्रैफिक संकेत",
     rtoDesc: "सड़क संकेतों में महारत हासिल करें और मॉक सिमुलेशन टेस्ट लें।",
-    schedule: "प्रशिक्षण अनुसूची",
-    schedDesc: "अपने प्रशिक्षक के साथ आगामी व्यावहारिक सत्र बुक करें।",
+    schedule: "दैनिक योजना और उपस्थिति",
+    schedDesc: "अपने 21-दिवसीय पाठ्यक्रम को प्रबंधित करें, दैनिक समय देखें, और उपस्थिति रिकॉर्ड ट्रैक करें।",
     achievements: "उपलब्धियां",
     achDesc: "अर्जित बैज और प्रगति मील के पत्थर देखें।",
     dashboardHub: "डैशबोर्ड हब",
@@ -129,8 +129,8 @@ const DASHBOARD_DICT = {
     theoryDesc: "ఇంటరాక్టివ్ రోడ్ సేఫ్టీ థియరీ పాఠాలను పూర్తి చేయండి.",
     rtoHub: "ట్రాఫిక్ సంకేతాలు",
     rtoDesc: "రహదారి సంకేతాలను నేర్చుకోండి మరియు మాక్ సిమ్యులేషన్ పరీక్షలు తీసుకోండి.",
-    schedule: "శిక్షణ షెడ్యూల్",
-    schedDesc: "మీ బోధకుడితో రాబోయే ప్రాక్టికల్ సెషన్‌లను బుక్ చేయండి.",
+    schedule: "రోజువారీ ప్రణాళిక & హాజరు",
+    schedDesc: "మీ 21-రోజుల సిలబస్‌ను నిర్వహించండి, రోజువారీ సమయాలను వీక్షించండి మరియు హాజరు రికార్డులను ట్రాక్ చేయండి.",
     achievements: "విజయాలు",
     achDesc: "సంపాదించిన బ్యాడ్జ్‌లు మరియు పురోగతి మైలురాళ్లను చూడండి.",
     dashboardHub: "డాష్‌బోర్డ్ హబ్",
@@ -181,6 +181,15 @@ interface StudentDashboardProps {
       lessonType: string
       instructorName: string
     } | null
+    pendingBooking?: {
+      id: string
+      status: string
+      trainingType: string
+      slot: {
+        dayOfWeek: string
+        time: string
+      } | null
+    } | null
     drivingTests: {
       id: string
       testDate: string
@@ -219,6 +228,18 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
   const { unreadCount } = useNotifications()
   
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState<string[]>([])
+  const [localBooking, setLocalBooking] = useState<{ dayOfWeek: string; time: string; courseTitle: string; ref: string } | null>(null)
+  
+  useEffect(() => {
+    const saved = localStorage.getItem('sriguru_last_booking')
+    if (saved) {
+      try {
+        setLocalBooking(JSON.parse(saved))
+      } catch (e) {
+        console.error(e)
+      }
+    }
+  }, [])
   const [showFeedbackModal, setShowFeedbackModal] = useState(false)
   const [feedbackRating, setFeedbackRating] = useState(0)
   const [feedbackComment, setFeedbackComment] = useState('')
@@ -551,6 +572,30 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
                   <span className="text-sm font-medium">{new Date(dbData.nextSession.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
               </div>
+            ) : (dbData.pendingBooking || localBooking) ? (
+              <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white rounded-[24px] p-6 w-[240px] flex-shrink-0 relative overflow-hidden shadow-app-hover flex flex-col justify-between">
+                <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/10 rounded-full blur-xl" />
+                {dbData.isMock && (
+                  <span className="absolute top-4 right-4 bg-white/20 text-white border border-white/30 text-[8px] font-mono font-bold px-2 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-sm z-20">
+                    Preview
+                  </span>
+                )}
+                <div>
+                  <span className="text-[8px] font-mono bg-white/20 text-white border border-white/30 px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">
+                    Pending Verification
+                  </span>
+                  <h4 className="text-xl font-bold font-display mt-4 leading-snug">
+                    {dbData.pendingBooking?.slot ? `${dbData.pendingBooking.slot.dayOfWeek}` : (localBooking?.dayOfWeek || 'Trial Slot')}
+                  </h4>
+                  <p className="text-white/80 text-xs mt-1">
+                    {dbData.pendingBooking?.slot ? `${dbData.pendingBooking.slot.time}` : (localBooking?.time || '')}
+                  </p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-white/10">
+                  <p className="text-[8px] uppercase font-mono text-white/60">Selected Course</p>
+                  <p className="font-semibold text-[11px] truncate mt-0.5">{localBooking?.courseTitle || (dbData.pendingBooking?.trainingType || 'Trial Lesson')}</p>
+                </div>
+              </div>
             ) : (
               <div className="bg-[rgb(var(--color-surface))] text-[rgb(var(--color-text-1))] border border-[rgb(var(--color-border))] rounded-[24px] p-6 w-[240px] flex-shrink-0 relative overflow-hidden shadow-app flex flex-col justify-center items-center text-center">
                 <Calendar className="w-10 h-10 text-[rgb(var(--color-text-3))] mb-3" />
@@ -573,9 +618,13 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
                 <p className="text-slate-800 text-sm font-bold uppercase tracking-wider">{t.instructor}</p>
               </div>
               <div>
-                <p className="font-bold text-2xl font-display leading-tight">{student.instructorName || t.unassigned}</p>
+                <p className="font-bold text-2xl font-display leading-tight">
+                  {student.instructorName.includes('Unassigned') ? 'Awaiting Coach' : student.instructorName}
+                </p>
                 <div className="flex items-center gap-2 mt-3">
-                  <span className="text-xs font-bold px-3 py-1.5 bg-black/10 rounded-full backdrop-blur-md">{t.activeCoach}</span>
+                  <span className="text-xs font-bold px-3 py-1.5 bg-black/10 rounded-full backdrop-blur-md">
+                    {student.instructorName.includes('Unassigned') ? 'Pending' : t.activeCoach}
+                  </span>
                 </div>
               </div>
             </div>
