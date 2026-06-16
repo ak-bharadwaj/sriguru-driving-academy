@@ -123,6 +123,23 @@ interface BookingUser {
   feeStatus?: string
 }
 
+const HOURLY_BLOCKS = [
+  '07:00 AM - 08:00 AM',
+  '08:00 AM - 09:00 AM',
+  '09:00 AM - 10:00 AM',
+  '10:00 AM - 11:00 AM',
+  '11:00 AM - 12:00 PM',
+  '12:00 PM - 01:00 PM',
+  '01:00 PM - 02:00 PM',
+  '02:00 PM - 03:00 PM',
+  '03:00 PM - 04:00 PM',
+  '04:00 PM - 05:00 PM',
+  '05:00 PM - 06:00 PM',
+  '06:00 PM - 07:00 PM',
+  '07:00 PM - 08:00 PM',
+  '08:00 PM - 09:00 PM'
+]
+
 export default function SlotManagerClient() {
   const { language } = useLanguageStore()
   const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
@@ -170,11 +187,16 @@ export default function SlotManagerClient() {
     startDate: '',
     endDate: '',
     weekdays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-    times: ['08:00 AM - 09:30 AM', '04:00 PM - 05:30 PM'],
+    times: [] as string[],
     maxCapacity: 5,
     instructorId: '',
     status: 'ACTIVE'
   })
+
+  const [selectedSingleHourlySlots, setSelectedSingleHourlySlots] = useState<string[]>([])
+  const [isSingleCustomTime, setIsSingleCustomTime] = useState(false)
+  const [selectedBatchHourlySlots, setSelectedBatchHourlySlots] = useState<string[]>([])
+  const [isBatchCustomTime, setIsBatchCustomTime] = useState(false)
 
   const [customTimeInput, setCustomTimeInput] = useState({ start: '', end: '' })
 
@@ -188,12 +210,56 @@ export default function SlotManagerClient() {
   })
   const [manualSubmitting, setManualSubmitting] = useState(false)
 
+  const toggleSingleHourlySlot = (time: string) => {
+    setSelectedSingleHourlySlots(prev => 
+      prev.includes(time) ? prev.filter(t => t !== time) : [...prev, time]
+    )
+  }
+
+  const toggleBatchHourlySlot = (time: string) => {
+    setSelectedBatchHourlySlots(prev => 
+      prev.includes(time) ? prev.filter(t => t !== time) : [...prev, time]
+    )
+  }
+
+  const handleStartTimeChange = (val: string) => {
+    setCreateForm(prev => {
+      const updated = { ...prev, startTime: val }
+      if (val) {
+        const [h, m] = val.split(':').map(Number)
+        const nextH = (h + 1) % 24
+        updated.endTime = `${String(nextH).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+      }
+      return updated
+    })
+  }
+
+  const handleBatchCustomStartChange = (val: string) => {
+    setCustomTimeInput(prev => {
+      const updated = { ...prev, start: val }
+      if (val) {
+        const [h, m] = val.split(':').map(Number)
+        const nextH = (h + 1) % 24
+        updated.end = `${String(nextH).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+      }
+      return updated
+    })
+  }
+
   const handleOpenCreateModal = (dateInput?: any) => {
     const targetDate = typeof dateInput === 'string' && dateInput ? dateInput : selectedDateStr
     setCreateForm(prev => ({
       ...prev,
-      date: targetDate
+      date: targetDate,
+      startTime: '',
+      endTime: '',
     }))
+    setSelectedSingleHourlySlots([])
+    setIsSingleCustomTime(false)
+    setSelectedBatchHourlySlots([])
+    setIsBatchCustomTime(false)
+    setCustomTimeInput({ start: '', end: '' })
+
     setBatchForm(prev => ({
       ...prev,
       startDate: targetDate,
@@ -208,7 +274,8 @@ export default function SlotManagerClient() {
         } catch {
           return targetDate
         }
-      })()
+      })(),
+      times: []
     }))
     setIsCreateModalOpen(true)
   }
@@ -451,7 +518,8 @@ export default function SlotManagerClient() {
     e.preventDefault()
     
     if (isBatchMode) {
-      if (!batchForm.startDate || !batchForm.endDate || batchForm.weekdays.length === 0 || batchForm.times.length === 0) {
+      const finalTimes = Array.from(new Set([...selectedBatchHourlySlots, ...batchForm.times]))
+      if (!batchForm.startDate || !batchForm.endDate || batchForm.weekdays.length === 0 || finalTimes.length === 0) {
         toast.error('Please configure Date Range, Weekdays, and Time Slot(s) for the batch.')
         return
       }
@@ -465,7 +533,7 @@ export default function SlotManagerClient() {
             startDate: batchForm.startDate,
             endDate: batchForm.endDate,
             weekdays: batchForm.weekdays,
-            times: batchForm.times,
+            times: finalTimes,
             maxCapacity: batchForm.maxCapacity,
             instructorId: batchForm.instructorId || createForm.instructorId,
             status: batchForm.status
@@ -489,47 +557,91 @@ export default function SlotManagerClient() {
       return
     }
 
-    if (!createForm.date || !createForm.startTime || !createForm.endTime) {
-      toast.error('Please fill in Date, Start Time and End Time')
+    if (!createForm.date) {
+      toast.error('Please select a Date')
       return
     }
 
-    const timeRange = `${formatTime12h(createForm.startTime)} - ${formatTime12h(createForm.endTime)}`
-    
-    setIsSaving(true)
-    try {
-      const res = await fetch('/api/public/slots', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          dayOfWeek: createForm.date, // Store date here
-          time: timeRange,            // Store custom time range here
-          maxCapacity: createForm.maxCapacity,
-          instructorId: createForm.instructorId,
-          status: createForm.status,
-          currentBooked: 0
-        })
-      })
-
-      if (res.ok) {
-        toast.success(t.slotActiveToast)
-        fetchSlots()
-        setIsCreateModalOpen(false)
-        setCreateForm(prev => ({
-          ...prev,
-          date: '',
-          startTime: '',
-          endTime: '',
-          maxCapacity: 5
-        }))
-      } else {
-        const errData = await res.json()
-        toast.error(errData.error || t.failedSave)
+    if (isSingleCustomTime) {
+      if (!createForm.startTime || !createForm.endTime) {
+        toast.error('Please fill in Start Time and End Time')
+        return
       }
-    } catch (e) {
-      toast.error(t.error)
-    } finally {
-      setIsSaving(false)
+      const timeRange = `${formatTime12h(createForm.startTime)} - ${formatTime12h(createForm.endTime)}`
+      setIsSaving(true)
+      try {
+        const res = await fetch('/api/public/slots', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            dayOfWeek: createForm.date,
+            time: timeRange,
+            maxCapacity: createForm.maxCapacity,
+            instructorId: createForm.instructorId,
+            status: createForm.status,
+            currentBooked: 0
+          })
+        })
+
+        if (res.ok) {
+          toast.success(t.slotActiveToast)
+          fetchSlots()
+          setIsCreateModalOpen(false)
+        } else {
+          const errData = await res.json()
+          toast.error(errData.error || t.failedSave)
+        }
+      } catch (e) {
+        toast.error(t.error)
+      } finally {
+        setIsSaving(false)
+      }
+    } else {
+      if (selectedSingleHourlySlots.length === 0) {
+        toast.error('Please select at least one hourly block or use custom time.')
+        return
+      }
+      setIsSaving(true)
+      try {
+        const results = await Promise.all(
+          selectedSingleHourlySlots.map(async (timeRange) => {
+            try {
+              const res = await fetch('/api/public/slots', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  dayOfWeek: createForm.date,
+                  time: timeRange,
+                  maxCapacity: createForm.maxCapacity,
+                  instructorId: createForm.instructorId,
+                  status: createForm.status,
+                  currentBooked: 0
+                })
+              })
+              return { ok: res.ok, status: res.status }
+            } catch {
+              return { ok: false, status: 500 }
+            }
+          })
+        )
+
+        const succeeded = results.filter(r => r.ok).length
+        if (succeeded === selectedSingleHourlySlots.length) {
+          toast.success(`Successfully published ${succeeded} time slots!`)
+          fetchSlots()
+          setIsCreateModalOpen(false)
+        } else if (succeeded > 0) {
+          toast.success(`Published ${succeeded} slots, but some failed.`)
+          fetchSlots()
+          setIsCreateModalOpen(false)
+        } else {
+          toast.error('Failed to save time slots. Ensure they do not overlap.')
+        }
+      } catch (e) {
+        toast.error(t.error)
+      } finally {
+        setIsSaving(false)
+      }
     }
   }
 
@@ -934,63 +1046,89 @@ export default function SlotManagerClient() {
                       />
                     </div>
 
-                    {/* Custom Time inputs range */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-1.5 text-left">
-                        <label className="text-[10px] font-bold font-mono text-[rgb(var(--color-text-2))] uppercase tracking-wider font-bold">Start Time</label>
-                        <input 
-                          type="time"
-                          required={!isBatchMode}
-                          value={createForm.startTime}
-                          onChange={(e) => setCreateForm({...createForm, startTime: e.target.value})}
-                          style={{ colorScheme: 'dark' }}
-                          className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-3 text-sm font-bold text-[rgb(var(--color-text-1))] outline-none focus:border-[rgb(var(--color-primary))]"
-                        />
+                    {/* Custom Time Toggle */}
+                    <div className="flex items-center justify-between bg-[rgb(var(--color-void))]/45 px-4 py-3 rounded-xl border border-[rgb(var(--color-border))]/40">
+                      <div className="flex flex-col text-left">
+                        <span className="text-xs font-bold text-[rgb(var(--color-text-1))]">Custom Time Range</span>
+                        <span className="text-[9px] font-mono text-[rgb(var(--color-text-3))]">Enter manual start/end times</span>
                       </div>
-
-                      <div className="flex flex-col gap-1.5 text-left">
-                        <label className="text-[10px] font-bold font-mono text-[rgb(var(--color-text-2))] uppercase tracking-wider font-bold">End Time</label>
-                        <input 
-                          type="time"
-                          required={!isBatchMode}
-                          value={createForm.endTime}
-                          onChange={(e) => setCreateForm({...createForm, endTime: e.target.value})}
-                          style={{ colorScheme: 'dark' }}
-                          className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-3 text-sm font-bold text-[rgb(var(--color-text-1))] outline-none focus:border-[rgb(var(--color-primary))]"
-                        />
-                      </div>
+                      <input 
+                        type="checkbox"
+                        checked={isSingleCustomTime}
+                        onChange={(e) => setIsSingleCustomTime(e.target.checked)}
+                        className="w-4 h-4 rounded border-[rgb(var(--color-border))] text-[rgb(var(--color-primary))] focus:ring-[rgb(var(--color-primary))] bg-[rgb(var(--color-void))]"
+                      />
                     </div>
 
-                    {/* Presets for Single Slot */}
-                    <div className="flex flex-col gap-2 text-left">
-                      <span className="text-[9px] font-mono text-[rgb(var(--color-text-3))] uppercase tracking-wider font-bold">Quick Time Presets</span>
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          { label: 'Morning (8:00 AM - 9:30 AM)', start: '08:00', end: '09:30' },
-                          { label: 'Noon (12:00 PM - 1:30 PM)', start: '12:00', end: '13:30' },
-                          { label: 'Evening (4:00 PM - 5:30 PM)', start: '16:00', end: '17:30' }
-                        ].map(preset => (
-                          <button
-                            key={preset.label}
-                            type="button"
-                            onClick={() => {
-                              setCreateForm(prev => ({
-                                ...prev,
-                                startTime: preset.start,
-                                endTime: preset.end
-                              }))
-                            }}
-                            className={`px-3 py-1.5 rounded-lg border text-[10px] font-mono font-bold transition-all ${
-                              createForm.startTime === preset.start && createForm.endTime === preset.end
-                                ? 'bg-[rgb(var(--color-primary))]/20 border-[rgb(var(--color-primary))] text-[rgb(var(--color-primary))] shadow-sm'
-                                : 'bg-[rgb(var(--color-void))] border-[rgb(var(--color-border))]/60 text-[rgb(var(--color-text-3))] hover:text-[rgb(var(--color-text-2))]'
-                            }`}
-                          >
-                            {preset.label.split(' (')[0]}
-                          </button>
-                        ))}
+                    {isSingleCustomTime ? (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1.5 text-left">
+                          <label className="text-[10px] font-bold font-mono text-[rgb(var(--color-text-2))] uppercase tracking-wider font-bold">Start Time</label>
+                          <input 
+                            type="time"
+                            required={isSingleCustomTime}
+                            value={createForm.startTime}
+                            onChange={(e) => handleStartTimeChange(e.target.value)}
+                            style={{ colorScheme: 'dark' }}
+                            className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-3 text-sm font-bold text-[rgb(var(--color-text-1))] outline-none focus:border-[rgb(var(--color-primary))]"
+                          />
+                        </div>
+
+                        <div className="flex flex-col gap-1.5 text-left">
+                          <label className="text-[10px] font-bold font-mono text-[rgb(var(--color-text-2))] uppercase tracking-wider font-bold">End Time</label>
+                          <input 
+                            type="time"
+                            required={isSingleCustomTime}
+                            value={createForm.endTime}
+                            onChange={(e) => setCreateForm({...createForm, endTime: e.target.value})}
+                            style={{ colorScheme: 'dark' }}
+                            className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-3 text-sm font-bold text-[rgb(var(--color-text-1))] outline-none focus:border-[rgb(var(--color-primary))]"
+                          />
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="flex flex-col gap-3 text-left">
+                        <div className="flex justify-between items-center bg-[rgb(var(--color-void))]/20 p-2.5 rounded-xl border border-[rgb(var(--color-border))]/40">
+                          <span className="text-[10px] font-bold font-mono text-[rgb(var(--color-text-2))] uppercase tracking-wider">Hourly Slots Grid (1 hr each)</span>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedSingleHourlySlots([...HOURLY_BLOCKS])}
+                              className="text-[9px] font-mono text-[rgb(var(--color-primary))] hover:underline"
+                            >
+                              Select All
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedSingleHourlySlots([])}
+                              className="text-[9px] font-mono text-rose-400 hover:underline"
+                            >
+                              Clear
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          {HOURLY_BLOCKS.map(block => {
+                            const isSelected = selectedSingleHourlySlots.includes(block)
+                            return (
+                              <button
+                                key={block}
+                                type="button"
+                                onClick={() => toggleSingleHourlySlot(block)}
+                                className={`px-2.5 py-2 rounded-xl border text-[10px] font-mono font-bold text-center transition-all ${
+                                  isSelected 
+                                    ? 'bg-[rgb(var(--color-primary))]/20 border-[rgb(var(--color-primary))] text-[rgb(var(--color-primary))] shadow-sm'
+                                    : 'bg-[rgb(var(--color-void))] border-[rgb(var(--color-border))]/60 text-[rgb(var(--color-text-2))] hover:bg-[rgb(var(--color-border))]/35'
+                                }`}
+                              >
+                                {block}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
 
@@ -1076,102 +1214,135 @@ export default function SlotManagerClient() {
                       </div>
                     </div>
 
-                    {/* Multiple Custom Time Selection */}
-                    <div className="flex flex-col gap-2 text-left">
-                      <label className="text-[10px] font-bold font-mono text-[rgb(var(--color-text-2))] uppercase tracking-wider font-bold">Class Times</label>
-                      <div className="flex gap-2 items-end">
-                        <div className="flex-1 flex flex-col gap-1">
-                          <span className="text-[8px] font-mono text-[rgb(var(--color-text-3))] uppercase font-semibold">Start</span>
-                          <input 
-                            type="time"
-                            value={customTimeInput.start}
-                            onChange={(e) => setCustomTimeInput({...customTimeInput, start: e.target.value})}
-                            style={{ colorScheme: 'dark' }}
-                            className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-[rgb(var(--color-text-1))] outline-none focus:border-[rgb(var(--color-primary))]"
-                          />
+                    {/* Hourly Grid for Batch Mode */}
+                    <div className="flex flex-col gap-3 text-left">
+                      <div className="flex justify-between items-center bg-[rgb(var(--color-void))]/20 p-2.5 rounded-xl border border-[rgb(var(--color-border))]/40">
+                        <label className="text-[10px] font-bold font-mono text-[rgb(var(--color-text-2))] uppercase tracking-wider">Hourly Slots Grid (1 hr each)</label>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedBatchHourlySlots([...HOURLY_BLOCKS])}
+                            className="text-[9px] font-mono text-[rgb(var(--color-primary))] hover:underline"
+                          >
+                            Select All
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedBatchHourlySlots([])}
+                            className="text-[9px] font-mono text-rose-400 hover:underline"
+                          >
+                            Clear
+                          </button>
                         </div>
-                        <div className="flex-1 flex flex-col gap-1">
-                          <span className="text-[8px] font-mono text-[rgb(var(--color-text-3))] uppercase font-semibold">End</span>
-                          <input 
-                            type="time"
-                            value={customTimeInput.end}
-                            onChange={(e) => setCustomTimeInput({...customTimeInput, end: e.target.value})}
-                            style={{ colorScheme: 'dark' }}
-                            className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-[rgb(var(--color-text-1))] outline-none focus:border-[rgb(var(--color-primary))]"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (!customTimeInput.start || !customTimeInput.end) {
-                              toast.error('Enter both start and end time')
-                              return
-                            }
-                            const timeRange = `${formatTime12h(customTimeInput.start)} - ${formatTime12h(customTimeInput.end)}`
-                            if (batchForm.times.includes(timeRange)) {
-                              toast.error('Time range already added')
-                              return
-                            }
-                            setBatchForm({
-                              ...batchForm,
-                              times: [...batchForm.times, timeRange]
-                            })
-                            setCustomTimeInput({ start: '', end: '' })
-                          }}
-                          className="px-3 py-2 bg-[rgb(var(--color-primary))]/20 hover:bg-[rgb(var(--color-primary))]/30 text-[rgb(var(--color-primary))] font-bold text-xs rounded-lg transition"
-                        >
-                          Add Time
-                        </button>
                       </div>
 
-                      {/* Preset intervals */}
-                      <div className="flex flex-wrap gap-1.5 mt-1">
-                        <span className="text-[8px] font-mono text-[rgb(var(--color-text-3))] uppercase mr-1 self-center">Presets:</span>
-                        {[
-                          { label: 'Morning 8am', start: '08:00', end: '09:30' },
-                          { label: 'Noon 12pm', start: '12:00', end: '13:30' },
-                          { label: 'Evening 4pm', start: '16:00', end: '17:30' }
-                        ].map(preset => (
+                      <div className="grid grid-cols-2 gap-2">
+                        {HOURLY_BLOCKS.map(block => {
+                          const isSelected = selectedBatchHourlySlots.includes(block)
+                          return (
+                            <button
+                              key={block}
+                              type="button"
+                              onClick={() => toggleBatchHourlySlot(block)}
+                              className={`px-2.5 py-2 rounded-xl border text-[10px] font-mono font-bold text-center transition-all ${
+                                isSelected 
+                                  ? 'bg-[rgb(var(--color-primary))]/20 border-[rgb(var(--color-primary))] text-[rgb(var(--color-primary))] shadow-sm'
+                                  : 'bg-[rgb(var(--color-void))] border-[rgb(var(--color-border))]/60 text-[rgb(var(--color-text-2))] hover:bg-[rgb(var(--color-border))]/35'
+                              }`}
+                            >
+                              {block}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Custom Batch Time Range toggle */}
+                    <div className="flex items-center justify-between bg-[rgb(var(--color-void))]/45 px-4 py-3 rounded-xl border border-[rgb(var(--color-border))]/40">
+                      <div className="flex flex-col text-left">
+                        <span className="text-xs font-bold text-[rgb(var(--color-text-1))]">Add Custom Batch Time</span>
+                        <span className="text-[9px] font-mono text-[rgb(var(--color-text-3))]">For non-standard hour increments</span>
+                      </div>
+                      <input 
+                        type="checkbox"
+                        checked={isBatchCustomTime}
+                        onChange={(e) => setIsBatchCustomTime(e.target.checked)}
+                        className="w-4 h-4 rounded border-[rgb(var(--color-border))] text-[rgb(var(--color-primary))] focus:ring-[rgb(var(--color-primary))] bg-[rgb(var(--color-void))]"
+                      />
+                    </div>
+
+                    {isBatchCustomTime && (
+                      <div className="flex flex-col gap-2 text-left bg-[rgb(var(--color-void))]/20 p-4 rounded-xl border border-[rgb(var(--color-border))]/40">
+                        <div className="flex gap-2 items-end">
+                          <div className="flex-1 flex flex-col gap-1">
+                            <span className="text-[8px] font-mono text-[rgb(var(--color-text-3))] uppercase font-semibold">Start</span>
+                            <input 
+                              type="time"
+                              value={customTimeInput.start}
+                              onChange={(e) => handleBatchCustomStartChange(e.target.value)}
+                              style={{ colorScheme: 'dark' }}
+                              className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-[rgb(var(--color-text-1))] outline-none focus:border-[rgb(var(--color-primary))]"
+                            />
+                          </div>
+                          <div className="flex-1 flex flex-col gap-1">
+                            <span className="text-[8px] font-mono text-[rgb(var(--color-text-3))] uppercase font-semibold">End</span>
+                            <input 
+                              type="time"
+                              value={customTimeInput.end}
+                              onChange={(e) => setCustomTimeInput({...customTimeInput, end: e.target.value})}
+                              style={{ colorScheme: 'dark' }}
+                              className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold text-[rgb(var(--color-text-1))] outline-none focus:border-[rgb(var(--color-primary))]"
+                            />
+                          </div>
                           <button
-                            key={preset.label}
                             type="button"
                             onClick={() => {
-                              const range = `${formatTime12h(preset.start)} - ${formatTime12h(preset.end)}`
-                              if (!batchForm.times.includes(range)) {
-                                setBatchForm({
-                                  ...batchForm,
-                                  times: [...batchForm.times, range]
-                                })
+                              if (!customTimeInput.start || !customTimeInput.end) {
+                                toast.error('Enter both start and end time')
+                                return
                               }
+                              const timeRange = `${formatTime12h(customTimeInput.start)} - ${formatTime12h(customTimeInput.end)}`
+                              if (batchForm.times.includes(timeRange) || selectedBatchHourlySlots.includes(timeRange)) {
+                                toast.error('Time range already added')
+                                return
+                              }
+                              setBatchForm({
+                                ...batchForm,
+                                times: [...batchForm.times, timeRange]
+                              })
+                              setCustomTimeInput({ start: '', end: '' })
                             }}
-                            className="px-2 py-0.5 rounded bg-[rgb(var(--color-void))] hover:bg-[rgb(var(--color-border))] border border-[rgb(var(--color-border))]/55 text-[8px] font-mono text-[rgb(var(--color-text-2))]"
+                            className="px-3 py-2 bg-[rgb(var(--color-primary))]/20 hover:bg-[rgb(var(--color-primary))]/30 text-[rgb(var(--color-primary))] font-bold text-xs rounded-lg transition"
                           >
-                            {preset.label}
+                            Add Custom
                           </button>
-                        ))}
-                      </div>
+                        </div>
 
-                      {/* Currently Added Times list */}
-                      {batchForm.times.length > 0 ? (
-                        <div className="flex flex-col gap-1.5 mt-2 bg-[rgb(var(--color-void))]/40 p-2.5 rounded-xl border border-[rgb(var(--color-border))]/40">
-                          <span className="text-[8px] font-mono text-[rgb(var(--color-text-3))] uppercase tracking-wider font-semibold">Selected Times ({batchForm.times.length}):</span>
-                          <div className="flex flex-col gap-1">
+                        {/* Custom Added Times List */}
+                        {batchForm.times.length > 0 && (
+                          <div className="flex flex-col gap-1.5 mt-2 bg-[rgb(var(--color-void))] p-2.5 rounded-lg border border-[rgb(var(--color-border))]/50">
                             {batchForm.times.map((tStr, index) => (
-                              <div key={index} className="flex justify-between items-center bg-[rgb(var(--color-void))] px-2.5 py-1.5 rounded-lg border border-[rgb(var(--color-border))]/50">
-                                <span className="text-xs font-mono font-bold text-[rgb(var(--color-text-1))]">{tStr}</span>
+                              <div key={index} className="flex justify-between items-center bg-[rgb(var(--color-void))]/60 px-2.5 py-1 rounded-md border border-[rgb(var(--color-border))]/20">
+                                <span className="text-xs font-mono text-[rgb(var(--color-text-1))]">{tStr}</span>
                                 <button
                                   type="button"
                                   onClick={() => setBatchForm({...batchForm, times: batchForm.times.filter((_, idx) => idx !== index)})}
-                                  className="text-[10px] font-bold text-rose-400 hover:text-rose-300"
+                                  className="text-[9px] font-bold text-rose-400 hover:text-rose-300"
                                 >
                                   Remove
                                 </button>
                               </div>
                             ))}
                           </div>
-                        </div>
-                      ) : (
-                        <span className="text-[10px] font-mono text-rose-400 mt-1">Please add at least 1 time slot to generate batch.</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Total selected summary */}
+                    <div className="text-[10px] font-mono text-[rgb(var(--color-text-3))] uppercase tracking-wider font-semibold">
+                      Total slots configured: <span className="text-[rgb(var(--color-primary))] font-bold">{selectedBatchHourlySlots.length + batchForm.times.length}</span>
+                      {(selectedBatchHourlySlots.length + batchForm.times.length === 0) && (
+                        <p className="text-rose-400 font-normal mt-1 lowercase">Please select at least one hour or add a custom time.</p>
                       )}
                     </div>
                   </>
