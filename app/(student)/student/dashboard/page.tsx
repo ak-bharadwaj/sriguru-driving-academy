@@ -163,6 +163,7 @@ export default async function StudentDashboardPage() {
       const quizAccuracy = totalAttempts > 0 ? Math.round((correctAttempts / totalAttempts) * 100) : 0
 
       dbData = {
+        isMock: false,
         student: {
           id: student.id,
           name: student.user.name,
@@ -216,6 +217,7 @@ export default async function StudentDashboardPage() {
   // Fallback to high-fidelity mock data if database was offline or student profile is missing
   if (!dbData) {
     dbData = {
+      isMock: true,
       student: {
         id: 'mock-student-id-123',
         name: userName,

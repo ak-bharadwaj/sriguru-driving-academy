@@ -162,6 +162,7 @@ interface RoadmapPhaseData {
 
 interface StudentDashboardProps {
   initialDbData: {
+    isMock?: boolean
     student: {
       id: string
       name: string
@@ -340,6 +341,20 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
       </div>
 
       <div className="max-w-md mx-auto px-5 -mt-20 relative z-10 flex flex-col gap-6">
+        {dbData.isMock && (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-[24px] p-5 text-left flex flex-col gap-3 shadow-lg shadow-amber-500/5 backdrop-blur-md">
+            <div className="flex items-center gap-2 text-amber-500 font-bold uppercase tracking-wider text-xs">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+              </span>
+              Sandbox Preview Active
+            </div>
+            <p className="text-xs text-[rgb(var(--color-text-2))] leading-relaxed">
+              <strong>Notice:</strong> Your student account was created successfully! Because an administrator or instructor hasn't scheduled your live driving slots yet, we have activated Sandbox Preview Mode with simulated schedules (e.g. coach Rajesh Kumar, upcoming test center, and practice sessions) so you can explore all dashboard features immediately. Real slots will replace these once published by the academy.
+            </p>
+          </div>
+        )}
         
         <AnimatePresence>
           {activeAnnouncements.length > 0 && (
@@ -522,6 +537,11 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
             {dbData.nextSession ? (
               <div className="bg-[rgb(var(--color-primary))] text-white rounded-[24px] p-6 w-[240px] flex-shrink-0 relative overflow-hidden shadow-app-hover">
                 <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/10 rounded-full blur-xl" />
+                {dbData.isMock && (
+                  <span className="absolute top-4 right-4 bg-white/20 text-white border border-white/30 text-[8px] font-mono font-bold px-2 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-sm z-20">
+                    Preview
+                  </span>
+                )}
                 <h4 className="text-4xl font-bold font-display">{new Date(dbData.nextSession.scheduledAt).getDate()}</h4>
                 <p className="text-white/80 text-sm mt-1 mb-6">{new Date(dbData.nextSession.scheduledAt).toLocaleString('default', { month: 'short', year: 'numeric' })}</p>
                 
@@ -541,6 +561,11 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
 
             <div className="bg-app-yellow text-slate-900 rounded-[24px] p-6 w-[240px] flex-shrink-0 relative overflow-hidden shadow-app-hover flex flex-col justify-between">
               <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/40 rounded-full blur-xl" />
+              {dbData.isMock && (
+                <span className="absolute top-4 right-4 bg-black/10 text-slate-800 border border-black/15 text-[8px] font-mono font-bold px-2 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-sm z-20">
+                  Preview
+                </span>
+              )}
               <div>
                 <div className="w-12 h-12 bg-white/40 rounded-full flex items-center justify-center mb-4 backdrop-blur-md">
                   <Award className="w-6 h-6" />
@@ -558,6 +583,11 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
             {nextTest && (
               <div className="bg-rose-500 text-white rounded-[24px] p-6 w-[240px] flex-shrink-0 relative overflow-hidden shadow-app-hover">
                 <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-white/20 rounded-full blur-xl" />
+                {dbData.isMock && (
+                  <span className="absolute top-4 right-4 bg-white/20 text-white border border-white/30 text-[8px] font-mono font-bold px-2 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-sm z-20">
+                    Preview
+                  </span>
+                )}
                 <h4 className="text-4xl font-bold font-display">{new Date(nextTest.testDate).getDate()}</h4>
                 <p className="text-white/80 text-sm mt-1 mb-6">{new Date(nextTest.testDate).toLocaleString('default', { month: 'short', year: 'numeric' })}</p>
                 

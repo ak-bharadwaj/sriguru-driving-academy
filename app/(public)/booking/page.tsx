@@ -197,8 +197,52 @@ const BOOKING_DICT = {
   }
 }
 
+const DRIVING_TIPS = [
+  {
+    title: "The Parallel Parking Formula",
+    desc: "Line up your rear bumper with the adjacent car's bumper, turn your steering wheel fully toward the curb, and reverse at a 45-degree angle until clear."
+  },
+  {
+    title: "The Clutch Friction Zone",
+    desc: "When moving from a standstill on a hill, slowly release the clutch until you feel the car vibrate slightly (the friction point) before letting go of the handbrake."
+  },
+  {
+    title: "RTO Track '8' Rule",
+    desc: "When driving in an '8' shape track, keep your steering wheel steady under 10 km/h and steer smoothly without using jerky movements."
+  },
+  {
+    title: "Defensive Braking Rule",
+    desc: "Always scan 12 seconds ahead on the road. It gives you enough reaction time to brake smoothly without locking the wheels."
+  },
+  {
+    title: "Traffic Sign Priority",
+    desc: "Remember: Stop signs demand a complete halt behind the white line, not just a slow rolling check."
+  }
+]
+
+const SUBMIT_STAGES = [
+  { label: "Establishing secure tunnel", iconKey: "Lock" },
+  { label: "Creating student profile", iconKey: "User" },
+  { label: "Allocating learning roadmap", iconKey: "BookOpen" },
+  { label: "Preparing sandbox environment", iconKey: "Award" },
+  { label: "Finalizing booking confirmation", iconKey: "CheckCircle" }
+]
+
+const getStageIcon = (key: string) => {
+  switch (key) {
+    case 'Lock': return Lock
+    case 'User': return User
+    case 'BookOpen': return BookOpen
+    case 'Award': return Award
+    case 'CheckCircle': return CheckCircle
+    default: return Info
+  }
+}
+
 export default function PublicBookingSystem() {
   const [step, setStep] = useState(1)
+  const [submitStage, setSubmitStage] = useState(0)
+  const [activeTipIndex, setActiveTipIndex] = useState(0)
 
   // Step 1: Personal details
   const [name, setName] = useState('')
@@ -414,8 +458,21 @@ export default function PublicBookingSystem() {
     setPasswordError('')
     
     setSubmitting(true)
+    setSubmitStage(0)
+
+    // Setup stages stepping
+    const stageInterval = setInterval(() => {
+      setSubmitStage(prev => {
+        if (prev < 4) return prev + 1
+        return prev
+      })
+    }, 1000)
+
+    // We want a minimum delay of 5000ms for staging animation
+    const delayPromise = new Promise(resolve => setTimeout(resolve, 5000))
+
     try {
-      const res = await fetch('/api/public/bookings', {
+      const apiPromise = fetch('/api/public/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -427,6 +484,11 @@ export default function PublicBookingSystem() {
           password
         })
       })
+
+      // Wait for both the minimum delay AND the API request
+      const [res] = await Promise.all([apiPromise, delayPromise])
+      clearInterval(stageInterval)
+      setSubmitStage(4) // Ensure final stage is marked complete
 
       if (res.ok) {
         const data = await res.json()
@@ -453,6 +515,7 @@ export default function PublicBookingSystem() {
         toast.error(errMsg)
       }
     } catch (e) {
+      clearInterval(stageInterval)
       console.error(e)
       toast.error("Failed to connect to the server. Please check your internet connection.")
     } finally {
@@ -515,9 +578,105 @@ export default function PublicBookingSystem() {
         <div className="bg-surface border border-border rounded-3xl p-6 md:p-10 shadow-2xl relative min-h-[400px] flex flex-col justify-between">
           
           <AnimatePresence mode="wait">
-            
-            {/* STEP 1: PERSONAL DETAILS (Identity-First Funnel) */}
-            {step === 1 && (
+            {submitting ? (
+              <motion.div
+                key="submitting-loader"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="flex flex-col items-center justify-center text-center py-6 gap-6 max-w-md mx-auto my-auto w-full"
+              >
+                {/* Loader Animation */}
+                <div className="relative w-14 h-14">
+                  <span className="absolute inset-0 rounded-full border-4 border-accent/20 animate-pulse"></span>
+                  <span className="absolute inset-0 rounded-full border-4 border-t-accent border-r-transparent border-b-transparent border-l-transparent animate-spin"></span>
+                </div>
+                
+                <div className="flex flex-col gap-1.5 w-full">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-accent font-bold animate-pulse">
+                    Processing Sri Guru Ledger
+                  </span>
+                  <h3 className="text-base font-bold text-text-1 font-display uppercase tracking-tight">
+                    Preparing Student Profile
+                  </h3>
+                  
+                  {/* Progress Bar */}
+                  <div className="w-full bg-void rounded-full h-2 overflow-hidden border border-border/80 mt-2">
+                    <motion.div 
+                      className="bg-gradient-to-r from-primary via-accent to-success h-full"
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${(submitStage + 1) * 20}%` }}
+                      transition={{ duration: 0.5, ease: "easeInOut" }}
+                    />
+                  </div>
+                  <div className="flex justify-between items-center text-[8px] font-mono text-text-3 uppercase mt-1">
+                    <span>Initiated</span>
+                    <span>{Math.min((submitStage + 1) * 20, 100)}% Complete</span>
+                  </div>
+                </div>
+
+                {/* Checklist of Stages */}
+                <div className="w-full bg-void/40 border border-border/60 rounded-2xl p-4 flex flex-col gap-3 text-left">
+                  {SUBMIT_STAGES.map((s, index) => {
+                    const isCompleted = submitStage > index
+                    const isActive = submitStage === index
+                    const Icon = getStageIcon(s.iconKey)
+
+                    return (
+                      <div key={index} className="flex items-center gap-3 transition-opacity duration-300">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center border shrink-0 transition-all duration-300 ${
+                          isCompleted
+                            ? 'bg-success/20 border-success text-success'
+                            : isActive
+                              ? 'bg-accent/20 border-accent text-accent animate-pulse'
+                              : 'bg-void/40 border-border/60 text-text-3 opacity-50'
+                        }`}>
+                          {isCompleted ? (
+                            <Check className="w-3.5 h-3.5" />
+                          ) : (
+                            <Icon className={`w-3 h-3 ${isActive ? 'animate-pulse' : ''}`} />
+                          )}
+                        </div>
+                        <span className={`text-[11px] font-mono uppercase tracking-wider transition-colors duration-300 ${
+                          isCompleted
+                            ? 'text-success/80 line-through decoration-success/25'
+                            : isActive
+                              ? 'text-text-1 font-bold'
+                              : 'text-text-3 opacity-50'
+                        }`}>
+                          {s.label}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* Interactive Tip Card to Divert Time */}
+                <div className="w-full bg-void/50 border border-border/80 rounded-2xl p-4 flex flex-col gap-2 relative overflow-hidden text-left shadow-sm">
+                  <div className="flex items-center justify-between border-b border-border/30 pb-2">
+                    <span className="text-[10px] font-mono text-accent uppercase tracking-wider font-bold flex items-center gap-1.5">
+                      💡 Driving Tip of the Day
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTipIndex(prev => (prev + 1) % DRIVING_TIPS.length)}
+                      className="text-[9px] font-mono text-primary hover:text-primary/80 transition-colors uppercase font-bold border border-primary/20 px-2 py-0.5 rounded cursor-pointer select-none"
+                    >
+                      Next Tip ➔
+                    </button>
+                  </div>
+                  <p className="text-xs font-bold text-text-1 font-display mt-0.5">
+                    {DRIVING_TIPS[activeTipIndex].title}
+                  </p>
+                  <p className="text-[11px] text-text-2 leading-relaxed font-body">
+                    {DRIVING_TIPS[activeTipIndex].desc}
+                  </p>
+                </div>
+              </motion.div>
+            ) : (
+              <>
+                {/* STEP 1: PERSONAL DETAILS (Identity-First Funnel) */}
+                {step === 1 && (
               <motion.div
                 key="step1"
                 initial={{ opacity: 0, x: 20 }}
@@ -1194,7 +1353,7 @@ export default function PublicBookingSystem() {
                 </button>
               </motion.div>
             )}
-
+          </>)}
           </AnimatePresence>
 
         </div>
