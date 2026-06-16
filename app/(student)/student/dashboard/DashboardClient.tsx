@@ -67,7 +67,7 @@ const DASHBOARD_DICT = {
     officialTest: "Official Test",
     training: "Training",
     attendanceVerification: "Attendance Verification",
-    attendanceOtpDesc: "Generate a verification code to share with your instructor to check-in.",
+    attendanceOtpDesc: "Generate a code to share with your instructor to verify your attendance.",
     generateOtp: "Generate Code",
     generating: "Generating...",
     otpExpires: "Expires in"
@@ -115,7 +115,7 @@ const DASHBOARD_DICT = {
     officialTest: "आधिकारिक परीक्षा",
     training: "प्रशिक्षण",
     attendanceVerification: "उपस्थिति सत्यापन",
-    attendanceOtpDesc: "उपस्थिति दर्ज कराने के लिए अपने प्रशिक्षक के साथ साझा करने के लिए एक सत्यापन कोड जनरेट करें।",
+    attendanceOtpDesc: "अपनी उपस्थिति सत्यापित करने के लिए अपने प्रशिक्षक के साथ साझा करने के लिए एक कोड जनरेट करें।",
     generateOtp: "सत्यापन कोड जनरेट करें",
     generating: "जनरेट किया जा रहा है...",
     otpExpires: "समाप्त होने में"
@@ -163,7 +163,7 @@ const DASHBOARD_DICT = {
     officialTest: "అధికారిక పరీక్ష",
     training: "శిక్షణ",
     attendanceVerification: "హాజరు ధృవీకరణ",
-    attendanceOtpDesc: "హాజరు నమోదు చేయడానికి మీ బోధకుడితో పంచుకోవడానికి ఒక ధృవీకరణ కోడ్‌ను జనరేట్ చేయండి.",
+    attendanceOtpDesc: "మీ హాజరును ధృవీకరించడానికి మీ బోధకుడితో పంచుకోవడానికి ఒక కోడ్‌ను జనరేట్ చేయండి.",
     generateOtp: "ధృవీకరణ కోడ్‌ను జనరేట్ చేయండి",
     generating: "జనరేట్ అవుతోంది...",
     otpExpires: "గడువు ముగింపు"

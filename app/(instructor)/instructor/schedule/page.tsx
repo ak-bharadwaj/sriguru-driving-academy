@@ -50,7 +50,8 @@ const PAGE_DICT = {
     markAbsent: 'Mark Absent',
     extendSession: 'Extend +15m',
     otpLabel: 'Student OTP Code',
-    otpPlaceholder: 'e.g. 123456'
+    otpPlaceholder: 'e.g. 123456',
+    otpHelp: 'Ask the student to open their dashboard and read the 6-digit code to you.'
   },
   HI: {
     pageTitle: 'अनुसूची प्रबंधन',
@@ -86,7 +87,8 @@ const PAGE_DICT = {
     markAbsent: 'अनुपस्थित चिह्नित करें',
     extendSession: '+15 मिनट बढ़ाएं',
     otpLabel: 'छात्र ओटीपी कोड',
-    otpPlaceholder: 'जैसे 123456'
+    otpPlaceholder: 'जैसे 123456',
+    otpHelp: 'छात्र से कहें कि वे अपना डैशबोर्ड खोलें और आपको 6 अंकों का कोड बताएं।'
   },
   TE: {
     pageTitle: 'షెడ్యూల్ నిర్వహణ',
@@ -122,7 +124,8 @@ const PAGE_DICT = {
     markAbsent: 'గైర్హాజరుగా గుర్తించండి',
     extendSession: '+15 నిమిషాలు పొడిగించు',
     otpLabel: 'విద్యార్థి OTP కోడ్',
-    otpPlaceholder: 'ఉదా. 123456'
+    otpPlaceholder: 'ఉదా. 123456',
+    otpHelp: 'విద్యార్థిని వారి డాష్‌బోర్డ్ తెరిచి 6 అంకెల కోడ్‌ను మీకు చెప్పమని అడగండి.'
   },
 }
 
@@ -651,6 +654,9 @@ export default function InstructorSchedulePage() {
                       }}
                       className="w-full bg-void border border-border rounded-xl p-3 text-white tracking-widest text-center font-mono font-bold text-xl focus:outline-none focus:border-primary"
                     />
+                    <p className="text-[11px] text-text-3 mt-2 leading-relaxed">
+                      {t.otpHelp}
+                    </p>
                   </div>
                 )}
 
