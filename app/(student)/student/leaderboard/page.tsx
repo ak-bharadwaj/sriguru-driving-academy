@@ -3,7 +3,6 @@ import { db } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { Trophy, Medal, Star, Flame } from 'lucide-react'
-import Image from 'next/image'
 
 export default async function LeaderboardPage() {
   const session = await getServerSession(authOptions)

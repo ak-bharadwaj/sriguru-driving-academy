@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Edit2, Trash2, Tag, Book, Activity, AlertCircle, Save, Image as ImageIcon, Upload, Loader2 } from 'lucide-react'
+import { Plus, Edit2, Trash2, Tag, Book, Activity, AlertCircle, Save, Image as ImageIcon, Upload, Loader2, GraduationCap, Check, X } from 'lucide-react'
 import { Course, Offer } from '@/lib/data/academyStore'
 import { useLanguageStore } from '@/store/languageStore'
 import { useUploadThing } from '@/lib/uploadthing'
@@ -100,7 +100,17 @@ export default function ContentManagementPage() {
   const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
   const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
 
-  const [activeTab, setActiveTab] = useState<'COURSES' | 'OFFERS' | 'GALLERY'>('COURSES')
+  const [activeTab, setActiveTab] = useState<'COURSES' | 'OFFERS' | 'GALLERY' | 'SYLLABUS'>('COURSES')
+
+  // Syllabus state
+  const [syllabusType, setSyllabusType] = useState<'BEGINNER' | 'ADVANCED' | 'RTO_FAST_TRACK'>('BEGINNER')
+  const [syllabusData, setSyllabusData] = useState<any[]>([])
+  const [syllabusLoading, setSyllabusLoading] = useState(false)
+  const [editingDay, setEditingDay] = useState<any>(null)
+  const [editDayForm, setEditDayForm] = useState({ title: '', description: '' })
+  const [savingDay, setSavingDay] = useState(false)
+  const [addingDay, setAddingDay] = useState(false)
+  const [newDay, setNewDay] = useState({ title: '', description: '' })
   const [courses, setCourses] = useState<Course[]>([])
   const [offers, setOffers] = useState<Offer[]>([])
   const [gallery, setGallery] = useState<any[]>([])
@@ -131,6 +141,89 @@ export default function ContentManagementPage() {
   useEffect(() => {
     fetchData()
   }, [])
+
+  const fetchSyllabus = async (type: string) => {
+    setSyllabusLoading(true)
+    try {
+      const res = await fetch(`/api/admin/syllabus?type=${type}`)
+      if (res.ok) {
+        const data = await res.json()
+        setSyllabusData(data.sort((a: any, b: any) => a.dayNumber - b.dayNumber))
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setSyllabusLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === 'SYLLABUS') fetchSyllabus(syllabusType)
+  }, [activeTab, syllabusType])
+
+  const handleSaveDay = async () => {
+    if (!editingDay) return
+    setSavingDay(true)
+    try {
+      const res = await fetch('/api/admin/syllabus', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: editingDay.id, title: editDayForm.title, description: editDayForm.description })
+      })
+      if (res.ok) {
+        toast.success('Day updated!')
+        setEditingDay(null)
+        fetchSyllabus(syllabusType)
+      } else toast.error('Failed to update day')
+    } catch { toast.error('Error saving day') }
+    setSavingDay(false)
+  }
+
+  const handleDeleteDay = async (id: string) => {
+    if (!confirm('Delete this day from the syllabus?')) return
+    try {
+      const res = await fetch(`/api/admin/syllabus?id=${id}`, { method: 'DELETE' })
+      if (res.ok) { toast.success('Day deleted'); fetchSyllabus(syllabusType) }
+      else toast.error('Failed to delete')
+    } catch { toast.error('Error') }
+  }
+
+  const handleAddDay = async () => {
+    if (!newDay.title.trim()) { toast.error('Title is required'); return }
+    setSavingDay(true)
+    const nextNum = (syllabusData.length > 0 ? Math.max(...syllabusData.map((d: any) => d.dayNumber)) : 0) + 1
+    try {
+      const res = await fetch('/api/admin/syllabus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trainingType: syllabusType, dayNumber: nextNum, title: newDay.title, description: newDay.description })
+      })
+      if (res.ok) {
+        toast.success(`Day ${nextNum} added!`)
+        setNewDay({ title: '', description: '' })
+        setAddingDay(false)
+        fetchSyllabus(syllabusType)
+      } else toast.error('Failed to add day')
+    } catch { toast.error('Error') }
+    setSavingDay(false)
+  }
+
+  const handleResetSyllabus = async () => {
+    if (!confirm(`Reset all ${syllabusType} syllabus days to factory defaults? This cannot be undone.`)) return
+    setSyllabusLoading(true)
+    try {
+      const res = await fetch('/api/admin/syllabus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reset: true, trainingType: syllabusType })
+      })
+      if (res.ok) {
+        toast.success('Syllabus reset to defaults!')
+        fetchSyllabus(syllabusType)
+      } else toast.error('Reset failed')
+    } catch { toast.error('Error') }
+    setSyllabusLoading(false)
+  }
 
   const fetchData = async () => {
     setIsLoading(true)
@@ -270,6 +363,16 @@ export default function ContentManagementPage() {
           }`}
         >
           <ImageIcon className="w-4 h-4" /> {t.tabGallery}
+        </button>
+        <button
+          onClick={() => setActiveTab('SYLLABUS')}
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all whitespace-nowrap ${
+            activeTab === 'SYLLABUS' 
+              ? 'bg-amber-500 text-void shadow-lg shadow-amber-500/20' 
+              : 'bg-surface border border-border text-text-3 hover:text-text-1'
+          }`}
+        >
+          <GraduationCap className="w-4 h-4" /> Syllabus Manager
         </button>
       </div>
 
@@ -423,6 +526,179 @@ export default function ContentManagementPage() {
                   </div>
                 ))}
               </div>
+            </motion.div>
+          )}
+
+          {activeTab === 'SYLLABUS' && (
+            <motion.div
+              key="syllabus"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="flex flex-col gap-6"
+            >
+              {/* Header toolbar */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-void/50 border border-border p-4 rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <GraduationCap className="w-5 h-5 text-amber-500" />
+                  <div>
+                    <p className="text-sm font-bold text-text-1">Course Syllabus Editor</p>
+                    <p className="text-xs text-text-3 font-mono">Changes reflect live on student schedule page</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Course Type Selector */}
+                  <div className="flex bg-void border border-border rounded-xl overflow-hidden">
+                    {(['BEGINNER', 'ADVANCED', 'RTO_FAST_TRACK'] as const).map(type => (
+                      <button
+                        key={type}
+                        onClick={() => setSyllabusType(type)}
+                        className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all ${
+                          syllabusType === type
+                            ? 'bg-amber-500 text-void'
+                            : 'text-text-3 hover:text-text-1'
+                        }`}
+                      >
+                        {type === 'RTO_FAST_TRACK' ? 'RTO' : type.slice(0, 3)}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setAddingDay(true)}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-amber-500 text-void rounded-xl text-xs font-bold hover:bg-amber-400 transition-all"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add Day
+                  </button>
+                  <button
+                    onClick={handleResetSyllabus}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-surface border border-border text-text-2 rounded-xl text-xs font-bold hover:border-amber-500/50 hover:text-amber-500 transition-all"
+                  >
+                    ↺ Reset to Defaults
+                  </button>
+                </div>
+              </div>
+
+              {/* Course type badge */}
+              <div className="flex items-center gap-3 px-1">
+                <span className="text-xs font-mono text-amber-500 font-bold uppercase tracking-wider">
+                  {syllabusType === 'BEGINNER' ? '21-Day Foundation' : syllabusType === 'ADVANCED' ? '14-Day Advanced' : '7-Day RTO Bootcamp'}
+                </span>
+                <span className="text-xs text-text-3">— {syllabusData.length} days configured</span>
+              </div>
+
+              {syllabusLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {syllabusData.map((day: any) => (
+                    <div key={day.id} className="bg-surface border border-border rounded-2xl p-4 flex gap-4 items-start group hover:border-amber-500/30 transition-all">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="text-xs font-mono font-black text-amber-500">{day.dayNumber}</span>
+                      </div>
+
+                      {editingDay?.id === day.id ? (
+                        <div className="flex-1 flex flex-col gap-2">
+                          <input
+                            autoFocus
+                            type="text"
+                            value={editDayForm.title}
+                            onChange={e => setEditDayForm(p => ({...p, title: e.target.value}))}
+                            className="bg-void border border-amber-500/50 rounded-lg px-3 py-2 text-sm text-white outline-none w-full font-bold"
+                            placeholder="Day title..."
+                          />
+                          <textarea
+                            rows={2}
+                            value={editDayForm.description}
+                            onChange={e => setEditDayForm(p => ({...p, description: e.target.value}))}
+                            className="bg-void border border-border rounded-lg px-3 py-2 text-xs text-text-2 outline-none w-full resize-none focus:border-amber-500/50"
+                            placeholder="Short description..."
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleSaveDay}
+                              disabled={savingDay}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-amber-500 text-void rounded-lg text-xs font-bold hover:bg-amber-400 disabled:opacity-50 transition-all"
+                            >
+                              {savingDay ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />} Save
+                            </button>
+                            <button
+                              onClick={() => setEditingDay(null)}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-void border border-border text-text-3 rounded-lg text-xs font-bold hover:text-text-1 transition-all"
+                            >
+                              <X className="w-3 h-3" /> Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-text-1 text-sm leading-snug">{day.title}</h4>
+                          <p className="text-xs text-text-3 mt-0.5 leading-relaxed">{day.description}</p>
+                        </div>
+                      )}
+
+                      {editingDay?.id !== day.id && (
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                          <button
+                            onClick={() => { setEditingDay(day); setEditDayForm({ title: day.title, description: day.description }) }}
+                            className="p-1.5 bg-void hover:bg-amber-500/10 hover:text-amber-500 text-text-3 rounded-lg transition-all"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteDay(day.id)}
+                            className="p-1.5 bg-void hover:bg-danger/20 hover:text-danger text-text-3 rounded-lg transition-all"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Add new day inline form */}
+                  {addingDay && (
+                    <div className="bg-amber-500/5 border border-amber-500/30 rounded-2xl p-4 flex gap-4 items-start">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="text-xs font-mono font-black text-amber-500 opacity-50">+</span>
+                      </div>
+                      <div className="flex-1 flex flex-col gap-2">
+                        <input
+                          autoFocus
+                          type="text"
+                          value={newDay.title}
+                          onChange={e => setNewDay(p => ({...p, title: e.target.value}))}
+                          className="bg-void border border-amber-500/50 rounded-lg px-3 py-2 text-sm text-white outline-none w-full font-bold"
+                          placeholder="New day title..."
+                        />
+                        <textarea
+                          rows={2}
+                          value={newDay.description}
+                          onChange={e => setNewDay(p => ({...p, description: e.target.value}))}
+                          className="bg-void border border-border rounded-lg px-3 py-2 text-xs text-text-2 outline-none w-full resize-none focus:border-amber-500/50"
+                          placeholder="Short description (optional)..."
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleAddDay}
+                            disabled={savingDay}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-amber-500 text-void rounded-lg text-xs font-bold hover:bg-amber-400 disabled:opacity-50 transition-all"
+                          >
+                            {savingDay ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />} Add Day
+                          </button>
+                          <button
+                            onClick={() => { setAddingDay(false); setNewDay({ title: '', description: '' }) }}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-void border border-border text-text-3 rounded-lg text-xs font-bold hover:text-text-1 transition-all"
+                          >
+                            <X className="w-3 h-3" /> Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

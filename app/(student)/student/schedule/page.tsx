@@ -54,30 +54,7 @@ const PAGE_DICT = {
   }
 }
 
-// Hardcoded standard 21-day driving syllabus
-const SYLLABUS = [
-  { title: 'Vehicle Familiarization & Controls', desc: 'Understanding pedals, steering, gears, and mirrors.' },
-  { title: 'Ignition & Moving Off', desc: 'Starting the engine and finding the clutch bite point.' },
-  { title: 'Steering Control (Slalom)', desc: 'Basic steering mechanics in an empty ground.' },
-  { title: 'Gear Shifting Dynamics', desc: 'Smoothly shifting from 1st to 3rd gear.' },
-  { title: 'Braking & Stopping Distance', desc: 'Controlled stops at marked lines.' },
-  { title: 'Left & Right Turns', desc: 'Using indicators and judging corner radiuses.' },
-  { title: 'U-Turns & 3-Point Turns', desc: 'Reversing directions in narrow spaces.' },
-  { title: 'Light Traffic Navigation', desc: 'First day on quiet residential roads.' },
-  { title: 'Roundabouts & Intersections', desc: 'Yielding, entering, and exiting traffic circles.' },
-  { title: 'Hill Starts & Inclines', desc: 'Clutch control with handbrake on a slope.' },
-  { title: 'Parallel Parking (Theory + Ground)', desc: 'The geometry of reversing into a spot.' },
-  { title: 'Parallel Parking (Live Traffic)', desc: 'Executing the maneuver with surrounding cars.' },
-  { title: 'Reverse Bay Parking', desc: 'Reversing 90 degrees into a parking bay.' },
-  { title: 'Moderate Traffic & Overtaking', desc: 'Changing lanes safely in medium traffic.' },
-  { title: 'Highway Merging & Exiting', desc: 'Matching speeds on slip roads.' },
-  { title: 'High-Speed Cruising', desc: 'Maintaining lane discipline at 60+ km/h.' },
-  { title: 'Night Driving Fundamentals', desc: 'Understanding high/low beams and glare.' },
-  { title: 'Heavy Traffic (Bumper to Bumper)', desc: 'Advanced clutch control in congestion.' },
-  { title: 'Emergency Braking & Hazards', desc: 'Reacting to sudden obstacles.' },
-  { title: 'Independent Driving Route', desc: 'Navigating without instructor prompts.' },
-  { title: 'Mock RTO Practical Test', desc: 'Final assessment for the official license.' },
-]
+
 
 export default function SchedulePage() {
   const { language } = useLanguageStore()
@@ -86,6 +63,7 @@ export default function SchedulePage() {
 
   const [student, setStudent] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [syllabusList, setSyllabusList] = useState<{ dayNumber: number; title: string; description: string }[]>([])
 
   useEffect(() => {
     fetch('/api/student/dashboard')
@@ -93,12 +71,23 @@ export default function SchedulePage() {
       .then(data => {
         setStudent(data)
         setLoading(false)
+        // Fetch syllabus from DB based on student's training type
+        const type = data?.trainingType || 'BEGINNER'
+        fetch(`/api/public/syllabus?type=${type}`)
+          .then(r => r.json())
+          .then(days => {
+            if (Array.isArray(days)) {
+              setSyllabusList(days.sort((a: any, b: any) => a.dayNumber - b.dayNumber))
+            }
+          })
+          .catch(() => {})
       })
       .catch(err => {
         console.error(err)
         setLoading(false)
       })
   }, [])
+
 
   if (loading) {
     return (
@@ -129,8 +118,6 @@ export default function SchedulePage() {
   const syllabusTitle = trainingType === 'ADVANCED' ? t.syllabusTitleAdvanced
                       : trainingType === 'RTO_FAST_TRACK' ? t.syllabusTitleRto
                       : t.syllabusTitleBeginner
-
-  const syllabusList = SYLLABUS.slice(0, durationDays)
 
   const getRecurrenceNotice = () => {
     if (activeLang === 'HI') {
@@ -238,7 +225,7 @@ export default function SchedulePage() {
 
           <div className="space-y-8 relative">
             {syllabusList.map((day, idx) => {
-              const dayNum = idx + 1
+              const dayNum = day.dayNumber
               const isCompleted = dayNum < currentDay
               const isToday = dayNum === currentDay
               const isUpcoming = dayNum > currentDay
@@ -289,7 +276,7 @@ export default function SchedulePage() {
                       {day.title}
                     </h3>
                     <p className="text-sm text-text-3 mt-1">
-                      {day.desc}
+                      {day.description}
                     </p>
                   </div>
                 </motion.div>

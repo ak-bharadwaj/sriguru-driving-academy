@@ -504,6 +504,19 @@ model CourseFeedback {
   Student   Student  @relation(fields: [studentId], references: [id])
 }
 
+model SyllabusDay {
+  id           String       @id @default(cuid())
+  trainingType TrainingType
+  dayNumber    Int
+  title        String
+  description  String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@unique([trainingType, dayNumber])
+  @@index([trainingType])
+}
+
 enum Role {
   STUDENT
   INSTRUCTOR
