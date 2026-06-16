@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, User, ShieldCheck, Flame, Star, AlertTriangle, CheckCircle, PenTool, Battery, Clock, Award } from 'lucide-react'
+import { ChevronLeft, User, ShieldCheck, Flame, Star, AlertTriangle, CheckCircle, PenTool, Battery, Clock, Award, BookOpen, CheckSquare, Square, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useXPStore } from '@/lib/stores/xp-store'
 import { useRTOStore } from '@/lib/stores/rto-store'
@@ -124,10 +124,15 @@ export default function InstructorCadetDetails({ params }: PageProps) {
   const studentId = params.id
 
   const [studentData, setStudentData] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'FEEDBACK'>('OVERVIEW')
+  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'FEEDBACK' | 'SYLLABUS'>('OVERVIEW')
   const [isEditingSkills, setIsEditingSkills] = useState(false)
   const [skillScores, setSkillScores] = useState<Record<string, number>>({})
   const [updatingSkill, setUpdatingSkill] = useState<string | null>(null)
+
+  // Syllabus progress state
+  const [syllabusProgress, setSyllabusProgress] = useState<any[]>([])
+  const [syllabusLoading, setSyllabusLoading] = useState(false)
+  const [togglingDay, setTogglingDay] = useState<string | null>(null)
   
   // Feedback form state
   const [sessionNotes, setSessionNotes] = useState('')
@@ -172,6 +177,58 @@ export default function InstructorCadetDetails({ params }: PageProps) {
     }
     fetchState()
   }, [studentId])
+
+  const fetchSyllabusProgress = async () => {
+    setSyllabusLoading(true)
+    try {
+      const res = await fetch(`/api/instructor/syllabus-progress?studentId=${studentId}`)
+      if (res.ok) {
+        const data = await res.json()
+        setSyllabusProgress(data.days || [])
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setSyllabusLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === 'SYLLABUS') fetchSyllabusProgress()
+  }, [activeTab, studentId])
+
+  const toggleDayComplete = async (day: any) => {
+    setTogglingDay(day.id)
+    try {
+      if (day.completed) {
+        // Unmark
+        const res = await fetch('/api/instructor/syllabus-progress', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentId, syllabusDayId: day.id })
+        })
+        if (res.ok) {
+          setSyllabusProgress(prev => prev.map(d => d.id === day.id ? { ...d, completed: false, completedAt: null } : d))
+        }
+      } else {
+        // Mark complete
+        const res = await fetch('/api/instructor/syllabus-progress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentId, syllabusDayId: day.id })
+        })
+        if (res.ok) {
+          setSyllabusProgress(prev => prev.map(d => d.id === day.id ? { ...d, completed: true, completedAt: new Date().toISOString() } : d))
+          setToastMessage(`Day ${day.dayNumber} marked complete! ✓`)
+          setTimeout(() => setToastMessage(null), 2000)
+        }
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setTogglingDay(null)
+    }
+  }
 
   const submitFeedback = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -307,18 +364,26 @@ export default function InstructorCadetDetails({ params }: PageProps) {
       </header>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-border/40 pb-4 mb-8">
+      <div className="flex gap-2 border-b border-border/40 pb-4 mb-8 overflow-x-auto scrollbar-none">
         <button 
           onClick={() => setActiveTab('OVERVIEW')}
-          className={`px-6 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all ${
+          className={`px-5 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all whitespace-nowrap ${
             activeTab === 'OVERVIEW' ? 'bg-primary text-void shadow-lg shadow-primary/20' : 'bg-surface border border-border text-text-3 hover:text-text-1'
           }`}
         >
           {t.performanceOverview}
         </button>
         <button 
+          onClick={() => setActiveTab('SYLLABUS')}
+          className={`px-5 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all whitespace-nowrap ${
+            activeTab === 'SYLLABUS' ? 'bg-amber-500 text-void shadow-lg shadow-amber-500/20' : 'bg-surface border border-border text-text-3 hover:text-text-1'
+          }`}
+        >
+          <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" /> Syllabus Progress</span>
+        </button>
+        <button 
           onClick={() => setActiveTab('FEEDBACK')}
-          className={`px-6 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all ${
+          className={`px-5 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase transition-all whitespace-nowrap ${
             activeTab === 'FEEDBACK' ? 'bg-accent text-void shadow-lg shadow-accent/20' : 'bg-surface border border-border text-text-3 hover:text-text-1'
           }`}
         >
@@ -426,6 +491,128 @@ export default function InstructorCadetDetails({ params }: PageProps) {
                 <div className="text-center py-10">
                   <ShieldCheck className="w-8 h-8 text-success mx-auto mb-3 opacity-50" />
                   <p className="text-xs font-mono text-text-3 uppercase">{t.noTheoryVulnerabilities}</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'SYLLABUS' && (
+          <motion.div
+            key="syllabus"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="max-w-3xl mx-auto"
+          >
+            <div className="bg-surface border border-border rounded-3xl p-6 md:p-8">
+              <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <BookOpen className="w-5 h-5 text-amber-500" />
+                  <div>
+                    <h3 className="text-lg font-bold font-display text-text-1">Course Syllabus Progress</h3>
+                    <p className="text-xs text-text-3 font-mono mt-0.5">Tick lessons as the student completes them — no fixed order required</p>
+                  </div>
+                </div>
+                {syllabusProgress.length > 0 && (
+                  <div className="text-right">
+                    <div className="text-xl font-black font-mono text-amber-500">
+                      {syllabusProgress.filter(d => d.completed).length}/{syllabusProgress.length}
+                    </div>
+                    <div className="text-[10px] text-text-3 uppercase font-mono">Completed</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Progress bar */}
+              {syllabusProgress.length > 0 && (
+                <div className="mb-6">
+                  <div className="w-full h-2 bg-void rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(syllabusProgress.filter(d => d.completed).length / syllabusProgress.length) * 100}%` }}
+                      transition={{ duration: 0.8 }}
+                      className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full"
+                    />
+                  </div>
+                  <div className="flex justify-between mt-1">
+                    <span className="text-[10px] text-text-3 font-mono">Start</span>
+                    <span className="text-[10px] text-amber-500 font-mono font-bold">
+                      {Math.round((syllabusProgress.filter(d => d.completed).length / syllabusProgress.length) * 100)}% done
+                    </span>
+                    <span className="text-[10px] text-text-3 font-mono">Course Complete</span>
+                  </div>
+                </div>
+              )}
+
+              {syllabusLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+                </div>
+              ) : syllabusProgress.length === 0 ? (
+                <div className="text-center py-16">
+                  <BookOpen className="w-10 h-10 text-text-3 mx-auto mb-4 opacity-30" />
+                  <p className="text-text-3 font-mono text-xs uppercase">No syllabus configured for this student's course type</p>
+                  <p className="text-text-3 text-xs mt-2">Admin can add syllabus days in Content → Syllabus Manager</p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {syllabusProgress.map((day, idx) => (
+                    <motion.button
+                      key={day.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.03 }}
+                      onClick={() => toggleDayComplete(day)}
+                      disabled={togglingDay === day.id}
+                      className={`w-full flex items-start gap-4 p-4 rounded-2xl border text-left transition-all group ${
+                        day.completed
+                          ? 'bg-success/5 border-success/30 hover:bg-success/10'
+                          : 'bg-void/50 border-border hover:border-amber-500/40 hover:bg-amber-500/5'
+                      } disabled:opacity-60`}
+                    >
+                      {/* Day number badge */}
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                        day.completed ? 'bg-success/20 border border-success/30' : 'bg-void border border-border group-hover:border-amber-500/50'
+                      }`}>
+                        {togglingDay === day.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-amber-500" />
+                        ) : day.completed ? (
+                          <CheckSquare className="w-4 h-4 text-success" />
+                        ) : (
+                          <Square className="w-4 h-4 text-text-3 group-hover:text-amber-500 transition-colors" />
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className={`text-[10px] font-mono font-bold uppercase tracking-wider ${
+                            day.completed ? 'text-success' : 'text-text-3'
+                          }`}>
+                            Day {day.dayNumber}
+                          </span>
+                          {day.completed && day.completedAt && (
+                            <span className="text-[9px] text-success/60 font-mono">
+                              ✓ {new Date(day.completedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                            </span>
+                          )}
+                        </div>
+                        <h4 className={`text-sm font-bold leading-snug ${
+                          day.completed ? 'text-text-2 line-through decoration-success/40' : 'text-text-1'
+                        }`}>
+                          {day.title}
+                        </h4>
+                        <p className="text-xs text-text-3 mt-0.5 leading-relaxed">{day.description}</p>
+                      </div>
+
+                      {/* Quick action hint */}
+                      <div className={`text-[10px] font-mono uppercase tracking-wider shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity ${
+                        day.completed ? 'text-danger/60' : 'text-success/70'
+                      }`}>
+                        {day.completed ? 'unmark' : 'mark done'}
+                      </div>
+                    </motion.button>
+                  ))}
                 </div>
               )}
             </div>

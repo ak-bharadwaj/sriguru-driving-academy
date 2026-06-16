@@ -63,31 +63,28 @@ export default function SchedulePage() {
 
   const [student, setStudent] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [syllabusList, setSyllabusList] = useState<{ dayNumber: number; title: string; description: string }[]>([])
+  const [syllabusList, setSyllabusList] = useState<any[]>([])
+  const [completedCount, setCompletedCount] = useState(0)
 
   useEffect(() => {
-    fetch('/api/student/dashboard')
-      .then(res => res.json())
-      .then(data => {
-        setStudent(data)
+    // Fetch student info and syllabus progress in parallel
+    Promise.all([
+      fetch('/api/student/dashboard').then(r => r.json()),
+      fetch('/api/student/syllabus-progress').then(r => r.json())
+    ])
+      .then(([dashData, progressData]) => {
+        setStudent(dashData)
+        if (progressData?.days && Array.isArray(progressData.days)) {
+          setSyllabusList(progressData.days)
+          setCompletedCount(progressData.completedCount || 0)
+        }
         setLoading(false)
-        // Fetch syllabus from DB based on student's training type
-        const type = data?.trainingType || 'BEGINNER'
-        fetch(`/api/public/syllabus?type=${type}`)
-          .then(r => r.json())
-          .then(days => {
-            if (Array.isArray(days)) {
-              setSyllabusList(days.sort((a: any, b: any) => a.dayNumber - b.dayNumber))
-            }
-          })
-          .catch(() => {})
       })
       .catch(err => {
         console.error(err)
         setLoading(false)
       })
   }, [])
-
 
   if (loading) {
     return (
@@ -101,8 +98,10 @@ export default function SchedulePage() {
   }
 
   const trainingType = student?.trainingType || 'BEGINNER'
-  const durationDays = trainingType === 'ADVANCED' ? 14 : trainingType === 'RTO_FAST_TRACK' ? 7 : 21
-  const currentDay = Math.min((student?.totalAttended || 0) + 1, durationDays + 1)
+  const durationDays = syllabusList.length || (trainingType === 'ADVANCED' ? 14 : trainingType === 'RTO_FAST_TRACK' ? 7 : 21)
+  // Find the next incomplete day as "today"
+  const nextIncompleteDay = syllabusList.find(d => !d.completed)
+  const currentDayNumber = nextIncompleteDay?.dayNumber ?? (durationDays + 1)
   const timingTime = student?.bookings?.[0]?.slot?.time || student?.bookings?.[0]?.preferredTime || '07:00 AM'
 
   let vehicleName = 'Maruti Swift (Dual Control)'
@@ -118,6 +117,7 @@ export default function SchedulePage() {
   const syllabusTitle = trainingType === 'ADVANCED' ? t.syllabusTitleAdvanced
                       : trainingType === 'RTO_FAST_TRACK' ? t.syllabusTitleRto
                       : t.syllabusTitleBeginner
+
 
   const getRecurrenceNotice = () => {
     if (activeLang === 'HI') {
@@ -215,7 +215,7 @@ export default function SchedulePage() {
         <div className="mb-6 flex justify-between items-end">
           <h2 className="text-2xl font-display font-bold">{syllabusTitle}</h2>
           <span className="text-sm font-mono text-primary font-bold bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-            {Math.min(currentDay - 1, durationDays)} / {durationDays} {t.completed}
+            {completedCount} / {durationDays} {t.completed}
           </span>
         </div>
 
@@ -226,9 +226,9 @@ export default function SchedulePage() {
           <div className="space-y-8 relative">
             {syllabusList.map((day, idx) => {
               const dayNum = day.dayNumber
-              const isCompleted = dayNum < currentDay
-              const isToday = dayNum === currentDay
-              const isUpcoming = dayNum > currentDay
+              const isCompleted = day.completed === true
+              const isToday = dayNum === currentDayNumber && !isCompleted
+              const isUpcoming = !isCompleted && !isToday
 
               return (
                 <motion.div 

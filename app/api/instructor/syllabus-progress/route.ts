@@ -1,0 +1,133 @@
+export const dynamic = 'force-dynamic'
+import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { db } from '@/lib/db'
+
+// GET: instructor fetches a student's syllabus progress
+// GET /api/instructor/syllabus-progress?studentId=xxx
+export async function GET(request: Request) {
+  try {
+    const session = await getServerSession(authOptions)
+    const user = session?.user as any
+    if (!session || user?.role !== 'INSTRUCTOR') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const url = new URL(request.url)
+    const studentId = url.searchParams.get('studentId')
+    if (!studentId) return NextResponse.json({ error: 'studentId required' }, { status: 400 })
+
+    // Get the student to find their training type
+    const student = await db.student.findUnique({
+      where: { id: studentId },
+      select: { trainingType: true }
+    })
+    if (!student) return NextResponse.json({ error: 'Student not found' }, { status: 404 })
+
+    // Get syllabus days for their course type
+    const syllabusDays = await db.syllabusDay.findMany({
+      where: { trainingType: student.trainingType },
+      orderBy: { dayNumber: 'asc' }
+    })
+
+    // Auto-seed defaults if empty
+    if (syllabusDays.length === 0) {
+      // Trigger seed via public API pattern (reuse admin logic)
+      const adminRes = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/admin/syllabus?type=${student.trainingType}`)
+    }
+
+    // Get this student's completed days
+    const progress = await db.studentSyllabusProgress.findMany({
+      where: { studentId },
+      select: { syllabusDayId: true, completedAt: true, notes: true }
+    })
+
+    const completedIds = new Set(progress.map(p => p.syllabusDayId))
+
+    const result = syllabusDays.map(day => ({
+      ...day,
+      completed: completedIds.has(day.id),
+      completedAt: progress.find(p => p.syllabusDayId === day.id)?.completedAt || null,
+      notes: progress.find(p => p.syllabusDayId === day.id)?.notes || null,
+    }))
+
+    return NextResponse.json({
+      trainingType: student.trainingType,
+      days: result,
+      completedCount: progress.length,
+      totalCount: syllabusDays.length
+    })
+  } catch (error) {
+    console.error('Instructor syllabus-progress GET error:', error)
+    return NextResponse.json({ error: 'Failed to fetch progress' }, { status: 500 })
+  }
+}
+
+// POST: mark a day as complete
+// Body: { studentId, syllabusDayId, notes? }
+export async function POST(request: Request) {
+  try {
+    const session = await getServerSession(authOptions)
+    const user = session?.user as any
+    if (!session || user?.role !== 'INSTRUCTOR') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const instructor = await db.instructor.findFirst({
+      where: { userId: user.id }
+    })
+
+    const body = await request.json()
+    const { studentId, syllabusDayId, notes } = body
+    if (!studentId || !syllabusDayId) {
+      return NextResponse.json({ error: 'studentId and syllabusDayId required' }, { status: 400 })
+    }
+
+    const record = await db.studentSyllabusProgress.upsert({
+      where: { studentId_syllabusDayId: { studentId, syllabusDayId } },
+      create: {
+        studentId,
+        syllabusDayId,
+        instructorId: instructor?.id || null,
+        notes: notes || null
+      },
+      update: {
+        notes: notes || null,
+        completedAt: new Date()
+      }
+    })
+
+    return NextResponse.json({ success: true, record })
+  } catch (error) {
+    console.error('Instructor syllabus-progress POST error:', error)
+    return NextResponse.json({ error: 'Failed to mark complete' }, { status: 500 })
+  }
+}
+
+// DELETE: unmark a day as complete
+// Body: { studentId, syllabusDayId }
+export async function DELETE(request: Request) {
+  try {
+    const session = await getServerSession(authOptions)
+    const user = session?.user as any
+    if (!session || user?.role !== 'INSTRUCTOR') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { studentId, syllabusDayId } = body
+    if (!studentId || !syllabusDayId) {
+      return NextResponse.json({ error: 'studentId and syllabusDayId required' }, { status: 400 })
+    }
+
+    await db.studentSyllabusProgress.deleteMany({
+      where: { studentId, syllabusDayId }
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Instructor syllabus-progress DELETE error:', error)
+    return NextResponse.json({ error: 'Failed to unmark' }, { status: 500 })
+  }
+}
