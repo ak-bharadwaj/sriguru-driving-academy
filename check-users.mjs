@@ -18,7 +18,7 @@ async function check() {
     take: 10
   });
   for (const s of students) {
-    console.log(`Student ID: ${s.id} | RegNo: ${s.regNo} | Name: ${s.user.name} | hasOnboarded: ${s.hasOnboarded}`);
+    console.log(`Student ID: ${s.id} | RegNo: ${s.regNo} | Name: ${s.user.name} | trainingType: ${s.trainingType} | hasOnboarded: ${s.hasOnboarded}`);
   }
 
   console.log("\n--- Bookings in DB ---");
