@@ -672,7 +672,7 @@ export default function SlotManagerClient() {
                             : 'border-[rgb(var(--color-border))]/60 hover:border-[rgb(var(--color-primary))]/50'
                         }`}
                       >
-                        <div className="flex justify-between items-center">
+                        <div className="flex justify-between items-center w-full">
                           <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md ${
                             isToday 
                               ? 'bg-[rgb(var(--color-primary))] text-white shadow-sm font-black' 
@@ -680,9 +680,24 @@ export default function SlotManagerClient() {
                           }`}>
                             {cell.dayNum}
                           </span>
-                          {cellSlots.length > 0 && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                          )}
+                          <div className="flex items-center gap-1.5">
+                            {cell.isCurrentMonth && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setSelectedDateStr(cell.dateStr)
+                                  handleOpenCreateModal(cell.dateStr)
+                                }}
+                                className="p-1 rounded-md text-[rgb(var(--color-text-3))] hover:text-white hover:bg-[rgb(var(--color-primary))] transition-all active:scale-90"
+                                title="Quick Add Time Slot"
+                              >
+                                <Plus className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                            {cellSlots.length > 0 && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            )}
+                          </div>
                         </div>
 
                         {/* Visual Occupancy Load Progress Bar */}
@@ -943,6 +958,37 @@ export default function SlotManagerClient() {
                           style={{ colorScheme: 'dark' }}
                           className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl px-4 py-3 text-sm font-bold text-[rgb(var(--color-text-1))] outline-none focus:border-[rgb(var(--color-primary))]"
                         />
+                      </div>
+                    </div>
+
+                    {/* Presets for Single Slot */}
+                    <div className="flex flex-col gap-2 text-left">
+                      <span className="text-[9px] font-mono text-[rgb(var(--color-text-3))] uppercase tracking-wider font-bold">Quick Time Presets</span>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { label: 'Morning (8:00 AM - 9:30 AM)', start: '08:00', end: '09:30' },
+                          { label: 'Noon (12:00 PM - 1:30 PM)', start: '12:00', end: '13:30' },
+                          { label: 'Evening (4:00 PM - 5:30 PM)', start: '16:00', end: '17:30' }
+                        ].map(preset => (
+                          <button
+                            key={preset.label}
+                            type="button"
+                            onClick={() => {
+                              setCreateForm(prev => ({
+                                ...prev,
+                                startTime: preset.start,
+                                endTime: preset.end
+                              }))
+                            }}
+                            className={`px-3 py-1.5 rounded-lg border text-[10px] font-mono font-bold transition-all ${
+                              createForm.startTime === preset.start && createForm.endTime === preset.end
+                                ? 'bg-[rgb(var(--color-primary))]/20 border-[rgb(var(--color-primary))] text-[rgb(var(--color-primary))] shadow-sm'
+                                : 'bg-[rgb(var(--color-void))] border-[rgb(var(--color-border))]/60 text-[rgb(var(--color-text-3))] hover:text-[rgb(var(--color-text-2))]'
+                            }`}
+                          >
+                            {preset.label.split(' (')[0]}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </>
