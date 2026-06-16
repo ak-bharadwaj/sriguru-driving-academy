@@ -23,6 +23,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Student profile not found.' }, { status: 404 })
     }
 
+    // Verify if the student has a session scheduled for today (allowing +/- 12 hours for timezone/delay offsets)
+    const now = new Date()
+    const startOfToday = new Date(now.getTime() - 12 * 60 * 60 * 1000)
+    const endOfToday = new Date(now.getTime() + 18 * 60 * 60 * 1000)
+
+    const scheduledSessionToday = await db.session.findFirst({
+      where: {
+        studentId: student.id,
+        status: { in: ['SCHEDULED', 'IN_PROGRESS'] },
+        scheduledAt: {
+          gte: startOfToday,
+          lte: endOfToday
+        }
+      }
+    })
+
+    if (!scheduledSessionToday) {
+      return NextResponse.json({ 
+        error: 'Attendance verification code can only be generated on days you have a scheduled driving session.' 
+      }, { status: 400 })
+    }
+
     // Generate random 6-digit OTP code
     const otp = Math.floor(100000 + Math.random() * 900000).toString()
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000) // 15 mins

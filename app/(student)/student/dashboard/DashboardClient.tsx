@@ -22,6 +22,7 @@ import Link from 'next/link'
 import { useXPStore } from '@/lib/stores/xp-store'
 import { useLanguageStore } from '@/store/languageStore'
 import { useNotifications } from '@/hooks/useNotifications'
+import toast from 'react-hot-toast'
 
 const DASHBOARD_DICT = {
   EN: {
@@ -280,14 +281,17 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
     setGeneratingOtp(true)
     try {
       const res = await fetch('/api/student/attendance-otp', { method: 'POST' })
+      const data = await res.json()
       if (res.ok) {
-        const data = await res.json()
         setOtpCode(data.otp)
         const secondsRemaining = Math.max(0, Math.floor((new Date(data.expiresAt).getTime() - Date.now()) / 1000))
         setOtpCountdown(secondsRemaining)
+      } else {
+        toast.error(data.error || 'Failed to generate code')
       }
     } catch (e) {
       console.error(e)
+      toast.error('An error occurred while generating code.')
     } finally {
       setGeneratingOtp(false)
     }
