@@ -178,23 +178,25 @@ export default function InstructorCadetDetails({ params }: PageProps) {
     fetchState()
   }, [studentId])
 
-  const fetchSyllabusProgress = async () => {
-    setSyllabusLoading(true)
-    try {
-      const res = await fetch(`/api/instructor/syllabus-progress?studentId=${studentId}`)
-      if (res.ok) {
-        const data = await res.json()
-        setSyllabusProgress(data.days || [])
-      }
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setSyllabusLoading(false)
-    }
-  }
-
   useEffect(() => {
-    if (activeTab === 'SYLLABUS') fetchSyllabusProgress()
+    const fetchSyllabusProgress = async () => {
+      setSyllabusLoading(true)
+      try {
+        const res = await fetch(`/api/instructor/syllabus-progress?studentId=${studentId}`)
+        if (res.ok) {
+          const data = await res.json()
+          setSyllabusProgress(data.days || [])
+        }
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setSyllabusLoading(false)
+      }
+    }
+
+    if (activeTab === 'SYLLABUS') {
+      fetchSyllabusProgress()
+    }
   }, [activeTab, studentId])
 
   const toggleDayComplete = async (day: any) => {

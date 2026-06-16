@@ -526,8 +526,8 @@ model StudentSyllabusProgress {
   completedAt   DateTime    @default(now())
   instructorId  String?
   notes         String?
-  student       Student     @relation(fields: [studentId], references: [id])
-  syllabusDay   SyllabusDay @relation(fields: [syllabusDayId], references: [id])
+  student       Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  syllabusDay   SyllabusDay @relation(fields: [syllabusDayId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, syllabusDayId])
   @@index([studentId])

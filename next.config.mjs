@@ -7,6 +7,53 @@ const withPWA = withPWAInit({
   skipWaiting: true,
   workboxOptions: {
     navigateFallbackDenylist: [/^\/admin/, /^\/instructor/, /^\/student/, /^\/api/],
+    runtimeCaching: [
+      {
+        urlPattern: /^\/api(\/.*)?$/,
+        handler: 'NetworkOnly',
+      },
+      {
+        urlPattern: /^\/admin(\/.*)?$/,
+        handler: 'NetworkOnly',
+      },
+      {
+        urlPattern: /^\/instructor(\/.*)?$/,
+        handler: 'NetworkOnly',
+      },
+      {
+        urlPattern: /^\/student(\/.*)?$/,
+        handler: 'NetworkOnly',
+      },
+      // Default cache strategies for fonts, assets and scripts
+      {
+        urlPattern: /\.(?:eot|otf|ttc|ttf|woff|woff2|font.css)$/i,
+        handler: 'StaleWhileRevalidate',
+        options: {
+          cacheName: 'static-font-assets',
+        }
+      },
+      {
+        urlPattern: /\.(?:jpg|jpeg|gif|png|svg|ico|webp)$/i,
+        handler: 'StaleWhileRevalidate',
+        options: {
+          cacheName: 'static-image-assets',
+        }
+      },
+      {
+        urlPattern: /\/_next\/static.+\.js$/i,
+        handler: 'CacheFirst',
+        options: {
+          cacheName: 'next-static-js-assets',
+        }
+      },
+      {
+        urlPattern: /.*/,
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'default-pages',
+        }
+      }
+    ]
   }
 });
 

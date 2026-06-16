@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/db'
+import { DEFAULT_SYLLABUS } from '@/lib/data/syllabusData'
 
 // GET: instructor fetches a student's syllabus progress
 // GET /api/instructor/syllabus-progress?studentId=xxx
@@ -26,15 +27,24 @@ export async function GET(request: Request) {
     if (!student) return NextResponse.json({ error: 'Student not found' }, { status: 404 })
 
     // Get syllabus days for their course type
-    const syllabusDays = await db.syllabusDay.findMany({
+    let syllabusDays = await db.syllabusDay.findMany({
       where: { trainingType: student.trainingType },
       orderBy: { dayNumber: 'asc' }
     })
 
     // Auto-seed defaults if empty
     if (syllabusDays.length === 0) {
-      // Trigger seed via public API pattern (reuse admin logic)
-      const adminRes = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/admin/syllabus?type=${student.trainingType}`)
+      const defaults = DEFAULT_SYLLABUS[student.trainingType]
+      if (defaults) {
+        await db.syllabusDay.createMany({
+          data: defaults.map(d => ({ trainingType: student.trainingType, ...d })),
+          skipDuplicates: true
+        })
+        syllabusDays = await db.syllabusDay.findMany({
+          where: { trainingType: student.trainingType },
+          orderBy: { dayNumber: 'asc' }
+        })
+      }
     }
 
     // Get this student's completed days
