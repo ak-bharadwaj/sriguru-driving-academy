@@ -1061,7 +1061,7 @@ export default function SlotManagerClient() {
                     </div>
 
                     {isSingleCustomTime ? (
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1.5 text-left">
                           <label className="text-[10px] font-bold font-mono text-[rgb(var(--color-text-2))] uppercase tracking-wider font-bold">Start Time</label>
                           <input 
@@ -1108,7 +1108,7 @@ export default function SlotManagerClient() {
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                           {HOURLY_BLOCKS.map(block => {
                             const isSelected = selectedSingleHourlySlots.includes(block)
                             return (
@@ -1136,7 +1136,7 @@ export default function SlotManagerClient() {
                 {isBatchMode && (
                   <>
                     {/* Date Range Selection */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="flex flex-col gap-1.5 text-left">
                         <label className="text-[10px] font-bold font-mono text-[rgb(var(--color-text-2))] uppercase tracking-wider font-bold">Start Date</label>
                         <input 
@@ -1236,7 +1236,7 @@ export default function SlotManagerClient() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         {HOURLY_BLOCKS.map(block => {
                           const isSelected = selectedBatchHourlySlots.includes(block)
                           return (
@@ -1273,7 +1273,7 @@ export default function SlotManagerClient() {
 
                     {isBatchCustomTime && (
                       <div className="flex flex-col gap-2 text-left bg-[rgb(var(--color-void))]/20 p-4 rounded-xl border border-[rgb(var(--color-border))]/40">
-                        <div className="flex gap-2 items-end">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 items-stretch sm:items-end">
                           <div className="flex-1 flex flex-col gap-1">
                             <span className="text-[8px] font-mono text-[rgb(var(--color-text-3))] uppercase font-semibold">Start</span>
                             <input 
