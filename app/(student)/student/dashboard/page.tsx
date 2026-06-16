@@ -36,6 +36,7 @@ export default async function StudentDashboardPage() {
   let student = null
   let dbData = null
 
+  // 1. Fetch or create student profile
   try {
     student = await db.student.findUnique({
       where: { userId },
@@ -68,13 +69,18 @@ export default async function StudentDashboardPage() {
         })
       }
     }
+  } catch (err) {
+    console.error("Error fetching student profile:", err)
+  }
 
-    if (student) {
-      // Force onboarding if incomplete
-      if (!student.hasOnboarded) {
-        redirect('/student/onboarding')
-      }
+  // 2. Redirect if not onboarded (done outside try/catch to avoid intercepting Next.js redirect exceptions)
+  if (student && !student.hasOnboarded) {
+    redirect('/student/onboarding')
+  }
 
+  // 3. Fetch all other dashboard metrics if student exists
+  if (student) {
+    try {
       // -------------------------------------------------------------
       // HIGH-PERFORMANCE DB FETCHING (Multiplexed via Promise.all)
       // -------------------------------------------------------------
@@ -230,9 +236,9 @@ export default async function StudentDashboardPage() {
           createdAt: a.createdAt.toISOString()
         }))
       }
+    } catch (err) {
+      console.error("Error fetching live student dashboard data, using mock fallbacks:", err)
     }
-  } catch (err) {
-    console.error("Error fetching live student dashboard data, using mock fallbacks:", err)
   }
 
   // Fallback to high-fidelity mock data if database was offline or student profile is missing
