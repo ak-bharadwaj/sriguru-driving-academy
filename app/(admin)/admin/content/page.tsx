@@ -123,6 +123,12 @@ export default function ContentManagementPage() {
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
 
+  // Offers states
+  const [deletingOfferId, setDeletingOfferId] = useState<string | null>(null)
+  const [editingOffer, setEditingOffer] = useState<any>(null)
+  const [showOfferModal, setShowOfferModal] = useState(false)
+  const [offerForm, setOfferForm] = useState({ title: '', desc: '', discountPercent: '', promoCode: '', badge: '', active: true })
+
   const { startUpload } = useUploadThing('galleryImage', {
     onClientUploadComplete: (res) => {
       const url = res?.[0]?.url
@@ -320,6 +326,53 @@ export default function ContentManagementPage() {
     }
   }
 
+  const handleDeleteOffer = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this offer?')) return
+    try {
+      const res = await fetch(`/api/admin/offers?id=${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        toast.success('Offer deleted successfully')
+        await fetchData()
+      } else {
+        toast.error('Failed to delete offer')
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Error deleting offer')
+    }
+  }
+
+  const handleOfferSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmitting(true)
+    try {
+      const url = '/api/admin/offers'
+      const method = editingOffer ? 'PUT' : 'POST'
+      const bodyData = editingOffer 
+        ? { id: editingOffer.id, ...offerForm, discountPercent: Number(offerForm.discountPercent) }
+        : { ...offerForm, discountPercent: Number(offerForm.discountPercent) }
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bodyData)
+      })
+
+      if (res.ok) {
+        toast.success(editingOffer ? 'Offer updated!' : 'Offer created!')
+        await fetchData()
+        setShowOfferModal(false)
+        setOfferForm({ title: '', desc: '', discountPercent: '', promoCode: '', badge: '', active: true })
+      } else {
+        toast.error('Something went wrong')
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Error saving offer')
+    }
+    setSubmitting(false)
+  }
+
   return (
     <div className="p-6 md:p-10 max-w-7xl mx-auto font-body min-h-screen">
       
@@ -443,7 +496,14 @@ export default function ContentManagementPage() {
                   <AlertCircle className="w-5 h-5 text-accent" />
                   <span className="text-sm font-mono tracking-wide">{t.offersAlert}</span>
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-surface hover:bg-accent/20 border border-border hover:border-accent/40 rounded-xl text-xs font-bold text-text-1 transition-all">
+                <button 
+                  onClick={() => {
+                    setEditingOffer(null)
+                    setOfferForm({ title: '', desc: '', discountPercent: '', promoCode: '', badge: '', active: true })
+                    setShowOfferModal(true)
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-surface hover:bg-accent/20 border border-border hover:border-accent/40 rounded-xl text-xs font-bold text-text-1 transition-all"
+                >
                   <Plus className="w-4 h-4" /> {t.createOffer}
                 </button>
               </div>
@@ -452,8 +512,51 @@ export default function ContentManagementPage() {
                 {offers.map((offer: any) => (
                   <div key={offer.id} className="bg-surface border border-border p-6 rounded-3xl flex flex-col relative group transition-all hover:border-accent/50">
                     <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-1.5 bg-void/80 hover:bg-white/10 rounded-lg text-text-2 transition-all"><Edit2 className="w-3.5 h-3.5" /></button>
-                      <button className="p-1.5 bg-void/80 hover:bg-danger/20 hover:text-danger rounded-lg text-text-2 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+                      {deletingOfferId === offer.id ? (
+                        <div className="flex items-center gap-1.5 bg-void/90 p-1.5 rounded-lg border border-danger/30">
+                          <button
+                            onClick={() => {
+                              handleDeleteOffer(offer.id)
+                              setDeletingOfferId(null)
+                            }}
+                            className="px-2 py-1 bg-danger text-white rounded text-[10px] font-bold"
+                          >
+                            Confirm
+                          </button>
+                          <button
+                            onClick={() => setDeletingOfferId(null)}
+                            className="px-2 py-1 bg-surface text-text-2 rounded text-[10px] font-bold"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <button 
+                            onClick={() => {
+                              setEditingOffer(offer)
+                              setOfferForm({
+                                title: typeof offer.title === 'object' ? (offer.title?.EN || '') : (offer.title || ''),
+                                desc: typeof offer.desc === 'object' ? (offer.desc?.EN || '') : (offer.desc || ''),
+                                discountPercent: String(offer.discountPercent),
+                                promoCode: offer.promoCode,
+                                badge: typeof offer.badge === 'object' ? (offer.badge?.EN || '') : (offer.badge || ''),
+                                active: offer.active
+                              })
+                              setShowOfferModal(true)
+                            }}
+                            className="p-1.5 bg-void/80 hover:bg-white/10 rounded-lg text-text-2 transition-all"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={() => setDeletingOfferId(offer.id)}
+                            className="p-1.5 bg-void/80 hover:bg-danger/20 hover:text-danger rounded-lg text-text-2 transition-all"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </>
+                      )}
                     </div>
 
                     <div className="flex gap-3 items-center mb-4">
@@ -823,6 +926,55 @@ export default function ContentManagementPage() {
               <div className="pt-2">
                 <button type="submit" disabled={submitting} className="w-full py-3 bg-primary text-void font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50">
                   {submitting ? 'Saving...' : 'Save All Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showOfferModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowOfferModal(false)}>
+          <div className="bg-surface border border-border rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="p-5 border-b border-border flex justify-between items-center bg-void/50">
+              <h3 className="font-bold text-lg text-white">{editingOffer ? '✏️ Edit Offer' : '➕ Create Offer'}</h3>
+              <button type="button" onClick={() => setShowOfferModal(false)} className="text-text-3 hover:text-white text-xl leading-none">&times;</button>
+            </div>
+            <form onSubmit={handleOfferSubmit} className="p-5 flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Title *</label>
+                <input required type="text" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-accent outline-none text-white w-full" 
+                  value={offerForm.title} onChange={e => setOfferForm({...offerForm, title: e.target.value})} placeholder="e.g. Monsoon Driving Shield" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Description *</label>
+                <textarea required rows={3} className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-accent outline-none text-white w-full resize-none" 
+                  value={offerForm.desc} onChange={e => setOfferForm({...offerForm, desc: e.target.value})} placeholder="e.g. Master wet road handling..." />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Discount % *</label>
+                  <input required type="number" min="0" max="100" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-accent outline-none text-white w-full" 
+                    value={offerForm.discountPercent} onChange={e => setOfferForm({...offerForm, discountPercent: e.target.value})} placeholder="20" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Promo Code *</label>
+                  <input required type="text" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-accent outline-none text-white w-full uppercase font-mono" 
+                    value={offerForm.promoCode} onChange={e => setOfferForm({...offerForm, promoCode: e.target.value})} placeholder="MONSOON20" />
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Badge Label *</label>
+                <input required type="text" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-accent outline-none text-white w-full" 
+                  value={offerForm.badge} onChange={e => setOfferForm({...offerForm, badge: e.target.value})} placeholder="e.g. ACTIVE" />
+              </div>
+              <div className="flex items-center gap-3 bg-void/50 border border-border rounded-xl p-3">
+                <input type="checkbox" id="activeOffer" checked={offerForm.active} onChange={e => setOfferForm({...offerForm, active: e.target.checked})} className="w-4 h-4 rounded border-border accent-accent" />
+                <label htmlFor="activeOffer" className="text-sm text-white font-medium">Offer is Active</label>
+              </div>
+              <div className="pt-2">
+                <button type="submit" disabled={submitting} className="w-full py-3 bg-accent text-void font-bold rounded-xl hover:bg-accent/90 transition-colors disabled:opacity-50">
+                  {submitting ? 'Saving...' : editingOffer ? 'Save Changes' : 'Create Offer'}
                 </button>
               </div>
             </form>

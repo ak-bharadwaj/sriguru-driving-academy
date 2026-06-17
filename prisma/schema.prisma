@@ -195,6 +195,7 @@ model LearningProgress {
 
 model RoadmapNode {
   id                String               @id @default(cuid())
+  trainingType      TrainingType         @default(BEGINNER)
   title             String
   description       String
   phase             RoadmapPhase
@@ -205,6 +206,7 @@ model RoadmapNode {
   studentNodes      StudentRoadmapNode[]
 
   @@index([phase])
+  @@index([trainingType])
 }
 
 model StudentRoadmapNode {

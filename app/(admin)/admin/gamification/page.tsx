@@ -116,6 +116,7 @@ export default function GamificationHQPage() {
   const [loadingRoadmap, setLoadingRoadmap] = useState(false)
   const [editingNode, setEditingNode] = useState<any | null>(null)
   const [showNodeModal, setShowNodeModal] = useState(false)
+  const [selectedCoursePlan, setSelectedCoursePlan] = useState<'BEGINNER' | 'ADVANCED' | 'RTO_FAST_TRACK'>('BEGINNER')
 
   // Form State
   const [formTitle, setFormTitle] = useState('')
@@ -143,10 +144,10 @@ export default function GamificationHQPage() {
   }
 
   // Fetch roadmap data
-  const fetchRoadmap = async () => {
+  const fetchRoadmap = async (type: string) => {
     setLoadingRoadmap(true)
     try {
-      const res = await fetch('/api/admin/roadmap')
+      const res = await fetch(`/api/admin/roadmap?trainingType=${type}`)
       if (res.ok) {
         setRoadmapNodes(await res.json())
       }
@@ -164,9 +165,9 @@ export default function GamificationHQPage() {
 
   useEffect(() => {
     if (activeTab === 'roadmap') {
-      fetchRoadmap()
+      fetchRoadmap(selectedCoursePlan)
     }
-  }, [activeTab])
+  }, [activeTab, selectedCoursePlan])
 
   const handleOpenAdd = () => {
     setEditingNode(null)
@@ -189,10 +190,10 @@ export default function GamificationHQPage() {
     setFormIcon(node.icon)
     setFormRequiredCardSlugs(
       Array.isArray(node.requiredCardSlugs) 
-        ? node.requiredCardSlugs.join(', ') 
-        : typeof node.requiredCardSlugs === 'string'
-          ? JSON.parse(node.requiredCardSlugs).join(', ')
-          : ''
+         ? node.requiredCardSlugs.join(', ') 
+         : typeof node.requiredCardSlugs === 'string'
+           ? JSON.parse(node.requiredCardSlugs).join(', ')
+           : ''
     )
     setFormUnlockThreshold(String(node.unlockThreshold))
     setShowNodeModal(true)
@@ -213,7 +214,8 @@ export default function GamificationHQPage() {
       orderIndex: parseInt(formOrderIndex) || 1,
       icon: formIcon,
       requiredCardSlugs: slugsArray,
-      unlockThreshold: parseFloat(formUnlockThreshold) || 0.8
+      unlockThreshold: parseFloat(formUnlockThreshold) || 0.8,
+      trainingType: selectedCoursePlan
     }
 
     try {
@@ -227,7 +229,7 @@ export default function GamificationHQPage() {
       if (res.ok) {
         toast.success(editingNode ? 'Roadmap node updated successfully' : 'Roadmap node created successfully')
         setShowNodeModal(false)
-        fetchRoadmap()
+        fetchRoadmap(selectedCoursePlan)
       } else {
         const errData = await res.json()
         toast.error(errData.error || 'Failed to save node')
@@ -246,7 +248,7 @@ export default function GamificationHQPage() {
       })
       if (res.ok) {
         toast.success('Roadmap node deleted')
-        fetchRoadmap()
+        fetchRoadmap(selectedCoursePlan)
       } else {
         toast.error('Failed to delete node')
       }
@@ -459,14 +461,32 @@ export default function GamificationHQPage() {
             className="flex flex-col gap-6"
           >
             <div className="bg-surface border border-border rounded-3xl p-6">
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-border/40 pb-4 mb-6 gap-4">
                 <div>
                   <h3 className="text-lg font-bold text-text-1 font-display">Student Curriculum Roadmap Nodes</h3>
                   <p className="text-xs text-text-3 mt-1 font-mono">Configure winding road modules and phase dependencies</p>
                 </div>
+                
+                {/* Course Selector */}
+                <div className="flex bg-void border border-border rounded-xl p-1 shrink-0">
+                  {(['BEGINNER', 'ADVANCED', 'RTO_FAST_TRACK'] as const).map((plan) => (
+                    <button
+                      key={plan}
+                      onClick={() => setSelectedCoursePlan(plan)}
+                      className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${
+                        selectedCoursePlan === plan 
+                          ? 'bg-primary text-void shadow-md' 
+                          : 'text-text-3 hover:text-text-1'
+                      }`}
+                    >
+                      {plan === 'RTO_FAST_TRACK' ? 'RTO Fast-Track' : plan}
+                    </button>
+                  ))}
+                </div>
+
                 <button 
                   onClick={handleOpenAdd}
-                  className="px-4 py-2.5 bg-primary hover:bg-primary/95 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-lg shadow-primary/10 transition-all duration-200"
+                  className="px-4 py-2.5 bg-primary hover:bg-primary/95 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-lg shadow-primary/10 transition-all duration-200 shrink-0"
                 >
                   <Plus className="w-4 h-4" /> Add Roadmap Node
                 </button>
