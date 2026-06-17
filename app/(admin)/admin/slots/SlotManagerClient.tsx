@@ -158,9 +158,24 @@ export default function SlotManagerClient() {
     const day = String(d.getDate()).padStart(2, '0')
     return `${year}-${month}-${day}`
   })
+
+  // Mobile week strip state — start of displayed week (Sunday)
+  const [mobileWeekStart, setMobileWeekStart] = useState(() => {
+    const d = new Date()
+    d.setDate(d.getDate() - d.getDay()) // go to Sunday
+    d.setHours(0, 0, 0, 0)
+    return d
+  })
   
   const monthIndex = currentDate.getMonth()
   const year = currentDate.getFullYear()
+
+  const safeFormatDate = (d: Date) => {
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const dy = String(d.getDate()).padStart(2, '0')
+    return `${y}-${m}-${dy}`
+  }
 
   const handlePrevMonth = () => {
     setCurrentDate(new Date(year, monthIndex - 1, 1))
@@ -169,6 +184,25 @@ export default function SlotManagerClient() {
   const handleNextMonth = () => {
     setCurrentDate(new Date(year, monthIndex + 1, 1))
   }
+
+  const handlePrevWeek = () => {
+    const d = new Date(mobileWeekStart)
+    d.setDate(d.getDate() - 7)
+    setMobileWeekStart(d)
+  }
+
+  const handleNextWeek = () => {
+    const d = new Date(mobileWeekStart)
+    d.setDate(d.getDate() + 7)
+    setMobileWeekStart(d)
+  }
+
+  // Build the 7 days of the mobile week
+  const mobileWeekDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(mobileWeekStart)
+    d.setDate(d.getDate() + i)
+    return { date: d, dateStr: safeFormatDate(d) }
+  })
   
   // Custom Slot Creation Modal state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -686,10 +720,118 @@ export default function SlotManagerClient() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* MONTHLY CALENDAR GRID (Left Column - 2/3 width) */}
-          <div className="lg:col-span-2 bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] p-6 rounded-3xl shadow-sm flex flex-col gap-6 animate-fadeIn">
+          {/* ══════════════════════════════════════════════════════
+              MOBILE WEEK STRIP  (visible below lg breakpoint only)
+          ══════════════════════════════════════════════════════ */}
+          <div className="lg:hidden lg:col-span-2 bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] p-4 rounded-3xl shadow-sm flex flex-col gap-4 animate-fadeIn">
+
+            {/* Week nav header */}
+            <div className="flex justify-between items-center">
+              <button
+                type="button"
+                onClick={handlePrevWeek}
+                className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] text-[rgb(var(--color-text-1))] hover:border-[rgb(var(--color-primary))]/60 transition text-lg font-bold"
+              >
+                ‹
+              </button>
+              <div className="text-center">
+                <p className="text-[11px] font-mono font-bold text-[rgb(var(--color-text-3))] uppercase tracking-widest">
+                  {months[mobileWeekDays[0].date.getMonth()].slice(0,3)} {mobileWeekDays[0].date.getFullYear()}
+                </p>
+                <p className="text-xs font-semibold text-[rgb(var(--color-text-2))] mt-0.5">
+                  {mobileWeekDays[0].date.getDate()} – {mobileWeekDays[6].date.getDate()} {months[mobileWeekDays[6].date.getMonth()].slice(0,3)}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleNextWeek}
+                className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] text-[rgb(var(--color-text-1))] hover:border-[rgb(var(--color-primary))]/60 transition text-lg font-bold"
+              >
+                ›
+              </button>
+            </div>
+
+            {/* 7 large day circles */}
+            <div className="grid grid-cols-7 gap-1.5">
+              {mobileWeekDays.map(({ date, dateStr }) => {
+                const daySlots = slots.filter(s => s.dayOfWeek === dateStr)
+                const isSelected = selectedDateStr === dateStr
+                const todayStr = safeFormatDate(new Date())
+                const isToday = todayStr === dateStr
+                const hasActive = daySlots.some(s => s.status === 'ACTIVE')
+                const hasClosed = daySlots.some(s => s.status === 'CLOSED')
+                const allFull = daySlots.length > 0 && daySlots.every(s => s.currentBooked >= s.maxCapacity)
+
+                let dotColor = 'bg-emerald-400'
+                if (hasClosed && !hasActive) dotColor = 'bg-rose-400'
+                else if (allFull) dotColor = 'bg-amber-400'
+
+                return (
+                  <button
+                    key={dateStr}
+                    type="button"
+                    onClick={() => setSelectedDateStr(dateStr)}
+                    className={`flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl border transition-all active:scale-95 ${
+                      isSelected
+                        ? 'bg-[rgb(var(--color-primary))] border-[rgb(var(--color-primary))] shadow-lg shadow-[rgb(var(--color-primary))]/30'
+                        : isToday
+                        ? 'bg-[rgb(var(--color-primary))]/10 border-[rgb(var(--color-primary))]/50'
+                        : 'bg-[rgb(var(--color-void))]/40 border-[rgb(var(--color-border))]/60 hover:border-[rgb(var(--color-primary))]/40'
+                    }`}
+                  >
+                    {/* Day letter */}
+                    <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                      isSelected ? 'text-white' : 'text-[rgb(var(--color-text-3))]'
+                    }`}>
+                      {['Su','Mo','Tu','We','Th','Fr','Sa'][date.getDay()]}
+                    </span>
+
+                    {/* Day number */}
+                    <span className={`text-lg font-extrabold leading-none font-mono ${
+                      isSelected ? 'text-white' : isToday ? 'text-[rgb(var(--color-primary))]' : 'text-[rgb(var(--color-text-1))]'
+                    }`}>
+                      {date.getDate()}
+                    </span>
+
+                    {/* Slot indicator */}
+                    {daySlots.length > 0 ? (
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ${
+                        isSelected
+                          ? 'bg-white/20 text-white'
+                          : `${dotColor}/20 text-[rgb(var(--color-text-1))]`
+                      }`}>
+                        {daySlots.length}
+                      </span>
+                    ) : (
+                      <span className="w-1.5 h-1.5 rounded-full bg-transparent" />
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Quick-add button for selected day */}
+            <button
+              type="button"
+              onClick={() => handleOpenCreateModal(selectedDateStr)}
+              className="flex items-center justify-center gap-2 w-full py-3 bg-[rgb(var(--color-primary))]/10 hover:bg-[rgb(var(--color-primary))]/20 border border-[rgb(var(--color-primary))]/30 rounded-2xl text-sm font-bold text-[rgb(var(--color-primary))] transition-all active:scale-[0.98]"
+            >
+              <Plus className="w-4 h-4" />
+              Add slot for {(() => {
+                try {
+                  const d = new Date(selectedDateStr)
+                  return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
+                } catch { return selectedDateStr }
+              })()}
+            </button>
+          </div>
+
+          {/* ══════════════════════════════════════════════════════
+              DESKTOP FULL MONTH GRID  (visible from lg only)
+          ══════════════════════════════════════════════════════ */}
+          <div className="hidden lg:flex lg:col-span-2 bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] p-6 rounded-3xl shadow-sm flex-col gap-4 animate-fadeIn">
             {/* Month selector header */}
-            <div className="flex justify-between items-center bg-[rgb(var(--color-void))]/60 p-4 rounded-2xl border border-[rgb(var(--color-border))]/50">
+            <div className="flex justify-between items-center bg-[rgb(var(--color-void))]/60 p-3 rounded-2xl border border-[rgb(var(--color-border))]/50">
               <button 
                 type="button"
                 onClick={handlePrevMonth}
@@ -710,24 +852,17 @@ export default function SlotManagerClient() {
             </div>
 
             {/* Calendar Grid */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1">
               {/* Day names row */}
-              <div className="grid grid-cols-7 text-center font-mono text-[10px] font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider mb-2">
+              <div className="grid grid-cols-7 text-center font-mono text-[10px] font-bold text-[rgb(var(--color-text-3))] uppercase tracking-wider mb-1">
                 {weekdays.map(d => (
-                  <div key={d}>{d}</div>
+                  <div key={d} className="px-0.5">{d.slice(0,2)}</div>
                 ))}
               </div>
 
               {/* Day cells grid */}
               <div className="grid grid-cols-7 gap-2">
                 {(() => {
-                  const safeFormatDate = (d: Date) => {
-                    const y = d.getFullYear()
-                    const m = String(d.getMonth() + 1).padStart(2, '0')
-                    const dy = String(d.getDate()).padStart(2, '0')
-                    return `${y}-${m}-${dy}`
-                  }
-
                   const firstDay = new Date(year, monthIndex, 1).getDay()
                   const totalDaysInMonth = new Date(year, monthIndex + 1, 0).getDate()
                   const cells = []
@@ -736,37 +871,24 @@ export default function SlotManagerClient() {
                   for (let i = firstDay - 1; i >= 0; i--) {
                     const dNum = prevMonthDays - i
                     const dObj = new Date(year, monthIndex - 1, dNum)
-                    cells.push({
-                      dayNum: dNum,
-                      isCurrentMonth: false,
-                      dateStr: safeFormatDate(dObj)
-                    })
+                    cells.push({ dayNum: dNum, isCurrentMonth: false, dateStr: safeFormatDate(dObj) })
                   }
 
                   for (let i = 1; i <= totalDaysInMonth; i++) {
                     const dObj = new Date(year, monthIndex, i)
-                    cells.push({
-                      dayNum: i,
-                      isCurrentMonth: true,
-                      dateStr: safeFormatDate(dObj)
-                    })
+                    cells.push({ dayNum: i, isCurrentMonth: true, dateStr: safeFormatDate(dObj) })
                   }
 
                   const totalCells = cells.length > 35 ? 42 : 35
                   const padding = totalCells - cells.length
                   for (let i = 1; i <= padding; i++) {
                     const dObj = new Date(year, monthIndex + 1, i)
-                    cells.push({
-                      dayNum: i,
-                      isCurrentMonth: false,
-                      dateStr: safeFormatDate(dObj)
-                    })
+                    cells.push({ dayNum: i, isCurrentMonth: false, dateStr: safeFormatDate(dObj) })
                   }
 
                   return cells.map((cell, idx) => {
                     const cellSlots = slots.filter(s => s.dayOfWeek === cell.dateStr)
                     const isSelected = selectedDateStr === cell.dateStr
-                    
                     const todayStr = safeFormatDate(new Date())
                     const isToday = todayStr === cell.dateStr
 
@@ -774,7 +896,7 @@ export default function SlotManagerClient() {
                       <div
                         key={idx}
                         onClick={() => setSelectedDateStr(cell.dateStr)}
-                        className={`min-h-[105px] p-2 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-1 text-left relative ${
+                        className={`min-h-[90px] p-2 rounded-xl border cursor-pointer transition-all flex flex-col justify-between gap-0.5 text-left relative ${
                           cell.isCurrentMonth 
                             ? 'bg-[rgb(var(--color-void))]/30 text-[rgb(var(--color-text-1))]' 
                             : 'bg-transparent text-[rgb(var(--color-text-3))]/45 border-transparent cursor-default'
@@ -792,7 +914,7 @@ export default function SlotManagerClient() {
                           }`}>
                             {cell.dayNum}
                           </span>
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1">
                             {cell.isCurrentMonth && (
                               <button
                                 onClick={(e) => {
@@ -812,9 +934,9 @@ export default function SlotManagerClient() {
                           </div>
                         </div>
 
-                        {/* Visual Occupancy Load Progress Bar */}
+                        {/* Load bar */}
                         {cellSlots.length > 0 && (
-                          <div className="w-full flex flex-col gap-0.5 my-1">
+                          <div className="w-full flex flex-col gap-0.5">
                             <div className="flex justify-between items-center text-[7px] font-mono font-semibold tracking-wider text-[rgb(var(--color-text-3))] leading-none">
                               <span>LOAD</span>
                               <span>
@@ -841,31 +963,28 @@ export default function SlotManagerClient() {
                           </div>
                         )}
 
-                        {/* Slots micro list inside day cell */}
-                        <div className="flex flex-col gap-1 overflow-hidden">
-                          {cellSlots.slice(0, 2).map(slot => {
-                            const isClosed = slot.status === 'CLOSED'
-                            const isFull = slot.currentBooked >= slot.maxCapacity
-                            
-                            let pillStyle = 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
-                            if (isClosed) pillStyle = 'bg-rose-500/15 border-rose-500/30 text-rose-400'
-                            else if (isFull) pillStyle = 'bg-amber-500/15 border-amber-500/30 text-amber-400'
-
-                            return (
-                              <div 
-                                key={slot.id}
-                                className={`text-[8px] font-bold font-mono px-1.5 py-0.5 rounded border truncate ${pillStyle}`}
-                              >
-                                {slot.time.split(' ')[0]} ({slot.currentBooked}/{slot.maxCapacity})
-                              </div>
-                            )
-                          })}
-                          {cellSlots.length > 2 && (
-                            <span className="text-[7px] font-mono text-[rgb(var(--color-text-3))] uppercase tracking-wider pl-1 font-bold">
-                              +{cellSlots.length - 2} more
-                            </span>
-                          )}
-                        </div>
+                        {/* Slot pills */}
+                        {cellSlots.length > 0 && (
+                          <div className="flex flex-col gap-1">
+                            {cellSlots.slice(0, 2).map(slot => {
+                              const isClosed = slot.status === 'CLOSED'
+                              const isFull = slot.currentBooked >= slot.maxCapacity
+                              let pillStyle = 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                              if (isClosed) pillStyle = 'bg-rose-500/15 border-rose-500/30 text-rose-400'
+                              else if (isFull) pillStyle = 'bg-amber-500/15 border-amber-500/30 text-amber-400'
+                              return (
+                                <div key={slot.id} className={`text-[8px] font-bold font-mono px-1.5 py-0.5 rounded border truncate ${pillStyle}`}>
+                                  {slot.time.split(' ')[0]} ({slot.currentBooked}/{slot.maxCapacity})
+                                </div>
+                              )
+                            })}
+                            {cellSlots.length > 2 && (
+                              <span className="text-[7px] font-mono text-[rgb(var(--color-text-3))] uppercase tracking-wider pl-1 font-bold">
+                                +{cellSlots.length - 2} more
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )
                   })
@@ -873,6 +992,9 @@ export default function SlotManagerClient() {
               </div>
             </div>
           </div>
+
+
+
 
           {/* DAY DETAILS SIDEBAR CONSOLE (Right Column - 1/3 width) */}
           <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] p-6 rounded-3xl shadow-sm flex flex-col gap-6 animate-fadeIn">

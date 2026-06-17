@@ -16,7 +16,11 @@ import {
   CloudRain, 
   Flag,
   RotateCcw,
-  TrendingUp
+  TrendingUp,
+  Zap,
+  Key,
+  AlignLeft,
+  Route
 } from 'lucide-react'
 import { useRTOStore } from '@/lib/stores/rto-store'
 import { useLanguageStore } from '@/store/languageStore'
@@ -29,7 +33,7 @@ const PAGE_DICT = {
     currentZone: 'CURRENT ZONE:',
     studentResolution: 'Student RESOLUTION',
     overallCompletion: 'Overall Curriculum Milestone Completion',
-    estimatedCompletion: '3 Weeks remaining (based on 3 sessions/week)',
+    estimatedCompletion: 'Progress updates weekly',
     progressRatio: 'Progress ratio masteries',
     coachingFocus: 'Coaching Focus Board',
     criticalWeakMetrics: 'Critical weak metrics found inside RTO sign practice runs',
@@ -46,6 +50,8 @@ const PAGE_DICT = {
     check3: '✓ Validate ignition starter switch',
     cancel: 'Cancel',
     continueCourse: 'Continue Course',
+    weeklyReset: 'Progress resets weekly every Monday',
+    noNodesYet: 'No syllabus days configured yet.',
   },
   HI: {
     learningVectors: 'सीखने के वेक्टर',
@@ -54,7 +60,7 @@ const PAGE_DICT = {
     currentZone: 'वर्तमान क्षेत्र:',
     studentResolution: 'छात्र संकल्प',
     overallCompletion: 'समग्र पाठ्यक्रम मील का पत्थर पूरा होना',
-    estimatedCompletion: '3 सप्ताह शेष (3 सत्र/सप्ताह के आधार पर)',
+    estimatedCompletion: 'प्रगति साप्ताहिक रूप से अपडेट होती है',
     progressRatio: 'प्रगति अनुपात महारत',
     coachingFocus: 'कोचिंग फोकस बोर्ड',
     criticalWeakMetrics: 'RTO संकेत अभ्यास रन के अंदर महत्वपूर्ण कमजोर मेट्रिक्स मिले',
@@ -71,6 +77,8 @@ const PAGE_DICT = {
     check3: '✓ इग्निशन स्टार्टर स्विच मान्य करें',
     cancel: 'रद्द करें',
     continueCourse: 'कोर्स जारी रखें',
+    weeklyReset: 'प्रगति हर सोमवार साप्ताहिक रूप से रीसेट होती है',
+    noNodesYet: 'अभी तक कोई पाठ्यक्रम दिन कॉन्फ़िगर नहीं किया गया।',
   },
   TE: {
     learningVectors: 'లెర్నింగ్ వెక్టార్స్',
@@ -79,7 +87,7 @@ const PAGE_DICT = {
     currentZone: 'ప్రస్తుత జోన్:',
     studentResolution: 'విద్యార్థి తీర్మానం',
     overallCompletion: 'మొత్తం కరికులం మైలురాయి పూర్తి',
-    estimatedCompletion: '3 వారాలు మిగిలి ఉన్నాయి (వారానికి 3 సెషన్ల ఆధారంగా)',
+    estimatedCompletion: 'ప్రోగ్రెస్ ప్రతి సోమవారం రీసెట్ అవుతుంది',
     progressRatio: 'ప్రోగ్రెస్ రేషియో మాస్టరీస్',
     coachingFocus: 'కోచింగ్ ఫోకస్ బోర్డ్',
     criticalWeakMetrics: 'RTO సంకేతాల ప్రాక్టీస్ రన్‌లలో క్లిష్టమైన బలహీన కొలమానాలు కనుగొనబడ్డాయి',
@@ -96,42 +104,15 @@ const PAGE_DICT = {
     check3: '✓ ఇగ్నిషన్ స్టార్టర్ స్విచ్‌లను ధృవీకరించండి',
     cancel: 'రద్దు చేయండి',
     continueCourse: 'కోర్సును కొనసాగించండి',
+    weeklyReset: 'ప్రోగ్రెస్ ప్రతి సోమవారం రీసెట్ అవుతుంది',
+    noNodesYet: 'ఇంకా సిలబస్ రోజులు కాన్ఫిగర్ చేయబడలేదు.',
   }
 }
 
-
-interface Milestone {
-  id: string
-  name: string
-  phase: number // 1 to 5
-  phaseName: string
-  description: string
-  x: number // SVG X coord
-  y: number // SVG Y coord
-  icon: React.ComponentType<{ className?: string }>
-  details: string
-}
-
-// Visual layout coordinates for the winding road based on orderIndex
-const VISUAL_COORDS: Record<number, { x: number; y: number; details: string }> = {
-  1: { x: 180, y: 70, details: 'Master mirror alignment (3-point visibility check), secondary controls, and standard cockpit safety routines.' },
-  2: { x: 100, y: 150, details: 'Familiarization with friction points, manual gearbox shifters, pedal alignment, and basic acceleration loops.' },
-  3: { x: 80, y: 230, details: 'Learn to crawl at idle speeds under 5 km/h, execute standard U-turns, and maintain lane holding vectors.' },
-  4: { x: 140, y: 310, details: 'Defensive gap evaluations, side road entries, manual gear holding in moderate congestion grids.' },
-  5: { x: 260, y: 340, details: 'Complete 3-step parallel reversals, parking curb alignments, and reverse slot entries.' },
-  6: { x: 320, y: 420, details: 'Study double white divider lines, box junctions, indicator timing rules, and standard sign protocols.' },
-  7: { x: 250, y: 500, details: 'Master joining highways, overtaking large transport vehicles, blind-spot checks at 80 km/h.' },
-  8: { x: 120, y: 550, details: 'Anti-glare focusing, night junction crawls, safe tailing gaps during dark hours.' },
-  9: { x: 80, y: 630, details: 'Hydroplaning checks, window defogger alignment, hazard light utilization guidelines.' },
-  10: { x: 130, y: 710, details: 'Practice sudden hazard braking under dual control, emergency shoulder pullouts, and post-stall ignition safety.' },
-  11: { x: 280, y: 750, details: 'Interactive RTO prep sign cards, speed restriction tags, and mock layout exams.' },
-  12: { x: 320, y: 830, details: 'Verify timed questions under 10 minutes with strict 60% standard pass metric thresholds.' },
-}
-
-const ICON_MAP: Record<string, any> = {
-  Key: Eye, CircleDashed: Compass, Zap: Map, RotateCw: TrendingUp, ParkingSquare: RotateCcw, 
-  AlignLeft: Flag, GitMerge: Compass, Route: Moon, Moon: CloudRain, AlertTriangle: AlertCircle, 
-  FileText: FileText, Award: Award
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Key, CircleDashed: Eye, Zap, RotateCw: RotateCcw, ParkingSquare: RotateCcw,
+  AlignLeft, GitMerge: Compass, Route, Moon, AlertTriangle: AlertCircle,
+  FileText, Award, Compass, TrendingUp, CloudRain, Flag
 }
 
 const PHASE_MAP: Record<string, { id: number, name: string }> = {
@@ -142,19 +123,74 @@ const PHASE_MAP: Record<string, { id: number, name: string }> = {
   MASTERY: { id: 5, name: 'Mastery Zone' }
 }
 
+interface Milestone {
+  id: string
+  name: string
+  phase: number
+  phaseName: string
+  description: string
+  x: number
+  y: number
+  icon: React.ComponentType<{ className?: string }>
+  completed: boolean
+  orderIndex: number
+}
+
+// Generate dynamic winding road coordinates for any number of days
+function getDynamicCoords(orderIndex: number): { x: number; y: number } {
+  // Create a serpentine/winding pattern
+  const row = Math.floor((orderIndex - 1) / 4)
+  const col = (orderIndex - 1) % 4
+  
+  // Alternate direction per row (serpentine)
+  const xPositions = row % 2 === 0 
+    ? [60, 160, 260, 340]
+    : [340, 260, 160, 60]
+  
+  const x = xPositions[col] || 200
+  const y = 80 + row * 130 + (col % 2 === 1 ? 30 : 0)
+  
+  return { x, y }
+}
+
+// Build SVG path string dynamically from milestone coordinates
+function buildSvgPath(milestones: Milestone[]): string {
+  if (milestones.length === 0) return ''
+  const pts = milestones.map(m => ({ x: m.x, y: m.y }))
+  
+  // Start above the first point
+  let d = `M ${pts[0].x},${Math.max(0, pts[0].y - 60)}`
+  
+  for (let i = 0; i < pts.length; i++) {
+    if (i === 0) {
+      d += ` L ${pts[0].x},${pts[0].y}`
+    } else {
+      const prev = pts[i - 1]
+      const curr = pts[i]
+      const cx1 = prev.x
+      const cy1 = (prev.y + curr.y) / 2
+      const cx2 = curr.x
+      const cy2 = (prev.y + curr.y) / 2
+      d += ` C ${cx1},${cy1} ${cx2},${cy2} ${curr.x},${curr.y}`
+    }
+  }
+  
+  // Extend below last point
+  const last = pts[pts.length - 1]
+  d += ` L ${last.x},${last.y + 80}`
+  
+  return d
+}
+
 export default function StudentLearningRoadmap() {
   const { weakTopics, practiceProgress } = useRTOStore()
   const { language } = useLanguageStore()
   const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
   const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
- 
-  // Manage node progress states (Normally resolved via Zustand lessons completion, mock here for clean visual mapping)
-  // Milestone 1, 2, 3: Completed
-  // Milestone 4: In Progress
-  // Milestone 5+: Available or Locked
-  const [completedIds, setCompletedIds] = useState<string[]>(['1', '2', '3'])
-  const [inProgressId, setInProgressId] = useState<string>('4')
+
   const [milestones, setMilestones] = useState<Milestone[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null)
 
   React.useEffect(() => {
     async function fetchRoadmap() {
@@ -162,119 +198,71 @@ export default function StudentLearningRoadmap() {
         const res = await fetch('/api/student/roadmap')
         if (res.ok) {
           const nodes = await res.json()
-          const mappedNodes = nodes.map((n: any) => ({
-            id: n.id,
-            name: n.title,
-            phase: PHASE_MAP[n.phase]?.id || 1,
-            phaseName: PHASE_MAP[n.phase]?.name || 'Unknown',
-            description: n.description,
-            x: VISUAL_COORDS[n.orderIndex]?.x || 200,
-            y: VISUAL_COORDS[n.orderIndex]?.y || 100,
-            icon: ICON_MAP[n.icon] || Award,
-            details: VISUAL_COORDS[n.orderIndex]?.details || n.description
-          }))
-          setMilestones(mappedNodes)
-
-          // Auto-calculate progress based on localStorage lessons (temporary until we connect LearningProgress directly to Roadmap)
-          const saved = localStorage.getItem('completed_skills')
-          if (saved) {
-            const skills: string[] = JSON.parse(saved)
-            const completed = nodes.filter((n: any) => 
-              n.requiredCardSlugs && n.requiredCardSlugs.length > 0 && n.requiredCardSlugs.every((s: string) => skills.includes(s))
-            ).map((n: any) => n.id)
-            
-            // Add initial base nodes to completed
-            const unique = Array.from(new Set([...completed, mappedNodes[0]?.id, mappedNodes[1]?.id]))
-            setCompletedIds(unique as string[])
-
-            const nextMilestone = mappedNodes.find((m: any) => !unique.includes(m.id))
-            if (nextMilestone) {
-              setInProgressId(nextMilestone.id)
+          const mapped: Milestone[] = nodes.map((n: any) => {
+            const coords = getDynamicCoords(n.orderIndex)
+            return {
+              id: n.id,
+              name: n.title,
+              phase: PHASE_MAP[n.phase]?.id || 1,
+              phaseName: PHASE_MAP[n.phase]?.name || n.phase,
+              description: n.description,
+              x: coords.x,
+              y: coords.y,
+              icon: ICON_MAP[n.icon] || Award,
+              completed: n.completed || false,
+              orderIndex: n.orderIndex
             }
-          }
+          })
+          setMilestones(mapped)
         }
       } catch (err) {
         console.error(err)
+      } finally {
+        setLoading(false)
       }
     }
     fetchRoadmap()
   }, [])
 
-  // Selected milestone details modal/panel state
-  const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null)
+  // Calculate canvas height dynamically
+  const maxY = milestones.reduce((max, m) => Math.max(max, m.y), 0)
+  const canvasHeight = Math.max(600, maxY + 160)
+  const svgPath = buildSvgPath(milestones)
 
-  // Top overall stats calculation
+  // Progress stats
+  const completedCount = milestones.filter(m => m.completed).length
   const totalMilestones = milestones.length
-  const completedCount = completedIds.length
-  const estimatedCompletion = t.estimatedCompletion
 
-  // Unlock validation details
-  const phase1Nodes = milestones.filter(m => m.phase === 1)
-  const completedPhase1Count = phase1Nodes.filter(n => completedIds.includes(n.id)).length
-  const phase1ProgressPct = phase1Nodes.length > 0 ? (completedPhase1Count / phase1Nodes.length) * 100 : 0
-  const phase2Unlocked = phase1ProgressPct >= 80
-
-  // Identify current phase zone matching highest available/completed node
-  const activeMilestone = milestones.find(m => m.id === inProgressId) || milestones[0]
-  const currentPhaseZone = activeMilestone?.phaseName || 'BEGINNER'
+  // Find in-progress (first incomplete)
+  const inProgressMilestone = milestones.find(m => !m.completed)
+  const currentPhaseZone = inProgressMilestone?.phaseName || milestones[milestones.length - 1]?.phaseName || 'BEGINNER'
 
   const getNodeState = (m: Milestone) => {
-    if (completedIds.includes(m.id)) return 'completed'
-    if (inProgressId === m.id) return 'inprogress'
-    
-    // Unlock boundaries check
-    if (m.phase === 2 && !phase2Unlocked) return 'locked'
-    // Phase 3, 4, 5 lock conditions
-    if (m.phase > 2 && completedIds.length < 6) return 'locked'
-
+    if (m.completed) return 'completed'
+    if (inProgressMilestone?.id === m.id) return 'inprogress'
+    // Lock if previous incomplete
+    const prev = milestones.find(mp => mp.orderIndex === m.orderIndex - 1)
+    if (prev && !prev.completed && prev.id !== inProgressMilestone?.id) return 'locked'
     return 'available'
   }
 
-  // Render SVG points pathway string (winding bezier spline)
-  const svgPathString = `
-    M 200,0 
-    C 200,30 180,50 180,70
-    C 180,100 100,120 100,150
-    C 100,180 80,200 80,230
-    C 80,270 140,280 140,310
-    C 140,330 260,320 260,340
-    C 260,380 320,380 320,420
-    C 320,460 250,460 250,500
-    C 250,520 120,520 120,550
-    C 120,590 80,590 80,630
-    C 80,670 130,670 130,710
-    C 130,730 280,720 280,750
-    C 280,790 320,790 320,830
-    C 320,870 260,870 260,910
-    C 260,940 110,940 110,970
-    C 110,1020 200,1020 200,1070
-    C 200,1110 200,1130 200,1170
-  `
-
-  // Weak areas calculation: if practiceProgress < 70% or active weakTopics present
   const showWeakAreas = practiceProgress < 70 || Object.keys(weakTopics).length > 0
 
   return (
     <div className="min-h-screen bg-void text-text-1 font-body relative pb-24 pt-24">
-      
-      {/* Background neon glows */}
       <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[140px] pointer-events-none" />
 
-      {/* Main Roster Container */}
       <div className="max-w-3xl mx-auto px-6 flex flex-col gap-6 relative">
-        
-        {/* Hub Header */}
+
+        {/* Header */}
         <header className="border-b border-border pb-4 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <span className="text-xs font-mono uppercase tracking-widest text-primary">{t.learningVectors}</span>
             <h1 className="text-3xl font-extrabold text-text-1 font-display tracking-tight mt-0.5 uppercase">
               {t.curriculumRoadmap}
             </h1>
-            <p className="text-xs text-text-2 mt-1">
-              {t.visualCoordinates}
-            </p>
+            <p className="text-xs text-text-2 mt-1">{t.visualCoordinates}</p>
           </div>
-
           <div className="flex gap-2">
             <span className="text-[10px] font-mono bg-white/[0.03] border border-border px-3.5 py-1.5 rounded-full text-accent font-bold uppercase">
               {t.currentZone} {currentPhaseZone}
@@ -282,14 +270,14 @@ export default function StudentLearningRoadmap() {
           </div>
         </header>
 
-        {/* Overall progress box */}
+        {/* Progress box */}
         <div className="bg-surface border border-border p-5 rounded-3xl grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
           <div className="text-left">
             <span className="text-[9px] font-mono text-text-3 uppercase tracking-wider block">{t.studentResolution}</span>
             <h4 className="text-sm font-bold text-text-1 uppercase font-display mt-1">{t.overallCompletion}</h4>
-            <p className="text-xs text-text-2 font-mono mt-0.5">{estimatedCompletion}</p>
+            <p className="text-xs text-text-2 font-mono mt-0.5">{t.estimatedCompletion}</p>
+            <p className="text-[10px] text-primary/70 font-mono mt-1">↺ {t.weeklyReset}</p>
           </div>
-
           <div className="flex items-center gap-4 bg-void/60 border border-border p-3.5 rounded-2xl">
             <div className="text-left">
               <span className="text-[32px] font-extrabold text-primary font-mono leading-none">{completedCount}</span>
@@ -297,9 +285,9 @@ export default function StudentLearningRoadmap() {
             </div>
             <div className="flex-1">
               <div className="w-full bg-void h-2 rounded-full overflow-hidden border border-border/80">
-                <div 
-                  className="bg-primary h-full transition-all duration-500 ease-out" 
-                  style={{ width: `${(completedCount / totalMilestones) * 100}%` }}
+                <div
+                  className="bg-primary h-full transition-all duration-500 ease-out"
+                  style={{ width: totalMilestones > 0 ? `${(completedCount / totalMilestones) * 100}%` : '0%' }}
                 />
               </div>
               <span className="text-[9px] font-mono text-text-3 mt-1 block text-right">{t.progressRatio}</span>
@@ -307,120 +295,100 @@ export default function StudentLearningRoadmap() {
           </div>
         </div>
 
-        {/* ----------------------------------------------------
-            VISUAL WINDING ROAD MAP (SVG PATHS BASED)
-            ---------------------------------------------------- */}
-        <div className="bg-surface/50 border border-border rounded-3xl py-12 px-6 flex justify-center relative shadow-xl min-h-[1200px]">
-          
-          <div className="relative w-full max-w-[400px] h-[1200px]">
-            
-            {/* SVG winding road canvas */}
-            <svg 
-              className="absolute inset-0 w-full h-full pointer-events-none select-none z-0" 
-              viewBox="0 0 400 1200" 
-              fill="none"
-            >
-              {/* Outer dark concrete curb border */}
-              <path 
-                d={svgPathString} 
-                stroke="rgba(255,255,255,0.03)" 
-                strokeWidth="48" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-              />
-              
-              {/* Core road path asphalt background */}
-              <path 
-                d={svgPathString} 
-                stroke="#0D1117" 
-                strokeWidth="42" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-              />
-
-              {/* Lane dashed center markings */}
-              {/* Completed sections (fully rendered white) */}
-              <path 
-                d={svgPathString} 
-                stroke="rgba(255,255,255,0.25)" 
-                strokeWidth="1.5" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeDasharray="6, 12"
-              />
-            </svg>
-
-            {/* Render milestones dynamically onto the coordinates path */}
-            {milestones.map((m) => {
-              const state = getNodeState(m)
-              const Icon = m.icon
-              
-              let borderStyle = 'bg-surface border-border text-text-3'
-              let clickHandler = () => {}
-              let isClickable = false
-              let extraComponent: React.ReactNode = null
-
-              if (state === 'completed') {
-                borderStyle = 'bg-success border-success text-white shadow-lg shadow-success/15'
-                isClickable = true
-                clickHandler = () => setSelectedMilestone(m)
-              } else if (state === 'inprogress') {
-                borderStyle = 'bg-surface border-accent text-accent shadow-lg shadow-accent/15 border-2'
-                isClickable = true
-                clickHandler = () => setSelectedMilestone(m)
-                
-                // Spinner outer border layout
-                extraComponent = (
-                  <span className="absolute inset-[-4px] rounded-full border border-dashed border-accent animate-spin" />
-                )
-              } else if (state === 'available') {
-                borderStyle = 'bg-surface border-primary text-primary shadow-lg shadow-primary/15 animate-pulse border-2'
-                isClickable = true
-                clickHandler = () => setSelectedMilestone(m)
-              } else if (state === 'locked') {
-                borderStyle = 'bg-void/80 border-border text-text-3 opacity-60'
-                extraComponent = (
-                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-void border border-border rounded-full flex items-center justify-center text-text-3">
-                    <Lock className="w-2.5 h-2.5" />
-                  </span>
-                )
-              }
-
-              return (
-                <div
-                  key={m.id}
-                  onClick={clickHandler}
-                  className={`absolute w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 z-10 ${borderStyle} ${
-                    isClickable ? 'cursor-pointer hover:scale-110' : 'cursor-not-allowed'
-                  }`}
-                  style={{
-                    left: `${m.x - 24}px`, // center circle on coordinate
-                    top: `${m.y - 24}px`
-                  }}
-                  title={`${m.name} (${state.toUpperCase()})`}
-                >
-                  {extraComponent}
-                  {state === 'completed' ? (
-                    <Check className="w-5 h-5 font-bold" />
-                  ) : (
-                    <Icon className="w-5 h-5" />
-                  )}
-                  
-                  {/* Miniature labels underneath */}
-                  <span className="absolute top-13 left-1/2 -translate-x-1/2 w-28 text-center text-[8.5px] font-mono font-bold tracking-tight text-text-2 uppercase bg-void/80 border border-border/40 py-0.5 px-1.5 rounded select-none pointer-events-none">
-                    {m.name}
-                  </span>
-                </div>
-              )
-            })}
-
+        {/* Winding Road SVG Canvas */}
+        {loading ? (
+          <div className="bg-surface/50 border border-border rounded-3xl py-24 flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-t-primary border-r-transparent rounded-full animate-spin" />
           </div>
+        ) : milestones.length === 0 ? (
+          <div className="bg-surface/50 border border-border rounded-3xl py-24 flex items-center justify-center text-text-3 font-mono text-sm">
+            {t.noNodesYet}
+          </div>
+        ) : (
+          <div className="bg-surface/50 border border-border rounded-3xl py-12 px-6 flex justify-center relative shadow-xl overflow-hidden">
+            <div className="relative w-full max-w-[400px]" style={{ height: `${canvasHeight}px` }}>
 
-        </div>
+              {/* SVG winding road */}
+              <svg
+                className="absolute inset-0 w-full h-full pointer-events-none select-none z-0"
+                viewBox={`0 0 400 ${canvasHeight}`}
+                fill="none"
+              >
+                {/* Road border */}
+                <path d={svgPath} stroke="rgba(255,255,255,0.03)" strokeWidth="48" strokeLinecap="round" strokeLinejoin="round" />
+                {/* Road asphalt */}
+                <path d={svgPath} stroke="#0D1117" strokeWidth="42" strokeLinecap="round" strokeLinejoin="round" />
+                {/* Completed progress segment */}
+                {completedCount > 0 && milestones.length > 0 && (
+                  <path d={svgPath} stroke="rgba(var(--color-primary),0.4)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" strokeDashoffset="0"
+                    style={{ opacity: 0.7 }}
+                  />
+                )}
+                {/* Dashed center line */}
+                <path d={svgPath} stroke="rgba(255,255,255,0.18)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="6, 12" />
+              </svg>
 
-        {/* ----------------------------------------------------
-            WEAK AREA FOCUS BOARDS SECTION (Scored < 70%)
-            ---------------------------------------------------- */}
+              {/* Milestone nodes */}
+              {milestones.map((m) => {
+                const state = getNodeState(m)
+                const Icon = m.icon
+
+                let borderStyle = 'bg-surface border-border text-text-3'
+                let clickHandler = () => {}
+                let isClickable = false
+                let extraComponent: React.ReactNode = null
+
+                if (state === 'completed') {
+                  borderStyle = 'bg-success border-success text-white shadow-lg shadow-success/15'
+                  isClickable = true
+                  clickHandler = () => setSelectedMilestone(m)
+                } else if (state === 'inprogress') {
+                  borderStyle = 'bg-surface border-accent text-accent shadow-lg shadow-accent/15 border-2'
+                  isClickable = true
+                  clickHandler = () => setSelectedMilestone(m)
+                  extraComponent = (
+                    <span className="absolute inset-[-4px] rounded-full border border-dashed border-accent animate-spin" />
+                  )
+                } else if (state === 'available') {
+                  borderStyle = 'bg-surface border-primary text-primary shadow-lg shadow-primary/15 border-2'
+                  isClickable = true
+                  clickHandler = () => setSelectedMilestone(m)
+                } else {
+                  borderStyle = 'bg-void/80 border-border text-text-3 opacity-60'
+                  extraComponent = (
+                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-void border border-border rounded-full flex items-center justify-center text-text-3">
+                      <Lock className="w-2.5 h-2.5" />
+                    </span>
+                  )
+                }
+
+                return (
+                  <div
+                    key={m.id}
+                    onClick={clickHandler}
+                    className={`absolute w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 z-10 border ${borderStyle} ${
+                      isClickable ? 'cursor-pointer hover:scale-110' : 'cursor-not-allowed'
+                    }`}
+                    style={{ left: `${m.x - 24}px`, top: `${m.y - 24}px` }}
+                    title={`Day ${m.orderIndex}: ${m.name} (${state.toUpperCase()})`}
+                  >
+                    {extraComponent}
+                    {state === 'completed' ? (
+                      <Check className="w-5 h-5 font-bold" />
+                    ) : (
+                      <Icon className="w-5 h-5" />
+                    )}
+                    <span className="absolute top-13 left-1/2 -translate-x-1/2 w-28 text-center text-[8.5px] font-mono font-bold tracking-tight text-text-2 uppercase bg-void/80 border border-border/40 py-0.5 px-1.5 rounded select-none pointer-events-none whitespace-nowrap overflow-hidden text-ellipsis">
+                      D{m.orderIndex} {m.name}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Weak area coaching board */}
         {showWeakAreas && (
           <div className="bg-void/50 border border-border p-6 rounded-[32px] text-left flex flex-col gap-4">
             <div className="flex items-center gap-2 border-b border-border/40 pb-2">
@@ -430,19 +398,14 @@ export default function StudentLearningRoadmap() {
                 <p className="text-[9px] font-mono text-text-3 uppercase mt-0.5">{t.criticalWeakMetrics}</p>
               </div>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Object.entries(weakTopics).length === 0 ? (
-                // Fallback weak topics in case the initial seed wasn't failed yet
                 <div className="bg-surface border border-border p-4 rounded-xl flex justify-between items-center">
                   <div className="flex flex-col">
                     <span className="text-xs font-bold text-text-1 font-mono">{t.warningSignsMastery}</span>
                     <span className="text-[9px] text-text-3 font-mono mt-1">{t.accuracyScored}</span>
                   </div>
-                  <button
-                    onClick={() => window.location.href = '/rto'}
-                    className="px-3.5 py-1.5 bg-accent hover:bg-accent/90 text-void font-bold text-[9px] font-mono rounded-lg transition-all duration-200"
-                  >
+                  <button onClick={() => window.location.href = '/rto'} className="px-3.5 py-1.5 bg-accent hover:bg-accent/90 text-void font-bold text-[9px] font-mono rounded-lg transition-all duration-200">
                     {t.practiceNow}
                   </button>
                 </div>
@@ -453,10 +416,7 @@ export default function StudentLearningRoadmap() {
                       <span className="text-xs font-bold text-text-1 font-mono uppercase">{topic} {t.moduleSuffix}</span>
                       <span className="text-[9px] text-text-3 font-mono mt-1">{t.failedTimesPre} {count} {t.failedTimesPost}</span>
                     </div>
-                    <button
-                      onClick={() => window.location.href = '/rto'}
-                      className="px-3.5 py-1.5 bg-accent hover:bg-accent/90 text-void font-bold text-[9px] font-mono rounded-lg transition-all duration-200"
-                    >
+                    <button onClick={() => window.location.href = '/rto'} className="px-3.5 py-1.5 bg-accent hover:bg-accent/90 text-void font-bold text-[9px] font-mono rounded-lg transition-all duration-200">
                       {t.practiceNow}
                     </button>
                   </div>
@@ -465,19 +425,13 @@ export default function StudentLearningRoadmap() {
             </div>
           </div>
         )}
-
       </div>
 
-      {/* ----------------------------------------------------
-          SLIDE-UP MILESTONE DETAIL PANEL
-          ---------------------------------------------------- */}
+      {/* Milestone Detail Slide-up Panel */}
       <AnimatePresence>
         {selectedMilestone && (
           <div className="fixed inset-0 bg-void/80 z-50 flex items-end justify-center px-4 pb-4">
-            
-            {/* Click backdrop to close */}
             <div className="absolute inset-0" onClick={() => setSelectedMilestone(null)} />
-
             <motion.div
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
@@ -485,78 +439,62 @@ export default function StudentLearningRoadmap() {
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="bg-surface border border-border rounded-t-3xl max-w-lg w-full p-6 relative z-10 shadow-2xl text-left"
             >
-              {/* Drag handles style */}
               <div className="w-12 h-1.5 bg-border rounded-full mx-auto mb-4" />
-
               <div className="flex justify-between items-start">
                 <div>
                   <span className="text-[9px] font-mono text-primary uppercase font-bold tracking-wider">
-                    {selectedMilestone.phaseName} · {t.milestone} {selectedMilestone.id}
+                    {selectedMilestone.phaseName} · {t.milestone} · Day {selectedMilestone.orderIndex}
                   </span>
                   <h3 className="text-xl font-extrabold text-text-1 font-display mt-0.5 uppercase">
                     {selectedMilestone.name}
                   </h3>
                 </div>
-                <button 
-                  onClick={() => setSelectedMilestone(null)}
-                  className="p-1 hover:bg-white/[0.04] rounded-lg text-text-3"
-                >
+                <button onClick={() => setSelectedMilestone(null)} className="p-1 hover:bg-white/[0.04] rounded-lg text-text-3">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <p className="text-xs text-text-2 leading-relaxed mt-3 font-body">
-                {selectedMilestone.details}
+                {selectedMilestone.description}
               </p>
 
               <div className="bg-void/60 border border-border p-4 rounded-xl my-4 text-xs font-mono">
                 <span className="text-[9px] text-text-3 uppercase tracking-wider block">{t.observationChecklist}</span>
                 <p className="text-text-2 mt-1 leading-relaxed">
-                  {t.check1}<br />
-                  {t.check2}<br />
-                  {t.check3}
+                  {t.check1}<br />{t.check2}<br />{t.check3}
                 </p>
               </div>
 
               <div className="flex gap-2">
-                <button
-                  onClick={() => setSelectedMilestone(null)}
-                  className="flex-1 py-3 bg-void hover:bg-white/[0.02] border border-border text-text-2 font-bold text-xs rounded-xl transition-all duration-200"
-                >
+                <button onClick={() => setSelectedMilestone(null)} className="flex-1 py-3 bg-void hover:bg-white/[0.02] border border-border text-text-2 font-bold text-xs rounded-xl transition-all duration-200">
                   {t.cancel}
                 </button>
-                <button
-                  onClick={() => window.location.href = '/learn'}
-                  className="flex-1 py-3 bg-primary hover:bg-primary/95 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1 shadow-lg shadow-primary/10 transition-all duration-200"
-                >
+                <button onClick={() => window.location.href = '/learn'} className="flex-1 py-3 bg-primary hover:bg-primary/95 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1 shadow-lg shadow-primary/10 transition-all duration-200">
                   <Play className="w-3.5 h-3.5" />
                   {t.continueCourse}
                 </button>
               </div>
-
             </motion.div>
-
           </div>
         )}
       </AnimatePresence>
-
     </div>
   )
 }
 
-// Inline Close vector icon helper
-function X({ className, onClick }: { className?: string; onClick?: () => void }) {
+function Lock({ className }: { className?: string }) {
   return (
-    <svg 
-      className={className} 
-      onClick={onClick} 
-      fill="none" 
-      viewBox="0 0 24 24" 
-      stroke="currentColor" 
-      strokeWidth="2.5"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
     </svg>
   )
 }
 
+function X({ className, onClick }: { className?: string; onClick?: () => void }) {
+  return (
+    <svg className={className} onClick={onClick} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  )
+}

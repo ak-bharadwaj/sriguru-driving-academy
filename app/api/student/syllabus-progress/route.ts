@@ -5,7 +5,16 @@ import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { DEFAULT_SYLLABUS } from '@/lib/data/syllabusData'
 
-// Student fetches their own syllabus progress
+function getStartOfWeek() {
+  const now = new Date()
+  const day = now.getDay()
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1)
+  const start = new Date(now.getFullYear(), now.getMonth(), diff)
+  start.setHours(0, 0, 0, 0)
+  return start
+}
+
+// Student fetches their own syllabus progress (current week only)
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
@@ -20,14 +29,16 @@ export async function GET() {
     })
     if (!student) return NextResponse.json({ error: 'Student not found' }, { status: 404 })
 
-    // Get syllabus days for their course type and student's completed days — in parallel
     let [syllabusDays, progress] = await Promise.all([
       db.syllabusDay.findMany({
         where: { trainingType: student.trainingType },
         orderBy: { dayNumber: 'asc' }
       }),
       db.studentSyllabusProgress.findMany({
-        where: { studentId: student.id },
+        where: {
+          studentId: student.id,
+          completedAt: { gte: getStartOfWeek() }
+        },
         select: { syllabusDayId: true, completedAt: true }
       })
     ])

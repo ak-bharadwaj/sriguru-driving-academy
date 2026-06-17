@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/db'
+import { TrainingType } from '@prisma/client'
 
 export async function GET(request: Request) {
   try {
@@ -12,56 +13,59 @@ export async function GET(request: Request) {
     }
     
     const url = new URL(request.url)
-    const trainingType = url.searchParams.get('trainingType') || 'BEGINNER'
+    const trainingType = (url.searchParams.get('trainingType') || 'BEGINNER') as TrainingType
     
-    // Seed default nodes if none exist in the database for this trainingType yet
-    let nodes = await db.roadmapNode.findMany({
-      where: { trainingType: trainingType as any },
-      orderBy: { orderIndex: 'asc' }
+    // Fetch directly from SyllabusDay table
+    const days = await db.syllabusDay.findMany({
+      where: { trainingType },
+      orderBy: { dayNumber: 'asc' }
     })
 
-    if (nodes.length === 0) {
-      const { RoadmapPhase, TrainingType } = require('@prisma/client')
-      const DEFAULT_NODES_BY_TYPE = {
-        BEGINNER: [
-          { orderIndex: 1, title: 'Vehicle Basics', phase: RoadmapPhase.BEGINNER, description: 'Cockpit drills, startup sequencing, and steering mechanics.', icon: 'Compass', requiredCardSlugs: ['vehicle-startup', 'steering-control'], trainingType: TrainingType.BEGINNER },
-          { orderIndex: 2, title: 'Basic Control', phase: RoadmapPhase.BEGINNER, description: 'Master clutch friction points, shifting sequencing, and progressive braking.', icon: 'Gauge', requiredCardSlugs: ['clutch-control', 'braking'], trainingType: TrainingType.BEGINNER },
-          { orderIndex: 3, title: 'Safety Essentials', phase: RoadmapPhase.BEGINNER, description: 'MSM mirror routines, blind spot checks, and traffic signal theory.', icon: 'ShieldAlert', requiredCardSlugs: ['mirror-checking', 'blind-spots', 'traffic-signals'], trainingType: TrainingType.BEGINNER },
-          { orderIndex: 4, title: 'Incline Control', phase: RoadmapPhase.INTERMEDIATE, description: 'Coordinating slope holds, handbrake starts, and uphill clutch crawl vectors.', icon: 'TrendingUp', requiredCardSlugs: ['hill-starts'], trainingType: TrainingType.BEGINNER },
-          { orderIndex: 5, title: 'Street Integration', phase: RoadmapPhase.INTERMEDIATE, description: 'Lane discipline, standard overtaking safety margins, and roundabout exit routines.', icon: 'Milestone', requiredCardSlugs: ['lane-changing', 'roundabouts'], trainingType: TrainingType.BEGINNER },
-          { orderIndex: 6, title: 'Parking Mechanics', phase: RoadmapPhase.INTERMEDIATE, description: 'Reverse bay slots, parallel parking references, and kerb alignment vectors.', icon: 'Maximize', requiredCardSlugs: ['parallel-parking', 'reverse-parking', 'parking-alignment'], trainingType: TrainingType.BEGINNER },
-          { orderIndex: 7, title: 'Highway Dynamics', phase: RoadmapPhase.ADVANCED, description: 'Fast slip road lane merging, speed coordination, and dual-carriageway spacing.', icon: 'Zap', requiredCardSlugs: ['highway-merging', 'overtaking'], trainingType: TrainingType.BEGINNER }
-        ],
-        ADVANCED: [
-          { orderIndex: 1, title: 'Advanced Control', phase: RoadmapPhase.ADVANCED, description: 'High-speed handling, clutchless control, and rev-matching concepts.', icon: 'Gauge', requiredCardSlugs: ['clutch-control', 'braking'], trainingType: TrainingType.ADVANCED },
-          { orderIndex: 2, title: 'Street & Highway', phase: RoadmapPhase.ADVANCED, description: 'Highway lane merging, high-speed overtaking, and defensive positioning.', icon: 'Milestone', requiredCardSlugs: ['lane-changing', 'highway-merging', 'overtaking'], trainingType: TrainingType.ADVANCED },
-          { orderIndex: 3, title: 'Adverse Elements', phase: RoadmapPhase.ADVANCED, description: 'Hydroplaning control, wet-weather stopping margins, and nighttime glare management.', icon: 'CloudRain', requiredCardSlugs: ['rain-driving', 'night-driving'], trainingType: TrainingType.ADVANCED },
-          { orderIndex: 4, title: 'Emergency Management', phase: RoadmapPhase.MASTERY, description: 'Sudden obstacle avoidance, maximum ABS hard braking, and engine failure drills.', icon: 'LifeBuoy', requiredCardSlugs: ['emergency-braking'], trainingType: TrainingType.ADVANCED }
-        ],
-        RTO_FAST_TRACK: [
-          { orderIndex: 1, title: 'RTO Signs Theory', phase: RoadmapPhase.RTO, description: 'Mandatory, cautionary, and informatory road signs overview.', icon: 'FileText', requiredCardSlugs: ['traffic-signals'], trainingType: TrainingType.RTO_FAST_TRACK },
-          { orderIndex: 2, title: 'Safety & Hazards', phase: RoadmapPhase.RTO, description: 'Blind spots check routines, hazard perception, and defensive driving theory.', icon: 'ShieldAlert', requiredCardSlugs: ['blind-spots'], trainingType: TrainingType.RTO_FAST_TRACK },
-          { orderIndex: 3, title: 'Mock Test Series', phase: RoadmapPhase.RTO, description: 'Complete timed RTO exam mock tests.', icon: 'Award', requiredCardSlugs: [], trainingType: TrainingType.RTO_FAST_TRACK }
-        ]
+    // Map to RoadmapNode structure for compatibility with client-side UI
+    const nodes = days.map(day => {
+      // Determine phase dynamically
+      let phase = 'BEGINNER'
+      if (trainingType === 'BEGINNER') {
+        if (day.dayNumber <= 7) phase = 'BEGINNER'
+        else if (day.dayNumber <= 14) phase = 'INTERMEDIATE'
+        else phase = 'ADVANCED'
+      } else if (trainingType === 'ADVANCED') {
+        if (day.dayNumber <= 7) phase = 'ADVANCED'
+        else phase = 'MASTERY'
+      } else {
+        phase = 'RTO'
       }
-      
-      const defaultToSeed = DEFAULT_NODES_BY_TYPE[trainingType as keyof typeof DEFAULT_NODES_BY_TYPE] || DEFAULT_NODES_BY_TYPE.BEGINNER
-      
-      await db.roadmapNode.createMany({
-        data: defaultToSeed
-      })
-      nodes = await db.roadmapNode.findMany({
-        where: { trainingType: trainingType as any },
-        orderBy: { orderIndex: 'asc' }
-      })
-    }
 
-    return NextResponse.json(nodes, {
-      status: 200,
-      headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=30'
+      // Determine icon
+      let icon = 'Compass'
+      const t = day.title.toLowerCase()
+      if (t.includes('steer')) icon = 'CircleDashed'
+      else if (t.includes('clutch') || t.includes('friction') || t.includes('gear')) icon = 'Zap'
+      else if (t.includes('brake') || t.includes('stop')) icon = 'AlertTriangle'
+      else if (t.includes('park')) icon = 'ParkingSquare'
+      else if (t.includes('night')) icon = 'Moon'
+      else if (t.includes('rain')) icon = 'CloudRain'
+      else if (t.includes('highway') || t.includes('speed')) icon = 'Route'
+      else if (t.includes('test') || t.includes('exam')) icon = 'Award'
+      else if (t.includes('sign') || t.includes('rule')) icon = 'FileText'
+      else {
+        const icons = ['Compass', 'Key', 'RotateCw', 'AlignLeft', 'GitMerge']
+        icon = icons[day.dayNumber % icons.length]
+      }
+
+      return {
+        id: day.id,
+        title: day.title,
+        description: day.description,
+        phase,
+        orderIndex: day.dayNumber,
+        icon,
+        requiredCardSlugs: [],
+        unlockThreshold: 0.8
       }
     })
+
+    return NextResponse.json(nodes, { status: 200 })
   } catch (error) {
     console.error('Admin Roadmap GET Error:', error)
     return NextResponse.json({ error: 'Failed to load roadmap nodes' }, { status: 500 })
@@ -75,21 +79,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const body = await request.json()
-    const { title, description, phase, orderIndex, icon, requiredCardSlugs, unlockThreshold, trainingType } = body
+    const { title, description, orderIndex, trainingType } = body
 
-    const newNode = await db.roadmapNode.create({
+    const newDay = await db.syllabusDay.create({
       data: {
         title,
         description,
-        phase,
-        orderIndex: parseInt(orderIndex),
-        icon: icon || 'Compass',
-        requiredCardSlugs: requiredCardSlugs || [],
-        unlockThreshold: parseFloat(unlockThreshold) || 0.8,
-        trainingType: trainingType || 'BEGINNER'
+        dayNumber: parseInt(orderIndex) || 1,
+        trainingType: (trainingType || 'BEGINNER') as TrainingType
       }
     })
-    return NextResponse.json(newNode, { status: 201 })
+
+    // Return mapped object for compatibility
+    return NextResponse.json({
+      id: newDay.id,
+      title: newDay.title,
+      description: newDay.description,
+      phase: 'BEGINNER',
+      orderIndex: newDay.dayNumber,
+      icon: 'Compass',
+      requiredCardSlugs: [],
+      unlockThreshold: 0.8
+    }, { status: 201 })
   } catch (error) {
     console.error('Admin Roadmap POST Error:', error)
     return NextResponse.json({ error: 'Failed to create roadmap node' }, { status: 500 })
@@ -103,22 +114,28 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const body = await request.json()
-    const { id, title, description, phase, orderIndex, icon, requiredCardSlugs, unlockThreshold, trainingType } = body
+    const { id, title, description, orderIndex, trainingType } = body
 
-    const updatedNode = await db.roadmapNode.update({
+    const updatedDay = await db.syllabusDay.update({
       where: { id },
       data: {
         title,
         description,
-        phase,
-        orderIndex: parseInt(orderIndex),
-        icon: icon || 'Compass',
-        requiredCardSlugs: requiredCardSlugs || [],
-        unlockThreshold: parseFloat(unlockThreshold) || 0.8,
-        trainingType: trainingType || 'BEGINNER'
+        dayNumber: parseInt(orderIndex) || 1,
+        trainingType: (trainingType || 'BEGINNER') as TrainingType
       }
     })
-    return NextResponse.json(updatedNode, { status: 200 })
+
+    return NextResponse.json({
+      id: updatedDay.id,
+      title: updatedDay.title,
+      description: updatedDay.description,
+      phase: 'BEGINNER',
+      orderIndex: updatedDay.dayNumber,
+      icon: 'Compass',
+      requiredCardSlugs: [],
+      unlockThreshold: 0.8
+    }, { status: 200 })
   } catch (error) {
     console.error('Admin Roadmap PUT Error:', error)
     return NextResponse.json({ error: 'Failed to update roadmap node' }, { status: 500 })
@@ -137,15 +154,15 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Missing id parameter' }, { status: 400 })
     }
 
-    // First delete any StudentRoadmapNode dependencies if there are any cascade issues
-    await db.studentRoadmapNode.deleteMany({
-      where: { nodeId: id }
+    // Clean any student syllabus progress records referencing this day
+    await db.studentSyllabusProgress.deleteMany({
+      where: { syllabusDayId: id }
     })
 
-    const deletedNode = await db.roadmapNode.delete({
+    const deletedDay = await db.syllabusDay.delete({
       where: { id }
     })
-    return NextResponse.json(deletedNode, { status: 200 })
+    return NextResponse.json(deletedDay, { status: 200 })
   } catch (error) {
     console.error('Admin Roadmap DELETE Error:', error)
     return NextResponse.json({ error: 'Failed to delete roadmap node' }, { status: 500 })

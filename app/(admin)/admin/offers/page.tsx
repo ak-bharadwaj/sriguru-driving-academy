@@ -94,6 +94,7 @@ export default function PromotionsPage() {
   
   const [form, setForm] = useState({ title: '', desc: '', discountPercent: '', promoCode: '', badge: '', active: true })
   const [submitting, setSubmitting] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const fetchOffers = async () => {
     try {
@@ -149,7 +150,6 @@ export default function PromotionsPage() {
   }
 
   const deletePromo = async (id: string) => {
-    if (!confirm(t.deleteConfirm)) return
     try {
       const res = await fetch(`/api/admin/offers?id=${id}`, { method: 'DELETE' })
       if (res.ok) {
@@ -216,12 +216,34 @@ export default function PromotionsPage() {
                 </div>
 
                 <div className="flex items-center gap-2 mt-auto border-t border-[rgb(var(--color-border))] pt-4">
-                  <button onClick={() => toggleActive(promo.id, promo.active)} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold transition-colors ${promo.active ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
-                    <Power className="w-4 h-4" /> {promo.active ? t.disable : t.enable}
-                  </button>
-                  <button onClick={() => deletePromo(promo.id)} className="p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {deletingId === promo.id ? (
+                    <>
+                      <button 
+                        onClick={async () => {
+                          await deletePromo(promo.id)
+                          setDeletingId(null)
+                        }} 
+                        className="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-colors"
+                      >
+                        Confirm Delete
+                      </button>
+                      <button 
+                        onClick={() => setDeletingId(null)} 
+                        className="px-3 py-2 bg-slate-100 dark:bg-slate-800 text-[rgb(var(--color-text-2))] hover:text-[rgb(var(--color-text-1))] rounded-xl text-xs font-bold transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => toggleActive(promo.id, promo.active)} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold transition-colors ${promo.active ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
+                        <Power className="w-4 h-4" /> {promo.active ? t.disable : t.enable}
+                      </button>
+                      <button onClick={() => setDeletingId(promo.id)} className="p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </>
+                  )}
                 </div>
               </motion.div>
             ))}

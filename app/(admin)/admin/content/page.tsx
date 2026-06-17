@@ -122,12 +122,13 @@ export default function ContentManagementPage() {
   const [submitting, setSubmitting] = useState(false)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
+  const [translating, setTranslating] = useState(false)
 
   // Offers states
   const [deletingOfferId, setDeletingOfferId] = useState<string | null>(null)
   const [editingOffer, setEditingOffer] = useState<any>(null)
   const [showOfferModal, setShowOfferModal] = useState(false)
-  const [offerForm, setOfferForm] = useState({ title: '', desc: '', discountPercent: '', promoCode: '', badge: '', active: true })
+  const [offerForm, setOfferForm] = useState({ title: '', titleHI: '', titleTE: '', desc: '', descHI: '', descTE: '', discountPercent: '', promoCode: '', badge: '', active: true })
 
   const { startUpload } = useUploadThing('galleryImage', {
     onClientUploadComplete: (res) => {
@@ -342,15 +343,97 @@ export default function ContentManagementPage() {
     }
   }
 
+  // Auto-translate helper
+  const translateText = async (text: string, lang: 'HI' | 'TE'): Promise<string> => {
+    const res = await fetch('/api/admin/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, targetLang: lang })
+    })
+    if (!res.ok) return text
+    const { translation } = await res.json()
+    return translation || text
+  }
+
+  const handleTranslateCourse = async () => {
+    if (!editingCourse) return
+    const enTitle = editingCourse.title?.EN || ''
+    const enDesc = editingCourse.desc?.EN || ''
+    if (!enTitle && !enDesc) {
+      toast.error('Please fill in the English fields first')
+      return
+    }
+    setTranslating(true)
+    try {
+      const [hiTitle, teTitle, hiDesc, teDesc] = await Promise.all([
+        enTitle ? translateText(enTitle, 'HI') : Promise.resolve(''),
+        enTitle ? translateText(enTitle, 'TE') : Promise.resolve(''),
+        enDesc ? translateText(enDesc, 'HI') : Promise.resolve(''),
+        enDesc ? translateText(enDesc, 'TE') : Promise.resolve(''),
+      ])
+      setEditingCourse((prev: any) => ({
+        ...prev,
+        title: { ...prev.title, HI: hiTitle, TE: teTitle },
+        desc: { ...prev.desc, HI: hiDesc, TE: teDesc }
+      }))
+      toast.success('Translated to Hindi & Telugu!')
+    } catch {
+      toast.error('Translation failed')
+    } finally {
+      setTranslating(false)
+    }
+  }
+
+  const handleTranslateOffer = async () => {
+    if (!offerForm.title && !offerForm.desc) {
+      toast.error('Please fill in English Title and Description first')
+      return
+    }
+    setTranslating(true)
+    try {
+      const [hiTitle, teTitle, hiDesc, teDesc] = await Promise.all([
+        offerForm.title ? translateText(offerForm.title, 'HI') : Promise.resolve(''),
+        offerForm.title ? translateText(offerForm.title, 'TE') : Promise.resolve(''),
+        offerForm.desc ? translateText(offerForm.desc, 'HI') : Promise.resolve(''),
+        offerForm.desc ? translateText(offerForm.desc, 'TE') : Promise.resolve(''),
+      ])
+      setOfferForm(prev => ({
+        ...prev,
+        titleHI: hiTitle,
+        titleTE: teTitle,
+        descHI: hiDesc,
+        descTE: teDesc,
+      }))
+      toast.success('Offer translated to Hindi & Telugu!')
+    } catch {
+      toast.error('Translation failed')
+    } finally {
+      setTranslating(false)
+    }
+  }
+
   const handleOfferSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitting(true)
     try {
       const url = '/api/admin/offers'
       const method = editingOffer ? 'PUT' : 'POST'
-      const bodyData = editingOffer 
-        ? { id: editingOffer.id, ...offerForm, discountPercent: Number(offerForm.discountPercent) }
-        : { ...offerForm, discountPercent: Number(offerForm.discountPercent) }
+      // Build multilingual objects if translations are present
+      const titleObj = offerForm.titleHI || offerForm.titleTE
+        ? { EN: offerForm.title, HI: offerForm.titleHI || offerForm.title, TE: offerForm.titleTE || offerForm.title }
+        : offerForm.title
+      const descObj = offerForm.descHI || offerForm.descTE
+        ? { EN: offerForm.desc, HI: offerForm.descHI || offerForm.desc, TE: offerForm.descTE || offerForm.desc }
+        : offerForm.desc
+      const bodyData = {
+        ...(editingOffer ? { id: editingOffer.id } : {}),
+        title: titleObj,
+        desc: descObj,
+        discountPercent: Number(offerForm.discountPercent),
+        promoCode: offerForm.promoCode,
+        badge: offerForm.badge,
+        active: offerForm.active
+      }
 
       const res = await fetch(url, {
         method,
@@ -362,7 +445,7 @@ export default function ContentManagementPage() {
         toast.success(editingOffer ? 'Offer updated!' : 'Offer created!')
         await fetchData()
         setShowOfferModal(false)
-        setOfferForm({ title: '', desc: '', discountPercent: '', promoCode: '', badge: '', active: true })
+        setOfferForm({ title: '', titleHI: '', titleTE: '', desc: '', descHI: '', descTE: '', discountPercent: '', promoCode: '', badge: '', active: true })
       } else {
         toast.error('Something went wrong')
       }
@@ -859,8 +942,9 @@ export default function ContentManagementPage() {
               <button type="button" onClick={() => setEditingCourse(null)} className="text-text-3 hover:text-white text-xl leading-none">&times;</button>
             </div>
             <form onSubmit={handleUpdateCourse} className="p-5 flex flex-col gap-4 max-h-[80vh] overflow-y-auto">
-              <p className="text-xs text-text-3 font-mono">Fields marked * are shown on the website</p>
+              <p className="text-xs text-text-3 font-mono">Fields marked * are shown on the website. Fill English fields then click Auto-Translate.</p>
 
+              {/* English fields */}
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Title (English) *</label>
                 <input required type="text" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-primary outline-none text-white w-full"
@@ -868,34 +952,54 @@ export default function ContentManagementPage() {
                   onChange={e => setEditingCourse({...editingCourse, title: {...editingCourse.title, EN: e.target.value}})} />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Title (Hindi)</label>
-                <input type="text" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-primary outline-none text-white w-full"
-                  value={editingCourse.title?.HI || ''}
-                  onChange={e => setEditingCourse({...editingCourse, title: {...editingCourse.title, HI: e.target.value}})} />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Title (Telugu)</label>
-                <input type="text" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-primary outline-none text-white w-full"
-                  value={editingCourse.title?.TE || ''}
-                  onChange={e => setEditingCourse({...editingCourse, title: {...editingCourse.title, TE: e.target.value}})} />
-              </div>
-              <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Description (English) *</label>
                 <textarea rows={3} className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-primary outline-none text-white w-full resize-none"
                   value={editingCourse.desc?.EN || ''}
                   onChange={e => setEditingCourse({...editingCourse, desc: {...editingCourse.desc, EN: e.target.value}})} />
               </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Description (Hindi)</label>
-                <textarea rows={2} className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-primary outline-none text-white w-full resize-none"
-                  value={editingCourse.desc?.HI || ''}
-                  onChange={e => setEditingCourse({...editingCourse, desc: {...editingCourse.desc, HI: e.target.value}})} />
+
+              {/* Auto-translate button */}
+              <button
+                type="button"
+                onClick={handleTranslateCourse}
+                disabled={translating}
+                className="flex items-center justify-center gap-2 w-full py-2.5 bg-gradient-to-r from-primary/20 to-accent/20 hover:from-primary/30 hover:to-accent/30 border border-primary/30 hover:border-primary/60 text-white text-xs font-bold rounded-xl transition-all disabled:opacity-50"
+              >
+                {translating ? (
+                  <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Translating...</>
+                ) : (
+                  <>🌐 Auto-Translate English → हिंदी &amp; తెలుగు</>
+                )}
+              </button>
+
+              {/* Hindi / Telugu fields (auto-filled or manual) */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Title (हिंदी)</label>
+                  <input type="text" className="bg-void border border-border rounded-xl px-3 py-2.5 text-sm focus:border-primary outline-none text-white w-full"
+                    value={editingCourse.title?.HI || ''}
+                    onChange={e => setEditingCourse({...editingCourse, title: {...editingCourse.title, HI: e.target.value}})} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Title (తెలుగు)</label>
+                  <input type="text" className="bg-void border border-border rounded-xl px-3 py-2.5 text-sm focus:border-primary outline-none text-white w-full"
+                    value={editingCourse.title?.TE || ''}
+                    onChange={e => setEditingCourse({...editingCourse, title: {...editingCourse.title, TE: e.target.value}})} />
+                </div>
               </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Description (Telugu)</label>
-                <textarea rows={2} className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-primary outline-none text-white w-full resize-none"
-                  value={editingCourse.desc?.TE || ''}
-                  onChange={e => setEditingCourse({...editingCourse, desc: {...editingCourse.desc, TE: e.target.value}})} />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Desc (हिंदी)</label>
+                  <textarea rows={2} className="bg-void border border-border rounded-xl px-3 py-2 text-sm focus:border-primary outline-none text-white w-full resize-none"
+                    value={editingCourse.desc?.HI || ''}
+                    onChange={e => setEditingCourse({...editingCourse, desc: {...editingCourse.desc, HI: e.target.value}})} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Desc (తెలుగు)</label>
+                  <textarea rows={2} className="bg-void border border-border rounded-xl px-3 py-2 text-sm focus:border-primary outline-none text-white w-full resize-none"
+                    value={editingCourse.desc?.TE || ''}
+                    onChange={e => setEditingCourse({...editingCourse, desc: {...editingCourse.desc, TE: e.target.value}})} />
+                </div>
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Duration Tag * — e.g. "21 Days"</label>
@@ -940,16 +1044,57 @@ export default function ContentManagementPage() {
               <h3 className="font-bold text-lg text-white">{editingOffer ? '✏️ Edit Offer' : '➕ Create Offer'}</h3>
               <button type="button" onClick={() => setShowOfferModal(false)} className="text-text-3 hover:text-white text-xl leading-none">&times;</button>
             </div>
-            <form onSubmit={handleOfferSubmit} className="p-5 flex flex-col gap-4">
+            <form onSubmit={handleOfferSubmit} className="p-5 flex flex-col gap-4 max-h-[80vh] overflow-y-auto">
+              <p className="text-xs text-text-3 font-mono">Fill English fields then click Auto-Translate to fill Hindi &amp; Telugu.</p>
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Title *</label>
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Title (English) *</label>
                 <input required type="text" className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-accent outline-none text-white w-full" 
                   value={offerForm.title} onChange={e => setOfferForm({...offerForm, title: e.target.value})} placeholder="e.g. Monsoon Driving Shield" />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Description *</label>
+                <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Description (English) *</label>
                 <textarea required rows={3} className="bg-void border border-border rounded-xl px-4 py-3 text-sm focus:border-accent outline-none text-white w-full resize-none" 
                   value={offerForm.desc} onChange={e => setOfferForm({...offerForm, desc: e.target.value})} placeholder="e.g. Master wet road handling..." />
+              </div>
+
+              {/* Auto-translate button */}
+              <button
+                type="button"
+                onClick={handleTranslateOffer}
+                disabled={translating}
+                className="flex items-center justify-center gap-2 w-full py-2.5 bg-gradient-to-r from-accent/20 to-primary/20 hover:from-accent/30 hover:to-primary/30 border border-accent/30 hover:border-accent/60 text-white text-xs font-bold rounded-xl transition-all disabled:opacity-50"
+              >
+                {translating ? (
+                  <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Translating...</>
+                ) : (
+                  <>🌐 Auto-Translate English → हिंदी &amp; తెలుగు</>
+                )}
+              </button>
+
+              {/* Hindi / Telugu fields */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Title (हिंदी)</label>
+                  <input type="text" className="bg-void border border-border rounded-xl px-3 py-2.5 text-sm focus:border-accent outline-none text-white w-full"
+                    value={offerForm.titleHI} onChange={e => setOfferForm({...offerForm, titleHI: e.target.value})} placeholder="Auto-filled..." />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Title (తెలుగు)</label>
+                  <input type="text" className="bg-void border border-border rounded-xl px-3 py-2.5 text-sm focus:border-accent outline-none text-white w-full"
+                    value={offerForm.titleTE} onChange={e => setOfferForm({...offerForm, titleTE: e.target.value})} placeholder="Auto-filled..." />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Desc (हिंदी)</label>
+                  <textarea rows={2} className="bg-void border border-border rounded-xl px-3 py-2 text-sm focus:border-accent outline-none text-white w-full resize-none"
+                    value={offerForm.descHI} onChange={e => setOfferForm({...offerForm, descHI: e.target.value})} placeholder="Auto-filled..." />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-bold text-text-3 uppercase tracking-wider">Desc (తెలుగు)</label>
+                  <textarea rows={2} className="bg-void border border-border rounded-xl px-3 py-2 text-sm focus:border-accent outline-none text-white w-full resize-none"
+                    value={offerForm.descTE} onChange={e => setOfferForm({...offerForm, descTE: e.target.value})} placeholder="Auto-filled..." />
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">

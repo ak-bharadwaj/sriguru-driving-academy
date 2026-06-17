@@ -85,27 +85,6 @@
         "HI": "गर्म प्रस्ताव",
         "TE": "హాట్ ఆఫర్"
       }
-    },
-    {
-      "id": "offer-rto-special",
-      "title": {
-        "EN": "RTO Preparation Combo",
-        "HI": "RTO तैयारी विशेष",
-        "TE": "RTO ప్రిపరేషన్ స్పెషల్"
-      },
-      "desc": {
-        "EN": "Get 15% off RTO mock test series and track coaching package today.",
-        "HI": "आज ही RTO मॉक टेस्ट सीरीज़ और ट्रैक कोचिंग पैकेज पर 15% की छूट पाएं।",
-        "TE": "ఈ రోజు RTO మాక్ టెస్ట్ సిరీస్ మరియు కోచింగ్ ప్యాకేజీపై 15% తగ్గింపు పొందండి."
-      },
-      "discountPercent": 15,
-      "promoCode": "RTOSPECIAL",
-      "active": true,
-      "badge": {
-        "EN": "SPECIAL PROMO",
-        "HI": "विशेष प्रोमो",
-        "TE": "ప్రత్యేక ప్రమోషన్"
-      }
     }
   ]
 }
