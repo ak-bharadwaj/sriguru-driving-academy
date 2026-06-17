@@ -14,8 +14,31 @@ export async function GET(req: Request) {
   const format = searchParams.get('format')
 
   const tests = await db.drivingTest.findMany({
-    include: {
-      student: { include: { user: { select: { name: true } } } }
+    select: {
+      id: true,
+      studentId: true,
+      testDate: true,
+      type: true,
+      testCenter: true,
+      result: true,
+      attemptNo: true,
+      notes: true,
+      scheduledBy: true,
+      createdAt: true,
+      student: {
+        select: {
+          id: true,
+          userId: true,
+          regNo: true,
+          trainingType: true,
+          status: true,
+          user: {
+            select: {
+              name: true
+            }
+          }
+        }
+      }
     },
     orderBy: { testDate: 'desc' }
   })
@@ -39,5 +62,9 @@ export async function GET(req: Request) {
     })
   }
 
-  return NextResponse.json(tests)
+  return NextResponse.json(tests, {
+    headers: {
+      'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=15'
+    }
+  })
 }

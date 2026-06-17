@@ -10,13 +10,28 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const userId = (session.user as any).id
-  const instructor = await db.instructor.findUnique({ where: { userId } })
+  const instructor = await db.instructor.findUnique({
+    where: { userId },
+    select: { id: true }
+  })
   if (!instructor) return NextResponse.json({ error: 'Instructor not found' }, { status: 404 })
 
   const sessions = await db.session.findMany({
     where: { instructorId: instructor.id },
-    include: {
-      student: { include: { user: { select: { name: true } } } }
+    select: {
+      id: true,
+      lessonType: true,
+      scheduledAt: true,
+      status: true,
+      student: {
+        select: {
+          user: {
+            select: {
+              name: true
+            }
+          }
+        }
+      }
     },
     orderBy: { scheduledAt: 'desc' },
     take: 20
@@ -29,6 +44,11 @@ export async function GET() {
       scheduledAt: s.scheduledAt,
       status: s.status,
       studentName: s.student.user.name
-    }))
+    })),
+    {
+      headers: {
+        'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=5'
+      }
+    }
   )
 }

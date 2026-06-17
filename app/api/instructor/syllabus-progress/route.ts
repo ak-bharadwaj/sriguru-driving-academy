@@ -67,6 +67,10 @@ export async function GET(request: Request) {
       days: result,
       completedCount: progress.length,
       totalCount: syllabusDays.length
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=5, stale-while-revalidate=5'
+      }
     })
   } catch (error) {
     console.error('Instructor syllabus-progress GET error:', error)
@@ -85,7 +89,8 @@ export async function POST(request: Request) {
     }
 
     const instructor = await db.instructor.findFirst({
-      where: { userId: user.id }
+      where: { userId: user.id },
+      select: { id: true }
     })
 
     const body = await request.json()

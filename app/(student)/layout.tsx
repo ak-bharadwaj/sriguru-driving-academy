@@ -70,8 +70,8 @@ export default function StudentPortalLayout({ children }: { children: React.Reac
 
       {!hideNav && (
         <>
-          {/* Language & Theme toggles — standard solid pill bottom-right */}
-          <div className="fixed bottom-[96px] right-4 z-[500] animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* Language & Theme toggles — standard solid pill bottom-right (hidden on mobile, shown on desktop) */}
+          <div className="hidden md:block fixed bottom-[96px] right-4 z-[500] animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center gap-1.5 p-1.5 bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-full shadow-lg">
               <ThemeToggle />
               <LanguageToggle />

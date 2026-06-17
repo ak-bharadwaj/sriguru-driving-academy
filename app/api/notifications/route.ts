@@ -1,9 +1,8 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { NotificationType } from '@prisma/client'
 
 export async function GET() {
   try {
@@ -14,9 +13,17 @@ export async function GET() {
 
     const userId = (session.user as any).id
 
-    // Fetch from database
+    // select only the fields the frontend reads — no extra columns
     const notifications = await db.notification.findMany({
       where: { userId },
+      select: {
+        id: true,
+        type: true,
+        title: true,
+        message: true,
+        isRead: true,
+        createdAt: true
+      },
       orderBy: [
         { isRead: 'asc' },
         { createdAt: 'desc' }
@@ -24,7 +31,6 @@ export async function GET() {
       take: 20
     })
 
-    // Map to expected format for frontend if needed, but UI uses id, type, message, isRead, createdAt
     const formatted = notifications.map(n => ({
       id: n.id,
       type: n.type,
@@ -34,7 +40,10 @@ export async function GET() {
       read: n.isRead
     }))
 
-    return NextResponse.json(formatted, { status: 200 })
+    const response = NextResponse.json(formatted, { status: 200 })
+    // Short cache — notifications should feel close to real-time
+    response.headers.set('Cache-Control', 'private, max-age=5, stale-while-revalidate=15')
+    return response
   } catch (error) {
     return NextResponse.json({ error: 'Failed to retrieve notifications' }, { status: 500 })
   }
@@ -53,7 +62,6 @@ export async function PATCH(request: Request) {
     const action = searchParams.get('action')
 
     if (action === 'read-all') {
-      // Mark all read for this user
       await db.notification.updateMany({
         where: { userId, isRead: false },
         data: { isRead: true }
@@ -62,9 +70,8 @@ export async function PATCH(request: Request) {
     }
 
     if (id) {
-      // Mark single notification read
       await db.notification.update({
-        where: { id, userId }, // Ensure user owns it
+        where: { id, userId },
         data: { isRead: true }
       })
       return NextResponse.json({ success: true, id }, { status: 200 })
@@ -75,4 +82,3 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Notification update failed' }, { status: 500 })
   }
 }
-

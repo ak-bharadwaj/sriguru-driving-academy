@@ -74,7 +74,12 @@ export async function GET() {
       globalXP: totalXP >= 1000000 ? `${(totalXP / 1000000).toFixed(2)}M` : totalXP >= 1000 ? `${(totalXP / 1000).toFixed(1)}K` : totalXP.toString(),
       leaderboard,
       badgeDistribution
-    }, { status: 200 })
+    }, { 
+      status: 200,
+      headers: {
+        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=15'
+      }
+    })
 
   } catch (error) {
     console.error('Gamification Fetch Error:', error)

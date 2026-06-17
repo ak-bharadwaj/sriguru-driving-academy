@@ -44,7 +44,10 @@ export async function GET() {
       trend: 'stable'
     }))
 
-    return NextResponse.json(formattedLeaderboard, { status: 200 })
+    return NextResponse.json(formattedLeaderboard, {
+      status: 200,
+      headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' }
+    })
   } catch (error) {
     console.error('Leaderboard fetch error:', error)
     return NextResponse.json({ error: 'Failed to fetch leaderboard' }, { status: 500 })

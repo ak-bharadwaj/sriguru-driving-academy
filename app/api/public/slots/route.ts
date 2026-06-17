@@ -22,11 +22,28 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Under the unified single calendar system, we always query 'BEGINNER' slots
-    // so there is only 1 unified time schedule.
+    // Under the unified single calendar system, query 'BEGINNER' slots with selective projection (no hashed passwords)
     const slots = await db.slot.findMany({
       where: { trainingType: 'BEGINNER' },
-      include: { instructor: { include: { user: true } } },
+      select: {
+        id: true,
+        dayOfWeek: true,
+        time: true,
+        trainingType: true,
+        maxCapacity: true,
+        currentCount: true,
+        status: true,
+        instructorId: true,
+        instructor: {
+          select: {
+            user: {
+              select: {
+                name: true
+              }
+            }
+          }
+        }
+      },
       orderBy: { dayOfWeek: 'asc' }
     })
     
@@ -69,7 +86,7 @@ export async function POST(request: Request) {
       
       let assignedInstructorId = instructorId
       if (!assignedInstructorId) {
-        const firstInstructor = await db.instructor.findFirst()
+        const firstInstructor = await db.instructor.findFirst({ select: { id: true } })
         if (firstInstructor) {
           assignedInstructorId = firstInstructor.id
         } else {
@@ -117,7 +134,8 @@ export async function POST(request: Request) {
                 time: timeStr,
                 trainingType: 'BEGINNER',
                 instructorId: assignedInstructorId
-              }
+              },
+              select: { id: true }
             })
 
             if (!existing) {
@@ -147,7 +165,7 @@ export async function POST(request: Request) {
     
     let assignedInstructorId = instructorId
     if (!assignedInstructorId) {
-      const firstInstructor = await db.instructor.findFirst()
+      const firstInstructor = await db.instructor.findFirst({ select: { id: true } })
       if (firstInstructor) {
         assignedInstructorId = firstInstructor.id
       } else {
@@ -213,7 +231,14 @@ export async function DELETE(request: Request) {
     if (id) {
       const slot = await db.slot.findUnique({
         where: { id },
-        include: { bookings: { where: { status: { in: ['PENDING', 'APPROVED'] } } } }
+        select: {
+          id: true,
+          currentCount: true,
+          bookings: {
+            where: { status: { in: ['PENDING', 'APPROVED'] } },
+            select: { id: true }
+          }
+        }
       })
 
       if (!slot) {
@@ -231,7 +256,14 @@ export async function DELETE(request: Request) {
     if (dayOfWeek) {
       const slotsForDay = await db.slot.findMany({
         where: { dayOfWeek, trainingType: 'BEGINNER' },
-        include: { bookings: { where: { status: { in: ['PENDING', 'APPROVED'] } } } }
+        select: {
+          id: true,
+          currentCount: true,
+          bookings: {
+            where: { status: { in: ['PENDING', 'APPROVED'] } },
+            select: { id: true }
+          }
+        }
       })
 
       const hasBookings = slotsForDay.some(s => s.bookings.length > 0 || s.currentCount > 0)

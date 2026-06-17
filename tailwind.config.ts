@@ -17,6 +17,8 @@ const config = withUt({
         },
         surface: {
           DEFAULT: 'rgb(var(--color-surface) / <alpha-value>)', // Card/panel background
+          // surface-2 = slightly elevated surface — used throughout for nested cards/inputs
+          2: 'rgb(var(--color-surface-2) / <alpha-value>)',
         },
         border: {
           DEFAULT: 'rgb(var(--color-border) / <alpha-value>)', // All borders
@@ -37,6 +39,8 @@ const config = withUt({
           1: 'rgb(var(--color-text-1) / <alpha-value>)', // Primary text
           2: 'rgb(var(--color-text-2) / <alpha-value>)', // Secondary text
           3: 'rgb(var(--color-text-3) / <alpha-value>)', // Muted text
+          // text-void = text colored like the page background (used for text on colored buttons)
+          void: 'rgb(var(--color-void) / <alpha-value>)',
         },
         'app-blue': '#4579FF',
         'app-yellow': '#F9F1C5',
@@ -45,6 +49,8 @@ const config = withUt({
         display: ['var(--font-display)', 'sans-serif'],
         body: ['var(--font-body)', 'sans-serif'],
         mono: ['var(--font-mono)', 'monospace'],
+        // font-data-mono alias — used in schedule/analytics pages for numeric data
+        'data-mono': ['var(--font-mono)', 'monospace'],
       },
       spacing: {
         // Named spacing scale from ARCHITECTURE.md

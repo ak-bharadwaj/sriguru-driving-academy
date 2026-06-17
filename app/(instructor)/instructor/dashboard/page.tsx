@@ -20,15 +20,15 @@ export default async function InstructorDashboardPage() {
   let isDbOffline = false
 
   try {
-    instructor = await db.instructor.findUnique({
-      where: { userId },
-      include: { user: true }
-    })
-
-    if (instructor) {
-      // Fetch assigned students
-      students = await db.student.findMany({
-        where: { instructorId: instructor.id },
+    // Parallel lookup: instructor profile + assigned students at the same time
+    const [instructorResult, studentsResult] = await Promise.all([
+      db.instructor.findUnique({
+        where: { userId },
+        select: { id: true, user: { select: { name: true } } }
+      }),
+      // We don't know instructorId yet, so we join via userId for students in one round-trip
+      db.student.findMany({
+        where: { instructor: { userId } },
         select: {
           id: true,
           enrolledAt: true,
@@ -37,32 +37,33 @@ export default async function InstructorDashboardPage() {
           xp: true,
           level: true,
           user: {
-            select: {
-              name: true,
-              email: true
-            }
+            select: { name: true, email: true }
           },
           progress: {
             select: {
               completed: true,
-              quizPassed: true,
-              card: {
-                select: {
-                  title: true,
-                  category: true
-                }
-              }
+              card: { select: { category: true } }
             }
           },
+          // Only today's SCHEDULED sessions — pushed to DB
           sessions: {
+            where: {
+              scheduledAt: {
+                gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                lte: new Date(new Date().setHours(23, 59, 59, 999))
+              },
+              status: 'SCHEDULED'
+            },
             select: {
               id: true,
               lessonType: true,
               scheduledAt: true,
               status: true,
               duration: true
-            }
+            },
+            take: 1
           },
+          _count: { select: { sessions: true } },
           drivingTests: {
             select: {
               id: true,
@@ -78,15 +79,21 @@ export default async function InstructorDashboardPage() {
               tag: true,
               content: true,
               createdAt: true
-            }
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 5
           }
         }
       })
-    }
+    ])
+
+    instructor = instructorResult
+    students = studentsResult
   } catch (err) {
     console.error("Failed to fetch instructor dashboard data from DB:", err)
     isDbOffline = true
   }
+
 
   // Fallback to mock data if DB offline or instructor profile is missing
   if (!instructor) {
@@ -123,11 +130,8 @@ export default async function InstructorDashboardPage() {
         { name: 'Road Rules', score: Math.min(10, s.progress.filter((p: any) => p.card.category === 'road-rules' && p.completed).length * 3 + 4) }
       ]
 
-      const todaySession = s.sessions.find((sess: any) => {
-        const sDate = new Date(sess.scheduledAt).toDateString()
-        const tDate = new Date().toDateString()
-        return sDate === tDate && sess.status === 'SCHEDULED'
-      })
+      // sessions is already filtered to today's SCHEDULED, take the first one
+      const todaySession = s.sessions[0] ?? null
 
       return {
         id: s.id,
@@ -135,7 +139,7 @@ export default async function InstructorDashboardPage() {
         email: s.user.email,
         license: s.trainingType === 'RTO_FAST_TRACK' ? 'RTO' : s.trainingType,
         enrollmentDate: s.enrolledAt.toISOString().split('T')[0],
-        totalSessions: s.sessions.length,
+        totalSessions: s._count.sessions, // Use count — no need to fetch all sessions
         completionPercent,
         skills,
         dailyLog,

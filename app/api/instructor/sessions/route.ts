@@ -1,10 +1,10 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-
-
 
 export async function GET() {
   try {
@@ -18,8 +18,10 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized. User ID not found.' }, { status: 401 })
     }
 
+    // Single query with nested lookup instead of two sequential queries
     const instructor = await db.instructor.findUnique({
-      where: { userId: user.id }
+      where: { userId: user.id },
+      select: { id: true }
     })
 
     if (!instructor) {
@@ -28,7 +30,13 @@ export async function GET() {
 
     const sessions = await db.session.findMany({
       where: { instructorId: instructor.id },
-      include: {
+      select: {
+        id: true,
+        scheduledAt: true,
+        duration: true,
+        status: true,
+        lessonType: true,
+        notes: true,
         student: {
           select: {
             id: true,
@@ -53,7 +61,10 @@ export async function GET() {
       }
     }))
 
-    return NextResponse.json({ sessions: formatted }, { status: 200 })
+    const response = NextResponse.json({ sessions: formatted }, { status: 200 })
+    // Cache for 10s on client, allow stale-while-revalidate for 30s
+    response.headers.set('Cache-Control', 'private, max-age=10, stale-while-revalidate=30')
+    return response
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     console.error('Instructor sessions query Error:', error)
@@ -74,7 +85,8 @@ export async function POST(request: Request) {
     }
 
     const instructor = await db.instructor.findUnique({
-      where: { userId: user.id }
+      where: { userId: user.id },
+      select: { id: true }
     })
 
     if (!instructor) {
@@ -88,6 +100,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required session fields' }, { status: 400 })
     }
 
+    // Verify student belongs to this instructor
     const student = await db.student.findUnique({
       where: { id: studentId },
       select: { instructorId: true }

@@ -1,26 +1,38 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { db } from '@/lib/db'
 
-async function getInstructor() {
+async function getInstructorId(): Promise<string | null> {
   const session = await getServerSession(authOptions)
   if (!session?.user || (session.user as any).role !== 'INSTRUCTOR') return null
   const userId = (session.user as any).id
-  return db.instructor.findUnique({ where: { userId } })
+  const instructor = await db.instructor.findUnique({
+    where: { userId },
+    select: { id: true }
+  })
+  return instructor?.id ?? null
 }
 
 export async function GET() {
-  const instructor = await getInstructor()
-  if (!instructor) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const instructorId = await getInstructorId()
+  if (!instructorId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const notes = await db.coachingNote.findMany({
-    where: { instructorId: instructor.id },
-    include: {
+    where: { instructorId },
+    select: {
+      id: true,
+      note: true,
+      createdAt: true,
+      sessionId: true,
       session: {
-        include: {
-          student: { include: { user: { select: { name: true } } } }
+        select: {
+          scheduledAt: true,
+          lessonType: true,
+          student: {
+            select: { user: { select: { name: true } } }
+          }
         }
       }
     },
@@ -28,7 +40,7 @@ export async function GET() {
     take: 50
   })
 
-  return NextResponse.json({
+  const response = NextResponse.json({
     notes: notes.map(n => ({
       id: n.id,
       note: n.note,
@@ -43,11 +55,13 @@ export async function GET() {
       }
     }))
   })
+  response.headers.set('Cache-Control', 'private, max-age=15, stale-while-revalidate=60')
+  return response
 }
 
 export async function POST(req: Request) {
-  const instructor = await getInstructor()
-  if (!instructor) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const instructorId = await getInstructorId()
+  if (!instructorId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
   const { sessionId, note } = body
@@ -59,8 +73,9 @@ export async function POST(req: Request) {
   let resolvedSessionId = sessionId
   if (!resolvedSessionId) {
     const latestSession = await db.session.findFirst({
-      where: { instructorId: instructor.id },
-      orderBy: { scheduledAt: 'desc' }
+      where: { instructorId },
+      orderBy: { scheduledAt: 'desc' },
+      select: { id: true }
     })
     if (!latestSession) {
       return NextResponse.json({ error: 'No sessions found to attach note to' }, { status: 400 })
@@ -71,13 +86,19 @@ export async function POST(req: Request) {
   const coaching = await db.coachingNote.create({
     data: {
       sessionId: resolvedSessionId,
-      instructorId: instructor.id,
+      instructorId,
       note: note.trim()
     },
-    include: {
+    select: {
+      id: true,
+      note: true,
+      createdAt: true,
+      sessionId: true,
       session: {
-        include: {
-          student: { include: { user: { select: { name: true } } } }
+        select: {
+          scheduledAt: true,
+          lessonType: true,
+          student: { select: { user: { select: { name: true } } } }
         }
       }
     }

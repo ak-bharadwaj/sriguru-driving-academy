@@ -22,14 +22,20 @@ export async function GET() {
       return NextResponse.json({ error: 'Student profile not found' }, { status: 404 })
     }
 
-    // Find all incorrect quiz attempts for this student, including the question details
+    // Find all incorrect quiz attempts for this student, selecting only necessary question columns (no explanations, choices)
     const weakAttempts = await db.quizAttempt.findMany({
       where: {
         studentId: student.id,
         correct: false
       },
-      include: {
-        question: true
+      select: {
+        id: true,
+        question: {
+          select: {
+            category: true,
+            question: true
+          }
+        }
       }
     })
 
@@ -59,7 +65,12 @@ export async function GET() {
     // Sort by most mistakes first
     weakTopics.sort((a, b) => b.mistakeCount - a.mistakeCount)
 
-    return NextResponse.json({ weakTopics }, { status: 200 })
+    return NextResponse.json({ weakTopics }, { 
+      status: 200,
+      headers: {
+        'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=10'
+      }
+    })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     console.error('Weak topics API Error:', message)

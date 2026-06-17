@@ -23,6 +23,8 @@ import { useXPStore } from '@/lib/stores/xp-store'
 import { useLanguageStore } from '@/store/languageStore'
 import { useNotifications } from '@/hooks/useNotifications'
 import toast from 'react-hot-toast'
+import { ThemeToggle } from '@/components/shared/ThemeToggle'
+import { LanguageToggle } from '@/components/shared/LanguageToggle'
 
 const DASHBOARD_DICT = {
   EN: {
@@ -400,7 +402,13 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
               <h1 className="text-3xl font-bold font-display mt-1">{student.name}</h1>
               <p className="text-white/60 text-sm mt-1">{new Date().toLocaleDateString()}</p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2.5 sm:gap-4">
+              {/* Theme & Language Toggles for mobile header (hidden on desktop) */}
+              <div className="flex items-center gap-1 p-1 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full shadow-lg md:hidden">
+                <ThemeToggle />
+                <LanguageToggle dropdownDirection="down" />
+              </div>
+
               <Link href="/student/notifications" className="relative w-12 h-12 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors backdrop-blur-md">
                 <Bell className="w-6 h-6 text-white" />
                 {unreadCount > 0 && (

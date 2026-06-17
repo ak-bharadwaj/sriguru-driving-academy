@@ -14,7 +14,15 @@ export async function GET(req: Request) {
   const format = searchParams.get('format')
 
   const students = await db.student.findMany({
-    include: { user: { select: { name: true, email: true, phone: true } } },
+    select: {
+      id: true,
+      trainingType: true,
+      feeStatus: true,
+      courseFee: true,
+      enrolledAt: true,
+      status: true,
+      user: { select: { name: true, email: true, phone: true } }
+    },
     orderBy: { enrolledAt: 'desc' }
   })
 
@@ -30,15 +38,18 @@ export async function GET(req: Request) {
       new Date(s.enrolledAt).toISOString().split('T')[0],
       s.status
     ])
-    
+
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
     return new NextResponse(csv, {
       headers: {
         'Content-Type': 'text/csv',
-        'Content-Disposition': 'attachment; filename="students_report.csv"'
+        'Content-Disposition': 'attachment; filename="students_report.csv"',
+        'Cache-Control': 'private, max-age=60, stale-while-revalidate=300'
       }
     })
   }
 
-  return NextResponse.json(students)
+  return NextResponse.json(students, {
+    headers: { 'Cache-Control': 'private, max-age=60, stale-while-revalidate=300' }
+  })
 }

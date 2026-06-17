@@ -31,8 +31,7 @@ export async function POST(request: Request) {
 
     // Security check: Verify that the student is assigned to this instructor
     const student = await db.student.findUnique({
-      where: { id: studentId },
-      select: { instructorId: true }
+      where: { id: studentId }
     })
 
     if (!student || student.instructorId !== instructor.id) {
@@ -47,6 +46,35 @@ export async function POST(request: Request) {
         tag: tag || 'General Feedback',
         content: comments,
         skillScores: { rating }
+      }
+    })
+
+    // Award +150 XP to the student for completing the session
+    const amount = 150
+    const currentXP = student.xp + amount
+    const neededXP = student.level * 1000
+
+    if (currentXP >= neededXP) {
+      await db.student.update({
+        where: { id: student.id },
+        data: {
+          level: student.level + 1,
+          xp: currentXP - neededXP
+        }
+      })
+    } else {
+      await db.student.update({
+        where: { id: student.id },
+        data: { xp: currentXP }
+      })
+    }
+
+    // Log the XP transaction event
+    await db.xPEvent.create({
+      data: {
+        studentId,
+        amount,
+        reason: 'SESSION_FEEDBACK_BONUS'
       }
     })
 

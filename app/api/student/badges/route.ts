@@ -30,13 +30,20 @@ export async function GET() {
       return NextResponse.json({ error: 'Student not found' }, { status: 404 })
     }
 
-    // Fetch actual badges from DB
-    const studentBadges = await db.studentBadge.findMany({
-      where: { studentId: student.id },
-      include: { badge: true }
-    })
-    
-    const allDbBadges = await db.badge.findMany()
+    // Fetch actual badges from DB (in parallel)
+    const [studentBadges, allDbBadges] = await Promise.all([
+      db.studentBadge.findMany({
+        where: { studentId: student.id },
+        select: {
+          badgeId: true,
+          earnedAt: true,
+          badge: { select: { id: true, type: true, name: true, description: true, icon: true } }
+        }
+      }),
+      db.badge.findMany({
+        select: { id: true, type: true, name: true, description: true, icon: true }
+      })
+    ])
     
     const earnedBadgeIds = studentBadges.map(sb => sb.badgeId)
 
@@ -92,7 +99,10 @@ export async function GET() {
         xp: student.xp,
         nextBadgeXp: (earnedBadges.length + 1) * 2000
       }
-    }, { status: 200 })
+    }, {
+      status: 200,
+      headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' }
+    })
 
   } catch (error) {
     console.error('Badge Fetch Error:', error)

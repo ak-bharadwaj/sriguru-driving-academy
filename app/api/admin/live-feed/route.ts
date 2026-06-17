@@ -15,7 +15,8 @@ export async function GET() {
     // Fetch the 5 most recent real activity logs or system notifications from the DB
     const notifications = await db.notification.findMany({
       take: 5,
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, type: true, message: true, createdAt: true }
     })
 
     const alerts = notifications.map((n, idx) => {
@@ -45,7 +46,10 @@ export async function GET() {
       }
     })
 
-    return NextResponse.json(alerts, { status: 200 })
+    return NextResponse.json(alerts, {
+      status: 200,
+      headers: { 'Cache-Control': 'private, max-age=5, stale-while-revalidate=10' }
+    })
   } catch (error) {
     console.error('Live Feed Fetch Error:', error)
     return NextResponse.json([], { status: 200 })

@@ -14,9 +14,14 @@ export async function GET(req: Request) {
   const format = searchParams.get('format')
 
   const sessions = await db.session.findMany({
-    include: {
-      student: { include: { user: { select: { name: true } } } },
-      instructor: { include: { user: { select: { name: true } } } }
+    select: {
+      id: true,
+      lessonType: true,
+      scheduledAt: true,
+      status: true,
+      duration: true,
+      student: { select: { user: { select: { name: true } } } },
+      instructor: { select: { user: { select: { name: true } } } }
     },
     orderBy: { scheduledAt: 'desc' }
   })
@@ -31,15 +36,18 @@ export async function GET(req: Request) {
       s.status,
       s.duration
     ])
-    
+
     const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
     return new NextResponse(csv, {
       headers: {
         'Content-Type': 'text/csv',
-        'Content-Disposition': 'attachment; filename="sessions_report.csv"'
+        'Content-Disposition': 'attachment; filename="sessions_report.csv"',
+        'Cache-Control': 'private, max-age=60, stale-while-revalidate=300'
       }
     })
   }
 
-  return NextResponse.json(sessions)
+  return NextResponse.json(sessions, {
+    headers: { 'Cache-Control': 'private, max-age=60, stale-while-revalidate=300' }
+  })
 }

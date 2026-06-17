@@ -91,7 +91,7 @@ export default async function ProfilePage() {
             <h1 className="text-lg font-bold font-display">{t.settings}</h1>
             <div className="flex items-center gap-1.5 p-1 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg">
               <ThemeToggle />
-              <LanguageToggle />
+              <LanguageToggle dropdownDirection="down" />
               <Link href="/student/notifications" className="p-2 hover:bg-white/20 rounded-xl transition cursor-pointer flex items-center justify-center">
                 <Bell className="w-5 h-5 text-white" />
               </Link>

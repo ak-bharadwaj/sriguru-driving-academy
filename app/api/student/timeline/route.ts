@@ -13,7 +13,8 @@ export async function GET() {
 
     const userId = (session.user as any).id
     const student = await db.student.findUnique({
-      where: { userId }
+      where: { userId },
+      select: { id: true }
     })
 
     if (!student) {
@@ -25,7 +26,12 @@ export async function GET() {
       orderBy: { testDate: 'asc' }
     })
 
-    return NextResponse.json(tests, { status: 200 })
+    return NextResponse.json(tests, {
+      status: 200,
+      headers: {
+        'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=10'
+      }
+    })
 
   } catch (error) {
     console.error("Timeline GET error:", error)
@@ -42,7 +48,8 @@ export async function PUT(req: Request) {
 
     const userId = (session.user as any).id
     const student = await db.student.findUnique({
-      where: { userId }
+      where: { userId },
+      select: { id: true }
     })
 
     if (!student) {
@@ -53,7 +60,8 @@ export async function PUT(req: Request) {
 
     // Verify the test belongs to the student
     const test = await db.drivingTest.findFirst({
-      where: { id: testId, studentId: student.id }
+      where: { id: testId, studentId: student.id },
+      select: { id: true, result: true }
     })
 
     if (!test) {

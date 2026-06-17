@@ -46,10 +46,9 @@ export async function GET(request: Request) {
     let fetchedRevenue = 0
 
     // Fetch statistics and datasets concurrently from real database tables
+    // (Removed unused instructor.count and booking.count queries to optimize Neon usage)
     const [
       sCount,
-      ,
-      ,
       sessCount,
       dbStudents,
       dbBookings,
@@ -57,8 +56,6 @@ export async function GET(request: Request) {
       dbNotifications
     ] = await Promise.all([
       db.student.count(),
-      db.instructor.count(),
-      db.booking.count(),
       db.session.count(),
       db.student.findMany({
         select: {
@@ -87,7 +84,8 @@ export async function GET(request: Request) {
           status: true,
           createdAt: true
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
+        take: 50
       }),
       db.payment.aggregate({
         _sum: { amount: true }
@@ -95,7 +93,7 @@ export async function GET(request: Request) {
       db.notification.findMany({
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: { user: true }
+        select: { id: true, type: true, message: true, createdAt: true }
       })
     ])
 
@@ -150,7 +148,10 @@ export async function GET(request: Request) {
         totalPages: Math.ceil(studentCount / limit) || 1,
         totalItems: studentCount
       }
-    }, { status: 200 })
+    }, {
+      status: 200,
+      headers: { 'Cache-Control': 'private, max-age=15, stale-while-revalidate=60' }
+    })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     console.error('Admin Analytics route Error:', error)

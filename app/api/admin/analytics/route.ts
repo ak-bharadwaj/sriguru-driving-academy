@@ -39,6 +39,10 @@ export async function GET() {
       db.payment.findMany({
         where: {
           receivedAt: { gte: new Date(now - 7 * 24 * 60 * 60 * 1000) }
+        },
+        select: {
+          receivedAt: true,
+          amount: true
         }
       }),
       db.student.count(),
@@ -151,7 +155,12 @@ export async function GET() {
     cachedData = responsePayload
     cacheExpiryTime = now + CACHE_TTL
 
-    return NextResponse.json(responsePayload, { status: 200 })
+    return NextResponse.json(responsePayload, {
+      status: 200,
+      headers: {
+        'Cache-Control': 'private, max-age=60, stale-while-revalidate=60'
+      }
+    })
 
   } catch (error) {
     console.error('Analytics Fetch Error:', error)

@@ -15,30 +15,41 @@ export async function GET() {
 
     const student = await db.student.findUnique({
       where: { userId },
-      include: {
-        user: true,
+      select: {
+        id: true,
+        enrolledAt: true,
+        courseFee: true,
+        feeStatus: true,
+        trainingType: true,
+        xp: true,
+        level: true,
+        streakDays: true,
+        user: { select: { name: true, email: true } },
         instructor: {
-          include: {
-            user: true
-          }
+          select: { user: { select: { name: true, email: true } } }
         },
         payments: {
+          select: { id: true, amount: true, method: true, note: true, receivedAt: true },
           orderBy: { receivedAt: 'desc' }
         },
         drivingTests: {
+          select: { id: true, testDate: true, testCenter: true, result: true, attemptNo: true, type: true },
           orderBy: { testDate: 'asc' }
         },
         sessions: {
+          select: { id: true, scheduledAt: true, status: true, lessonType: true, duration: true },
           orderBy: { scheduledAt: 'desc' },
           take: 5
         },
         bookings: {
           where: { status: 'APPROVED' },
-          include: {
-            slot: true
+          select: {
+            id: true, trainingType: true, status: true, preferredTime: true,
+            slot: { select: { id: true, dayOfWeek: true, time: true } }
           },
           take: 1
-        }
+        },
+        _count: { select: { attendance: { where: { status: 'PRESENT' } } } }
       }
     })
 
@@ -46,9 +57,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Student profile not found' }, { status: 404 })
     }
 
-    const totalAttended = await db.attendance.count({
-      where: { studentId: student.id, status: 'PRESENT' }
-    })
+    const totalAttended = student._count.attendance
 
     return NextResponse.json({
       id: student.id,
@@ -79,7 +88,10 @@ export async function GET() {
           time: b.slot.time,
         } : null
       }))
-    }, { status: 200 })
+    }, {
+      status: 200,
+      headers: { 'Cache-Control': 'private, max-age=10, stale-while-revalidate=30' }
+    })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json({ error: 'Failed to fetch student dashboard data', details: message }, { status: 500 })

@@ -17,7 +17,10 @@ export async function GET() {
       name: ins.user.name,
       email: ins.user.email
     }))
-    return NextResponse.json(formatted, { status: 200 })
+    return NextResponse.json(formatted, {
+      status: 200,
+      headers: { 'Cache-Control': 'private, max-age=15, stale-while-revalidate=60' }
+    })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch instructors' }, { status: 500 })
   }

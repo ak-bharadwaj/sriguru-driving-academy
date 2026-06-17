@@ -20,11 +20,17 @@ export async function GET() {
     })
     if (!student) return NextResponse.json({ error: 'Student not found' }, { status: 404 })
 
-    // Get syllabus days for their course type
-    let syllabusDays = await db.syllabusDay.findMany({
-      where: { trainingType: student.trainingType },
-      orderBy: { dayNumber: 'asc' }
-    })
+    // Get syllabus days for their course type and student's completed days — in parallel
+    let [syllabusDays, progress] = await Promise.all([
+      db.syllabusDay.findMany({
+        where: { trainingType: student.trainingType },
+        orderBy: { dayNumber: 'asc' }
+      }),
+      db.studentSyllabusProgress.findMany({
+        where: { studentId: student.id },
+        select: { syllabusDayId: true, completedAt: true }
+      })
+    ])
 
     // Auto-seed defaults if empty
     if (syllabusDays.length === 0) {
@@ -41,12 +47,6 @@ export async function GET() {
       }
     }
 
-    // Get this student's completed days
-    const progress = await db.studentSyllabusProgress.findMany({
-      where: { studentId: student.id },
-      select: { syllabusDayId: true, completedAt: true }
-    })
-
     const completedIds = new Set(progress.map(p => p.syllabusDayId))
 
     const result = syllabusDays.map(day => ({
@@ -60,6 +60,8 @@ export async function GET() {
       days: result,
       completedCount: progress.length,
       totalCount: syllabusDays.length
+    }, {
+      headers: { 'Cache-Control': 'private, max-age=20, stale-while-revalidate=60' }
     })
   } catch (error) {
     console.error('Student syllabus-progress GET error:', error)

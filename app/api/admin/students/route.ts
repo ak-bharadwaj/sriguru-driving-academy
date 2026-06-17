@@ -11,22 +11,26 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const students = await db.student.findMany({
-      include: {
-        user: { select: { name: true, email: true, phone: true } },
-        instructor: {
-          include: { user: { select: { name: true } } }
+    const [students, allInstructors] = await Promise.all([
+      db.student.findMany({
+        include: {
+          user: { select: { name: true, email: true, phone: true } },
+          instructor: {
+            include: { user: { select: { name: true } } }
+          },
+          payments: {
+            orderBy: { receivedAt: 'desc' },
+            select: { id: true, amount: true, method: true, note: true, receivedAt: true }
+          },
+          drivingTests: { orderBy: { testDate: 'desc' } },
+          sessions: { select: { id: true } },
         },
-        payments: { orderBy: { receivedAt: 'desc' } },
-        drivingTests: { orderBy: { testDate: 'desc' } },
-        sessions: { select: { id: true } },
-      },
-      orderBy: { enrolledAt: 'desc' }
-    })
-
-    const allInstructors = await db.instructor.findMany({
-      include: { user: { select: { id: true, name: true } } }
-    })
+        orderBy: { enrolledAt: 'desc' }
+      }),
+      db.instructor.findMany({
+        include: { user: { select: { id: true, name: true } } }
+      })
+    ])
 
     const formatted = students.map(s => {
       const totalPaid = s.payments.reduce((sum, p) => sum + p.amount, 0)
@@ -84,6 +88,8 @@ export async function GET() {
         id: i.id,
         name: i.user.name,
       })),
+    }, {
+      headers: { 'Cache-Control': 'private, max-age=15, stale-while-revalidate=60' }
     })
   } catch (error) {
     console.error('Admin students fetch error:', error)

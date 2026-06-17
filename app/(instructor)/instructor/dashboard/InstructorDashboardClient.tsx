@@ -313,10 +313,17 @@ export default function InstructorDashboardClient({ instructor, initialStudents 
 
   const handleAttendance = async (studentId: string, sessionId: string, status: 'Present' | 'Absent') => {
     try {
+      let otpInput: string | null = null
+      if (status === 'Present') {
+        otpInput = prompt('Enter the 6-digit student verification OTP:')
+        if (otpInput === null) return // User cancelled
+        otpInput = otpInput.trim()
+      }
+
       const res = await fetch('/api/instructor/attendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ studentId, sessionId, status })
+        body: JSON.stringify({ studentId, sessionId, status, otp: otpInput || undefined })
       })
 
       if (res.ok) {
@@ -326,6 +333,9 @@ export default function InstructorDashboardClient({ instructor, initialStudents 
         setTimeout(() => {
           setAttendanceAlert(null)
         }, 2000)
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Failed to mark attendance')
       }
     } catch (e) {
       console.error(e)

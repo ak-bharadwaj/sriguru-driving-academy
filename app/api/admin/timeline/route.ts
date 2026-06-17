@@ -11,15 +11,47 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Fetch all tests for all students
+    // Fetch all tests for all students with selective projection (excludes passwordHash)
     const tests = await db.drivingTest.findMany({
       orderBy: { testDate: 'asc' },
-      include: {
-        student: { include: { user: true } }
+      select: {
+        id: true,
+        studentId: true,
+        testDate: true,
+        type: true,
+        testCenter: true,
+        result: true,
+        attemptNo: true,
+        notes: true,
+        scheduledBy: true,
+        createdAt: true,
+        student: {
+          select: {
+            id: true,
+            userId: true,
+            regNo: true,
+            trainingType: true,
+            status: true,
+            user: {
+              select: {
+                id: true,
+                email: true,
+                phone: true,
+                name: true,
+                avatarUrl: true
+              }
+            }
+          }
+        }
       }
     })
 
-    return NextResponse.json(tests, { status: 200 })
+    return NextResponse.json(tests, {
+      status: 200,
+      headers: {
+        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=15'
+      }
+    })
 
   } catch (error) {
     console.error("Admin Timeline GET error:", error)

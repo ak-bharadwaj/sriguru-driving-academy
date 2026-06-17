@@ -6,6 +6,7 @@
   /* Light Mode Color Tokens - ULTRA PREMIUM FIGMA WHITE */
   --color-void: 245 247 251;     /* Soft Light Ice Blue #F5F7FB */
   --color-surface: 255 255 255;  /* Pure White #FFFFFF */
+  --color-surface-2: 241 244 249; /* Slightly elevated surface for nested inputs/cards */
   --color-border: 226 232 240;   /* Clean Border Slate 200 */
   --color-primary: 69 121 255;   /* Figma App Blue #4579FF */
   --color-accent: 245 158 11;    /* Amber 500 */
@@ -33,6 +34,7 @@
   /* Dark Mode Color Tokens - LUXURIOUS OBSIDIAN SPACE MODE */
   --color-void: 9 13 26;         /* Deep Obsidian Black-Blue #090D1A */
   --color-surface: 18 24 41;     /* Dark Slate Blue #121829 */
+  --color-surface-2: 28 38 60;   /* Slightly lighter dark surface for nested inputs/cards */
   --color-border: 38 52 74;      /* Crisp Dark Border #26344A (Higher Contrast) */
   --color-primary: 69 121 255;   /* Figma App Blue #4579FF */
   --color-accent: 251 191 36;    /* Amber 400 */

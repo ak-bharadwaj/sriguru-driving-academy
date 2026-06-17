@@ -12,7 +12,9 @@ export async function GET() {
     }
 
     const state = getStudentState()
-    return NextResponse.json(state)
+    return NextResponse.json(state, {
+      headers: { 'Cache-Control': 'private, max-age=10, stale-while-revalidate=30' }
+    })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch gamification state' }, { status: 500 })
   }
@@ -32,7 +34,9 @@ export async function POST(req: Request) {
     const updatedState = { ...currentState, ...body }
     
     saveStudentState(updatedState)
-    return NextResponse.json(updatedState)
+    return NextResponse.json(updatedState, {
+      headers: { 'Cache-Control': 'no-store' }
+    })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update gamification state' }, { status: 500 })
   }
