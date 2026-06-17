@@ -249,8 +249,10 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
   
   const [dismissedAnnouncements, setDismissedAnnouncements] = useState<string[]>([])
   const [localBooking, setLocalBooking] = useState<{ dayOfWeek: string; time: string; courseTitle: string; ref: string } | null>(null)
+  const [currentDate, setCurrentDate] = useState('')
   
   useEffect(() => {
+    setCurrentDate(new Date().toLocaleDateString())
     const saved = localStorage.getItem('sriguru_last_booking')
     if (saved) {
       try {
@@ -400,7 +402,7 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
             <div>
               <p className="text-white/80 font-medium text-lg">{t.welcomeBack}</p>
               <h1 className="text-3xl font-bold font-display mt-1">{student.name}</h1>
-              <p className="text-white/60 text-sm mt-1">{new Date().toLocaleDateString()}</p>
+              <p className="text-white/60 text-sm mt-1">{currentDate}</p>
             </div>
             <div className="flex items-center gap-2.5 sm:gap-4">
               {/* Theme & Language Toggles for mobile header (hidden on desktop) */}
