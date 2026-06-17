@@ -299,7 +299,22 @@ export default function StudentLearnPortal() {
   const [selectedAnswerIndex, setSelectedAnswerIndex] = useState<number | null>(null)
   const [quizFeedback, setQuizFeedback] = useState<'idle' | 'correct' | 'incorrect'>('idle')
 
-  // Card select wrapper resets states
+  // Reset states when closing or switching cards
+  useEffect(() => {
+    setShowQuiz(false)
+    setSimCompleted(false)
+    setSelectedAnswerIndex(null)
+    setQuizFeedback('idle')
+  }, [selectedCard])
+
+  // Auto-complete skill when simulation is completed
+  useEffect(() => {
+    if (simCompleted && selectedCard) {
+      handleMasterSkill(selectedCard)
+    }
+  }, [simCompleted, selectedCard])
+
+  // Card select wrapper
   const handleSelectCard = (card: LearningCardData) => {
     setSelectedCard(card)
     setSimCompleted(false)
@@ -739,8 +754,12 @@ export default function StudentLearnPortal() {
                         </div>
 
                         {/* Card bottom arrow */}
-                        <div className="flex justify-between items-center border-t border-border/40 pt-3 mt-3 w-full text-xs font-mono font-bold text-text-3 group-hover:text-primary transition-colors">
-                          <span>{t.beginTraining}</span>
+                        <div className={`flex justify-between items-center border-t pt-3 mt-3 w-full text-xs font-mono font-bold transition-colors ${
+                          isCompleted 
+                            ? 'border-success/20 text-success' 
+                            : 'border-border/40 text-text-3 group-hover:text-primary'
+                        }`}>
+                          <span>{isCompleted ? t.mastered : t.beginTraining}</span>
                           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </div>
 

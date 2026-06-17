@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { RotateCcw, ArrowRight, Check, Play } from 'lucide-react'
 import { useLanguageStore } from '@/store/languageStore'
-import { RealisticCarSVG } from './DynamicHTMLSimulations' 
+import { RealisticCarSVG, ScaledCanvas } from './DynamicHTMLSimulations' 
 
 export interface ParallelParkingSimulationProps {
   onComplete?: () => void
@@ -123,15 +123,15 @@ export const ParallelParkingSimulation: React.FC<ParallelParkingSimulationProps>
     setSpeed(0)
   }
 
-  // CORRECTED PARALLEL MATH: Swing rear UP (+deg rotation) around real axle origin
+  // CORRECTED PARALLEL MATH: Shifting entire layout left by 50px
   const getCarTransform = () => {
     switch (step) {
-      case 1: return 'translate(430px, 100px) rotate(0deg)'
-      case 2: return 'translate(350px, 60px) rotate(35deg)' 
-      case 3: return 'translate(270px, 45px) rotate(5deg)'  
-      case 4: return 'translate(280px, 40px) rotate(0deg)'
+      case 1: return 'translate(380px, 100px) rotate(0deg)'
+      case 2: return 'translate(300px, 60px) rotate(35deg)' 
+      case 3: return 'translate(220px, 45px) rotate(5deg)'  
+      case 4: return 'translate(230px, 40px) rotate(0deg)'
       case 0:
-      default: return 'translate(-20px, 100px) rotate(0deg)'
+      default: return 'translate(-70px, 100px) rotate(0deg)'
     }
   }
 
@@ -141,41 +141,43 @@ export const ParallelParkingSimulation: React.FC<ParallelParkingSimulationProps>
   return (
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
       
-      <div className="flex-1 relative w-full min-h-[300px] bg-[#353839] border-b border-white/5 overflow-hidden flex justify-center">
-        <div className="w-[600px] h-full relative">
-          
-          <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
+      <div className="flex-1 relative w-full min-h-[300px] bg-[#353839] border-b border-white/5 overflow-hidden">
+        <ScaledCanvas canvasWidth={600}>
+          <div className="w-[600px] h-full relative">
+            
+            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
 
-          <div className="absolute top-0 left-[-1000px] right-[-1000px] h-[30px] bg-green-900/40 border-b-4 border-slate-500 shadow-md z-0" />
+            <div className="absolute top-0 left-[-1000px] right-[-1000px] h-[30px] bg-green-900/40 border-b-4 border-slate-500 shadow-md z-0" />
 
-          {/* Bay 1: Back Car (Blue) */}
-          <div className="absolute left-[100px] top-[30px] w-[150px] h-[65px] border-b-[2px] border-r-[2px] border-white/40 flex items-center justify-center">
-             <RealisticCarSVG colorClass="blue" showLights={true} activeGear="P" step={1} />
+            {/* Bay 1: Back Car (Blue) - shifted left by 50px */}
+            <div className="absolute left-[50px] top-[30px] w-[150px] h-[65px] border-b-[2px] border-r-[2px] border-white/40 flex items-center justify-center">
+               <RealisticCarSVG colorClass="blue" showLights={true} activeGear="P" step={1} />
+            </div>
+
+            {/* Bay 2: Target Vacant Spot - shifted left by 50px */}
+            <div className="absolute left-[200px] top-[30px] w-[160px] h-[65px] border-b-[2px] border-r-[2px] border-primary/60 bg-primary/10 flex items-center justify-center transition-colors duration-500 shadow-inner" style={{ backgroundColor: step === 4 ? 'rgba(34, 197, 94, 0.2)' : '' }}>
+              <span className={`text-[12px] font-mono uppercase tracking-wider font-bold transition-colors ${step === 4 ? 'text-success' : 'text-primary/70'}`}>
+                {step === 4 ? t.parked : t.vacant}
+              </span>
+            </div>
+
+            {/* Bay 3: Front Car (Red) - shifted left by 50px */}
+            <div className="absolute left-[360px] top-[30px] w-[150px] h-[65px] border-b-[2px] border-white/40 flex items-center justify-center">
+               <RealisticCarSVG colorClass="red" showLights={true} activeGear="P" step={1} />
+            </div>
+
+            <div className="absolute top-[180px] left-[-1000px] right-[-1000px] h-[4px] border-t-[4px] border-dashed border-white/40" />
+
+            {/* PLAYER CAR (Silver) - Rotates around its true rear axle */}
+            <div 
+              className="absolute z-20 transition-all duration-[1500ms] ease-in-out top-0 left-0"
+              style={{ transform: getCarTransform(), transformOrigin: '20px 24px' }}
+            >
+               <RealisticCarSVG colorClass="slate" showLights={true} activeGear={activeGear} step={step} />
+            </div>
+
           </div>
-
-          {/* Bay 2: Target Vacant Spot */}
-          <div className="absolute left-[250px] top-[30px] w-[160px] h-[65px] border-b-[2px] border-r-[2px] border-primary/60 bg-primary/10 flex items-center justify-center transition-colors duration-500 shadow-inner" style={{ backgroundColor: step === 4 ? 'rgba(34, 197, 94, 0.2)' : '' }}>
-            <span className={`text-[12px] font-mono uppercase tracking-wider font-bold transition-colors ${step === 4 ? 'text-success' : 'text-primary/70'}`}>
-              {step === 4 ? t.parked : t.vacant}
-            </span>
-          </div>
-
-          {/* Bay 3: Front Car (Red) */}
-          <div className="absolute left-[410px] top-[30px] w-[150px] h-[65px] border-b-[2px] border-white/40 flex items-center justify-center">
-             <RealisticCarSVG colorClass="red" showLights={true} activeGear="P" step={1} />
-          </div>
-
-          <div className="absolute top-[180px] left-[-1000px] right-[-1000px] h-[4px] border-t-[4px] border-dashed border-white/40" />
-
-          {/* PLAYER CAR (Silver) - Rotates around its true rear axle */}
-          <div 
-            className="absolute z-20 transition-all duration-[1500ms] ease-in-out top-0 left-0"
-            style={{ transform: getCarTransform(), transformOrigin: '20px 24px' }}
-          >
-             <RealisticCarSVG colorClass="slate" showLights={true} activeGear={activeGear} step={step} />
-          </div>
-
-        </div>
+        </ScaledCanvas>
       </div>
 
       <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 relative z-30">

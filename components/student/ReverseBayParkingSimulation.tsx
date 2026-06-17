@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { RotateCcw, ArrowRight, Check, Play } from 'lucide-react'
 import { useLanguageStore } from '@/store/languageStore'
-import { RealisticCarSVG } from './DynamicHTMLSimulations' 
+import { RealisticCarSVG, ScaledCanvas } from './DynamicHTMLSimulations' 
 
 export interface ReverseBayParkingSimulationProps {
   onComplete?: () => void
@@ -141,44 +141,45 @@ export const ReverseBayParkingSimulation: React.FC<ReverseBayParkingSimulationPr
   return (
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
       
-      <div className="flex-1 relative w-full min-h-[300px] bg-[#353839] border-b border-white/5 overflow-hidden flex justify-center">
-        <div className="w-[600px] h-full relative">
-          
-          <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
+      <div className="flex-1 relative w-full min-h-[300px] bg-[#353839] border-b border-white/5 overflow-hidden">
+        <ScaledCanvas canvasWidth={600}>
+          <div className="w-[600px] h-full relative">
+            
+            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
 
-          <div className="absolute top-0 left-[-1000px] right-[-1000px] h-[20px] bg-green-900/40 border-b-4 border-slate-500 shadow-md z-0" />
+            <div className="absolute top-0 left-[-1000px] right-[-1000px] h-[20px] bg-green-900/40 border-b-4 border-slate-500 shadow-md z-0" />
 
-          <div className="absolute left-[65px] top-[5px] w-[80px] h-[130px] border-l-[3px] border-r-[3px] border-white/40 flex justify-center items-center">
-            <div style={{ transform: 'rotate(90deg)' }}>
-              <RealisticCarSVG colorClass="red" showLights={true} activeGear="P" step={1} />
+            <div className="absolute left-[65px] top-[5px] w-[80px] h-[130px] border-l-[3px] border-r-[3px] border-white/40 flex justify-center items-center">
+              <div style={{ transform: 'rotate(90deg)' }}>
+                <RealisticCarSVG colorClass="red" showLights={true} activeGear="P" step={1} />
+              </div>
             </div>
-          </div>
 
-          <div className="absolute left-[165px] top-[5px] w-[80px] h-[130px] border-l-[3px] border-r-[3px] border-primary/60 bg-primary/10 flex items-end justify-center pb-2 transition-colors duration-500 shadow-inner" style={{ backgroundColor: step === 4 ? 'rgba(34, 197, 94, 0.2)' : '' }}>
-            <span className={`text-[10px] font-mono uppercase tracking-wider font-bold transition-colors ${step === 4 ? 'text-success' : 'text-primary/70'}`}>
-              {step === 4 ? t.parked : t.bay12}
-            </span>
-          </div>
-
-          <div className="absolute left-[265px] top-[5px] w-[80px] h-[130px] border-l-[3px] border-r-[3px] border-white/40 flex justify-center items-center">
-            <div style={{ transform: 'rotate(90deg)' }}>
-              <RealisticCarSVG colorClass="blue" showLights={true} activeGear="P" step={1} />
+            <div className="absolute left-[165px] top-[5px] w-[80px] h-[130px] border-l-[3px] border-r-[3px] border-primary/60 bg-primary/10 flex items-end justify-center pb-2 transition-colors duration-500 shadow-inner" style={{ backgroundColor: step === 4 ? 'rgba(34, 197, 94, 0.2)' : '' }}>
+              <span className={`text-[10px] font-mono uppercase tracking-wider font-bold transition-colors ${step === 4 ? 'text-success' : 'text-primary/70'}`}>
+                {step === 4 ? t.parked : t.bay12}
+              </span>
             </div>
+
+            <div className="absolute left-[265px] top-[5px] w-[80px] h-[130px] border-l-[3px] border-r-[3px] border-white/40 flex justify-center items-center">
+              <div style={{ transform: 'rotate(90deg)' }}>
+                <RealisticCarSVG colorClass="blue" showLights={true} activeGear="P" step={1} />
+              </div>
+            </div>
+
+            <div className="absolute top-[250px] left-[-1000px] right-[-1000px] h-[4px] border-t-[4px] border-dashed border-yellow-500/60" />
+
+            {/* PLAYER CAR: Anchored rotation on Rear Axle (20px, 24px) to create flawless circle arc */}
+            <div 
+              className="absolute z-20 transition-all duration-[1500ms] ease-in-out top-0 left-0"
+              style={{ transform: getCarTransform(), transformOrigin: '20px 24px' }}
+            >
+               <RealisticCarSVG colorClass="slate" showLights={true} activeGear={activeGear} step={step} />
+            </div>
+
           </div>
-
-          <div className="absolute top-[250px] left-[-1000px] right-[-1000px] h-[4px] border-t-[4px] border-dashed border-yellow-500/60" />
-
-          {/* PLAYER CAR: Anchored rotation on Rear Axle (20px, 24px) to create flawless circle arc */}
-          <div 
-            className="absolute z-20 transition-all duration-[1500ms] ease-in-out top-0 left-0"
-            style={{ transform: getCarTransform(), transformOrigin: '20px 24px' }}
-          >
-             <RealisticCarSVG colorClass="slate" showLights={true} activeGear={activeGear} step={step} />
-          </div>
-
-        </div>
+        </ScaledCanvas>
       </div>
-
       <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 relative z-30">
         <div className="flex items-center gap-3">
           <div className="relative w-12 h-12 flex-shrink-0 bg-void border border-white/10 rounded-full flex items-center justify-center shadow-inner">

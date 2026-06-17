@@ -5,7 +5,7 @@ import { RotateCcw, ArrowRight, Check, Play, ShieldAlert, AlertTriangle, Key } f
 import { useLanguageStore } from '@/store/languageStore'
 
 /* ScaledCanvas: fits a fixed-width inner canvas into any container width */
-const ScaledCanvas = ({ canvasWidth = 700, children }: { canvasWidth?: number; children: React.ReactNode }) => {
+export const ScaledCanvas = ({ canvasWidth = 700, children }: { canvasWidth?: number; children: React.ReactNode }) => {
   const outerRef = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
 
