@@ -210,7 +210,7 @@ export default function AdminConsoleLayout({
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 relative">
-            <LanguageToggle />
+            <LanguageToggle dropdownDirection="down" />
             <ThemeToggle />
             
             <button 

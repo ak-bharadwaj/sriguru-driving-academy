@@ -65,10 +65,9 @@ export default function InstructorConsoleLayout({ children }: { children: React.
       {/* Main Content */}
       <div className="flex-1 relative z-10 pb-24 pt-4 px-4 sm:px-6 md:px-8">
         <div className="max-w-4xl mx-auto w-full">
-          {/* Top bar: Language, Theme & Notifications toggle */}
           <div className="flex justify-end items-center gap-2 mb-4 relative z-50">
             <ThemeToggle />
-            <LanguageToggle />
+            <LanguageToggle dropdownDirection="down" />
             
             <button 
               onClick={handleNotifClick}

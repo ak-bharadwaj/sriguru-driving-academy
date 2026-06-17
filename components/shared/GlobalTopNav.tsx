@@ -92,9 +92,8 @@ export function GlobalTopNav() {
         </nav>
       )}
 
-      {/* Right actions */}
       <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
-        <LanguageToggle />
+        <LanguageToggle dropdownDirection="down" />
         <ThemeToggle />
         {isLoggedIn ? (
           <Link
