@@ -217,7 +217,11 @@ import {
   VehicleStartupSimulation, 
   SteeringControlSimulation, 
   ClutchControlSimulation, 
-  HighwayMergingSimulation 
+  HighwayMergingSimulation,
+  ThreePointTurnSimulation,
+  EmergencyBrakingSimulation,
+  RoundaboutSimulation,
+  NightDrivingSimulation
 } from '@/components/student/DynamicHTMLSimulations'
 import { SignCard } from '@/components/student/SignCard'
 
@@ -710,7 +714,7 @@ export default function StudentLearnPortal() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                   {cards.map((card) => {
                     const isCompleted = completedIds.includes(card.id)
-                    const hasSim = ['parallel-parking', 'reverse-parking', 'vehicle-startup', 'steering-control', 'clutch-control', 'highway-merging'].includes(card.slug)
+                    const hasSim = ['parallel-parking', 'reverse-parking', 'vehicle-startup', 'steering-control', 'clutch-control', 'highway-merging', 'three-point-turn', 'emergency-braking', 'roundabout', 'night-driving'].includes(card.slug)
                     
                     return (
                       <motion.div
@@ -1005,7 +1009,7 @@ export default function StudentLearnPortal() {
         {selectedCard && (() => {
           const parsed = parseCardContent(selectedCard)
           const isCompleted = completedIds.includes(selectedCard.id)
-          const hasSim = ['parallel-parking', 'reverse-parking', 'vehicle-startup', 'steering-control', 'clutch-control', 'highway-merging'].includes(selectedCard.slug)
+          const hasSim = ['parallel-parking', 'reverse-parking', 'vehicle-startup', 'steering-control', 'clutch-control', 'highway-merging', 'three-point-turn', 'emergency-braking', 'roundabout', 'night-driving'].includes(selectedCard.slug)
           
           return (
             <div className="fixed inset-0 z-[500] flex flex-col">
@@ -1040,6 +1044,10 @@ export default function StudentLearnPortal() {
                   <div className="w-full bg-void border-b border-border/40 flex items-stretch justify-center relative overflow-hidden shrink-0" style={{ height: 'max(420px, 60vh)' }}>
                     {selectedCard.slug === 'parallel-parking' && <ParallelParkingSimulation onComplete={() => setSimCompleted(true)} />}
                     {selectedCard.slug === 'reverse-parking' && <ReverseBayParkingSimulation onComplete={() => setSimCompleted(true)} />}
+                    {selectedCard.slug === 'three-point-turn' && <ThreePointTurnSimulation onComplete={() => setSimCompleted(true)} />}
+                    {selectedCard.slug === 'emergency-braking' && <EmergencyBrakingSimulation onComplete={() => setSimCompleted(true)} />}
+                    {selectedCard.slug === 'roundabout' && <RoundaboutSimulation onComplete={() => setSimCompleted(true)} />}
+                    {selectedCard.slug === 'night-driving' && <NightDrivingSimulation onComplete={() => setSimCompleted(true)} />}
                     {selectedCard.slug === 'vehicle-startup' && <VehicleStartupSimulation onComplete={() => setSimCompleted(true)} />}
                     {selectedCard.slug === 'steering-control' && <SteeringControlSimulation onComplete={() => setSimCompleted(true)} />}
                     {selectedCard.slug === 'clutch-control' && <ClutchControlSimulation onComplete={() => setSimCompleted(true)} />}

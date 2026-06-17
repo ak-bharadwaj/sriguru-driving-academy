@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { RotateCcw, ArrowRight, Check, Play, ShieldAlert, AlertTriangle, Key } from 'lucide-react'
 import { useLanguageStore } from '@/store/languageStore'
+import { motion } from 'framer-motion'
 
 /* ScaledCanvas: fits a fixed-width inner canvas into any container width */
 export const ScaledCanvas = ({ canvasWidth = 700, children }: { canvasWidth?: number; children: React.ReactNode }) => {
@@ -976,6 +977,692 @@ export const HighwayMergingSimulation: React.FC<SimulationProps> = ({ onComplete
           )}
           <button onClick={handleNext} disabled={isAnimating || step === 4} className={`px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5 shadow-lg transition-all active:scale-95 disabled:pointer-events-none ${step === 4 ? 'bg-success/20 border border-success/30 text-success' : 'bg-primary hover:bg-primary/95 text-white shadow-primary/10 disabled:opacity-40'}`}>
             {step === 0 ? <><Play className="w-3 h-3 fill-current" /><span>{t.begin}</span></> : step === 4 ? <><Check className="w-3 h-3" /><span>{tMod.merged}</span></> : <><span>{t.next}</span><ArrowRight className="w-3 h-3" /></>}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ============================================================================
+   5. THREE POINT TURN SIMULATION
+   ============================================================================ */
+export const ThreePointTurnSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
+  const { language } = useLanguageStore()
+  const lang = (language === 'HI' || language === 'TE') ? language : 'EN'
+  const t = {
+    EN: {
+      telemetry: "Telemetry Status",
+      begin: "Begin",
+      next: "Next",
+      kmh: "km/h",
+      completed: "Completed",
+      initialTitle: "Setup Position",
+      initialDesc: "Stop close to the left curb. Check mirrors and blind spots.",
+      steps: [
+        { t: "1. Pull to Left", d: "Align the vehicle close to the left curb and stop." },
+        { t: "2. Turn Right Across", d: "Steer fully right and drive forward across the road." },
+        { t: "3. Reverse Left", d: "Shift to Reverse, steer fully left, and back up." },
+        { t: "4. Drive Off", d: "Shift to Drive, steer right, and proceed forward." }
+      ]
+    },
+    HI: {
+      telemetry: "टेलीमेट्री स्थिति",
+      begin: "शुरू करें",
+      next: "अगला",
+      kmh: "किमी/घं",
+      completed: "पूरा हुआ",
+      initialTitle: "सेटअप स्थिति",
+      initialDesc: "बाईं ओर रुकें। शीशे और ब्लाइंड स्पॉट जांचें।",
+      steps: [
+        { t: "1. बाएँ खींचें", d: "वाहन को बाएँ किनारे के पास संरेखित करें और रुकें।" },
+        { t: "2. दाएँ मुड़ें", d: "पहिया पूरा दाएँ घुमाएँ और सड़क के पार आगे बढ़ें।" },
+        { t: "3. बाएँ रिवर्स", d: "रिवर्स गियर डालें, पूरा बाएँ घुमाएँ और पीछे हटें।" },
+        { t: "4. आगे बढ़ें", d: "ड्राइव गियर डालें, दाएँ घुमाएँ और आगे बढ़ें।" }
+      ]
+    },
+    TE: {
+      telemetry: "టెలిమెట్రీ స్థితి",
+      begin: "ప్రారంభించండి",
+      next: "తదుపరి",
+      kmh: "కిమీ/గం",
+      completed: "పూర్తయింది",
+      initialTitle: "స్థాపన స్థానం",
+      initialDesc: "ఎడమ అంచు వద్ద కారు ఆపండి. అద్దాలు తనిఖీ చేయండి.",
+      steps: [
+        { t: "1. ఎడమకు లాగండి", d: "కారును ఎడమ అంచుకు సమాంతరంగా ఉంచి ఆపండి." },
+        { t: "2. కుడివైపుకి తిప్పండి", d: "స్టీరింగ్ పూర్తిగా కుడివైపు తిప్పి ముందుకు వెళ్లండి." },
+        { t: "3. రివర్స్ ఎడమ", d: "రివర్స్ గేర్ వేసి, పూర్తిగా ఎడమవైపు తిప్పి వెనుకకు వెళ్లండి." },
+        { t: "4. ముందుకు వెళ్లండి", d: "డ్రైవ్ గేర్ వేసి, కుడివైపు తిప్పి ముందుకు సాగండి." }
+      ]
+    }
+  }[lang]
+
+  const [step, setStep] = useState(0)
+  const [speed, setSpeed] = useState(0)
+  const [isAnimating, setIsAnimating] = useState(false)
+
+  const stepsInfo = [
+    { gear: "D", wheelAngle: 0, targetSpeed: 8 },
+    { gear: "D", wheelAngle: 450, targetSpeed: 6 },
+    { gear: "R", wheelAngle: -450, targetSpeed: 5 },
+    { gear: "D", wheelAngle: 360, targetSpeed: 10 }
+  ]
+
+  useEffect(() => {
+    if (step === 0) { setSpeed(0); return; }
+    const targetSpeed = stepsInfo[step - 1].targetSpeed
+    setIsAnimating(true)
+    
+    let currentSpeed = 0
+    const interval = setInterval(() => {
+      if (currentSpeed < targetSpeed) { currentSpeed += 1; setSpeed(currentSpeed) }
+      else {
+        clearInterval(interval)
+        setTimeout(() => {
+          let decelSpeed = targetSpeed
+          const decelInterval = setInterval(() => {
+            if (decelSpeed > 0) { decelSpeed -= 1; setSpeed(decelSpeed) }
+            else {
+              clearInterval(decelInterval)
+              setIsAnimating(false)
+              if (step === 4 && onComplete) onComplete()
+            }
+          }, 100)
+        }, 1200)
+      }
+    }, 80)
+    return () => clearInterval(interval)
+  }, [step])
+
+  const handleNext = () => { if (!isAnimating && step < 4) setStep(prev => prev + 1) }
+  const handleReset = () => { if (!isAnimating) { setStep(0); setSpeed(0) } }
+
+  const activeGear = step === 0 ? "P" : (step === 4 && !isAnimating ? "P" : stepsInfo[step - 1].gear)
+  const activeWheelAngle = step === 0 ? 0 : stepsInfo[step - 1].wheelAngle
+
+  const getCarTransform = () => {
+    switch (step) {
+      case 1: return 'translate(120px, 165px) rotate(0deg)'
+      case 2: return 'translate(260px, 70px) rotate(-65deg)'
+      case 3: return 'translate(140px, 160px) rotate(25deg)'
+      case 4: return 'translate(360px, 120px) rotate(0deg)'
+      case 0: default: return 'translate(10px, 165px) rotate(0deg)'
+    }
+  }
+
+  return (
+    <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
+      <div className="flex-1 relative w-full bg-[#353839] border-b border-white/5 overflow-hidden">
+        <ScaledCanvas canvasWidth={600}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
+            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
+            <div className="absolute top-[60px] left-[-1000px] right-[-1000px] h-[160px] bg-[#2a2c2d] border-y-4 border-yellow-600/70" />
+            <div className="absolute top-[140px] left-[-1000px] right-[-1000px] h-0 border-t-2 border-dashed border-white/30" />
+            
+            <div className="absolute z-10 text-[9px] font-mono bg-void/60 border border-border px-2 py-0.5 rounded text-text-3 left-4 top-4 uppercase tracking-wider">Narrow Street</div>
+
+            <div 
+              className="absolute z-20 transition-all duration-[1500ms] ease-in-out top-0 left-0"
+              style={{ transform: getCarTransform(), transformOrigin: '20px 24px' }}
+            >
+               <RealisticCarSVG colorClass="slate" showLights={true} step={step} activeGear={activeGear} />
+            </div>
+          </div>
+        </ScaledCanvas>
+      </div>
+      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 z-30">
+        <div className="flex items-center gap-3">
+          <div className="relative w-12 h-12 flex-shrink-0 bg-void border border-white/10 rounded-full flex items-center justify-center shadow-inner">
+            <svg className="w-9 h-9 text-text-2 transition-transform duration-[1500ms] ease-in-out" style={{ transform: `rotate(${activeWheelAngle}deg)` }} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" />
+              <line x1="50" y1="10" x2="50" y2="50" stroke="currentColor" strokeWidth="8" />
+              <line x1="18" y1="68" x2="50" y2="50" stroke="currentColor" strokeWidth="8" />
+              <line x1="82" y1="68" x2="50" y2="50" stroke="currentColor" strokeWidth="8" />
+            </svg>
+            <span className="absolute -bottom-1 right-[-4px] text-[9px] font-mono bg-void border border-white/10 px-0.5 rounded text-accent">{activeWheelAngle}°</span>
+          </div>
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold font-mono text-text-1 w-8">{speed} <span className="text-[9px] text-text-3">{t.kmh}</span></span>
+              <div className="flex gap-1 bg-void border border-white/5 p-1 rounded text-[10px] font-mono font-bold">
+                {["P", "R", "N", "D"].map(g => (
+                  <span key={g} className={`w-4 h-4 rounded-sm flex items-center justify-center transition-colors ${activeGear === g ? 'bg-primary text-white' : 'text-text-3 opacity-40'}`}>{g}</span>
+                ))}
+              </div>
+            </div>
+            <span className="text-[10px] font-mono text-text-3 uppercase tracking-wider mt-1">{t.telemetry}</span>
+          </div>
+        </div>
+        <div className="flex-1 max-w-[280px]">
+          <h4 className="text-[11px] sm:text-xs font-bold text-accent font-display uppercase tracking-wider leading-none">{step === 0 ? t.initialTitle : t.steps[step - 1].t}</h4>
+          <p className="text-[10px] sm:text-xs text-text-2 font-body mt-1 leading-snug line-clamp-2">{step === 0 ? t.initialDesc : t.steps[step - 1].d}</p>
+        </div>
+        <div className="flex gap-2">
+          {step > 0 && (
+            <button onClick={handleReset} disabled={isAnimating} className="p-2 bg-void hover:bg-white/[0.02] border border-border text-text-3 hover:text-text-1 rounded-xl transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none" title="Reset">
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          )}
+          <button onClick={handleNext} disabled={isAnimating || step === 4} className={`px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5 shadow-lg transition-all active:scale-95 disabled:pointer-events-none ${step === 4 ? 'bg-success/20 border border-success/30 text-success' : 'bg-primary hover:bg-primary/95 text-white shadow-primary/10 disabled:opacity-40'}`}>
+            {step === 0 ? <><Play className="w-3 h-3 fill-current" /><span>{t.begin}</span></> : step === 4 ? <><Check className="w-3 h-3" /><span>{t.completed}</span></> : <><span>{t.next}</span><ArrowRight className="w-3 h-3" /></>}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ============================================================================
+   6. EMERGENCY BRAKING SIMULATION
+   ============================================================================ */
+export const EmergencyBrakingSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
+  const { language } = useLanguageStore()
+  const lang = (language === 'HI' || language === 'TE') ? language : 'EN'
+  const t = {
+    EN: {
+      telemetry: "Telemetry Status",
+      begin: "Begin",
+      next: "Next",
+      kmh: "km/h",
+      completed: "Stopped Safely",
+      initialTitle: "In-Motion Setup",
+      initialDesc: "Begin driving forward. Prepare for a sudden hazard alert.",
+      steps: [
+        { t: "1. Accelerate", d: "Accelerate to standard urban cruising speed." },
+        { t: "2. Build Speed", d: "Speed is 50 km/h. Keep clear focus ahead." },
+        { t: "3. HAZARD! Brake Firm", d: "Red hazard alert! Apply emergency brakes immediately." },
+        { t: "4. Full Stop", d: "Come to a complete stop before the obstacle." }
+      ]
+    },
+    HI: {
+      telemetry: "टेलीमेट्री स्थिति",
+      begin: "शुरू करें",
+      next: "अगला",
+      kmh: "किमी/घं",
+      completed: "सुरक्षित रूप से रुका",
+      initialTitle: "गति में सेटअप",
+      initialDesc: "आगे बढ़ना शुरू करें। अचानक खतरे की चेतावनी के लिए तैयार रहें।",
+      steps: [
+        { t: "1. गति बढ़ाएं", d: "सामान्य शहरी क्रूज़िंग गति तक गति बढ़ाएं।" },
+        { t: "2. गति बनाएँ", d: "गति 50 किमी/घंटा है। आगे ध्यान केंद्रित रखें।" },
+        { t: "3. खतरा! ब्रेक दबाएं", d: "लाल खतरे की चेतावनी! तुरंत आपातकालीन ब्रेक लगाएं।" },
+        { t: "4. पूर्ण विराम", d: "बाधा से पहले पूरी तरह से रुकें।" }
+      ]
+    },
+    TE: {
+      telemetry: "టెలిమెట్రీ స్థితి",
+      begin: "ప్రారంభించండి",
+      next: "తదుపరి",
+      kmh: "కిమీ/గం",
+      completed: "సురక్షితంగా ఆగిపోయింది",
+      initialTitle: "గమనంలో అమరిక",
+      initialDesc: "ముందుకు సాగడం ప్రారంభించండి. హఠాత్తుగా వచ్చే అడ్డంకికి సిద్ధంగా ఉండండి.",
+      steps: [
+        { t: "1. వేగాన్ని పెంచండి", d: "సాధారణ నగర వేగాన్ని అందుకోండి." },
+        { t: "2. వేగం పెంచండి", d: "వేగం 50 కిమీ/గం ఉంది. రోడ్డు వైపే చూడండి." },
+        { t: "3. అపాయం! బ్రేక్ వేయండి", d: "ఎరుపు అపాయ హెచ్చరిక! త్వరగా బ్రేక్ నొక్కండి." },
+        { t: "4. పూర్తిగా ఆపండి", d: "అడ్డంకి కంటే ముందే వాహనాన్ని పూర్తిగా ఆపండి." }
+      ]
+    }
+  }[lang]
+
+  const [step, setStep] = useState(0)
+  const [speed, setSpeed] = useState(0)
+  const [isAnimating, setIsAnimating] = useState(false)
+
+  const stepsInfo = [
+    { gear: "D", wheelAngle: 0, targetSpeed: 30 },
+    { gear: "D", wheelAngle: 0, targetSpeed: 50 },
+    { gear: "D", wheelAngle: 0, targetSpeed: 10 },
+    { gear: "D", wheelAngle: 0, targetSpeed: 0 }
+  ]
+
+  useEffect(() => {
+    if (step === 0) { setSpeed(0); return; }
+    const targetSpeed = stepsInfo[step - 1].targetSpeed
+    setIsAnimating(true)
+    
+    let currentSpeed = speed
+    const stepInterval = step === 3 ? 20 : 50
+    const interval = setInterval(() => {
+      if (currentSpeed < targetSpeed) { currentSpeed += 2; setSpeed(currentSpeed) }
+      else if (currentSpeed > targetSpeed) { currentSpeed -= 4; setSpeed(Math.max(0, currentSpeed)) }
+      else {
+        clearInterval(interval)
+        setTimeout(() => {
+          setIsAnimating(false)
+          if (step === 4 && onComplete) onComplete()
+        }, 1200)
+      }
+    }, stepInterval)
+    return () => clearInterval(interval)
+  }, [step])
+
+  const handleNext = () => { if (!isAnimating && step < 4) setStep(prev => prev + 1) }
+  const handleReset = () => { if (!isAnimating) { setStep(0); setSpeed(0) } }
+
+  const activeGear = step === 0 ? "P" : (step === 4 && !isAnimating ? "P" : stepsInfo[step - 1].gear)
+  const activeWheelAngle = step === 0 ? 0 : stepsInfo[step - 1].wheelAngle
+
+  const getCarTransform = () => {
+    switch (step) {
+      case 1: return 'translate(100px, 120px)'
+      case 2: return 'translate(260px, 120px)'
+      case 3: return 'translate(360px, 120px)'
+      case 4: return 'translate(400px, 120px)'
+      case 0: default: return 'translate(-60px, 120px)'
+    }
+  }
+
+  return (
+    <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
+      <div className="flex-1 relative w-full bg-[#353839] border-b border-white/5 overflow-hidden">
+        <ScaledCanvas canvasWidth={600}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
+            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
+            <div className="absolute top-[80px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#2a2c2d] border-y-4 border-slate-500 shadow-inner" />
+            <div className="absolute top-[150px] left-[-1000px] right-[-1000px] h-0 border-t border-dashed border-white/30" />
+            
+            {step >= 3 && (
+              <motion.div 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute left-[510px] top-[110px] z-10 flex flex-col items-center gap-1"
+              >
+                <div className="w-10 h-10 rounded bg-red-600 border-2 border-white flex items-center justify-center animate-pulse shadow-lg shadow-red-600/30">
+                  <span className="text-white font-bold text-xs font-mono">STOP</span>
+                </div>
+                <div className="w-1.5 h-12 bg-slate-400" />
+              </motion.div>
+            )}
+
+            <div 
+              className="absolute z-20 transition-all duration-[1000ms] ease-out top-0 left-0"
+              style={{ transform: getCarTransform() }}
+            >
+               <RealisticCarSVG colorClass="slate" showLights={true} step={step} activeGear={activeGear} />
+            </div>
+          </div>
+        </ScaledCanvas>
+      </div>
+      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 z-30">
+        <div className="flex items-center gap-3">
+          <div className="relative w-12 h-12 flex-shrink-0 bg-void border border-white/10 rounded-full flex items-center justify-center shadow-inner">
+            <svg className="w-9 h-9 text-text-2 transition-transform duration-[1500ms] ease-in-out" style={{ transform: `rotate(${activeWheelAngle}deg)` }} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" />
+              <line x1="50" y1="10" x2="50" y2="50" stroke="currentColor" strokeWidth="8" />
+              <line x1="18" y1="68" x2="50" y2="50" stroke="currentColor" strokeWidth="8" />
+              <line x1="82" y1="68" x2="50" y2="50" stroke="currentColor" strokeWidth="8" />
+            </svg>
+            <span className="absolute -bottom-1 right-[-4px] text-[9px] font-mono bg-void border border-white/10 px-0.5 rounded text-accent">{activeWheelAngle}°</span>
+          </div>
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold font-mono text-text-1 w-8">{speed} <span className="text-[9px] text-text-3">{t.kmh}</span></span>
+              <div className="flex gap-1 bg-void border border-white/5 p-1 rounded text-[10px] font-mono font-bold">
+                {["P", "R", "N", "D"].map(g => (
+                  <span key={g} className={`w-4 h-4 rounded-sm flex items-center justify-center transition-colors ${activeGear === g ? 'bg-primary text-white' : 'text-text-3 opacity-40'}`}>{g}</span>
+                ))}
+              </div>
+            </div>
+            <span className="text-[10px] font-mono text-text-3 uppercase tracking-wider mt-1">{t.telemetry}</span>
+          </div>
+        </div>
+        <div className="flex-1 max-w-[280px]">
+          <h4 className="text-[11px] sm:text-xs font-bold text-accent font-display uppercase tracking-wider leading-none">{step === 0 ? t.initialTitle : t.steps[step - 1].t}</h4>
+          <p className="text-[10px] sm:text-xs text-text-2 font-body mt-1 leading-snug line-clamp-2">{step === 0 ? t.initialDesc : t.steps[step - 1].d}</p>
+        </div>
+        <div className="flex gap-2">
+          {step > 0 && (
+            <button onClick={handleReset} disabled={isAnimating} className="p-2 bg-void hover:bg-white/[0.02] border border-border text-text-3 hover:text-text-1 rounded-xl transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none" title="Reset">
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          )}
+          <button onClick={handleNext} disabled={isAnimating || step === 4} className={`px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5 shadow-lg transition-all active:scale-95 disabled:pointer-events-none ${step === 4 ? 'bg-success/20 border border-success/30 text-success' : 'bg-primary hover:bg-primary/95 text-white shadow-primary/10 disabled:opacity-40'}`}>
+            {step === 0 ? <><Play className="w-3 h-3 fill-current" /><span>{t.begin}</span></> : step === 4 ? <><Check className="w-3 h-3" /><span>{t.completed}</span></> : <><span>{t.next}</span><ArrowRight className="w-3 h-3" /></>}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ============================================================================
+   7. ROUNDABOUT NAVIGATION SIMULATION
+   ============================================================================ */
+export const RoundaboutSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
+  const { language } = useLanguageStore()
+  const lang = (language === 'HI' || language === 'TE') ? language : 'EN'
+  const t = {
+    EN: {
+      telemetry: "Telemetry Status",
+      begin: "Begin",
+      next: "Next",
+      kmh: "km/h",
+      completed: "Exited Roundabout",
+      initialTitle: "Roundabout Entry",
+      initialDesc: "Approach the entry line. Yield to circular traffic.",
+      steps: [
+        { t: "1. Approach Entry", d: "Slow down and approach the roundabout yielding line." },
+        { t: "2. Yield & Enter", d: "Ensure right is clear, then enter the circular lane." },
+        { t: "3. Circular Path", d: "Keep left steering angle while navigating the inner circle." },
+        { t: "4. Signal & Exit", d: "Activate left indicator and smoothly exit the junction." }
+      ]
+    },
+    HI: {
+      telemetry: "टेलीमेट्री स्थिति",
+      begin: "शुरू करें",
+      next: "अगला",
+      kmh: "किमी/घं",
+      completed: "चौराहे से बाहर",
+      initialTitle: "गोलचक्कर प्रवेश",
+      initialDesc: "प्रवेश रेखा के पास पहुंचें। गोलाकार यातायात को रास्ता दें।",
+      steps: [
+        { t: "1. प्रवेश दृष्टिकोण", d: "गति धीमी करें और गोलचक्कर उपज रेखा के पास पहुंचें।" },
+        { t: "2. रास्ता दें और प्रवेश", d: "सुनिश्चित करें कि दायाँ साफ़ है, फिर गोलाकार लेन में प्रवेश करें।" },
+        { t: "3. गोलाकार मार्ग", d: "भीतरी घेरे में चलते समय बायां स्टीयरिंग कोण बनाए रखें।" },
+        { t: "4. संकेत दें और बाहर", d: "बायां संकेतक चालू करें और सुरक्षित रूप से बाहर निकलें।" }
+      ]
+    },
+    TE: {
+      telemetry: "టెలిమెట్రీ స్థితి",
+      begin: "ప్రారంభించండి",
+      next: "తదుపరి",
+      kmh: "కిమీ/గం",
+      completed: "కూడలి దాటారు",
+      initialTitle: "కూడలి ప్రవేశం",
+      initialDesc: "కూడలి వద్ద వేగం తగ్గించండి. కుడి వైపు ట్రాఫిక్‌కు ప్రాధాన్యత ఇవ్వండి.",
+      steps: [
+        { t: "1. కూడలి సమీపించండి", d: "వేగాన్ని తగ్గించి జంక్షన్ వద్ద నిలబడండి." },
+        { t: "2. ప్రవేశించండి", d: "కుడి వైపు కారులు లేవని నిర్ధారించుకుని లోపలికి వెళ్లండి." },
+        { t: "3. లోపలి వలయం", d: "కూడలి గుండ్రటి మార్గంలో ఎడమ వైపు వంగి నడపండి." },
+        { t: "4. ఇండికేటర్ వేసి బయటకు", d: "ఎడమ వైపు ఇండికేటర్ వేసి జంక్షన్ నుండి నిష్క్రమించండి." }
+      ]
+    }
+  }[lang]
+
+  const [step, setStep] = useState(0)
+  const [speed, setSpeed] = useState(0)
+  const [isAnimating, setIsAnimating] = useState(false)
+
+  const stepsInfo = [
+    { gear: "D", wheelAngle: 0, targetSpeed: 15 },
+    { gear: "D", wheelAngle: -90, targetSpeed: 18 },
+    { gear: "D", wheelAngle: -120, targetSpeed: 18 },
+    { gear: "D", wheelAngle: 90, targetSpeed: 15 }
+  ]
+
+  useEffect(() => {
+    if (step === 0) { setSpeed(0); return; }
+    const targetSpeed = stepsInfo[step - 1].targetSpeed
+    setIsAnimating(true)
+    
+    let currentSpeed = 0
+    const interval = setInterval(() => {
+      if (currentSpeed < targetSpeed) { currentSpeed += 2; setSpeed(currentSpeed) }
+      else {
+        clearInterval(interval)
+        setTimeout(() => {
+          let decelSpeed = targetSpeed
+          const decelInterval = setInterval(() => {
+            if (decelSpeed > 0) { decelSpeed -= 2; setSpeed(decelSpeed) }
+            else {
+              clearInterval(decelInterval)
+              setIsAnimating(false)
+              if (step === 4 && onComplete) onComplete()
+            }
+          }, 150)
+        }, 1200)
+      }
+    }, 100)
+    return () => clearInterval(interval)
+  }, [step])
+
+  const handleNext = () => { if (!isAnimating && step < 4) setStep(prev => prev + 1) }
+  const handleReset = () => { if (!isAnimating) { setStep(0); setSpeed(0) } }
+
+  const activeGear = step === 0 ? "P" : (step === 4 && !isAnimating ? "P" : stepsInfo[step - 1].gear)
+  const activeWheelAngle = step === 0 ? 0 : stepsInfo[step - 1].wheelAngle
+
+  const getCarTransform = () => {
+    switch (step) {
+      case 1: return 'translate(220px, 190px) rotate(0deg)'
+      case 2: return 'translate(280px, 130px) rotate(-35deg)'
+      case 3: return 'translate(310px, 80px) rotate(-90deg)'
+      case 4: return 'translate(410px, 70px) rotate(0deg)'
+      case 0: default: return 'translate(60px, 190px) rotate(0deg)'
+    }
+  }
+
+  return (
+    <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
+      <div className="flex-1 relative w-full bg-[#353839] border-b border-white/5 overflow-hidden">
+        <ScaledCanvas canvasWidth={600}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
+            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
+            
+            <div className="absolute left-0 top-[170px] right-0 h-[60px] bg-[#2a2c2d]" />
+            <div className="absolute left-[310px] top-0 bottom-0 w-[60px] bg-[#2a2c2d]" />
+
+            <div className="absolute left-[300px] top-[100px] w-[80px] h-[80px] rounded-full bg-slate-500 border-4 border-slate-600 z-10 flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 rounded-full bg-green-800/40 border border-white/10" />
+            </div>
+
+            <div 
+              className="absolute z-20 transition-all duration-[1500ms] ease-in-out top-0 left-0"
+              style={{ transform: getCarTransform(), transformOrigin: '20px 24px' }}
+            >
+               <RealisticCarSVG colorClass="slate" showLights={true} step={step} activeGear={activeGear} />
+            </div>
+          </div>
+        </ScaledCanvas>
+      </div>
+      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 z-30">
+        <div className="flex items-center gap-3">
+          <div className="relative w-12 h-12 flex-shrink-0 bg-void border border-white/10 rounded-full flex items-center justify-center shadow-inner">
+            <svg className="w-9 h-9 text-text-2 transition-transform duration-[1500ms] ease-in-out" style={{ transform: `rotate(${activeWheelAngle}deg)` }} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" />
+              <line x1="50" y1="10" x2="50" y2="50" stroke="currentColor" strokeWidth="8" />
+              <line x1="18" y1="68" x2="50" y2="50" stroke="currentColor" strokeWidth="8" />
+              <line x1="82" y1="68" x2="50" y2="50" stroke="currentColor" strokeWidth="8" />
+            </svg>
+            <span className="absolute -bottom-1 right-[-4px] text-[9px] font-mono bg-void border border-white/10 px-0.5 rounded text-accent">{activeWheelAngle}°</span>
+          </div>
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold font-mono text-text-1 w-8">{speed} <span className="text-[9px] text-text-3">{t.kmh}</span></span>
+              <div className="flex gap-1 bg-void border border-white/5 p-1 rounded text-[10px] font-mono font-bold">
+                {["P", "R", "N", "D"].map(g => (
+                  <span key={g} className={`w-4 h-4 rounded-sm flex items-center justify-center transition-colors ${activeGear === g ? 'bg-primary text-white' : 'text-text-3 opacity-40'}`}>{g}</span>
+                ))}
+              </div>
+            </div>
+            <span className="text-[10px] font-mono text-text-3 uppercase tracking-wider mt-1">{t.telemetry}</span>
+          </div>
+        </div>
+        <div className="flex-1 max-w-[280px]">
+          <h4 className="text-[11px] sm:text-xs font-bold text-accent font-display uppercase tracking-wider leading-none">{step === 0 ? t.initialTitle : t.steps[step - 1].t}</h4>
+          <p className="text-[10px] sm:text-xs text-text-2 font-body mt-1 leading-snug line-clamp-2">{step === 0 ? t.initialDesc : t.steps[step - 1].d}</p>
+        </div>
+        <div className="flex gap-2">
+          {step > 0 && (
+            <button onClick={handleReset} disabled={isAnimating} className="p-2 bg-void hover:bg-white/[0.02] border border-border text-text-3 hover:text-text-1 rounded-xl transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none" title="Reset">
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          )}
+          <button onClick={handleNext} disabled={isAnimating || step === 4} className={`px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5 shadow-lg transition-all active:scale-95 disabled:pointer-events-none ${step === 4 ? 'bg-success/20 border border-success/30 text-success' : 'bg-primary hover:bg-primary/95 text-white shadow-primary/10 disabled:opacity-40'}`}>
+            {step === 0 ? <><Play className="w-3 h-3 fill-current" /><span>{t.begin}</span></> : step === 4 ? <><Check className="w-3 h-3" /><span>{t.completed}</span></> : <><span>{t.next}</span><ArrowRight className="w-3 h-3" /></>}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ============================================================================
+   8. NIGHT DRIVING SIMULATION
+   ============================================================================ */
+export const NightDrivingSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
+  const { language } = useLanguageStore()
+  const lang = (language === 'HI' || language === 'TE') ? language : 'EN'
+  const t = {
+    EN: {
+      telemetry: "Telemetry Status",
+      begin: "Begin",
+      next: "Next",
+      kmh: "km/h",
+      completed: "Completed Night Drive",
+      initialTitle: "Lights Control",
+      initialDesc: "Ready to drive at night. Activate low beams before moving.",
+      steps: [
+        { t: "1. Turn Headlights ON", d: "Turn on low beams. Observe headlights illumination." },
+        { t: "2. Safe Cruising", d: "Maintain steady speed. Watch for reflections." },
+        { t: "3. Oncoming Brights", d: "Bright high beams approaching! Look left to avoid glare." },
+        { t: "4. Passed Safely", d: "Oncoming car has passed. Continue driving with full focus." }
+      ]
+    },
+    HI: {
+      telemetry: "टेलीमेट्री स्थिति",
+      begin: "शुरू करें",
+      next: "अगला",
+      kmh: "किमी/घं",
+      completed: "रात्रि ड्राइव पूरा हुआ",
+      initialTitle: "लाइट्स नियंत्रण",
+      initialDesc: "रात में ड्राइव करने के लिए तैयार। चलने से पहले हेडलाइट्स चालू करें।",
+      steps: [
+        { t: "1. हेडलाइट्स चालू करें", d: "लो बीम चालू करें। रोशनी का निरीक्षण करें।" },
+        { t: "2. सुरक्षित क्रूज़िंग", d: "स्थिर गति बनाए रखें। परावर्तन देखें।" },
+        { t: "3. सामने वाले की चमक", d: "तेज़ रोशनी आ रही है! चमक से बचने के लिए बाईं ओर देखें।" },
+        { t: "4. सुरक्षित रूप से पारित", d: "सामने वाली कार गुजर गई है। पूरा ध्यान केंद्रित रखें।" }
+      ]
+    },
+    TE: {
+      telemetry: "టెలిమెట్రీ స్థితి",
+      begin: "ప్రారంభించండి",
+      next: "తదుపరి",
+      kmh: "కిమీ/గం",
+      completed: "రాత్రి ప్రయాణం పూర్తి",
+      initialTitle: "లైట్లు ఆన్ చేయండి",
+      initialDesc: "రాత్రి వేళ ప్రయాణానికి సిద్ధం అవ్వండి. ప్రయాణించే ముందు లైట్లు ఆన్ చేయండి.",
+      steps: [
+        { t: "1. హెడ్‌లైట్లు ఆన్", d: "లో బీమ్స్ ఆన్ చేసి లైటింగ్ గమనించండి." },
+        { t: "2. సురక్షిత ప్రయాణం", d: "స్థిరమైన వేగాన్ని కొనసాగించండి." },
+        { t: "3. కుడి వైపు కాంతి", d: "సాటి వాహన కాంతి కళ్ళపై పడకుండా ఎడమ అంచు చూడండి." },
+        { t: "4. సురక్షితంగా దాటారు", d: "సాటి వాహనం వెళ్ళిపోయింది. పూర్తి శ్రద్ధతో ప్రయాణించండి." }
+      ]
+    }
+  }[lang]
+
+  const [step, setStep] = useState(0)
+  const [speed, setSpeed] = useState(0)
+  const [isAnimating, setIsAnimating] = useState(false)
+
+  const stepsInfo = [
+    { gear: "D", wheelAngle: 0, targetSpeed: 10 },
+    { gear: "D", wheelAngle: 0, targetSpeed: 40 },
+    { gear: "D", wheelAngle: 0, targetSpeed: 40 },
+    { gear: "D", wheelAngle: 0, targetSpeed: 45 }
+  ]
+
+  useEffect(() => {
+    if (step === 0) { setSpeed(0); return; }
+    const targetSpeed = stepsInfo[step - 1].targetSpeed
+    setIsAnimating(true)
+    
+    let currentSpeed = speed
+    const interval = setInterval(() => {
+      if (currentSpeed < targetSpeed) { currentSpeed += 3; setSpeed(Math.min(targetSpeed, currentSpeed)) }
+      else {
+        clearInterval(interval)
+        setTimeout(() => {
+          setIsAnimating(false)
+          if (step === 4 && onComplete) onComplete()
+        }, 1200)
+      }
+    }, 100)
+    return () => clearInterval(interval)
+  }, [step])
+
+  const handleNext = () => { if (!isAnimating && step < 4) setStep(prev => prev + 1) }
+  const handleReset = () => { if (!isAnimating) { setStep(0); setSpeed(0) } }
+
+  const activeGear = step === 0 ? "P" : (step === 4 && !isAnimating ? "P" : stepsInfo[step - 1].gear)
+  const activeWheelAngle = step === 0 ? 0 : stepsInfo[step - 1].wheelAngle
+
+  const getCarTransform = () => {
+    switch (step) {
+      case 1: return 'translate(80px, 120px)'
+      case 2: return 'translate(220px, 120px)'
+      case 3: return 'translate(360px, 120px)'
+      case 4: return 'translate(450px, 120px)'
+      case 0: default: return 'translate(-60px, 120px)'
+    }
+  }
+
+  return (
+    <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
+      <div className="flex-1 relative w-full bg-[#0a0c10] border-b border-white/5 overflow-hidden">
+        <ScaledCanvas canvasWidth={600}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
+            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
+            <div className="absolute top-[80px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#1a1c20] border-y-2 border-white/10" />
+            
+            {step === 3 && (
+              <motion.div 
+                initial={{ x: 600, opacity: 0 }}
+                animate={{ x: 480, opacity: 1 }}
+                className="absolute top-[130px] z-10 scale-x-[-1]"
+              >
+                <RealisticCarSVG colorClass="red" showLights={true} step={1} activeGear="D" />
+                <div className="absolute right-[110px] top-[14px] w-[180px] h-[80px] bg-yellow-200/20 blur-xl rounded-full" />
+              </motion.div>
+            )}
+
+            <div 
+              className="absolute z-20 transition-all duration-[1500ms] ease-in-out top-0 left-0"
+              style={{ transform: getCarTransform() }}
+            >
+               <RealisticCarSVG colorClass="slate" showLights={step > 0} step={step} activeGear={activeGear} />
+            </div>
+          </div>
+        </ScaledCanvas>
+      </div>
+      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 z-30">
+        <div className="flex items-center gap-3">
+          <div className="relative w-12 h-12 flex-shrink-0 bg-void border border-white/10 rounded-full flex items-center justify-center shadow-inner">
+            <svg className="w-9 h-9 text-text-2 transition-transform duration-[1500ms] ease-in-out" style={{ transform: `rotate(${activeWheelAngle}deg)` }} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" />
+              <line x1="50" y1="10" x2="50" y2="50" stroke="currentColor" strokeWidth="8" />
+              <line x1="18" y1="68" x2="50" y2="50" stroke="currentColor" strokeWidth="8" />
+              <line x1="82" y1="68" x2="50" y2="50" stroke="currentColor" strokeWidth="8" />
+            </svg>
+            <span className="absolute -bottom-1 right-[-4px] text-[9px] font-mono bg-void border border-white/10 px-0.5 rounded text-accent">{activeWheelAngle}°</span>
+          </div>
+          <div className="flex flex-col justify-center">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold font-mono text-text-1 w-8">{speed} <span className="text-[9px] text-text-3">{t.kmh}</span></span>
+              <div className="flex gap-1 bg-void border border-white/5 p-1 rounded text-[10px] font-mono font-bold">
+                {["P", "R", "N", "D"].map(g => (
+                  <span key={g} className={`w-4 h-4 rounded-sm flex items-center justify-center transition-colors ${activeGear === g ? 'bg-primary text-white' : 'text-text-3 opacity-40'}`}>{g}</span>
+                ))}
+              </div>
+            </div>
+            <span className="text-[10px] font-mono text-text-3 uppercase tracking-wider mt-1">{t.telemetry}</span>
+          </div>
+        </div>
+        <div className="flex-1 max-w-[280px]">
+          <h4 className="text-[11px] sm:text-xs font-bold text-accent font-display uppercase tracking-wider leading-none">{step === 0 ? t.initialTitle : t.steps[step - 1].t}</h4>
+          <p className="text-[10px] sm:text-xs text-text-2 font-body mt-1 leading-snug line-clamp-2">{step === 0 ? t.initialDesc : t.steps[step - 1].d}</p>
+        </div>
+        <div className="flex gap-2">
+          {step > 0 && (
+            <button onClick={handleReset} disabled={isAnimating} className="p-2 bg-void hover:bg-white/[0.02] border border-border text-text-3 hover:text-text-1 rounded-xl transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none" title="Reset">
+              <RotateCcw className="w-4 h-4" />
+            </button>
+          )}
+          <button onClick={handleNext} disabled={isAnimating || step === 4} className={`px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5 shadow-lg transition-all active:scale-95 disabled:pointer-events-none ${step === 4 ? 'bg-success/20 border border-success/30 text-success' : 'bg-primary hover:bg-primary/95 text-white shadow-primary/10 disabled:opacity-40'}`}>
+            {step === 0 ? <><Play className="w-3 h-3 fill-current" /><span>{t.begin}</span></> : step === 4 ? <><Check className="w-3 h-3" /><span>{t.completed}</span></> : <><span>{t.next}</span><ArrowRight className="w-3 h-3" /></>}
           </button>
         </div>
       </div>
