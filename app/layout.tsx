@@ -10,6 +10,8 @@ import { GlobalTopNav } from "@/components/shared/GlobalTopNav";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { AIChatbot } from "@/components/shared/AIChatbot";
 import { MotionProvider } from "@/components/providers/MotionProvider";
+import { NavProgressBar } from "@/components/shared/NavProgressBar";
+import { Suspense } from "react";
 
 // Load custom fonts from next/font/google matching premium styling specs
 const displayFont = Outfit({
@@ -49,6 +51,10 @@ export default function RootLayout({
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <MotionProvider>
           <AuthProvider>
+            {/* Top nav progress bar — fires on every route change */}
+            <Suspense fallback={null}>
+              <NavProgressBar />
+            </Suspense>
             <GlobalTopNav />
             <AIChatbot />
 
