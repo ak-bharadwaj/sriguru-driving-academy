@@ -16,6 +16,7 @@ import { ThemeToggle } from '@/components/shared/ThemeToggle'
 import { GuidedTour } from '@/components/shared/GuidedTour'
 
 import { useNotifications } from '@/hooks/useNotifications'
+import { useXPStore } from '@/lib/stores/xp-store'
 
 type NavTab = {
   label: string
@@ -40,6 +41,7 @@ export default function StudentPortalLayout({ children }: { children: React.Reac
   const pathname = usePathname()
   const { language } = useLanguageStore()
   const lang = language.toUpperCase()
+  const { addToast } = useXPStore()
   
   // Call useNotifications to register native browser notifications and poll in the background
   useNotifications()
@@ -49,7 +51,53 @@ export default function StudentPortalLayout({ children }: { children: React.Reac
   const [mounted, setMounted] = React.useState(false)
   React.useEffect(() => {
     setMounted(true)
-  }, [])
+
+    // Weekly Reset check
+    const lastResetStr = localStorage.getItem('last_weekly_reset_time')
+    const now = new Date()
+    
+    const shouldReset = () => {
+      if (!lastResetStr) {
+        localStorage.setItem('last_weekly_reset_time', Date.now().toString())
+        return false
+      }
+      const lastResetTime = parseInt(lastResetStr, 10)
+      if (isNaN(lastResetTime)) {
+        localStorage.setItem('last_weekly_reset_time', Date.now().toString())
+        return false
+      }
+      
+      const last = new Date(lastResetTime)
+      // 7 days check
+      if (now.getTime() - last.getTime() >= 7 * 24 * 60 * 60 * 1000) {
+        return true
+      }
+      // Calendar week boundary check (week starts on Monday)
+      const getStartOfWeek = (d: Date) => {
+        const date = new Date(d)
+        const day = date.getDay()
+        const diff = date.getDate() - day + (day === 0 ? -6 : 1)
+        date.setDate(diff)
+        date.setHours(0, 0, 0, 0)
+        return date.getTime()
+      }
+      return getStartOfWeek(now) !== getStartOfWeek(last)
+    }
+
+    if (shouldReset()) {
+      localStorage.removeItem('completed_skills')
+      localStorage.removeItem('completed_signs')
+      localStorage.setItem('last_weekly_reset_time', Date.now().toString())
+      
+      setTimeout(() => {
+        addToast({
+          title: "Weekly Reset!",
+          description: "All training modules and road signs have been refreshed for the new week! Learn again to earn more XP.",
+          type: 'xp'
+        })
+      }, 1000)
+    }
+  }, [addToast])
 
   const getLabel = (tab: NavTab) => {
     if (!mounted) return tab.label // Safe fallback for server-matching

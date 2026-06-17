@@ -1,16 +1,17 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   X, Award, HelpCircle, AlertTriangle, Ban, Info, Phone, Plus, SquareParking as ParkingSquare, 
   ArrowRight, ArrowLeft, ArrowUp, Zap, HelpCircle as Question, TriangleAlert, 
-  CircleSlash, Navigation, MapPin, Hand, XCircle, AlertCircle
+  CircleSlash, Navigation, MapPin, Hand, XCircle, AlertCircle, Check
 } from 'lucide-react'
 
 // Import road sign SVGs
 import * as RoadSigns from '@/lib/icons/road-signs'
+import { useXPStore } from '@/lib/stores/xp-store'
 
 interface SignCardProps {
   signKey?: string
@@ -45,6 +46,44 @@ export const SignCard: React.FC<SignCardProps> = ({
   onStartQuiz
 }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const [isCompleted, setIsCompleted] = useState(false)
+  const { addXP, addToast } = useXPStore()
+
+  useEffect(() => {
+    if (signKey) {
+      const saved = localStorage.getItem('completed_signs')
+      if (saved) {
+        try {
+          const completedList = JSON.parse(saved)
+          setIsCompleted(completedList.includes(signKey))
+        } catch (e) {}
+      } else {
+        setIsCompleted(false)
+      }
+    }
+  }, [signKey, isOpen])
+
+  const handleMarkComplete = () => {
+    if (!signKey) return
+    const saved = localStorage.getItem('completed_signs')
+    let completedList: string[] = []
+    if (saved) {
+      try {
+        completedList = JSON.parse(saved)
+      } catch (e) {}
+    }
+    if (!completedList.includes(signKey)) {
+      completedList.push(signKey)
+      localStorage.setItem('completed_signs', JSON.stringify(completedList))
+      setIsCompleted(true)
+      addXP(5)
+      addToast({
+        title: `Sign Mastered!`,
+        description: `Gained +5 XP for learning this road sign.`,
+        type: 'xp'
+      })
+    }
+  }
 
   // Retrieve the custom SVG component if it exists
   const SVGIcon = (signKey && RoadSigns[signKey as keyof typeof RoadSigns])
@@ -177,10 +216,17 @@ export const SignCard: React.FC<SignCardProps> = ({
         className="w-[160px] h-[160px] bg-surface border border-border rounded-2xl p-4 flex flex-col items-center justify-between relative cursor-pointer select-none group transition-colors duration-300"
       >
         {/* Top-Right XP Reward Badge */}
-        <div className="absolute top-2 right-2 bg-accent/20 border border-accent/30 px-1.5 py-0.5 rounded-full flex items-center gap-0.5 pointer-events-none">
-          <Award className="w-2.5 h-2.5 text-accent fill-accent" />
-          <span className="text-[9px] font-bold text-accent font-mono">+5 XP</span>
-        </div>
+        {isCompleted ? (
+          <div className="absolute top-2 right-2 bg-emerald-500/20 border border-emerald-500/35 px-1.5 py-0.5 rounded-full flex items-center gap-0.5 pointer-events-none text-emerald-400">
+            <Check className="w-2.5 h-2.5 stroke-[3]" />
+            <span className="text-[9px] font-bold font-mono uppercase tracking-wider">Done</span>
+          </div>
+        ) : (
+          <div className="absolute top-2 right-2 bg-accent/20 border border-accent/30 px-1.5 py-0.5 rounded-full flex items-center gap-0.5 pointer-events-none">
+            <Award className="w-2.5 h-2.5 text-accent fill-accent" />
+            <span className="text-[9px] font-bold text-accent font-mono">+5 XP</span>
+          </div>
+        )}
 
         {/* Dynamic Image/Shape */}
         <div className="w-[72px] h-[72px] flex items-center justify-center mt-3 relative">
@@ -272,16 +318,20 @@ export const SignCard: React.FC<SignCardProps> = ({
                   >
                     Got It, Student
                   </button>
-                  {onStartQuiz && (
+                  {isCompleted ? (
+                    <div className="flex-1 py-3 bg-emerald-600/10 border border-emerald-600/30 text-emerald-400 font-semibold rounded-xl text-sm flex items-center justify-center gap-1.5">
+                      <Check className="w-4 h-4 stroke-[3]" />
+                      <span>Completed</span>
+                    </div>
+                  ) : (
                     <button
                       onClick={() => {
-                        setIsOpen(false)
-                        onStartQuiz()
+                        handleMarkComplete()
                       }}
-                      className="flex-1 py-3 bg-primary hover:bg-primary/95 text-white rounded-xl text-sm font-semibold shadow-lg shadow-primary/25 hover:shadow-primary/35 flex items-center justify-center gap-2 transition-all duration-300"
+                      className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold shadow-lg hover:shadow-emerald-600/20 flex items-center justify-center gap-1.5 transition-all duration-300"
                     >
-                      <HelpCircle className="w-4 h-4" />
-                      Practice Sign Quiz
+                      <Check className="w-4 h-4 stroke-[3]" />
+                      <span>Mark Complete</span>
                     </button>
                   )}
                 </div>
