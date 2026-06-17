@@ -117,6 +117,7 @@ model Session {
   @@index([studentId])
   @@index([instructorId])
   @@index([scheduledAt])
+  @@index([slotId])
 }
 
 model Attendance {
@@ -144,6 +145,7 @@ model Feedback {
   student        Student  @relation(fields: [studentId], references: [id])
 
   @@index([studentId])
+  @@index([instructorId])
 }
 
 model InstructorLog {
@@ -301,6 +303,7 @@ model Slot {
 
   @@unique([dayOfWeek, time, trainingType, instructorId])
   @@index([status])
+  @@index([instructorId])
 }
 
 model Booking {
@@ -323,6 +326,8 @@ model Booking {
 
   @@index([status])
   @@index([createdAt])
+  @@index([studentId])
+  @@index([slotId])
 }
 
 model Notification {
@@ -339,6 +344,7 @@ model Notification {
 
   @@index([userId, isRead])
   @@index([createdAt])
+  @@index([studentId])
 }
 
 model Inquiry {
