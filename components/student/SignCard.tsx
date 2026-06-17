@@ -52,38 +52,40 @@ export const SignCard: React.FC<SignCardProps> = ({
   useEffect(() => {
     if (signKey) {
       const saved = localStorage.getItem('completed_signs')
+      let isComp = false
       if (saved) {
         try {
           const completedList = JSON.parse(saved)
-          setIsCompleted(completedList.includes(signKey))
+          isComp = completedList.includes(signKey)
+          setIsCompleted(isComp)
         } catch (e) {}
       } else {
         setIsCompleted(false)
       }
-    }
-  }, [signKey, isOpen])
 
-  const handleMarkComplete = () => {
-    if (!signKey) return
-    const saved = localStorage.getItem('completed_signs')
-    let completedList: string[] = []
-    if (saved) {
-      try {
-        completedList = JSON.parse(saved)
-      } catch (e) {}
+      // Automatically complete the signboard if the modal is opened
+      if (isOpen && !isComp) {
+        const savedList = localStorage.getItem('completed_signs')
+        let completedList: string[] = []
+        if (savedList) {
+          try {
+            completedList = JSON.parse(savedList)
+          } catch (e) {}
+        }
+        if (!completedList.includes(signKey)) {
+          completedList.push(signKey)
+          localStorage.setItem('completed_signs', JSON.stringify(completedList))
+          setIsCompleted(true)
+          addXP(5)
+          addToast({
+            title: `Sign Mastered!`,
+            description: `Gained +5 XP for learning this road sign.`,
+            type: 'xp'
+          })
+        }
+      }
     }
-    if (!completedList.includes(signKey)) {
-      completedList.push(signKey)
-      localStorage.setItem('completed_signs', JSON.stringify(completedList))
-      setIsCompleted(true)
-      addXP(5)
-      addToast({
-        title: `Sign Mastered!`,
-        description: `Gained +5 XP for learning this road sign.`,
-        type: 'xp'
-      })
-    }
-  }
+  }, [signKey, isOpen, addXP, addToast])
 
   // Retrieve the custom SVG component if it exists
   const SVGIcon = (signKey && RoadSigns[signKey as keyof typeof RoadSigns])
@@ -318,22 +320,10 @@ export const SignCard: React.FC<SignCardProps> = ({
                   >
                     Got It, Student
                   </button>
-                  {isCompleted ? (
-                    <div className="flex-1 py-3 bg-emerald-600/10 border border-emerald-600/30 text-emerald-400 font-semibold rounded-xl text-sm flex items-center justify-center gap-1.5">
-                      <Check className="w-4 h-4 stroke-[3]" />
-                      <span>Completed</span>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        handleMarkComplete()
-                      }}
-                      className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold shadow-lg hover:shadow-emerald-600/20 flex items-center justify-center gap-1.5 transition-all duration-300"
-                    >
-                      <Check className="w-4 h-4 stroke-[3]" />
-                      <span>Mark Complete</span>
-                    </button>
-                  )}
+                  <div className="flex-1 py-3 bg-emerald-600/10 border border-emerald-600/30 text-emerald-400 font-semibold rounded-xl text-sm flex items-center justify-center gap-1.5 shadow-sm pointer-events-none">
+                    <Check className="w-4 h-4 stroke-[3]" />
+                    <span>Completed</span>
+                  </div>
                 </div>
               </div>
             </motion.div>

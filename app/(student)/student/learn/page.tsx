@@ -1271,6 +1271,15 @@ export default function StudentLearnPortal() {
                               <Check className="w-3.5 h-3.5" />
                               <span>{t.mastered}</span>
                             </div>
+                          ) : hasSim && !simCompleted ? (
+                            <button
+                              disabled
+                              title="Please run the HTML simulation step 1 to 4 on the left first!"
+                              className="flex-1 py-3 bg-border text-text-3 font-bold text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 cursor-not-allowed opacity-75"
+                            >
+                              <Play className="w-3.5 h-3.5 fill-text-3" />
+                              <span>{t.runSimFirst}</span>
+                            </button>
                           ) : (
                             <>
                               <button
@@ -1281,24 +1290,13 @@ export default function StudentLearnPortal() {
                                 <span>Mark Complete</span>
                               </button>
 
-                              {hasSim && !simCompleted ? (
-                                <button
-                                  disabled
-                                  title="Please run the HTML simulation step 1 to 4 on the left first!"
-                                  className="flex-1 py-3 bg-border text-text-3 font-bold text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 cursor-not-allowed opacity-75"
-                                >
-                                  <Play className="w-3.5 h-3.5 fill-text-3" />
-                                  <span>{t.runSimFirst}</span>
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => setShowQuiz(true)}
-                                  className="flex-1 py-3 bg-primary hover:bg-primary/95 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-1.5"
-                                >
-                                  <span>{t.takeChallenge}</span>
-                                  <ArrowRight className="w-3.5 h-3.5" />
-                                </button>
-                              )}
+                              <button
+                                onClick={() => setShowQuiz(true)}
+                                className="flex-1 py-3 bg-primary hover:bg-primary/95 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-1.5"
+                              >
+                                <span>{t.takeChallenge}</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                              </button>
                             </>
                           )}
                         </motion.div>
