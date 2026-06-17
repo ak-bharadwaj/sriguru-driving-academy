@@ -582,7 +582,7 @@ export default function ContentManagementPage() {
                 <button 
                   onClick={() => {
                     setEditingOffer(null)
-                    setOfferForm({ title: '', desc: '', discountPercent: '', promoCode: '', badge: '', active: true })
+                    setOfferForm({ title: '', titleHI: '', titleTE: '', desc: '', descHI: '', descTE: '', discountPercent: '', promoCode: '', badge: '', active: true })
                     setShowOfferModal(true)
                   }}
                   className="flex items-center gap-2 px-4 py-2 bg-surface hover:bg-accent/20 border border-border hover:border-accent/40 rounded-xl text-xs font-bold text-text-1 transition-all"
@@ -620,7 +620,11 @@ export default function ContentManagementPage() {
                               setEditingOffer(offer)
                               setOfferForm({
                                 title: typeof offer.title === 'object' ? (offer.title?.EN || '') : (offer.title || ''),
+                                titleHI: typeof offer.title === 'object' ? (offer.title?.HI || '') : '',
+                                titleTE: typeof offer.title === 'object' ? (offer.title?.TE || '') : '',
                                 desc: typeof offer.desc === 'object' ? (offer.desc?.EN || '') : (offer.desc || ''),
+                                descHI: typeof offer.desc === 'object' ? (offer.desc?.HI || '') : '',
+                                descTE: typeof offer.desc === 'object' ? (offer.desc?.TE || '') : '',
                                 discountPercent: String(offer.discountPercent),
                                 promoCode: offer.promoCode,
                                 badge: typeof offer.badge === 'object' ? (offer.badge?.EN || '') : (offer.badge || ''),

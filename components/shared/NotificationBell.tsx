@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react'
-import useSWR from 'swr'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Bell, 
@@ -14,53 +13,13 @@ import {
   AlertTriangle,
   MailCheck
 } from 'lucide-react'
-
-const fetcher = (url: string) => fetch(url).then(res => res.json())
-
-interface Notification {
-  id: string
-  type: 'SESSION_REMINDER' | 'BADGE_EARNED' | 'FEEDBACK_RECEIVED' | 'BOOKING_APPROVED' | 'BOOKING_REJECTED' | 'STREAK_AT_RISK'
-  message: string
-  time: string
-  read: boolean
-}
+import { useNotifications } from '@/hooks/useNotifications'
 
 export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Fetch initial notifications once
-  const { data: initialNotifications = [], mutate } = useSWR<Notification[]>(
-    '/api/notifications',
-    fetcher,
-    { revalidateOnFocus: false, revalidateOnReconnect: true } // Removed aggressive polling
-  )
-
-  const [liveNotifications, setLiveNotifications] = useState<Notification[]>([])
-  
-  // Combine initial and live notifications
-  const notifications = [...liveNotifications, ...initialNotifications].reduce((acc, curr) => {
-    if (!acc.find(n => n.id === curr.id)) acc.push(curr)
-    return acc
-  }, [] as Notification[]).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-
-  // SSE for real-time updates
-  useEffect(() => {
-    const eventSource = new EventSource('/api/notifications/stream')
-    
-    eventSource.onmessage = (event) => {
-      try {
-        const newNotifs = JSON.parse(event.data)
-        setLiveNotifications(prev => [...newNotifs, ...prev])
-      } catch (err) {}
-    }
-
-    return () => {
-      eventSource.close()
-    }
-  }, [])
-
-  const unreadCount = notifications.filter(n => !n.read).length
+  const { notifications, unreadCount, markAllAsRead, markAsRead } = useNotifications()
 
   // Click outside to close dropdown
   useEffect(() => {
@@ -76,38 +35,12 @@ export default function NotificationBell() {
   // Mark single as read
   const handleMarkAsRead = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation()
-    // Optimistic UI update
-    setLiveNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n))
-    mutate(
-      initialNotifications.map(n => (n.id === id ? { ...n, read: true } : n)),
-      false
-    )
-
-    try {
-      await fetch(`/api/notifications/${id}/read`, { method: 'PATCH' })
-      // Trigger full api fetch in the background to ensure sync
-      mutate()
-    } catch (err) {
-      console.error(err)
-    }
+    markAsRead(id)
   }
 
   // Mark all read
   const handleMarkAllRead = async () => {
-    // Optimistic UI update
-    setLiveNotifications(prev => prev.map(n => ({ ...n, read: true })))
-    mutate(
-      initialNotifications.map(n => ({ ...n, read: true })),
-      false
-    )
-
-    try {
-      await fetch('/api/notifications/read-all', { method: 'PATCH' })
-      // Trigger background sync
-      mutate()
-    } catch (err) {
-      console.error(err)
-    }
+    markAllAsRead()
   }
 
   const getNotificationIcon = (type: string) => {
