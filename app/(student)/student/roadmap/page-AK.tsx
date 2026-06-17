@@ -422,7 +422,7 @@ export default function StudentLearningRoadmap() {
           ---------------------------------------------------- */}
       <AnimatePresence>
         {selectedMilestone && (
-          <div className="fixed inset-0 bg-void/80 z-50 flex items-end justify-center px-4 pb-4">
+          <div className="fixed inset-0 bg-void/80 z-[500] flex items-end justify-center px-4 pb-4">
             
             {/* Click backdrop to close */}
             <div className="absolute inset-0" onClick={() => setSelectedMilestone(null)} />

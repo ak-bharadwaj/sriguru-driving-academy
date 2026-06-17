@@ -989,7 +989,7 @@ export default function StudentLearnPortal() {
           const hasSim = ['parallel-parking', 'reverse-parking', 'vehicle-startup', 'steering-control', 'clutch-control', 'highway-merging'].includes(selectedCard.slug)
           
           return (
-            <div className="fixed inset-0 z-[200] flex flex-col">
+            <div className="fixed inset-0 z-[500] flex flex-col">
               
               {/* Backdrop */}
               <motion.div

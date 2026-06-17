@@ -10,7 +10,8 @@ import {
   BookOpen, 
   RotateCcw,
   ChevronRight,
-  ArrowRight
+  ArrowRight,
+  Play
 } from 'lucide-react'
 
 // Import icons
@@ -229,6 +230,7 @@ export default function RTOLearningCenter() {
   const [quizFinished, setQuizFinished] = useState(false)
   const [quizScore, setQuizScore] = useState(0)
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({})
+  const [quizStarted, setQuizStarted] = useState(false)
   
   // Topic accuracy tracker for raw SVG radar chart
   const [topicScores, setTopicScores] = useState<Record<string, { correct: number; total: number }>>({
@@ -475,9 +477,9 @@ export default function RTOLearningCenter() {
             >
               3D Flashcards
             </button>
-            <button
+             <button
               onClick={() => {
-                resetQuizSession()
+                setQuizStarted(false)
                 setActiveMode('quiz')
               }}
               className={`px-4 py-2 rounded-xl text-xs font-bold tracking-wide transition-all duration-300 ${
@@ -538,8 +540,9 @@ export default function RTOLearningCenter() {
                       rule={sign.rule}
                       steps={sign.steps}
                       imagePath={sign.imagePath}
-                      onStartQuiz={() => {
+                       onStartQuiz={() => {
                         resetQuizSession()
+                        setQuizStarted(true)
                         setActiveMode('quiz')
                       }}
                     />
@@ -736,7 +739,52 @@ export default function RTOLearningCenter() {
         {activeMode === 'quiz' && (
           <div className="mt-8 flex flex-col items-center pb-12">
             
-            {!quizFinished && activeQuestions.length > 0 ? (
+            {!quizStarted ? (
+              <div className="w-full max-w-xl bg-surface border border-border rounded-3xl p-6 md:p-8 flex flex-col gap-6 text-center shadow-[0_16px_40px_rgba(0,0,0,0.6)]">
+                <div>
+                  <span className="text-xs font-mono uppercase tracking-widest text-primary">RTO Exam Simulator</span>
+                  <h3 className="text-2xl font-extrabold text-text-1 font-display tracking-tight mt-1 uppercase">
+                    RTO Mock Test
+                  </h3>
+                  <p className="text-xs text-text-2 mt-2 leading-relaxed">
+                    Test your knowledge of traffic signs, safety regulations, and driving rules. Get ready for your official RTO computer test.
+                  </p>
+                </div>
+
+                <div className="bg-void/50 border border-border/60 rounded-2xl p-5 text-left flex flex-col gap-3.5">
+                  <h4 className="text-xs font-mono font-bold text-accent uppercase tracking-wider font-mono">Exam Parameters</h4>
+                  <ul className="text-xs text-text-2 flex flex-col gap-2.5 font-body">
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      <span><strong>Total Questions:</strong> 20 (10 Signs, 10 Theory)</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      <span><strong>Time Limit:</strong> 15 seconds per question</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      <span><strong>Passing Score:</strong> 12 / 20 correct answers (60%)</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                      <span><strong>XP Reward:</strong> Earn +10 XP for every correct answer</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <button
+                  onClick={() => {
+                    resetQuizSession()
+                    setQuizStarted(true)
+                  }}
+                  className="w-full py-4 bg-primary hover:bg-primary/95 text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-300"
+                >
+                  <Play className="w-4 h-4" />
+                  Begin Exam
+                </button>
+              </div>
+            ) : !quizFinished && activeQuestions.length > 0 ? (
               <div className="w-full max-w-2xl bg-surface border border-border rounded-3xl p-6 md:p-8 flex flex-col gap-6 relative shadow-[0_16px_40px_rgba(0,0,0,0.6)]">
                 
                 {/* Selection frame */}
@@ -874,7 +922,10 @@ export default function RTOLearningCenter() {
 
                   <div className="flex gap-4">
                     <button
-                      onClick={resetQuizSession}
+                      onClick={() => {
+                        resetQuizSession()
+                        setQuizStarted(true)
+                      }}
                       className="flex-1 py-3 bg-void/80 hover:bg-white/[0.03] border border-border text-text-2 hover:text-text-1 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all duration-300"
                     >
                       <RotateCcw className="w-4 h-4" />
