@@ -207,7 +207,7 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-lg md:text-xl text-white/70 mb-12 max-w-2xl leading-relaxed font-light drop-shadow-md"
+            className="text-base sm:text-lg md:text-xl text-white font-medium mb-12 max-w-2xl leading-relaxed bg-black/40 px-5 py-3.5 rounded-2xl backdrop-blur-md border border-white/10 shadow-lg"
           >
             {t('landing.desc')}
           </motion.p>
@@ -254,8 +254,8 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center mb-4 shadow-lg shadow-violet-500/20">
                   <ShieldCheck className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-xl md:text-2xl font-medium mb-3 font-display tracking-tight">{t('landing.f1.title')}</h3>
-                <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm font-light max-w-md">
+                <h3 className="text-2xl md:text-3xl font-semibold mb-3 font-display tracking-tight text-slate-900 dark:text-white">{t('landing.f1.title')}</h3>
+                <p className="text-slate-800 dark:text-slate-200 leading-relaxed text-base sm:text-lg font-medium max-w-md">
                   {t('landing.f1.desc')}
                 </p>
               </div>
@@ -268,9 +268,9 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
                 <div className="w-10 h-10 rounded-xl border border-white/50 dark:border-white/10 bg-white/80 dark:bg-white/10 backdrop-blur-md flex items-center justify-center shrink-0 shadow-sm">
                   <Award className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                 </div>
-                <h3 className="text-lg md:text-xl font-medium font-display tracking-tight">{t('landing.f2.title')}</h3>
+                <h3 className="text-xl md:text-2xl font-semibold font-display tracking-tight text-slate-900 dark:text-white">{t('landing.f2.title')}</h3>
               </div>
-              <p className="text-slate-600 dark:text-slate-300 leading-relaxed font-light text-sm relative z-10">
+              <p className="text-slate-800 dark:text-slate-200 leading-relaxed font-medium text-base sm:text-lg relative z-10">
                 {t('landing.f2.desc')}
               </p>
             </div>
@@ -278,15 +278,15 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
             {/* Feature 3 */}
             <div className="md:col-span-1 md:row-span-1 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[2rem] p-6 flex flex-col justify-center items-center text-center shadow-xl shadow-indigo-500/20">
               <Clock className="w-8 h-8 text-white mb-3" />
-              <h3 className="text-lg font-medium text-white font-display tracking-tight mb-2">{t('landing.f3.title')}</h3>
-              <p className="text-indigo-100 text-xs leading-relaxed">{t('landing.f3.desc')}</p>
+              <h3 className="text-lg md:text-xl font-bold text-white font-display tracking-tight mb-2">{t('landing.f3.title')}</h3>
+              <p className="text-white text-sm md:text-base font-semibold leading-relaxed">{t('landing.f3.desc')}</p>
             </div>
 
             {/* Feature 4 */}
             <div className="md:col-span-1 md:row-span-1 bg-white/60 dark:bg-white/5 backdrop-blur-3xl rounded-[2rem] p-6 border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-center items-center text-center">
               <Car className="w-8 h-8 mb-3 text-violet-600 dark:text-violet-400" />
-              <h3 className="text-lg font-medium font-display tracking-tight mb-2">{t('landing.f4.title')}</h3>
-              <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">{t('landing.f4.desc')}</p>
+              <h3 className="text-lg md:text-xl font-bold font-display tracking-tight mb-2 text-slate-900 dark:text-white">{t('landing.f4.title')}</h3>
+              <p className="text-slate-800 dark:text-slate-200 text-sm md:text-base font-semibold leading-relaxed">{t('landing.f4.desc')}</p>
             </div>
           </div>
         </div>
@@ -327,47 +327,47 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
                     <span className="text-4xl md:text-5xl font-medium tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400">
                       ₹3,500 <span className="text-sm font-normal text-text-3">to</span> ₹5,000
                     </span>
-                    <span className="text-[9px] text-text-3 font-mono uppercase tracking-wider block mt-1">
+                    <span className="text-xs sm:text-sm text-text-2 font-mono uppercase tracking-wider block mt-1">
                       Flexible Duration Choices:
                     </span>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-2 mt-4 bg-void/35 p-3 rounded-2xl border border-border/30">
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold text-text-1">7 Days</span>
-                      <span className="text-[9px] text-text-3 font-mono">154 Total km</span>
+                      <span className="text-sm sm:text-base font-bold text-text-1">7 Days</span>
+                      <span className="text-xs text-text-3 font-semibold font-mono">154 Total km</span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold text-text-1">10 Days</span>
-                      <span className="text-[9px] text-text-3 font-mono">150 Total km</span>
+                      <span className="text-sm sm:text-base font-bold text-text-1">10 Days</span>
+                      <span className="text-xs text-text-3 font-semibold font-mono">150 Total km</span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold text-text-1">15 Days</span>
-                      <span className="text-[9px] text-text-3 font-mono">150 Total km</span>
+                      <span className="text-sm sm:text-base font-bold text-text-1">15 Days</span>
+                      <span className="text-xs text-text-3 font-semibold font-mono">150 Total km</span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold text-text-1">30 Days</span>
-                      <span className="text-[9px] text-text-3 font-mono">150 Total km</span>
+                      <span className="text-sm sm:text-base font-bold text-text-1">30 Days</span>
+                      <span className="text-xs text-text-3 font-semibold font-mono">150 Total km</span>
                     </div>
                   </div>
                 </div>
                 
-                <p className="text-slate-600 dark:text-slate-300 mb-6 flex-1 leading-relaxed font-light text-sm md:text-base relative z-10">
+                <p className="text-slate-800 dark:text-slate-200 mb-6 flex-1 leading-relaxed font-medium text-base sm:text-lg relative z-10">
                   Select your program duration based on your comfort level. Optional RTO license processing (+₹1,500) covers all documentation and RTO exam prep support.
                 </p>
                 
                 <ul className="space-y-4 md:space-y-5 mb-8 md:mb-12 relative z-10">
                   <li className="flex items-center gap-4">
                     <Check className="w-5 h-5 text-violet-600 dark:text-violet-400 shrink-0" />
-                    <span className="font-light text-lg">{t('landing.course.f1')}</span>
+                    <span className="font-semibold text-base sm:text-lg text-slate-800 dark:text-slate-100">{t('landing.course.f1')}</span>
                   </li>
                   <li className="flex items-center gap-4">
                     <Check className="w-5 h-5 text-violet-600 dark:text-violet-400 shrink-0" />
-                    <span className="font-light text-lg">{t('landing.course.f2')}</span>
+                    <span className="font-semibold text-base sm:text-lg text-slate-800 dark:text-slate-100">{t('landing.course.f2')}</span>
                   </li>
                   <li className="flex items-center gap-4">
                     <Check className="w-5 h-5 text-violet-600 dark:text-violet-400 shrink-0" />
-                    <span className="font-light text-lg">{t('landing.course.f3')}</span>
+                    <span className="font-semibold text-base sm:text-lg text-slate-800 dark:text-slate-100">{t('landing.course.f3')}</span>
                   </li>
                 </ul>
 
