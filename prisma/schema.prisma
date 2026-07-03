@@ -20,7 +20,6 @@ model User {
   updatedAt     DateTime       @updatedAt
   lastActiveAt  DateTime?
   admin         Admin?
-  instructor    Instructor?
   notifications Notification[]
   student       Student?
 
@@ -32,7 +31,6 @@ model Student {
   id              String                  @id @default(cuid())
   userId          String                  @unique
   regNo           String?                 @unique
-  instructorId    String?
   trainingType    TrainingType            @default(BEGINNER)
   enrolledAt      DateTime                @default(now())
   xp              Int                     @default(0)
@@ -45,19 +43,14 @@ model Student {
   hasOnboarded    Boolean                 @default(false)
   status          StudentStatus           @default(ACTIVE)
   activityLogs    ActivityLog[]
-  attendance      Attendance[]
   bookings        Booking[]
   CourseFeedback  CourseFeedback?
   drivingTests    DrivingTest[]
-  feedback        Feedback[]
   progress        LearningProgress[]
   notifications   Notification[]
   payments        Payment[]
   quizAttempts    QuizAttempt[]
-  sessions        Session[]
-  sessionNotes    SessionNote[]
   skillMastery    SkillMastery[]
-  instructor      Instructor?             @relation(fields: [instructorId], references: [id])
   user            User                    @relation(fields: [userId], references: [id])
   attendanceOtp        String?
   attendanceOtpExpires DateTime?
@@ -69,23 +62,6 @@ model Student {
   syllabusProgress StudentSyllabusProgress[]
 
   @@index([userId])
-  @@index([instructorId])
-}
-
-model Instructor {
-  id             String          @id @default(cuid())
-  userId         String          @unique
-  bio            String?
-  specialization String?
-  yearsExp       Int             @default(0)
-  coachingNotes  CoachingNote[]
-  user           User            @relation(fields: [userId], references: [id])
-  dailyLogs      InstructorLog[]
-  sessions       Session[]
-  slots          Slot[]
-  students       Student[]
-
-  @@index([userId])
 }
 
 model Admin {
@@ -94,71 +70,6 @@ model Admin {
   user   User   @relation(fields: [userId], references: [id])
 }
 
-model Session {
-  id            String         @id @default(cuid())
-  studentId     String
-  instructorId  String
-  slotId        String?
-  scheduledAt   DateTime
-  duration      Int            @default(60)
-  status        SessionStatus  @default(SCHEDULED)
-  lessonType    String
-  notes         String?
-  completedAt   DateTime?
-  createdAt     DateTime       @default(now())
-  skillsCovered String[]
-  attendance    Attendance?
-  coachingNotes CoachingNote[]
-  instructor    Instructor     @relation(fields: [instructorId], references: [id])
-  slot          Slot?          @relation(fields: [slotId], references: [id])
-  student       Student        @relation(fields: [studentId], references: [id])
-  studentNotes  SessionNote[]
-
-  @@index([studentId])
-  @@index([instructorId])
-  @@index([scheduledAt])
-  @@index([slotId])
-}
-
-model Attendance {
-  id        String           @id @default(cuid())
-  sessionId String           @unique
-  studentId String
-  status    AttendanceStatus
-  markedAt  DateTime         @default(now())
-  markedBy  String
-  session   Session          @relation(fields: [sessionId], references: [id])
-  student   Student          @relation(fields: [studentId], references: [id])
-
-  @@index([studentId])
-}
-
-model Feedback {
-  id             String   @id @default(cuid())
-  studentId      String
-  instructorId   String
-  tag            String
-  content        String
-  skillScores    Json?
-  createdAt      DateTime @default(now())
-  studentVisible Boolean  @default(true)
-  student        Student  @relation(fields: [studentId], references: [id])
-
-  @@index([studentId])
-  @@index([instructorId])
-}
-
-model InstructorLog {
-  id            String     @id @default(cuid())
-  instructorId  String
-  date          DateTime   @default(now())
-  content       String
-  skillsCovered Json?
-  instructor    Instructor @relation(fields: [instructorId], references: [id])
-
-  @@unique([instructorId, date])
-  @@index([instructorId])
-}
 
 model LearningCard {
   id             String             @id @default(cuid())
@@ -288,28 +199,9 @@ model StudentBadge {
   @@index([studentId])
 }
 
-model Slot {
-  id           String       @id @default(cuid())
-  instructorId String
-  trainingType TrainingType
-  maxCapacity  Int          @default(5)
-  currentCount Int          @default(0)
-  status       SlotStatus   @default(DRAFT)
-  dayOfWeek    String
-  time         String
-  bookings     Booking[]
-  sessions     Session[]
-  instructor   Instructor   @relation(fields: [instructorId], references: [id])
-
-  @@unique([dayOfWeek, time, trainingType, instructorId])
-  @@index([status])
-  @@index([instructorId])
-}
-
 model Booking {
   id            String         @id @default(cuid())
   studentId     String?
-  slotId        String?
   name          String
   phone         String
   email         String
@@ -321,13 +213,11 @@ model Booking {
   reviewedAt    DateTime?
   reviewedBy    String?
   preferredTime PreferredTime?
-  slot          Slot?          @relation(fields: [slotId], references: [id])
   student       Student?       @relation(fields: [studentId], references: [id])
 
   @@index([status])
   @@index([createdAt])
   @@index([studentId])
-  @@index([slotId])
 }
 
 model Notification {
@@ -427,31 +317,7 @@ model StudentDailyChallenge {
   @@index([studentId])
 }
 
-model CoachingNote {
-  id           String     @id @default(cuid())
-  sessionId    String
-  instructorId String
-  note         String
-  createdAt    DateTime   @default(now())
-  instructor   Instructor @relation(fields: [instructorId], references: [id])
-  session      Session    @relation(fields: [sessionId], references: [id])
 
-  @@index([sessionId])
-  @@index([instructorId])
-}
-
-model SessionNote {
-  id        String   @id @default(cuid())
-  sessionId String
-  studentId String
-  note      String
-  createdAt DateTime @default(now())
-  session   Session  @relation(fields: [sessionId], references: [id])
-  student   Student  @relation(fields: [studentId], references: [id])
-
-  @@index([sessionId])
-  @@index([studentId])
-}
 
 model Promotion {
   id          String    @id @default(cuid())
@@ -544,7 +410,6 @@ model StudentSyllabusProgress {
 
 enum Role {
   STUDENT
-  INSTRUCTOR
   ADMIN
 }
 
@@ -553,26 +418,6 @@ enum BookingStatus {
   APPROVED
   REJECTED
   COMPLETED
-}
-
-enum AttendanceStatus {
-  PRESENT
-  ABSENT
-  LATE
-}
-
-enum SessionStatus {
-  SCHEDULED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-}
-
-enum SlotStatus {
-  DRAFT
-  ACTIVE
-  FULL
-  CLOSED
 }
 
 enum TrainingType {

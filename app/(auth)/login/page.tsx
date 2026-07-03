@@ -60,7 +60,6 @@ export default function CentralLoginHub() {
         const role = (session?.user as { role?: string })?.role
 
         if (role === 'ADMIN') router.push('/admin/students')
-        else if (role === 'INSTRUCTOR') router.push('/instructor/schedule')
         else router.push('/student/dashboard')
       }
     } catch {
@@ -83,7 +82,7 @@ export default function CentralLoginHub() {
             name: result.displayName || '',
             avatarUrl: result.imageUrl || '',
             isGoogleNative: 'true',
-            password: 'google-auth-bypass-secure' // dummy password required by NextAuth structure
+            password: 'google-auth-bypass-secure'
           })
           
           if (res?.error) {
@@ -93,7 +92,6 @@ export default function CentralLoginHub() {
             const session = await getSession()
             const role = (session?.user as { role?: string })?.role
             if (role === 'ADMIN') router.push('/admin/students')
-            else if (role === 'INSTRUCTOR') router.push('/instructor/schedule')
             else router.push('/student/dashboard')
           }
         } else {

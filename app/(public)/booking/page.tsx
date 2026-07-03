@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Check, CheckCircle, ArrowRight, User, Phone, Mail, Clock, ArrowLeft, BookOpen, Award, Zap, Lock, Eye, EyeOff, Info } from 'lucide-react'
+import { Calendar, Check, CheckCircle, ArrowRight, User, Phone, Mail, Clock, ArrowLeft, BookOpen, Award, Zap, Lock, Eye, EyeOff, Info, Sun, Moon } from 'lucide-react'
 import { signIn, useSession } from 'next-auth/react'
 import toast from 'react-hot-toast'
 import { useLanguageStore } from '@/store/languageStore'
@@ -269,14 +269,13 @@ export default function PublicBookingSystem() {
     }
   }, [session, autoFilled])
 
-  // Step 2: Training Option selection
-  const [selectedType, setSelectedType] = useState('course-beginner')
+  // Step 2: Duration selection + license add-on
+  const [selectedType] = useState('course-driving')
+  const [selectedDuration, setSelectedDuration] = useState<7 | 10 | 15 | 30>(7)
+  const [includeLicense, setIncludeLicense] = useState(false)
 
-  // Step 3: Slots grid selection
-  const [slots, setSlots] = useState<SlotItem[]>([])
-  const [selectedSlot, setSelectedSlot] = useState<SlotItem | null>(null)
-  const [activeDay, setActiveDay] = useState('')
-  const [loadingSlots, setLoadingSlots] = useState(false)
+  // Step 3: Preferred time slot selection (replacing slots grid)
+  const [preferredTime, setPreferredTime] = useState<'MORNING' | 'AFTERNOON' | 'EVENING'>('MORNING')
 
   // Step 4: Submission Success overlay
   const [bookingResult, setBookingResult] = useState<{ ref: string; msg: string } | null>(null)
@@ -287,64 +286,24 @@ export default function PublicBookingSystem() {
   const activeLang = language.toUpperCase() as keyof typeof BOOKING_DICT
   const t = BOOKING_DICT[activeLang] || BOOKING_DICT.EN
 
-  const [courses, setCourses] = useState<Course[]>([])
   const [offers, setOffers] = useState<Offer[]>([])
-  const [loadingCourses, setLoadingCourses] = useState(true)
   const [promoCodeInput, setPromoCodeInput] = useState('')
   const [appliedPromo, setAppliedPromo] = useState<Offer | null>(null)
   const [promoError, setPromoError] = useState('')
 
-  const selectedCourse = courses.find(c => c.id === selectedType)
-  const courseTitle = selectedCourse 
-    ? (selectedCourse.title[activeLang] || selectedCourse.title['EN'] || selectedType) 
-    : selectedType
+  const BASE_DRIVING_PRICE = 3500
+  const LICENSE_ADDON_PRICE = 1500
+  const courseTitle = `Driving Course (${selectedDuration} Days)${includeLicense ? ' + License' : ''}`
 
-  const basePrice = selectedCourse ? selectedCourse.price : 0
+  const basePrice = BASE_DRIVING_PRICE + (includeLicense ? LICENSE_ADDON_PRICE : 0)
   const discountPercent = appliedPromo ? appliedPromo.discountPercent : 0
   const discountAmount = basePrice * (discountPercent / 100)
   const grandTotal = basePrice - discountAmount
 
-  // Load courses & offers on mount
+  // Load offers on mount
   useEffect(() => {
-    // 1. Fetch courses
-    fetch('/api/public/courses')
-      .then(res => res.json())
-      .then(data => {
-        const defaults: Course[] = [
-          { id: 'course-beginner', category: 'BEGINNER', title: { EN: 'The Foundation', HI: 'बुनियाद', TE: 'పునాది' }, tag: { EN: '21 Days LMV', HI: '21 दिन', TE: '21 రోజులు' }, desc: { EN: 'Complete basic to advanced manual shifting, parallel aligning, and safety mockups.', HI: 'बुनियाद', TE: 'పునాది' }, price: 4999, active: true },
-          { id: 'course-advanced', category: 'ADVANCED', title: { EN: 'Advanced Refresh', HI: 'अधुनातन', TE: 'అధునాతన' }, tag: { EN: '14 Days LMV', HI: '14 दिन', TE: '14 రోజులు' }, desc: { EN: 'Precision highway maneuvers, high speed defensive braking, and extreme clutch friction controls.', HI: 'उन्नत', TE: 'అధునాతన' }, price: 6999, active: true },
-          { id: 'course-rto', category: 'RTO_FAST_TRACK', title: { EN: 'RTO Rapid Prep', HI: 'RTO', TE: 'RTO' }, tag: { EN: '7 Days Bootcamp', HI: '7 दिन', TE: '7 రోజులు' }, desc: { EN: 'Mock signs examination center drills and high-precision parking track trials.', HI: 'RTO', TE: 'RTO' }, price: 2999, active: true }
-        ]
-        if (Array.isArray(data) && data.length > 0) {
-          setCourses(data)
-          
-          // Check query param first
-          const searchParams = new URLSearchParams(window.location.search)
-          const prog = searchParams.get('program')
-          if (prog && data.some(d => d.id === prog)) {
-            setSelectedType(prog)
-          } else {
-            setSelectedType(data[0].id)
-          }
-        } else {
-          setCourses(defaults)
-          setSelectedType(defaults[0].id)
-        }
-        setLoadingCourses(false)
-      })
-      .catch(e => {
-        console.error('Failed to fetch courses:', e)
-        const defaults: Course[] = [
-          { id: 'course-beginner', category: 'BEGINNER', title: { EN: 'The Foundation', HI: 'बुनियाद', TE: 'పునాది' }, tag: { EN: '21 Days LMV', HI: '21 दिन', TE: '21 రోజులు' }, desc: { EN: 'Complete basic to advanced manual shifting, parallel aligning, and safety mockups.', HI: 'बुनियाद', TE: 'పునాది' }, price: 4999, active: true },
-          { id: 'course-advanced', category: 'ADVANCED', title: { EN: 'Advanced Refresh', HI: 'अधुनातन', TE: 'అధునాతన' }, tag: { EN: '14 Days LMV', HI: '14 दिन', TE: '14 రోజులు' }, desc: { EN: 'Precision highway maneuvers, high speed defensive braking, and extreme clutch friction controls.', HI: 'उन्नत', TE: 'అధునాతన' }, price: 6999, active: true },
-          { id: 'course-rto', category: 'RTO_FAST_TRACK', title: { EN: 'RTO Rapid Prep', HI: 'RTO', TE: 'RTO' }, tag: { EN: '7 Days Bootcamp', HI: '7 दिन', TE: '7 రోజులు' }, desc: { EN: 'Mock signs examination center drills and high-precision parking track trials.', HI: 'RTO', TE: 'RTO' }, price: 2999, active: true }
-        ]
-        setCourses(defaults)
-        setSelectedType(defaults[0].id)
-        setLoadingCourses(false)
-      })
 
-    // 2. Fetch offers
+    // Fetch offers
     fetch('/api/public/offers')
       .then(res => res.json())
       .then(data => {
@@ -356,7 +315,7 @@ export default function PublicBookingSystem() {
         console.error('Failed to fetch offers:', e)
       })
 
-    // 3. Parse ?promo= query param
+    // Parse ?promo= query param
     const searchParams = new URLSearchParams(window.location.search)
     const promo = searchParams.get('promo')
     if (promo) {
@@ -389,29 +348,7 @@ export default function PublicBookingSystem() {
     }
   }, [offers, promoCodeInput])
 
-  // Fetch slots matching selected training program
-  useEffect(() => {
-    if (step === 3) {
-      setLoadingSlots(true)
-      fetch(`/api/public/slots`)
-        .then(res => res.json())
-        .then(data => {
-          const activeOrFull = data.filter((s: SlotItem) => s.status !== 'CLOSED')
-          setSlots(activeOrFull)
-          if (activeOrFull.length > 0) {
-            const dates = Array.from(new Set(activeOrFull.map((s: SlotItem) => s.dayOfWeek))).sort() as string[]
-            if (dates.length > 0) {
-              setActiveDay(dates[0])
-            }
-          }
-          setLoadingSlots(false)
-        })
-        .catch(e => {
-          console.error(e)
-          setLoadingSlots(false)
-        })
-    }
-  }, [step])
+
 
   // Inline Validators (Triggered on keystroke)
   const validateField = (field: 'name' | 'phone' | 'email', value: string) => {
@@ -443,8 +380,6 @@ export default function PublicBookingSystem() {
   }
 
   const handleBookingSubmit = async () => {
-    if (!selectedSlot) return
-    
     // Validate password for manual signups
     if (!session?.user && (!password || password.trim().length < 6)) {
       if (!password) {
@@ -480,7 +415,9 @@ export default function PublicBookingSystem() {
           phone,
           email,
           trainingType: selectedType,
-          slotId: selectedSlot.id,
+          duration: selectedDuration,
+          includeLicense,
+          preferredTime,
           password
         })
       })
@@ -506,6 +443,11 @@ export default function PublicBookingSystem() {
           })
         } catch (authErr) {
           console.error("Background auto-login failed:", authErr)
+        }
+
+        // Open WhatsApp to notify admin with booking details
+        if (data.whatsappUrl) {
+          window.open(data.whatsappUrl, '_blank', 'noopener,noreferrer')
         }
 
         setStep(5) // Move to full page success display state
@@ -541,6 +483,17 @@ export default function PublicBookingSystem() {
           <p className="text-xs text-text-2 mt-1.5 max-w-sm mx-auto">
             {t.reviewCal}
           </p>
+          {/* Address & Location Notice */}
+          <div className="mt-4 inline-flex flex-col sm:flex-row items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-2xl px-4 py-3 text-left max-w-lg mx-auto">
+            <span className="text-lg shrink-0">📍</span>
+            <div>
+              <p className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider">We Only Have 1 School — Nandyal</p>
+              <p className="text-[11px] text-text-2 font-body leading-relaxed mt-0.5">
+                Shop No.27282-P2, Near Anu Hospital, Bommalasatram, Kadapa Road, <strong className="text-text-1">Nandyal, Andhra Pradesh</strong>.
+                Training is <strong className="text-amber-400">available only in Nandyal</strong> — we do not operate in other cities or states.
+              </p>
+            </div>
+          </div>
         </header>
 
         {/* ----------------------------------------------------
@@ -822,97 +775,151 @@ export default function PublicBookingSystem() {
               </motion.div>
             )}
 
-            {/* STEP 2: TRAINING TYPE (Large Tap Targets) */}
+            {/* STEP 2: PLAN SELECTION + DURATION */}
             {step === 2 && (
               <motion.div
                 key="step2"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="flex flex-col gap-6 text-left"
+                className="flex flex-col gap-5 text-left"
               >
                 <div>
                   <h3 className="text-lg font-bold text-text-1 uppercase font-display">{t.step2Title}</h3>
                   <p className="text-[10px] text-text-3 mt-1 font-mono uppercase">{t.step2Desc}</p>
                 </div>
 
-                <div className="flex flex-col gap-4">
-                  {loadingCourses ? (
-                    <div className="flex flex-col items-center justify-center py-10 gap-3">
-                      <Clock className="w-8 h-8 text-primary animate-spin" />
-                      <span className="text-[9px] font-mono text-text-3">{t.loadingProg}</span>
-                    </div>
-                  ) : (
-                    courses.map((opt) => {
-                      const isSelected = selectedType === opt.id
-                      const Icon = opt.category === 'BEGINNER' ? BookOpen : opt.category === 'ADVANCED' ? Award : Zap
-                      const displayTitle = opt.title[activeLang] || opt.title['EN'] || ''
-                      const displayTag = opt.tag[activeLang] || opt.tag['EN'] || ''
-                      const displayDesc = opt.desc[activeLang] || opt.desc['EN'] || ''
+                {/* ─── PLAN CARDS ─── */}
+                <div className="flex flex-col gap-3">
+                  <span className="text-[9px] font-mono text-text-3 uppercase font-bold tracking-wider">Choose Your Plan</span>
 
+                  {/* Plan 1: Just Driving */}
+                  <div
+                    onClick={() => setIncludeLicense(false)}
+                    className={`relative p-4 rounded-2xl border cursor-pointer transition-all duration-300 flex items-start gap-4 ${
+                      !includeLicense
+                        ? 'bg-primary/5 border-primary shadow-lg shadow-primary/5'
+                        : 'bg-void/40 border-border hover:bg-white/[0.02]'
+                    }`}
+                  >
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                      !includeLicense ? 'bg-primary/15 text-primary' : 'bg-void text-text-3 border border-border'
+                    }`}>
+                      <BookOpen className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <span className="text-sm font-bold text-text-1">Just Driving</span>
+                        <span className="px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-extrabold border border-accent/20">₹3,500</span>
+                      </div>
+                      <p className="text-[10px] text-text-3 font-mono mt-1 leading-relaxed">
+                        On-road driving training only — steering control, road confidence, gear handling & RTO track practice.
+                      </p>
+                    </div>
+                    {!includeLicense && (
+                      <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                        <Check className="w-3 h-3 text-white" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Plan 2: Driving + License */}
+                  <div
+                    onClick={() => setIncludeLicense(true)}
+                    className={`relative p-4 rounded-2xl border cursor-pointer transition-all duration-300 flex items-start gap-4 ${
+                      includeLicense
+                        ? 'bg-accent/5 border-accent shadow-lg shadow-accent/5'
+                        : 'bg-void/40 border-border hover:bg-white/[0.02]'
+                    }`}
+                  >
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                      includeLicense ? 'bg-accent/15 text-accent' : 'bg-void text-text-3 border border-border'
+                    }`}>
+                      <Award className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-text-1">Driving + License Process</span>
+                          <span className="px-1.5 py-0.5 rounded bg-accent/20 text-accent text-[8px] font-extrabold uppercase tracking-wider">POPULAR</span>
+                        </div>
+                        <span className="px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-extrabold border border-accent/20">₹5,000</span>
+                      </div>
+                      <p className="text-[10px] text-text-3 font-mono mt-1 leading-relaxed">
+                        Everything in Driving + RTO learner license, permanent license application, documentation & exam support.
+                      </p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {['LL Application', 'DL Application', 'RTO Docs Help', 'Exam Prep'].map(tag => (
+                          <span key={tag} className="px-2 py-0.5 rounded bg-accent/10 text-accent text-[8px] font-bold uppercase tracking-wider border border-accent/10">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                    {includeLicense && (
+                      <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-accent flex items-center justify-center">
+                        <Check className="w-3 h-3 text-white" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* ─── DURATION PICKER ─── */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-[9px] font-mono text-text-3 uppercase font-bold tracking-wider">Select Duration</span>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {([
+                      { days: 7,  kmPerDay: 22 },
+                      { days: 10, kmPerDay: 15 },
+                      { days: 15, kmPerDay: 10 },
+                      { days: 30, kmPerDay: 5  }
+                    ] as const).map(({ days, kmPerDay }) => {
+                      const isActive = selectedDuration === days
+                      const totalKm = days * kmPerDay
                       return (
-                        <div
-                          key={opt.id}
-                          onClick={() => setSelectedType(opt.id)}
-                          className={`p-4 rounded-2xl border cursor-pointer transition-all duration-300 flex items-center justify-between gap-4 ${
-                            isSelected 
-                              ? 'bg-primary/5 border-primary shadow-lg shadow-primary/5' 
-                              : 'bg-void/40 border-border hover:bg-white/[0.02]'
+                        <button
+                          key={days}
+                          type="button"
+                          onClick={() => setSelectedDuration(days)}
+                          className={`flex flex-col items-center justify-center py-4 px-2 rounded-2xl border cursor-pointer transition-all duration-200 gap-0.5 ${
+                            isActive
+                              ? 'bg-primary/10 border-primary shadow-lg shadow-primary/10 scale-[1.02]'
+                              : 'bg-void/40 border-border hover:border-primary/40 hover:bg-white/[0.02]'
                           }`}
                         >
-                          <div className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                              isSelected ? 'bg-primary/15 text-primary' : 'bg-void text-text-3 border border-border'
-                            }`}>
-                              <Icon className="w-5 h-5" />
-                            </div>
-                            
-                            <div className="flex flex-col">
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-bold text-text-1">{displayTitle}</span>
-                                <span className="px-2 py-0.5 rounded-full bg-void text-[9px] font-bold text-accent border border-border">₹{opt.price}</span>
-                              </div>
-                              <div className="flex flex-wrap items-center gap-2 mt-1">
-                                <span className="px-2 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-extrabold uppercase tracking-wider">{displayTag}</span>
-                                <span className="text-[10px] text-text-3 font-mono">{displayDesc}</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {isSelected && (
-                            <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white flex-shrink-0">
-                              <Check className="w-3.5 h-3.5" />
+                          <span className={`text-2xl font-extrabold font-display leading-none ${
+                            isActive ? 'text-primary' : 'text-text-1'
+                          }`}>{days}</span>
+                          <span className={`text-[9px] font-mono uppercase font-bold ${
+                            isActive ? 'text-primary/70' : 'text-text-3'
+                          }`}>Days</span>
+                          <div className="w-full border-t border-border/30 my-1.5" />
+                          <span className={`text-[10px] font-bold font-display ${
+                            isActive ? 'text-primary' : 'text-text-2'
+                          }`}>{kmPerDay} km</span>
+                          <span className={`text-[8px] font-mono ${
+                            isActive ? 'text-primary/60' : 'text-text-3'
+                          }`}>per day</span>
+                          <span className={`text-[8px] font-mono mt-0.5 ${
+                            isActive ? 'text-primary/50' : 'text-text-3/60'
+                          }`}>({totalKm} km total)</span>
+                          {isActive && (
+                            <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center mt-1">
+                              <Check className="w-2.5 h-2.5 text-white" />
                             </div>
                           )}
-                        </div>
+                        </button>
                       )
-                    })
-                  )}
+                    })}
+                  </div>
                 </div>
 
                 <div className="flex justify-between border-t border-border mt-8 pt-5">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setStep(1)}
-                      className="px-5 py-3 bg-void border border-border text-text-2 hover:text-text-1 font-bold text-xs rounded-xl flex items-center gap-1 transition-all duration-200"
-                    >
-                      <ArrowLeft className="w-3.5 h-3.5" />
-                      {t.back}
-                    </button>
-                    <button
-                      onClick={async () => {
-                        // Skip the UI flow and instantly log into the mock Student account
-                        await signIn('credentials', { 
-                          email: 'student@demo.com', 
-                          password: 'mock',
-                          callbackUrl: '/student/dashboard'
-                        })
-                      }}
-                      className="px-5 py-3 bg-void border border-border text-text-3 hover:text-text-1 font-bold text-xs rounded-xl transition-all duration-200"
-                    >
-                      {t.skipCreate}
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => setStep(1)}
+                    className="px-5 py-3 bg-void border border-border text-text-2 hover:text-text-1 font-bold text-xs rounded-xl flex items-center gap-1 transition-all duration-200"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    {t.back}
+                  </button>
                   <button
                     onClick={() => setStep(3)}
                     className="px-6 py-3 bg-primary hover:bg-primary/95 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200"
@@ -924,7 +931,7 @@ export default function PublicBookingSystem() {
               </motion.div>
             )}
 
-            {/* STEP 3: SLOT SELECTION */}
+            {/* STEP 3: PREFERRED TIME SLOT */}
             {step === 3 && (
               <motion.div
                 key="step3"
@@ -938,102 +945,97 @@ export default function PublicBookingSystem() {
                   <p className="text-[10px] text-text-3 mt-1 font-mono uppercase">{t.step3Desc}</p>
                 </div>
 
-                <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 flex items-start gap-3 mt-1">
-                  <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                  <div className="text-xs text-text-2 leading-relaxed">
-                    <strong className="text-text-1 uppercase font-mono block mb-1">{t.dailyPolicyTitle}</strong>
-                    {t.dailyPolicyDesc}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Morning Option */}
+                  <div
+                    onClick={() => setPreferredTime('MORNING')}
+                    className={`relative p-5 rounded-2xl border cursor-pointer transition-all duration-300 flex flex-col items-center justify-center text-center gap-3 ${
+                      preferredTime === 'MORNING'
+                        ? 'bg-primary/5 border-primary shadow-lg shadow-primary/5 scale-[1.02]'
+                        : 'bg-void/40 border-border hover:bg-white/[0.02] hover:border-primary/40'
+                    }`}
+                  >
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                      preferredTime === 'MORNING' ? 'bg-primary/15 text-primary' : 'bg-void text-text-3 border border-border'
+                    }`}>
+                      <Sun className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-bold text-text-1 uppercase font-display tracking-tight">Morning Session</span>
+                      <p className="text-[10px] text-text-3 font-mono mt-1 leading-relaxed">
+                        6:00 AM - 12:00 PM
+                      </p>
+                      <p className="text-[10px] text-text-2 font-body mt-2 leading-relaxed italic">
+                        Best for cooler weather and starting early.
+                      </p>
+                    </div>
+                    {preferredTime === 'MORNING' && (
+                      <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                        <Check className="w-3 h-3 text-white" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Afternoon Option */}
+                  <div
+                    onClick={() => setPreferredTime('AFTERNOON')}
+                    className={`relative p-5 rounded-2xl border cursor-pointer transition-all duration-300 flex flex-col items-center justify-center text-center gap-3 ${
+                      preferredTime === 'AFTERNOON'
+                        ? 'bg-primary/5 border-primary shadow-lg shadow-primary/5 scale-[1.02]'
+                        : 'bg-void/40 border-border hover:bg-white/[0.02] hover:border-primary/40'
+                    }`}
+                  >
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                      preferredTime === 'AFTERNOON' ? 'bg-primary/15 text-primary' : 'bg-void text-text-3 border border-border'
+                    }`}>
+                      <Clock className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-bold text-text-1 uppercase font-display tracking-tight">Afternoon Session</span>
+                      <p className="text-[10px] text-text-3 font-mono mt-1 leading-relaxed">
+                        12:00 PM - 4:00 PM
+                      </p>
+                      <p className="text-[10px] text-text-2 font-body mt-2 leading-relaxed italic">
+                        Ideal for flexible mid-day schedules.
+                      </p>
+                    </div>
+                    {preferredTime === 'AFTERNOON' && (
+                      <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                        <Check className="w-3 h-3 text-white" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Evening Option */}
+                  <div
+                    onClick={() => setPreferredTime('EVENING')}
+                    className={`relative p-5 rounded-2xl border cursor-pointer transition-all duration-300 flex flex-col items-center justify-center text-center gap-3 ${
+                      preferredTime === 'EVENING'
+                        ? 'bg-primary/5 border-primary shadow-lg shadow-primary/5 scale-[1.02]'
+                        : 'bg-void/40 border-border hover:bg-white/[0.02] hover:border-primary/40'
+                    }`}
+                  >
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                      preferredTime === 'EVENING' ? 'bg-primary/15 text-primary' : 'bg-void text-text-3 border border-border'
+                    }`}>
+                      <Moon className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <span className="text-sm font-bold text-text-1 uppercase font-display tracking-tight">Evening Session</span>
+                      <p className="text-[10px] text-text-3 font-mono mt-1 leading-relaxed">
+                        4:00 PM - 7:00 PM
+                      </p>
+                      <p className="text-[10px] text-text-2 font-body mt-2 leading-relaxed italic">
+                        Best for working professionals & students.
+                      </p>
+                    </div>
+                    {preferredTime === 'EVENING' && (
+                      <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                        <Check className="w-3 h-3 text-white" />
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                {loadingSlots ? (
-                  <div className="flex flex-col items-center justify-center py-20 gap-3">
-                    <Clock className="w-8 h-8 text-primary animate-spin" />
-                    <span className="text-[9px] font-mono text-text-3">{t.fetching}</span>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    {/* Day Tabs (Horizontal Scroll) */}
-                    {(() => {
-                      const uniqueDates = Array.from(new Set(slots.map(s => s.dayOfWeek))).sort()
-
-                      if (uniqueDates.length === 0) {
-                        return (
-                          <div className="text-center py-12 bg-void/50 border border-dashed border-border rounded-2xl flex flex-col items-center justify-center gap-2">
-                            <span className="text-[10px] font-mono uppercase tracking-wider text-text-3 font-bold">No slots active currently</span>
-                            <p className="text-xs text-text-2 max-w-xs px-4">There are no operational calendar slots published yet. Please contact Sri Guru Driving School support to schedule sessions.</p>
-                          </div>
-                        )
-                      }
-
-                      const activeSlotsForDay = slots.filter(s => s.dayOfWeek === activeDay)
-
-                      return (
-                        <>
-                          <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-none border-b border-border/50">
-                            {uniqueDates.map(dateStr => {
-                              const isActive = activeDay === dateStr
-                              return (
-                                <button
-                                  key={dateStr}
-                                  onClick={() => setActiveDay(dateStr)}
-                                  type="button"
-                                  className={`px-4 py-2 rounded-t-xl text-xs font-bold uppercase tracking-widest whitespace-nowrap transition-all duration-200 border-b-2 ${
-                                    isActive 
-                                      ? 'bg-primary/10 text-primary border-primary' 
-                                      : 'text-text-3 border-transparent hover:bg-white/[0.02] hover:text-text-2'
-                                  }`}
-                                >
-                                  {formatFriendlyDate(dateStr)}
-                                </button>
-                              )
-                            })}
-                          </div>
-
-                          {/* Time Slots Grid for Active Day */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                            {activeSlotsForDay.map(matchingSlot => {
-                              const isSelected = Boolean(selectedSlot?.id === matchingSlot.id)
-                              const isFull = matchingSlot.currentBooked >= matchingSlot.maxCapacity
-                              
-                              let buttonStyle = 'bg-surface border-border hover:border-primary text-text-2'
-                              let cursorStyle = 'cursor-pointer hover:shadow-lg hover:-translate-y-0.5'
-                              let clickHandler = () => setSelectedSlot(matchingSlot)
-
-                              if (isSelected) {
-                                buttonStyle = 'bg-accent border-accent text-void font-bold shadow-lg shadow-accent/20'
-                                cursorStyle = 'cursor-default'
-                              } else if (isFull) {
-                                buttonStyle = 'bg-void/40 border-border/40 text-text-3 opacity-40'
-                                cursorStyle = 'cursor-not-allowed'
-                                clickHandler = () => {}
-                              }
-
-                              return (
-                                <button
-                                  key={matchingSlot.id}
-                                  onClick={clickHandler}
-                                  type="button"
-                                  className={`flex flex-col items-start p-4 border rounded-2xl transition-all duration-300 select-none ${buttonStyle} ${cursorStyle}`}
-                                >
-                                  <span className="text-sm font-bold font-mono">{matchingSlot.time}</span>
-                                  <div className="flex justify-between items-center w-full mt-2 border-t border-border/20 pt-2">
-                                    <span className="text-[9px] uppercase tracking-wider opacity-85 font-bold">
-                                      {isFull ? t.full : isSelected ? t.selected : t.active}
-                                    </span>
-                                    <span className="text-[9px] font-mono text-text-3">
-                                      {matchingSlot.currentBooked} / {matchingSlot.maxCapacity} Booked
-                                    </span>
-                                  </div>
-                                </button>
-                              )
-                            })}
-                          </div>
-                        </>
-                      )
-                    })()}
-                  </div>
-                )}
 
                 <div className="flex justify-between border-t border-border mt-8 pt-5">
                   <div className="flex gap-2">
@@ -1044,25 +1046,10 @@ export default function PublicBookingSystem() {
                       <ArrowLeft className="w-3.5 h-3.5" />
                       {t.back}
                     </button>
-                    <button
-                      onClick={async () => {
-                        await signIn('credentials', { 
-                          email: 'student@demo.com', 
-                          password: 'mock',
-                          callbackUrl: '/student/dashboard'
-                        })
-                      }}
-                      className="px-5 py-3 bg-void border border-border text-text-3 hover:text-text-1 font-bold text-xs rounded-xl transition-all duration-200"
-                    >
-                      {t.skipSlot}
-                    </button>
                   </div>
                   <button
-                    onClick={() => {
-                      if (selectedSlot) setStep(4)
-                    }}
-                    disabled={!selectedSlot}
-                    className="px-6 py-3 bg-primary hover:bg-primary/95 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200 disabled:opacity-40"
+                    onClick={() => setStep(4)}
+                    className="px-6 py-3 bg-primary hover:bg-primary/95 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200"
                   >
                     {t.validateSum}
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -1112,15 +1099,15 @@ export default function PublicBookingSystem() {
                   </div>
 
                   <div className="flex items-center gap-3 bg-primary/5 border border-primary/20 p-3.5 rounded-xl mt-2 text-xs leading-relaxed text-text-2 shadow-[0_0_10px_rgba(var(--color-primary),0.05)]">
-                    <Calendar className="w-5 h-5 text-primary flex-shrink-0" />
+                    <Clock className="w-5 h-5 text-primary flex-shrink-0" />
                     <div>
-                      <span className="font-bold text-text-1 uppercase font-mono">{t.scheduledSlot}</span>{' '}
-                      <span className="text-text-1">{formatFriendlyDate(selectedSlot?.dayOfWeek || '')}</span> at <span className="text-text-1">{selectedSlot?.time}</span> ({t.maxCap} {selectedSlot?.maxCapacity})
+                      <span className="font-bold text-text-1 uppercase font-mono">PREFERRED TIME SLOT:</span>{' '}
+                      <span className="text-text-1 uppercase font-bold">{preferredTime} SESSION</span>
                     </div>
                   </div>
 
                   <div className="text-[10px] text-text-3 font-mono leading-relaxed bg-void/50 border border-border/40 p-3.5 rounded-xl">
-                    ⚠️ {t.summaryNote}
+                    ⚠️ Note: Our instructors will coordinate with you to assign the exact timing within your preferred window.
                   </div>
 
                   {/* Receipt breakdown ledger */}
@@ -1129,9 +1116,15 @@ export default function PublicBookingSystem() {
                       {t.receiptLedger}
                     </span>
                     <div className="flex justify-between items-center text-text-2">
-                      <span className="uppercase text-[10px]">{t.baseFee}</span>
-                      <span className="font-bold text-text-1">₹{basePrice}</span>
+                      <span className="uppercase text-[10px]">Driving Course ({selectedDuration} Days)</span>
+                      <span className="font-bold text-text-1">₹3,500</span>
                     </div>
+                    {includeLicense && (
+                      <div className="flex justify-between items-center text-text-2">
+                        <span className="uppercase text-[10px]">License Process Add-on</span>
+                        <span className="font-bold text-text-1">+₹1,500</span>
+                      </div>
+                    )}
                     {appliedPromo && (
                       <div className="flex justify-between items-center text-success font-medium">
                         <span className="uppercase text-[10px]">{t.promoDed} ({appliedPromo.promoCode})</span>

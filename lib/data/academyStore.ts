@@ -67,66 +67,45 @@ const DATA_FILE = path.join(DATA_DIR, 'academy_data.json')
 
 const DEFAULT_COURSES: Course[] = [
   {
-    id: 'course-beginner',
+    id: 'course-driving',
     title: {
-      EN: 'The Foundation',
-      HI: 'बुनियाद',
-      TE: 'పునాది'
+      EN: 'Just Driving Course',
+      HI: 'केवल ड्राइविंग कोर्स',
+      TE: 'కేవలం డ్రైవింగ్ కోర్సు'
     },
     tag: {
-      EN: '21 Days',
-      HI: '21 दिन',
-      TE: '21 రోజులు'
+      EN: '150 Km Practice',
+      HI: '150 किमी अभ्यास',
+      TE: '150 కిమీ ప్రాక్టీస్'
     },
     desc: {
-      EN: 'The definitive beginner experience. Master manual transmissions, perfect your parallel parking, and glide through examinations with our guided instruction.',
-      HI: 'निश्चित शुरुआती अनुभव। मैनुअल ट्रांसमिशन में महारत हासिल करें, अपनी समानांतर पार्किंग को सही करें, और परीक्षा में आसानी से सफल हों।',
-      TE: 'ఖచ్చితమైన బిగినర్స్ అనుభవం. మాన్యువల్ ట్రాన్స్మిషన్లను నేర్చుకోండి, మీ సమాంతర పార్కింగ్ను పరిపూర్ణం చేసుకోండి మరియు పరీక్షల ద్వారా సులभంగా ఉత్తీర్ణత సాధించండి.'
+      EN: 'Dedicated on-road training focusing purely on driving skills, steering control, and road confidence.',
+      HI: 'सड़क पर ड्राइविंग कौशल और आत्मविश्वास विकसित करने पर ध्यान केंद्रित करने वाला कोर्स।',
+      TE: 'స్టీరింగ్ నియంత్రణ మరియు రోడ్డు విశ్వాసంపై ప్రత్యేకంగా దృష్టి పెట్టే డ్రైవింగ్ శిక్షణ.'
     },
     price: 4999,
     category: 'BEGINNER',
     active: true
   },
   {
-    id: 'course-advanced',
+    id: 'course-license',
     title: {
-      EN: 'Advanced Defensive',
-      HI: 'उन्नत रक्षात्मक',
-      TE: 'అధునాతన డిఫెన్సివ్'
+      EN: 'Driving Course + License Process',
+      HI: 'ड्राइविंग कोर्स + लाइसेंस प्रक्रिया',
+      TE: 'డ్రైవింగ్ కోర్సు + లైసెన్స్ ప్రక్రియ'
     },
     tag: {
-      EN: '14 Days',
-      HI: '14 दिन',
-      TE: '14 రోజులు'
+      EN: 'Complete Package',
+      HI: 'पूर्ण पैकेज',
+      TE: 'పూర్తి ప్యాకేజీ'
     },
     desc: {
-      EN: 'Elevate your existing skills. High-speed freeway maneuvering, extreme weather protocols, and advanced hazard perception for licensed drivers.',
-      HI: 'अपने मौजूदा कौशल को बढ़ाएं। उच्च गति वाली फ्रीवे पैंतरेबाज़ी, चरम मौसम प्रोटोकॉल, और लाइसेंस प्राप्त ड्राइवरों के लिए उन्नत जोखिम धारणा।',
-      TE: 'మీ నైపుణ్యాలను పెంచుకోండి. హై-స్పీడ్ ఫ్రీవే డ్రైవింగ్, విపరీత వాతావరణ ప్రోటోకాల్స్ మరియు లైసెన్స్ పొందిన డ్రైవర్లకు ప్రమాద హెచ్చరిక.'
+      EN: 'Comprehensive driving training combined with RTO learners & permanent license assistance and documentation.',
+      HI: 'लाइसेंस प्रक्रिया, दस्तावेज़ीकरण और परीक्षा सहायता के साथ संपूर्ण ड्राइविंग प्रशिक्षण।',
+      TE: 'RTO లెర్నర్స్ & పర్మనెంట్ లైసెన్స్ సహాయం మరియు డాక్యుమెంటేషన్‌తో కూడిన డ్రైవింగ్ శిక్షణ.'
     },
     price: 6999,
     category: 'ADVANCED',
-    active: true
-  },
-  {
-    id: 'course-rto',
-    title: {
-      EN: 'RTO Fast-Track',
-      HI: 'RTO फास्ट-ट्रैक',
-      TE: 'RTO ఫాస్ట్-ట్రాక్'
-    },
-    tag: {
-      EN: '7 Days',
-      HI: '7 दिन',
-      TE: '7 రోజులు'
-    },
-    desc: {
-      EN: 'Rapid clearance preparation. Intensive mock testing and precise alignment coaching to ensure flawless execution on your license exam day.',
-      HI: 'तेजी से क्लीयरेंस की तैयारी। आपके लाइसेंस परीक्षा के दिन दोषरहित निष्पादन सुनिश्चित करने के लिए गहन मॉक टेस्टिंग।',
-      TE: 'వేగవంతమైన క్లియరెన్స్ తయారీ. మీ లైసెన్స్ పరీక్ష రోజున దోషరహిత ప్రదర్శనను నిర్ధారించడానికి ఇంటెన్సివ్ మాక్ టెస్టింగ్ మరియు కోచింగ్.'
-    },
-    price: 2999,
-    category: 'RTO_FAST_TRACK',
     active: true
   }
 ]
@@ -158,7 +137,7 @@ const DEFAULT_OFFERS: Offer[] = [
     title: {
       EN: 'RTO Preparation Combo',
       HI: 'RTO तैयारी विशेष',
-      TE: 'RTO ప్రిపరేషన్ స్పెషల్'
+      TE: 'RTO प्रिపరేషన్ స్పెషల్'
     },
     desc: {
       EN: 'Get 15% off RTO mock test series and track coaching package today.',
@@ -196,8 +175,8 @@ const DEFAULT_STUDENT_STATE: StudentState = {
 
 const DEFAULT_BRANDING: BrandingState = {
   logoUrl: '/logo.png',
-  contactPhone: '+919876543210',
-  contactUrl: 'https://wa.me/919876543210',
+  contactPhone: '+919347879474',
+  contactUrl: 'https://wa.me/919347879474',
   academyName: 'Sri Guru Driving School'
 }
 
@@ -297,4 +276,3 @@ export function saveBranding(branding: BrandingState): void {
     console.error('Failed to save branding to academy JSON store:', error)
   }
 }
-

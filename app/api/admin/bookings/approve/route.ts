@@ -11,7 +11,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Unauthorized.' }, { status: 403 })
     }
 
-    const { bookingId, instructorId } = await request.json()
+    const { bookingId } = await request.json()
     if (!bookingId) return NextResponse.json({ error: 'Missing booking ID' }, { status: 400 })
 
     const booking = await db.booking.findUnique({ where: { id: bookingId } })
@@ -61,7 +61,6 @@ export async function PUT(request: Request) {
                 trainingType: booking.trainingType,
                 status: 'ACTIVE',
                 courseFee,
-                instructorId: instructorId || null
               }
             }
           },
@@ -74,9 +73,6 @@ export async function PUT(request: Request) {
           studentId = studentRecord.id
           
           const updateData: any = {}
-          if (instructorId) {
-            updateData.instructorId = instructorId
-          }
           if (!studentRecord.regNo) {
             const currentYear = new Date().getFullYear()
             const startOfYear = new Date(currentYear, 0, 1)
@@ -93,12 +89,9 @@ export async function PUT(request: Request) {
         }
       }
     } else {
-       // If student already exists, update their instructor and ensure regNo is assigned if missing
+       // If student already exists, update their record and ensure regNo is assigned if missing
        const studentRecord = await db.student.findUnique({ where: { id: studentId } })
        const updateData: any = {}
-       if (instructorId) {
-         updateData.instructorId = instructorId
-       }
        if (studentRecord && !studentRecord.regNo) {
          const currentYear = new Date().getFullYear()
          const startOfYear = new Date(currentYear, 0, 1)

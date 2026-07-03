@@ -711,20 +711,7 @@ export default function AdminStudentsPage() {
                         {stu.status === 'ACTIVE' ? t.active : stu.status === 'COMPLETED' ? t.completed : t.dropped}
                       </span>
 
-                      {stu.instructorName ? (
-                        <span className="text-xs font-bold text-[rgb(var(--color-text-2))] bg-[rgb(var(--color-border))] px-2.5 py-1 rounded-lg flex items-center gap-1">
-                          <UserCheck className="w-3 h-3" /> {stu.instructorName}
-                        </span>
-                      ) : (
-                        <span className="text-xs font-medium text-amber-500 bg-amber-50 dark:bg-amber-500/10 px-2.5 py-1 rounded-lg">{t.noInst}</span>
-                      )}
 
-                      {stu.nextTest && (
-                        <span className="text-xs font-bold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 px-2.5 py-1 rounded-lg flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {t.test} {new Date(stu.nextTest.testDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                        </span>
-                      )}
 
                       {isExpanded ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
                     </div>

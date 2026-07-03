@@ -11,31 +11,19 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const [students, allInstructors] = await Promise.all([
-      db.student.findMany({
-        include: {
-          user: { select: { name: true, email: true, phone: true } },
-          instructor: {
-            include: { user: { select: { name: true } } }
-          },
-          payments: {
-            orderBy: { receivedAt: 'desc' },
-            select: { id: true, amount: true, method: true, note: true, receivedAt: true }
-          },
-          drivingTests: { orderBy: { testDate: 'desc' } },
-          sessions: { select: { id: true } },
-        },
-        orderBy: { enrolledAt: 'desc' }
-      }),
-      db.instructor.findMany({
-        include: { user: { select: { id: true, name: true } } }
-      })
-    ])
+    const students = await db.student.findMany({
+      include: {
+        user: { select: { name: true, email: true, phone: true } },
+        payments: {
+          orderBy: { receivedAt: 'desc' },
+          select: { id: true, amount: true, method: true, note: true, receivedAt: true }
+        }
+      },
+      orderBy: { enrolledAt: 'desc' }
+    })
 
     const formatted = students.map(s => {
       const totalPaid = s.payments.reduce((sum, p) => sum + p.amount, 0)
-      const nextTest = s.drivingTests.find(t => t.result === 'SCHEDULED')
-      const lastTest = s.drivingTests.find(t => t.result !== 'SCHEDULED')
 
       return {
         id: s.id,
@@ -49,45 +37,19 @@ export async function GET() {
         feeStatus: s.feeStatus,
         totalPaid,
         balance: (s.courseFee || 0) - totalPaid,
-        instructorId: s.instructorId,
-        instructorName: s.instructor?.user.name || null,
-        totalSessions: s.sessions.length,
         payments: s.payments.map(p => ({
           id: p.id,
           amount: p.amount,
           method: p.method,
           note: p.note,
           receivedAt: p.receivedAt,
-        })),
-        nextTest: nextTest ? {
-          id: nextTest.id,
-          testDate: nextTest.testDate,
-          testCenter: nextTest.testCenter,
-          attemptNo: nextTest.attemptNo,
-        } : null,
-        lastTestResult: lastTest ? {
-          id: lastTest.id,
-          testDate: lastTest.testDate,
-          result: lastTest.result,
-          attemptNo: lastTest.attemptNo,
-        } : null,
-        drivingTests: s.drivingTests.map(t => ({
-          id: t.id,
-          testDate: t.testDate,
-          testCenter: t.testCenter,
-          result: t.result,
-          attemptNo: t.attemptNo,
-          notes: t.notes,
-        })),
+        }))
       }
     })
 
     return NextResponse.json({
       students: formatted,
-      instructors: allInstructors.map(i => ({
-        id: i.id,
-        name: i.user.name,
-      })),
+      instructors: []
     }, {
       headers: { 'Cache-Control': 'private, max-age=15, stale-while-revalidate=60' }
     })
@@ -104,9 +66,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { bookingId, name, email, phone, trainingType, instructorId } = await request.json()
+    const { bookingId, name, email, phone, trainingType } = await request.json()
 
-    if (!bookingId || !name || !email || !instructorId) {
+    if (!bookingId || !name || !email) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
@@ -138,7 +100,6 @@ export async function POST(request: Request) {
       const student = await prisma.student.create({
         data: {
           userId: user.id,
-          instructorId,
           trainingType: typeEnum,
           courseFee: typeEnum === 'BEGINNER' ? 4999 : typeEnum === 'ADVANCED' ? 6999 : 2999
         }

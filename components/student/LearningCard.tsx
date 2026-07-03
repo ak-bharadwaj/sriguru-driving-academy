@@ -9,14 +9,12 @@ import {
   VehicleStartupSimulation, 
   SteeringControlSimulation, 
   ClutchControlSimulation, 
-  HighwayMergingSimulation 
-} from './DynamicHTMLSimulations'
-import {
+  HighwayMergingSimulation,
   ThreePointTurnSimulation,
   EmergencyBrakingSimulation,
   RoundaboutSimulation,
   NightDrivingSimulation
-} from './AdvancedDrivingSimulations'
+} from './DynamicHTMLSimulations'
 
 export interface QuizData {
   question: string

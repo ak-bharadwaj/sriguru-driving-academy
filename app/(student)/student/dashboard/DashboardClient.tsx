@@ -386,8 +386,6 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
   const serviceCategories = [
     { name: t.theoryMods, desc: t.theoryDesc, icon: BookOpen, color: 'text-blue-500', bg: 'bg-blue-500/10', path: '/student/learn' },
     { name: t.rtoHub, desc: t.rtoDesc, icon: FileText, color: 'text-amber-500', bg: 'bg-amber-500/10', path: '/student/rto' },
-    { name: t.schedule, desc: t.schedDesc, icon: Calendar, color: 'text-indigo-500', bg: 'bg-indigo-500/10', path: '/student/schedule' },
-    { name: t.achievements, desc: t.achDesc, icon: Award, color: 'text-purple-500', bg: 'bg-purple-500/10', path: '/student/badges' },
   ]
 
   return (
@@ -434,46 +432,7 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
       </div>
 
       <div className="max-w-md mx-auto px-5 -mt-20 relative z-10 flex flex-col gap-6">
-        {dbData.isMock && (
-          <div className="bg-amber-500/10 border border-amber-500/30 rounded-[24px] p-5 text-left flex flex-col gap-3 shadow-lg shadow-amber-500/5 backdrop-blur-md">
-            <div className="flex items-center gap-2 text-amber-500 font-bold uppercase tracking-wider text-xs">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-              </span>
-              Sandbox Preview Active
-            </div>
-            <p className="text-xs text-[rgb(var(--color-text-2))] leading-relaxed">
-              <strong>Notice:</strong> Your student account was created successfully! Because an administrator or instructor hasn't scheduled your live driving slots yet, we have activated Sandbox Preview Mode with simulated schedules (e.g. coach Rajesh Kumar, upcoming test center, and practice sessions) so you can explore all dashboard features immediately. Real slots will replace these once published by the academy.
-            </p>
-          </div>
-        )}
-        
-        <AnimatePresence>
-          {activeAnnouncements.length > 0 && (
-            <motion.div 
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="flex flex-col gap-3 overflow-hidden"
-            >
-              {activeAnnouncements.map((a) => (
-                <div key={a.id} className="bg-[rgb(var(--color-surface))] rounded-[24px] shadow-app p-4 flex gap-3 relative border border-[rgb(var(--color-border))]">
-                  <div className="bg-[rgb(var(--color-accent))]/10 p-2 rounded-xl text-[rgb(var(--color-accent))] self-start">
-                    <Bell className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1 pr-4">
-                    <h4 className="text-sm font-bold text-[rgb(var(--color-text-1))]">{a.title}</h4>
-                    <p className="text-xs text-[rgb(var(--color-text-2))] mt-1">{a.message}</p>
-                  </div>
-                  <button onClick={() => dismissAnnouncement(a.id)} className="absolute top-4 right-4 text-[rgb(var(--color-text-3))] hover:text-[rgb(var(--color-text-1))]">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+
 
         <div className="bg-[rgb(var(--color-surface))] rounded-[28px] shadow-app p-8 flex flex-col items-center text-center border border-[rgb(var(--color-border))]">
           <h2 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))]">{t.courseProgress}</h2>
@@ -538,53 +497,6 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
           </div>
         </div>
 
-        {/* Attendance Verification Section */}
-        <div className="bg-[rgb(var(--color-surface))] rounded-[28px] shadow-app p-6 border border-[rgb(var(--color-border))] flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <div className="bg-amber-500/10 p-2.5 rounded-xl text-amber-500">
-              <Key className="w-5 h-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-display font-bold text-base text-[rgb(var(--color-text-1))]">
-                {t.attendanceVerification}
-              </h3>
-              <p className="text-xs text-[rgb(var(--color-text-3))] mt-0.5 leading-relaxed">
-                {t.attendanceOtpDesc}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center justify-center py-4 bg-[rgb(var(--color-background))]/40 rounded-2xl border border-[rgb(var(--color-border))]/60 min-h-[90px] relative overflow-hidden">
-            {otpCode ? (
-              <div className="flex flex-col items-center justify-center animate-fade-in">
-                <span 
-                  onClick={() => {
-                    navigator.clipboard.writeText(otpCode);
-                  }}
-                  title="Click to copy"
-                  className="text-3xl font-display font-black tracking-widest text-amber-500 cursor-pointer select-all font-mono hover:scale-105 active:scale-95 transition-transform duration-200"
-                >
-                  {otpCode}
-                </span>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-[rgb(var(--color-text-3))] mt-2 flex items-center gap-1.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                  </span>
-                  {t.otpExpires}: <span className="font-mono text-emerald-500 font-semibold">{formatCountdown(otpCountdown)}</span>
-                </span>
-              </div>
-            ) : (
-              <button
-                disabled={generatingOtp}
-                onClick={handleGenerateOtp}
-                className="px-6 py-2.5 rounded-xl text-xs font-bold bg-[rgb(var(--color-accent))] hover:bg-[rgb(var(--color-accent-hover))] text-white shadow-md shadow-[rgb(var(--color-accent))]/20 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed"
-              >
-                {generatingOtp ? t.generating : t.generateOtp}
-              </button>
-            )}
-          </div>
-        </div>
 
         <div className="mt-8 mb-4">
           <h3 className="text-xl font-bold font-display text-[rgb(var(--color-text-1))] mb-4 px-1">{t.interactivePractice}</h3>
@@ -668,104 +580,6 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
           </div>
         </div>
 
-        <div className="mt-4">
-          <div className="flex justify-between items-center mb-4 px-1">
-            <h3 className="text-lg font-bold font-display text-[rgb(var(--color-text-1))]">{t.dashboardHub}</h3>
-            <Link href="/student/schedule" className="text-sm text-[rgb(var(--color-primary))] font-semibold">{t.viewSchedule}</Link>
-          </div>
-          
-          <div className="flex gap-4 overflow-x-auto pb-4 -mx-5 px-5 scrollbar-none">
-            {dbData.nextSession ? (
-              <div className="bg-[rgb(var(--color-primary))] text-white rounded-[24px] p-6 w-[240px] flex-shrink-0 relative overflow-hidden shadow-app-hover">
-                <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/10 rounded-full blur-xl" />
-                {dbData.isMock && (
-                  <span className="absolute top-4 right-4 bg-white/20 text-white border border-white/30 text-[8px] font-mono font-bold px-2 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-sm z-20">
-                    Preview
-                  </span>
-                )}
-                <h4 className="text-4xl font-bold font-display">{new Date(dbData.nextSession.scheduledAt).getDate()}</h4>
-                <p className="text-white/80 text-sm mt-1 mb-6">{new Date(dbData.nextSession.scheduledAt).toLocaleString('default', { month: 'short', year: 'numeric' })}</p>
-                
-                <p className="font-semibold">{dbData.nextSession.lessonType} {t.training}</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <PlayCircle className="w-4 h-4 text-white/70" />
-                  <span className="text-sm font-medium">{new Date(dbData.nextSession.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                </div>
-              </div>
-            ) : (dbData.pendingBooking || localBooking) ? (
-              <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white rounded-[24px] p-6 w-[240px] flex-shrink-0 relative overflow-hidden shadow-app-hover flex flex-col justify-between">
-                <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/10 rounded-full blur-xl" />
-                {dbData.isMock && (
-                  <span className="absolute top-4 right-4 bg-white/20 text-white border border-white/30 text-[8px] font-mono font-bold px-2 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-sm z-20">
-                    Preview
-                  </span>
-                )}
-                <div>
-                  <span className="text-[8px] font-mono bg-white/20 text-white border border-white/30 px-2 py-0.5 rounded-full uppercase font-bold tracking-wider">
-                    Pending Verification
-                  </span>
-                  <h4 className="text-xl font-bold font-display mt-4 leading-snug">
-                    {dbData.pendingBooking?.slot ? `${dbData.pendingBooking.slot.dayOfWeek}` : (localBooking?.dayOfWeek || 'Trial Slot')}
-                  </h4>
-                  <p className="text-white/80 text-xs mt-1">
-                    {dbData.pendingBooking?.slot ? `${dbData.pendingBooking.slot.time}` : (localBooking?.time || '')}
-                  </p>
-                </div>
-                <div className="mt-4 pt-3 border-t border-white/10">
-                  <p className="text-[8px] uppercase font-mono text-white/60">Selected Course</p>
-                  <p className="font-semibold text-[11px] truncate mt-0.5">{localBooking?.courseTitle || (dbData.pendingBooking?.trainingType || 'Trial Lesson')}</p>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-[rgb(var(--color-surface))] text-[rgb(var(--color-text-1))] border border-[rgb(var(--color-border))] rounded-[24px] p-6 w-[240px] flex-shrink-0 relative overflow-hidden shadow-app flex flex-col justify-center items-center text-center">
-                <Calendar className="w-10 h-10 text-[rgb(var(--color-text-3))] mb-3" />
-                <p className="font-semibold text-lg font-display">{t.noSessions}</p>
-                <p className="text-xs text-[rgb(var(--color-text-3))] mt-1">{t.bookLesson}</p>
-              </div>
-            )}
-
-            <div className="bg-app-yellow text-slate-900 rounded-[24px] p-6 w-[240px] flex-shrink-0 relative overflow-hidden shadow-app-hover flex flex-col justify-between">
-              <div className="absolute -top-12 -right-12 w-32 h-32 bg-white/40 rounded-full blur-xl" />
-              {dbData.isMock && (
-                <span className="absolute top-4 right-4 bg-black/10 text-slate-800 border border-black/15 text-[8px] font-mono font-bold px-2 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-sm z-20">
-                  Preview
-                </span>
-              )}
-              <div>
-                <div className="w-12 h-12 bg-white/40 rounded-full flex items-center justify-center mb-4 backdrop-blur-md">
-                  <Award className="w-6 h-6" />
-                </div>
-                <p className="text-slate-800 text-sm font-bold uppercase tracking-wider">{t.instructor}</p>
-              </div>
-              <div>
-                <p className="font-bold text-2xl font-display leading-tight">
-                  {student.instructorName.includes('Unassigned') ? 'Awaiting Coach' : student.instructorName}
-                </p>
-                <div className="flex items-center gap-2 mt-3">
-                  <span className="text-xs font-bold px-3 py-1.5 bg-black/10 rounded-full backdrop-blur-md">
-                    {student.instructorName.includes('Unassigned') ? 'Pending' : t.activeCoach}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {nextTest && (
-              <div className="bg-rose-500 text-white rounded-[24px] p-6 w-[240px] flex-shrink-0 relative overflow-hidden shadow-app-hover">
-                <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-white/20 rounded-full blur-xl" />
-                {dbData.isMock && (
-                  <span className="absolute top-4 right-4 bg-white/20 text-white border border-white/30 text-[8px] font-mono font-bold px-2 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-sm z-20">
-                    Preview
-                  </span>
-                )}
-                <h4 className="text-4xl font-bold font-display">{new Date(nextTest.testDate).getDate()}</h4>
-                <p className="text-white/80 text-sm mt-1 mb-6">{new Date(nextTest.testDate).toLocaleString('default', { month: 'short', year: 'numeric' })}</p>
-                
-                <p className="font-semibold uppercase text-xs tracking-widest text-white/90">{t.officialTest}</p>
-                <p className="font-bold font-display text-lg mt-1">{nextTest.testCenter}</p>
-              </div>
-            )}
-          </div>
-        </div>
 
       </div>
 

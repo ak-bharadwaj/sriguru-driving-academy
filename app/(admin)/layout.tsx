@@ -82,46 +82,16 @@ function NavItemList({
 
 const ADMIN_NAV_T = {
   EN: [
-    { name: 'Console HUD', path: '/admin/dashboard', icon: Activity, category: 'OPERATIONS' },
-    { name: 'Student Directory', path: '/admin/students', icon: Users, category: 'Students' },
-    { name: 'Slot Registries', path: '/admin/slots', icon: Calendar, category: 'SCHEDULING' },
-    { name: 'Booking Review', path: '/admin/bookings', icon: Users, category: 'OPERATIONS' },
-    { name: 'Instructors', path: '/admin/instructors', icon: Users, category: 'OPERATIONS' },
-    { name: 'Enquiries', path: '/admin/enquiries', icon: Users, category: 'OPERATIONS' },
-    { name: 'Analytics & Insights', path: '/admin/analytics', icon: Activity, category: 'ANALYTICS' },
-    { name: 'Content Dashboard', path: '/admin/content', icon: Layers, category: 'SYSTEM' },
-    { name: 'Gamification HQ', path: '/admin/gamification', icon: Database, category: 'SYSTEM' },
-    { name: 'Promotions', path: '/admin/offers', icon: Tag, category: 'MARKETING' },
-    { name: 'Reports & Export', path: '/admin/reports', icon: FileDown, category: 'ANALYTICS' },
-    { name: 'Settings', path: '/admin/settings', icon: Settings, category: 'SYSTEM' }
+    { name: 'Student Bookings', path: '/admin/bookings', icon: Users, category: 'Bookings' },
+    { name: 'Content Editor', path: '/admin/content', icon: Layers, category: 'Content' }
   ],
   HI: [
-    { name: 'कंसोल HUD', path: '/admin/dashboard', icon: Activity, category: 'संचालन' },
-    { name: 'छात्र निर्देशिका', path: '/admin/students', icon: Users, category: 'छात्र' },
-    { name: 'स्लॉट रजिस्ट्रियां', path: '/admin/slots', icon: Calendar, category: 'निर्धारण' },
-    { name: 'बुकिंग समीक्षा', path: '/admin/bookings', icon: Users, category: 'संचालन' },
-    { name: 'प्रशिक्षक', path: '/admin/instructors', icon: Users, category: 'संचालन' },
-    { name: 'पूछताछ', path: '/admin/enquiries', icon: Users, category: 'संचालन' },
-    { name: 'विश्लेषिकी और अंतर्दृष्टि', path: '/admin/analytics', icon: Activity, category: 'विश्लेषिकी' },
-    { name: 'सामग्री डैशबोर्ड', path: '/admin/content', icon: Layers, category: 'प्रणाली' },
-    { name: 'गेमिफिकेशन मुख्यालय', path: '/admin/gamification', icon: Database, category: 'प्रणाली' },
-    { name: 'प्रचार', path: '/admin/offers', icon: Tag, category: 'विपणन' },
-    { name: 'रिपोर्ट और निर्यात', path: '/admin/reports', icon: FileDown, category: 'विश्लेषिकी' },
-    { name: 'सेटिंग्स', path: '/admin/settings', icon: Settings, category: 'प्रणाली' }
+    { name: 'छात्र बुकिंग', path: '/admin/bookings', icon: Users, category: 'बुकिंग' },
+    { name: 'सामग्री संपादक', path: '/admin/content', icon: Layers, category: 'सामग्री' }
   ],
   TE: [
-    { name: 'కన్సోల్ HUD', path: '/admin/dashboard', icon: Activity, category: 'కార్యకలాపాలు' },
-    { name: 'విద్యార్థుల డైరెక్టరీ', path: '/admin/students', icon: Users, category: 'విద్యార్థులు' },
-    { name: 'స్లాట్ రిజిస్ట్రీలు', path: '/admin/slots', icon: Calendar, category: 'షెడ్యూలింగ్' },
-    { name: 'బుకింగ్ సమీక్ష', path: '/admin/bookings', icon: Users, category: 'కార్యకలాపాలు' },
-    { name: 'బోధకులు', path: '/admin/instructors', icon: Users, category: 'కార్యకలాపాలు' },
-    { name: 'విచారణలు', path: '/admin/enquiries', icon: Users, category: 'కార్యకలాపాలు' },
-    { name: 'విశ్లేషణలు & అంతర్దృష్టులు', path: '/admin/analytics', icon: Activity, category: 'విశ్లేషణలు' },
-    { name: 'కంటెంట్ డాష్‌బోర్డ్', path: '/admin/content', icon: Layers, category: 'వ్యవస్థ' },
-    { name: 'గామిఫికేషన్ హెచ్క్యూ', path: '/admin/gamification', icon: Database, category: 'వ్యవస్థ' },
-    { name: 'ప్రమోషన్లు', path: '/admin/offers', icon: Tag, category: 'మార్కెటింగ్' },
-    { name: 'నివేదికలు & ఎగుమతి', path: '/admin/reports', icon: FileDown, category: 'విశ్లేషణలు' },
-    { name: 'సెట్టింగులు', path: '/admin/settings', icon: Settings, category: 'వ్యవస్థ' }
+    { name: 'విద్యార్థి బుకింగ్స్', path: '/admin/bookings', icon: Users, category: 'బుకింగ్స్' },
+    { name: 'కంటెంట్ ఎడిటర్', path: '/admin/content', icon: Layers, category: 'కంటెంట్' }
   ]
 }
 

@@ -24,17 +24,8 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Course, BrandingState } from '@/lib/data/academyStore'
 
-export interface InstructorProp {
-  id: string
-  name: string
-  bio: string | null
-  specialization: string | null
-  yearsExp: number
-}
-
 interface LandingClientProps {
   courses: Course[]
-  instructors: InstructorProp[]
   branding?: BrandingState
   gallery?: { id: string; imageKey: string; caption: string | null }[]
 }
@@ -42,7 +33,7 @@ interface LandingClientProps {
 import { useTranslation } from '@/hooks/useTranslation'
 import { useLanguageStore } from '@/store/languageStore'
 
-export default function LandingClient({ courses, instructors, branding, gallery = [] }: LandingClientProps) {
+export default function LandingClient({ courses, branding, gallery = [] }: LandingClientProps) {
   const router = useRouter()
   const { t } = useTranslation()
   const { language } = useLanguageStore()
@@ -234,14 +225,8 @@ export default function LandingClient({ courses, instructors, branding, gallery 
               {t('landing.book')} <ArrowRight className="w-4 h-4" />
             </button>
             <a 
-              href="#download-app" 
-              className="w-full sm:w-auto px-8 py-4 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-medium rounded-full backdrop-blur-xl transition-all duration-500 flex items-center justify-center gap-2 text-sm tracking-wide uppercase"
-            >
-              <Download className="w-4 h-4" /> {t('landing.download')}
-            </a>
-            <a 
               href="#courses" 
-              className="w-full sm:w-auto px-8 py-4 bg-transparent border border-white/20 hover:bg-white/10 text-white font-medium rounded-full backdrop-blur-xl transition-all duration-500 text-center text-sm tracking-wide uppercase hidden md:block"
+              className="w-full sm:w-auto px-8 py-4 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-medium rounded-full backdrop-blur-xl transition-all duration-500 text-center text-sm tracking-wide uppercase"
             >
               {t('nav.curriculum')}
             </a>
@@ -261,47 +246,47 @@ export default function LandingClient({ courses, instructors, branding, gallery 
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[300px]">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[160px] md:auto-rows-[220px]">
             {/* Feature 1 */}
-            <div className="md:col-span-2 md:row-span-2 bg-white/60 dark:bg-white/5 backdrop-blur-3xl rounded-[2rem] p-12 border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between group overflow-hidden relative">
+            <div className="md:col-span-2 md:row-span-2 bg-white/60 dark:bg-white/5 backdrop-blur-3xl rounded-[2rem] p-6 md:p-8 border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between group overflow-hidden relative">
               <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none" />
               <div className="relative z-10">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center mb-8 shadow-lg shadow-violet-500/20">
-                  <ShieldCheck className="w-8 h-8 text-white" />
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center mb-4 shadow-lg shadow-violet-500/20">
+                  <ShieldCheck className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-3xl md:text-4xl font-medium mb-6 font-display tracking-tight">{t('landing.f1.title')}</h3>
-                <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-lg font-light max-w-md">
+                <h3 className="text-xl md:text-2xl font-medium mb-3 font-display tracking-tight">{t('landing.f1.title')}</h3>
+                <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm font-light max-w-md">
                   {t('landing.f1.desc')}
                 </p>
               </div>
             </div>
 
             {/* Feature 2 */}
-            <div className="md:col-span-2 md:row-span-1 bg-white/60 dark:bg-white/5 backdrop-blur-3xl rounded-[2rem] p-10 border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-center relative overflow-hidden">
+            <div className="md:col-span-2 md:row-span-1 bg-white/60 dark:bg-white/5 backdrop-blur-3xl rounded-[2rem] p-6 md:p-8 border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-center relative overflow-hidden">
               <div className="absolute bottom-0 left-0 w-40 h-40 bg-cyan-500/10 rounded-full blur-[60px] -ml-10 -mb-10 pointer-events-none" />
-              <div className="flex items-center gap-6 mb-6 relative z-10">
-                <div className="w-14 h-14 rounded-2xl border border-white/50 dark:border-white/10 bg-white/80 dark:bg-white/10 backdrop-blur-md flex items-center justify-center shrink-0 shadow-sm">
-                  <Award className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
+              <div className="flex items-center gap-4 mb-3 relative z-10">
+                <div className="w-10 h-10 rounded-xl border border-white/50 dark:border-white/10 bg-white/80 dark:bg-white/10 backdrop-blur-md flex items-center justify-center shrink-0 shadow-sm">
+                  <Award className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                 </div>
-                <h3 className="text-2xl md:text-3xl font-medium font-display tracking-tight">{t('landing.f2.title')}</h3>
+                <h3 className="text-lg md:text-xl font-medium font-display tracking-tight">{t('landing.f2.title')}</h3>
               </div>
-              <p className="text-slate-600 dark:text-slate-300 leading-relaxed font-light text-lg relative z-10">
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed font-light text-sm relative z-10">
                 {t('landing.f2.desc')}
               </p>
             </div>
 
             {/* Feature 3 */}
-            <div className="md:col-span-1 md:row-span-1 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[2rem] p-10 flex flex-col justify-center items-center text-center shadow-xl shadow-indigo-500/20">
-              <Clock className="w-10 h-10 text-white mb-6" />
-              <h3 className="text-2xl font-medium text-white font-display tracking-tight mb-3">{t('landing.f3.title')}</h3>
-              <p className="text-indigo-100 text-sm leading-relaxed">{t('landing.f3.desc')}</p>
+            <div className="md:col-span-1 md:row-span-1 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[2rem] p-6 flex flex-col justify-center items-center text-center shadow-xl shadow-indigo-500/20">
+              <Clock className="w-8 h-8 text-white mb-3" />
+              <h3 className="text-lg font-medium text-white font-display tracking-tight mb-2">{t('landing.f3.title')}</h3>
+              <p className="text-indigo-100 text-xs leading-relaxed">{t('landing.f3.desc')}</p>
             </div>
 
             {/* Feature 4 */}
-            <div className="md:col-span-1 md:row-span-1 bg-white/60 dark:bg-white/5 backdrop-blur-3xl rounded-[2rem] p-10 border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-center items-center text-center">
-              <Car className="w-10 h-10 mb-6 text-violet-600 dark:text-violet-400" />
-              <h3 className="text-2xl font-medium font-display tracking-tight mb-3">{t('landing.f4.title')}</h3>
-              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">{t('landing.f4.desc')}</p>
+            <div className="md:col-span-1 md:row-span-1 bg-white/60 dark:bg-white/5 backdrop-blur-3xl rounded-[2rem] p-6 border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-center items-center text-center">
+              <Car className="w-8 h-8 mb-3 text-violet-600 dark:text-violet-400" />
+              <h3 className="text-lg font-medium font-display tracking-tight mb-2">{t('landing.f4.title')}</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed">{t('landing.f4.desc')}</p>
             </div>
           </div>
         </div>
@@ -697,36 +682,6 @@ export default function LandingClient({ courses, instructors, branding, gallery 
       </section>
 
       {/* ----------------------------------------------------
-          DOWNLOAD APP CTA (SPATIAL)
-          ---------------------------------------------------- */}
-      <section id="download-app" className="py-14 md:py-32 px-6 relative z-10">
-        <div className="max-w-5xl mx-auto">
-          <div className="bg-gradient-to-br from-indigo-900 to-violet-900 rounded-[3rem] p-12 md:p-20 relative overflow-hidden shadow-2xl">
-            {/* Glowing orbs inside the dark box */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-fuchsia-500/20 rounded-full blur-[100px]" />
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/20 rounded-full blur-[100px]" />
-            
-            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12 text-center md:text-left">
-              <div className="max-w-lg">
-                <h2 className="font-display text-4xl md:text-5xl font-medium text-white tracking-tighter mb-6">{t('landing.app.title')}</h2>
-                <p className="text-violet-200 font-light text-lg leading-relaxed mb-10">
-                  {t('landing.app.desc')}
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <a href="/downloads/app-release.apk" download className="px-8 py-4 bg-white text-indigo-900 font-bold rounded-full hover:scale-105 transition-transform duration-300 flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                    <Download className="w-5 h-5" /> Download APK
-                  </a>
-                </div>
-              </div>
-              <div className="hidden md:flex w-64 h-64 bg-white/5 backdrop-blur-md rounded-3xl border border-white/20 items-center justify-center">
-                <Smartphone className="w-32 h-32 text-white/50" strokeWidth={1} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ----------------------------------------------------
           RICH COLORED FOOTER
           ---------------------------------------------------- */}
       <footer className="bg-slate-950 dark:bg-[#0a051e] text-slate-400 py-24 px-6 relative z-20 border-t-4 border-violet-600">
@@ -758,7 +713,6 @@ export default function LandingClient({ courses, instructors, branding, gallery 
             <a href="#gallery" className="hover:text-white transition-colors">Gallery</a>
             <a href="#courses" className="hover:text-white transition-colors">Curriculum</a>
             <a href="/login" className="hover:text-white transition-colors">Portal</a>
-            <a href="#download-app" className="hover:text-white transition-colors">App</a>
           </div>
 
         </div>

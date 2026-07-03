@@ -8,14 +8,12 @@ import {
   VehicleStartupSimulation, 
   SteeringControlSimulation, 
   ClutchControlSimulation, 
-  HighwayMergingSimulation 
-} from '@/components/student/DynamicHTMLSimulations'
-import {
+  HighwayMergingSimulation,
   ThreePointTurnSimulation,
   EmergencyBrakingSimulation,
   RoundaboutSimulation,
   NightDrivingSimulation
-} from '@/components/student/AdvancedDrivingSimulations'
+} from '@/components/student/DynamicHTMLSimulations'
 
 import { useLanguageStore } from '@/store/languageStore'
 

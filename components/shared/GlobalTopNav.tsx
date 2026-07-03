@@ -22,6 +22,7 @@ const PUBLIC_NAV_LINKS = [
   { label: "Curriculum", href: "/#courses" },
   { label: "Instructors", href: "/#instructors" },
   { label: "Gallery", href: "/#gallery" },
+  { label: "RTO Study", href: "/study" },
 ];
 
 export function GlobalTopNav() {

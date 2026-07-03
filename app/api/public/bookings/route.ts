@@ -68,16 +68,16 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { name, phone, email, trainingType, slotId, password } = await request.json()
+    const { name, phone, email, trainingType, password, notes, duration, includeLicense, preferredTime } = await request.json()
     if (!name || !phone || !email || !trainingType) {
       return NextResponse.json({ error: 'Missing mandatory booking details' }, { status: 400 })
     }
 
     // Map course ID to schema's TrainingType enum
     let mappedTrainingType: import('@prisma/client').TrainingType = 'BEGINNER'
-    if (trainingType === 'course-beginner' || trainingType === 'BEGINNER') {
+    if (trainingType === 'course-beginner' || trainingType === 'BEGINNER' || trainingType === 'course-driving') {
       mappedTrainingType = 'BEGINNER'
-    } else if (trainingType === 'course-advanced' || trainingType === 'ADVANCED') {
+    } else if (trainingType === 'course-advanced' || trainingType === 'ADVANCED' || trainingType === 'course-license') {
       mappedTrainingType = 'ADVANCED'
     } else if (trainingType === 'course-rto' || trainingType === 'RTO_FAST_TRACK') {
       mappedTrainingType = 'RTO_FAST_TRACK'
@@ -138,7 +138,13 @@ export async function POST(request: Request) {
         }
       }
 
-      // 2. Create the booking entry and link it to the student & slot
+      // Map string preferredTime to PreferredTime enum if matching
+      let mappedPreferredTime: import('@prisma/client').PreferredTime | null = null
+      if (preferredTime === 'MORNING' || preferredTime === 'AFTERNOON' || preferredTime === 'EVENING') {
+        mappedPreferredTime = preferredTime
+      }
+
+      // 2. Create the booking entry and link it to the student
       const newBooking = await db.booking.create({
         data: {
           id: `bk-${bookingRef}`,
@@ -148,27 +154,69 @@ export async function POST(request: Request) {
           trainingType: mappedTrainingType,
           status: 'PENDING',
           studentId,
-          slotId
+          notes,
+          preferredTime: mappedPreferredTime
         }
       })
 
-      // 3. Increment the matching slot's booked counter
-      if (slotId) {
-        await db.slot.update({
-          where: { id: slotId },
-          data: { currentCount: { increment: 1 } }
+      // 3. Create a system notification for all ADMIN users
+      try {
+        const admins = await db.user.findMany({
+          where: { role: 'ADMIN' },
+          select: { id: true }
         })
+        if (admins.length > 0) {
+          await db.notification.createMany({
+            data: admins.map(adm => ({
+              userId: adm.id,
+              type: 'SESSION_REMINDER',
+              title: 'New Booking Received',
+              message: `${name} has requested: ${notes || 'Trial booking'}`,
+              isRead: false,
+              studentId: studentId
+            }))
+          })
+        }
+      } catch (err) {
+        console.error("Failed to generate admin notifications:", err)
       }
+
     } catch (dbError) {
       console.warn("Database offline during booking submission. Proceeding with mock registration fallback.", dbError)
       regNo = `${new Date().getFullYear()}_MOCK`
       studentId = 'mock-student-id-123'
     }
 
+    // Build WhatsApp message for admin
+    const planLabel = includeLicense ? 'Driving + License Process' : 'Just Driving'
+    const price = includeLicense ? '₹5,000' : '₹3,500'
+    const durationLabel = duration ? `${duration} Days` : 'Not specified'
+    const kmMap: Record<number, number> = { 7: 22, 10: 15, 15: 10, 30: 5 }
+    const kmPerDay = duration && kmMap[duration] ? `${kmMap[duration]} km/day` : ''
+
+    const waMessage = encodeURIComponent(
+      `🚗 *New Booking - Sri Guru Driving School*\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `👤 *Name:* ${name}\n` +
+      `📱 *Phone:* ${phone}\n` +
+      `📧 *Email:* ${email}\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `📚 *Plan:* ${planLabel}\n` +
+      `📅 *Duration:* ${durationLabel}${kmPerDay ? ` (${kmPerDay})` : ''}\n` +
+      `💰 *Price:* ${price} _(Price Negotiable)_\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `🔖 *Booking Ref:* ${bookingRef}\n` +
+      `📍 *Location:* Shop No.27282-P2, Near Anu Hospital,\nBommalasatram, Kadapa Road, Nandyal\n` +
+      `━━━━━━━━━━━━━━━━━━━━━━━\n` +
+      `Please contact the student to confirm their booking.`
+    )
+    const whatsappUrl = `https://wa.me/919347879474?text=${waMessage}`
+
     return NextResponse.json({
       success: true,
       bookingRef,
       regNo,
+      whatsappUrl,
       message: password
         ? "Registration successful! You now have instant access to your student portal using your chosen password."
         : "Registration successful! You now have instant access to your student portal using default password: sriguru123"

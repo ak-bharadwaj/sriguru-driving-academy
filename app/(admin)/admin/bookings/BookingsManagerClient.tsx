@@ -9,7 +9,7 @@ import { useLanguageStore } from '@/store/languageStore'
 const PAGE_DICT = {
   EN: {
     headerTitle: 'Booking Review (Manual Mode)',
-    headerDesc: 'Review incoming student registrations. Assign an instructor and approve to officially create their account.',
+    headerDesc: 'Review incoming student registrations. Approve to officially create their account.',
     noBookings: 'No pending bookings.',
     course: 'Course:',
     slot: 'Slot:',
@@ -28,7 +28,7 @@ const PAGE_DICT = {
   },
   HI: {
     headerTitle: 'बुकिंग समीक्षा (मैनुअल मोड)',
-    headerDesc: 'आने वाले छात्र पंजीकरणों की समीक्षा करें। एक प्रशिक्षक असाइन करें और आधिकारिक तौर पर उनका खाता बनाने के लिए स्वीकृति दें।',
+    headerDesc: 'आने वाले छात्र पंजीकरणों की समीक्षा करें। आधिकारिक तौर पर उनका खाता बनाने के लिए स्वीकृति दें।',
     noBookings: 'कोई लंबित बुकिंग नहीं है।',
     course: 'कोर्स:',
     slot: 'स्लॉट:',
@@ -47,7 +47,7 @@ const PAGE_DICT = {
   },
   TE: {
     headerTitle: 'బుకింగ్ సమీక్ష (మాన్యువల్ మోడ్)',
-    headerDesc: 'ఇన్‌కమింగ్ విద్యార్థి రిజిస్ట్రేషన్‌లను సమీక్షించండి. ఇన్‌స్ట్రక్టర్‌ను కేటాయించండి మరియు వారి ఖాతాను అధికారికంగా సృష్టించడానికి ఆమోదించండి.',
+    headerDesc: 'ఇన్‌కమింగ్ విద్యార్థి రిజిస్ట్రేషన్‌లను సమీక్షించండి. వారి ఖాతాను అధికారికంగా సృష్టించడానికి ఆమోదించండి.',
     noBookings: 'పెండింగ్ బుకింగ్‌లు లేవు.',
     course: 'కోర్సు:',
     slot: 'స్లాట్:',
@@ -87,11 +87,9 @@ interface InstructorOption {
 }
 
 export default function BookingsManagerClient({ 
-  initialBookings,
-  instructors
+  initialBookings
 }: { 
-  initialBookings: BookingData[],
-  instructors: InstructorOption[]
+  initialBookings: BookingData[]
 }) {
   const router = useRouter()
   const { language } = useLanguageStore()
@@ -99,7 +97,6 @@ export default function BookingsManagerClient({
   const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
 
   const [approvingId, setApprovingId] = useState<string | null>(null)
-  const [selectedInstructor, setSelectedInstructor] = useState<Record<string, string>>({})
   
   const handleApprove = async (bookingId: string) => {
     setApprovingId(bookingId)
@@ -108,8 +105,7 @@ export default function BookingsManagerClient({
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bookingId,
-          instructorId: selectedInstructor[bookingId] || undefined
+          bookingId
         })
       })
 
@@ -188,49 +184,40 @@ export default function BookingsManagerClient({
                   <span className="text-[rgb(var(--color-text-2))] font-bold">{t.course}</span>
                   <span className="text-[rgb(var(--color-text-1))] font-medium">{b.trainingType}</span>
                 </div>
-                {b.slot && (
-                  <div className="flex justify-between">
-                    <span className="text-[rgb(var(--color-text-2))] font-bold flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> {t.slot}
-                    </span>
-                    <span className="text-[rgb(var(--color-text-1))] font-medium">{b.slot.dayOfWeek} @ {b.slot.time}</span>
-                  </div>
-                )}
-                <div className="flex justify-between">
+                 <div className="flex justify-between">
                   <span className="text-[rgb(var(--color-text-2))] font-bold">{t.dateApplied}</span>
                   <span className="text-[rgb(var(--color-text-1))] font-medium">{new Date(b.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2 pt-2">
-                <label className="text-[10px] font-bold text-[rgb(var(--color-text-2))] uppercase font-mono">{t.assignInstructor}</label>
-                <select 
-                  className="bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-lg px-3 py-2 text-xs font-medium outline-none w-full"
-                  value={selectedInstructor[b.id] || ''}
-                  onChange={(e) => setSelectedInstructor(prev => ({...prev, [b.id]: e.target.value}))}
+              <div className="flex flex-col gap-2 mt-2">
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => handleReject(b.id)}
+                    disabled={approvingId === b.id}
+                    className="flex-1 py-2 bg-[rgb(var(--color-void))] border border-red-200 text-red-600 font-bold text-xs rounded-xl hover:bg-red-50 transition flex items-center justify-center gap-1"
+                  >
+                    <X className="w-4 h-4" /> {t.reject}
+                  </button>
+                  <button 
+                    onClick={() => handleApprove(b.id)}
+                    disabled={approvingId === b.id}
+                    className="flex-1 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl hover:bg-emerald-700 transition flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
+                  >
+                    <Check className="w-4 h-4" /> {approvingId === b.id ? t.approving : t.approve}
+                  </button>
+                </div>
+                <a
+                  href={`https://wa.me/${b.phone.replace(/[^0-9]/g, '').length === 10 ? '91' + b.phone.replace(/[^0-9]/g, '') : b.phone.replace(/[^0-9]/g, '')}?text=Hi%20${encodeURIComponent(b.name)},%20this%20is%20Sri%20Guru%20Driving%20School.%20We%20have%20received%20your%20booking%20request%20for%20the%20${encodeURIComponent(b.trainingType)}%20course.%20Let's%20discuss%20to%20finalize%20your%20admission!`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2 bg-[#25D366] text-void hover:bg-[#20ba5a] font-extrabold text-xs rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm"
                 >
-                  <option value="">{t.noInstructor}</option>
-                  {instructors.map(ins => (
-                    <option key={ins.id} value={ins.id}>{ins.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex gap-3 mt-2">
-                <button 
-                  onClick={() => handleReject(b.id)}
-                  disabled={approvingId === b.id}
-                  className="flex-1 py-2 bg-[rgb(var(--color-void))] border border-red-200 text-red-600 font-bold text-xs rounded-xl hover:bg-red-50 transition flex items-center justify-center gap-1"
-                >
-                  <X className="w-4 h-4" /> {t.reject}
-                </button>
-                <button 
-                  onClick={() => handleApprove(b.id)}
-                  disabled={approvingId === b.id}
-                  className="flex-1 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl hover:bg-emerald-700 transition flex items-center justify-center gap-1 shadow-sm disabled:opacity-50"
-                >
-                  <Check className="w-4 h-4" /> {approvingId === b.id ? t.approving : t.approve}
-                </button>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.725 1.45h.005c5.379 0 9.75-4.37 9.754-9.751.002-2.607-1.01-5.057-2.852-6.9a9.69 9.69 0 0 0-6.907-2.853c-5.385 0-9.757 4.37-9.761 9.752-.001 1.71.477 3.382 1.387 4.87L1.936 21.06l4.711-1.906zm12.42-7.514c-.302-.15-1.785-.882-2.062-.982-.278-.1-.48-.15-.68.15-.2.3-.775.982-.95 1.183-.175.2-.35.225-.65.075-.3-.15-1.27-.47-2.42-1.493-.895-.8-1.5-1.787-1.675-2.087-.175-.3-.02-.463.13-.613.137-.134.3-.35.45-.525.15-.175.2-.3.3-.5s.05-.375-.025-.525C10.744 6.782 10.144 5.3 9.893 4.7c-.244-.589-.493-.51-.68-.52-.174-.01-.374-.01-.574-.01s-.525.075-.8.375c-.275.3-1.05 1.025-1.05 2.5s1.075 2.9 1.225 3.1c.15.2 2.11 3.224 5.112 4.521.714.308 1.272.493 1.707.632.717.228 1.37.196 1.885.119.574-.087 1.785-.73 2.037-1.437.252-.708.252-1.313.175-1.437-.075-.125-.275-.2-.575-.35z"/>
+                  </svg>
+                  WhatsApp Follow Up
+                </a>
               </div>
 
             </div>
