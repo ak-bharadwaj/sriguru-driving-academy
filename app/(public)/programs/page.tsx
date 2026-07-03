@@ -203,7 +203,11 @@ export default function ProgramsPage() {
             <span className="px-3 py-1 bg-surface border border-white/10 text-text-2 text-xs font-mono rounded-full">{courses.length} {language === 'EN' ? 'Programs' : language === 'HI' ? 'प्रोग्राम' : 'ప్రోగ్రామ్‌లు'}</span>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className={`grid grid-cols-1 gap-8 ${
+            courses?.length === 1 
+              ? 'max-w-2xl mx-auto' 
+              : 'lg:grid-cols-2'
+          }`}>
             {courses.map((course, idx) => {
               const lang = language.toUpperCase() as 'EN' | 'HI' | 'TE'
               const displayTitle = course.title[lang] || course.title.EN

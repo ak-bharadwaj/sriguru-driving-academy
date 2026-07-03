@@ -302,7 +302,13 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
             <p className="text-slate-500 dark:text-slate-400 text-xl font-light">{t('landing.curriculum.desc')}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className={`grid grid-cols-1 gap-8 ${
+            courses?.length === 1 
+              ? 'max-w-md mx-auto' 
+              : courses?.length === 2 
+                ? 'md:grid-cols-2 max-w-3xl mx-auto' 
+                : 'md:grid-cols-3'
+          }`}>
             {courses?.slice(0,3).map((course, i) => (
               <div 
                 key={course.id}
