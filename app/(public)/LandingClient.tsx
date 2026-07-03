@@ -461,9 +461,9 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
           <div className="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
               <h2 className="font-display text-4xl md:text-6xl font-medium tracking-tighter mb-6">{t('landing.gallery.title')}</h2>
-              <p className="text-slate-500 dark:text-slate-400 text-xl font-light">{t('landing.gallery.desc')}</p>
+              <p className="text-slate-800 dark:text-slate-200 text-lg sm:text-xl font-semibold">{t('landing.gallery.desc')}</p>
             </div>
-            <a href="/gallery" className="inline-flex items-center gap-2 text-violet-600 dark:text-violet-400 font-semibold hover:underline">
+            <a href="/gallery" className="inline-flex items-center gap-2 text-violet-600 dark:text-violet-400 font-bold hover:underline">
               {t('landing.gallery.link')} <ArrowRight className="w-4 h-4" />
             </a>
           </div>
@@ -493,16 +493,16 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
                 {/* Caption card */}
                 <div className="absolute bottom-8 left-8 right-8 md:left-12 md:right-12 flex flex-col md:flex-row md:items-end justify-between gap-4">
                   <div className="max-w-md">
-                    <p className="text-violet-400 font-semibold tracking-wider text-xs uppercase mb-2">
+                    <p className="text-violet-400 font-bold tracking-wider text-xs uppercase mb-2">
                       {t('landing.gallery.badge') || 'Inside the Academy'}
                     </p>
-                    <h3 className="text-white text-2xl md:text-3xl font-display font-medium tracking-tight">
+                    <h3 className="text-white text-2xl md:text-3xl font-display font-semibold tracking-tight">
                       {galleryItems[currentGalleryIndex].caption}
                     </h3>
                   </div>
                   
                   {/* Slide counter */}
-                  <span className="text-white/60 text-sm font-medium bg-black/35 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10 self-start md:self-auto">
+                  <span className="text-white/90 text-sm font-semibold bg-black/50 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10 self-start md:self-auto">
                     {currentGalleryIndex + 1} / {galleryItems.length}
                   </span>
                 </div>
@@ -562,13 +562,13 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
             <div className="space-y-8">
               {TESTIMONIALS.slice(0, 2).map((t, idx) => (
                 <div key={idx} className="bg-white/60 dark:bg-white/5 backdrop-blur-3xl p-10 rounded-[2rem] border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-                  <p className="leading-relaxed mb-8 font-light text-lg">"{t.quote}"</p>
+                  <p className="leading-relaxed mb-8 font-semibold text-base sm:text-lg text-slate-800 dark:text-slate-200">"{t.quote}"</p>
                   <div className="flex items-center gap-5">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center font-bold text-sm shadow-md">
                       {t.name.charAt(0)}
                     </div>
                     <div>
-                      <h5 className="font-medium text-sm tracking-wide uppercase">{t.name}</h5>
+                      <h5 className="font-bold text-sm sm:text-base tracking-wide uppercase text-slate-900 dark:text-white">{t.name}</h5>
                       <div className="flex gap-1 mt-2">
                         {[...Array(t.rating)].map((_, i) => <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />)}
                       </div>
@@ -594,7 +594,7 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
                       onClick={() => setActiveFaq(isOpen ? null : idx)}
                       className="w-full px-8 py-6 flex justify-between items-center text-left"
                     >
-                      <span className="font-medium text-lg pr-4">{faq.q}</span>
+                      <span className="font-semibold text-base sm:text-lg pr-4 text-slate-900 dark:text-white">{faq.q}</span>
                       <ChevronDown className={`w-5 h-5 text-violet-500 transition-transform duration-500 shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
                     </button>
                     <AnimatePresence>
@@ -606,7 +606,7 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
                           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                           className="overflow-hidden"
                         >
-                          <p className="px-8 pb-8 text-slate-500 dark:text-slate-400 font-light leading-relaxed text-lg pt-2">
+                          <p className="px-8 pb-8 text-slate-800 dark:text-slate-200 font-medium leading-relaxed text-base sm:text-lg pt-2">
                             {faq.a}
                           </p>
                         </motion.div>
@@ -627,8 +627,8 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
       <section id="contact" className="py-14 md:py-32 px-6 relative z-10 border-t border-black/5 dark:border-white/5">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-16">
           <div className="flex-1">
-            <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tighter mb-6">Have Questions?</h2>
-            <p className="text-slate-500 dark:text-slate-400 text-lg font-light mb-10">
+            <h2 className="font-display text-4xl md:text-5xl font-semibold tracking-tighter mb-6 text-slate-900 dark:text-white">Have Questions?</h2>
+            <p className="text-slate-800 dark:text-slate-200 text-base sm:text-lg font-medium mb-10">
               Send us an enquiry and our administration team will get back to you directly to arrange a consultation or help you choose the right program.
             </p>
             <div className="space-y-6">
@@ -637,8 +637,8 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
                   <Phone className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-medium">Call Us Directly</h4>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">+91 98765 43210</p>
+                  <h4 className="font-bold text-base sm:text-lg text-slate-900 dark:text-white">Call Us Directly</h4>
+                  <p className="text-slate-800 dark:text-slate-200 text-sm sm:text-base font-semibold mt-1">+91 98765 43210</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -646,8 +646,8 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
                   <Mail className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-medium">Email Support</h4>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">support@sriguru.in</p>
+                  <h4 className="font-bold text-base sm:text-lg text-slate-900 dark:text-white">Email Support</h4>
+                  <p className="text-slate-800 dark:text-slate-200 text-sm sm:text-base font-semibold mt-1">support@sriguru.in</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -655,8 +655,8 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-medium">Visit Our School</h4>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+                  <h4 className="font-bold text-base sm:text-lg text-slate-900 dark:text-white">Visit Our School</h4>
+                  <p className="text-slate-800 dark:text-slate-200 text-sm sm:text-base font-semibold mt-1">
                     Shop No.27282-P2, Near Anu Hospital,<br className="hidden sm:inline" />
                     Bommalasatram, Kadapa Road, Nandyal
                   </p>
@@ -673,9 +673,9 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
                 <div className="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-6">
                   <Check className="w-10 h-10" />
                 </div>
-                <h3 className="font-display text-3xl font-medium mb-4">Message Sent!</h3>
-                <p className="text-slate-500 dark:text-slate-400">Our admin team has received your enquiry and will contact you shortly.</p>
-                <button onClick={() => setSubmitStatus('idle')} className="mt-8 px-6 py-3 bg-violet-600 text-white rounded-full font-medium hover:bg-violet-700 transition-colors">
+                <h3 className="font-display text-3xl font-semibold mb-4">Message Sent!</h3>
+                <p className="text-slate-800 dark:text-slate-200 font-medium">Our admin team has received your enquiry and will contact you shortly.</p>
+                <button onClick={() => setSubmitStatus('idle')} className="mt-8 px-6 py-3 bg-violet-600 text-white rounded-full font-bold hover:bg-violet-700 transition-colors">
                   Send Another
                 </button>
               </div>
@@ -683,24 +683,24 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
               <form onSubmit={handleContactSubmit} className="relative z-10 flex flex-col gap-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Full Name *</label>
-                    <input required value={contactForm.name} onChange={e => setContactForm({...contactForm, name: e.target.value})} type="text" className="px-4 py-3 bg-white/50 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl focus:outline-none focus:border-violet-500 transition-colors" placeholder="John Doe" />
+                    <label className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200">Full Name *</label>
+                    <input required value={contactForm.name} onChange={e => setContactForm({...contactForm, name: e.target.value})} type="text" className="px-4 py-3 bg-white/50 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl focus:outline-none focus:border-violet-500 transition-colors text-slate-900 dark:text-white font-medium text-sm sm:text-base" placeholder="John Doe" />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Phone Number *</label>
-                    <input required value={contactForm.phone} onChange={e => setContactForm({...contactForm, phone: e.target.value})} type="tel" className="px-4 py-3 bg-white/50 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl focus:outline-none focus:border-violet-500 transition-colors" placeholder="+91 XXXXX XXXXX" />
+                    <label className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200">Phone Number *</label>
+                    <input required value={contactForm.phone} onChange={e => setContactForm({...contactForm, phone: e.target.value})} type="tel" className="px-4 py-3 bg-white/50 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl focus:outline-none focus:border-violet-500 transition-colors text-slate-900 dark:text-white font-medium text-sm sm:text-base" placeholder="+91 XXXXX XXXXX" />
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Email Address</label>
-                  <input value={contactForm.email} onChange={e => setContactForm({...contactForm, email: e.target.value})} type="email" className="px-4 py-3 bg-white/50 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl focus:outline-none focus:border-violet-500 transition-colors" placeholder="john@example.com" />
+                  <label className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200">Email Address</label>
+                  <input value={contactForm.email} onChange={e => setContactForm({...contactForm, email: e.target.value})} type="email" className="px-4 py-3 bg-white/50 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl focus:outline-none focus:border-violet-500 transition-colors text-slate-900 dark:text-white font-medium text-sm sm:text-base" placeholder="john@example.com" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">How can we help? *</label>
-                  <textarea required value={contactForm.message} onChange={e => setContactForm({...contactForm, message: e.target.value})} rows={4} className="px-4 py-3 bg-white/50 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl focus:outline-none focus:border-violet-500 transition-colors resize-none" placeholder="I am interested in..." />
+                  <label className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200">How can we help? *</label>
+                  <textarea required value={contactForm.message} onChange={e => setContactForm({...contactForm, message: e.target.value})} rows={4} className="px-4 py-3 bg-white/50 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-xl focus:outline-none focus:border-violet-500 transition-colors resize-none text-slate-900 dark:text-white font-medium text-sm sm:text-base" placeholder="I am interested in..." />
                 </div>
-                {submitStatus === 'error' && <p className="text-red-500 text-sm">Failed to send message. Please try again.</p>}
-                <button type="submit" disabled={isSubmitting} className="py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-lg shadow-violet-500/20 disabled:opacity-70 flex items-center justify-center gap-2">
+                {submitStatus === 'error' && <p className="text-red-500 text-sm font-semibold">Failed to send message. Please try again.</p>}
+                <button type="submit" disabled={isSubmitting} className="py-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-base rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-lg shadow-violet-500/20 disabled:opacity-70 flex items-center justify-center gap-2">
                   {isSubmitting ? 'Sending...' : 'Send Enquiry'}
                 </button>
               </form>
