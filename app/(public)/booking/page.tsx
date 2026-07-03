@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Check, CheckCircle, ArrowRight, User, Phone, Mail, Clock, ArrowLeft, BookOpen, Award, Zap, Lock, Eye, EyeOff, Info, Sun, Moon } from 'lucide-react'
+import { Calendar, Check, CheckCircle, ArrowRight, User, Phone, Mail, Clock, ArrowLeft, BookOpen, Award, Zap, Lock, Eye, EyeOff, Info, Sun, Moon, Download } from 'lucide-react'
 import { signIn, useSession } from 'next-auth/react'
 import toast from 'react-hot-toast'
 import { useLanguageStore } from '@/store/languageStore'
@@ -279,6 +279,7 @@ export default function PublicBookingSystem() {
 
   // Step 4: Submission Success overlay
   const [bookingResult, setBookingResult] = useState<{ ref: string; msg: string } | null>(null)
+  const [whatsappUrl, setWhatsappUrl] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   // Dynamic Data & Languages
@@ -437,6 +438,7 @@ export default function PublicBookingSystem() {
 
         // Open WhatsApp to notify admin with booking details
         if (data.whatsappUrl) {
+          setWhatsappUrl(data.whatsappUrl)
           window.open(data.whatsappUrl, '_blank', 'noopener,noreferrer')
         }
 
@@ -1243,7 +1245,7 @@ export default function PublicBookingSystem() {
                 key="step5"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center justify-center text-center py-8 gap-6 max-w-md mx-auto"
+                className="flex flex-col items-center justify-center text-center py-8 gap-6 max-w-lg mx-auto"
               >
                 <div className="w-[84px] h-[84px] rounded-full bg-success/15 border-2 border-success/40 flex items-center justify-center text-success animate-bounce">
                   <CheckCircle className="w-12 h-12 text-success" />
@@ -1252,15 +1254,21 @@ export default function PublicBookingSystem() {
                 <div>
                   <span className="text-[10px] font-mono uppercase tracking-widest text-primary font-bold">{t.slotAcquired}</span>
                   <h2 className="text-2xl font-extrabold text-text-1 font-display tracking-tight mt-2 uppercase">
-                    {t.bookingConf}
+                    Booking Confirmed!
                   </h2>
                   <p className="text-xs text-text-2 leading-relaxed mt-2 font-body px-4">
-                    {t.trialVerified}
-                  </p>
-                  <p className="text-xs text-primary leading-relaxed font-semibold font-body px-4 max-w-sm mt-1">
-                    {bookingResult.msg}
+                    Your details are recorded. To continue learning, practicing RTO exams, or tracking your schedule, please use our dedicated student portal or download our Android app.
                   </p>
                 </div>
+
+                {whatsappUrl && (
+                  <button
+                    onClick={() => window.open(whatsappUrl, '_blank', 'noopener,noreferrer')}
+                    className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-500/10 flex items-center justify-center gap-2 transition-all duration-200"
+                  >
+                    💬 Send Confirmation via WhatsApp
+                  </button>
+                )}
 
                 <div className="w-full bg-void/60 border border-border p-5 rounded-2xl text-left flex flex-col gap-3 font-mono text-xs">
                   <div className="flex justify-between items-center pb-2 border-b border-border/40">
@@ -1268,18 +1276,31 @@ export default function PublicBookingSystem() {
                     <span className="text-accent font-bold uppercase">{bookingResult.ref}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-text-3 uppercase">RESOLUTION:</span>
-                    <span className="text-text-1 font-bold uppercase">{bookingResult.msg.includes("Account") ? "LOGIN CREDENTIALS SENT TO EMAIL" : "CALL WITHIN 24 HOURS"}</span>
+                    <span className="text-text-3 uppercase">DEFAULT PASSWORD:</span>
+                    <span className="text-text-1 font-bold uppercase">sriguru123</span>
                   </div>
                 </div>
 
-                <button
-                  onClick={() => window.location.href = '/student/dashboard'}
-                  className="px-6 py-3 bg-primary hover:bg-primary/95 text-white font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all duration-200 mt-4"
-                >
-                  Go to Dashboard
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                <div className="w-full flex flex-col sm:flex-row gap-3 mt-4">
+                  <a
+                    href="https://student-app-sooty-pi.vercel.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 px-5 py-3.5 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200 text-center"
+                  >
+                    Open Student Web Portal
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
+                  
+                  <a
+                    href="/downloads/sriguru-rto-app.apk"
+                    download
+                    className="flex-1 px-5 py-3.5 bg-void border border-border text-text-1 hover:border-primary/50 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200 text-center"
+                  >
+                    Download Android App (APK)
+                    <Download className="w-3.5 h-3.5" />
+                  </a>
+                </div>
               </motion.div>
             )}
           </>)}
