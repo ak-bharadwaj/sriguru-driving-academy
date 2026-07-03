@@ -1291,13 +1291,9 @@ export default function PublicBookingSystem() {
                 )}
 
                 <div className="w-full bg-void/60 border border-border p-5 rounded-2xl text-left flex flex-col gap-3 font-mono text-xs">
-                  <div className="flex justify-between items-center pb-2 border-b border-border/40">
+                  <div className="flex justify-between items-center">
                     <span className="text-text-3 uppercase">{t.refId}</span>
                     <span className="text-accent font-bold uppercase">{bookingResult.ref}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-text-3 uppercase">DEFAULT PASSWORD:</span>
-                    <span className="text-text-1 font-bold uppercase">sriguru123</span>
                   </div>
                 </div>
 

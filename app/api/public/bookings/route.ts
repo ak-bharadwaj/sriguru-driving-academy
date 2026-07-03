@@ -203,9 +203,7 @@ export async function POST(request: Request) {
       `📅 *Duration:* ${durationLabel}${kmPerDay ? ` (${kmPerDay})` : ''}\n` +
       `💰 *Price:* ${price} _(Negotiable)_\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `🔖 *Ref:* ${bookingRef}\n` +
-      `━━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `Please contact the student to confirm booking.`
+      `🔖 *Ref:* ${bookingRef}`
     )
     const whatsappUrl = `https://wa.me/919347879474?text=${waMessage}`
 

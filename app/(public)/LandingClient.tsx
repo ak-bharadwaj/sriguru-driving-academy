@@ -740,7 +740,6 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
           <div className="flex gap-10 text-sm font-medium tracking-wide uppercase text-violet-200/70">
             <a href="#gallery" className="hover:text-white transition-colors">Gallery</a>
             <a href="#courses" className="hover:text-white transition-colors">Curriculum</a>
-            <a href="/login" className="hover:text-white transition-colors">Portal</a>
           </div>
 
         </div>

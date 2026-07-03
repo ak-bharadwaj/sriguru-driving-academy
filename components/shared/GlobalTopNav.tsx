@@ -51,7 +51,7 @@ export function GlobalTopNav() {
   const shouldHide = HIDE_TOP_NAV_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   if (shouldHide) return null;
 
-  const isLoginPage = pathname === '/login';
+  const isLoginPage = pathname === '/admin-portal-login';
   const isLandingPage = pathname === '/';
   const isLoggedIn = !!session?.user;
 
@@ -106,7 +106,7 @@ export function GlobalTopNav() {
       <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
         <LanguageToggle dropdownDirection="down" />
         <ThemeToggle />
-        {isLoggedIn ? (
+        {isLoggedIn && (
           <Link
             href={dashboardRoute}
             className="p-2 md:px-5 md:py-2.5 bg-primary text-white font-bold text-sm rounded-full hover:-translate-y-0.5 hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2 shrink-0"
@@ -115,16 +115,7 @@ export function GlobalTopNav() {
             <span className="hidden md:inline">{t('nav.dashboard')}</span>
             <LayoutDashboard className="w-4.5 h-4.5 sm:w-4 sm:h-4" />
           </Link>
-        ) : !isLoginPage ? (
-          <Link
-            href="/login"
-            className="p-2 md:px-5 md:py-2.5 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-semibold text-sm rounded-full backdrop-blur-xl transition-all duration-300 flex items-center justify-center gap-1.5 shrink-0"
-            title={t('nav.portal')}
-          >
-            <span className="hidden md:inline">{t('nav.portal')}</span>
-            <User className="w-4.5 h-4.5 sm:w-4 sm:h-4" />
-          </Link>
-        ) : null}
+        )}
 
         {/* Mobile menu trigger */}
         {isLandingPage && (
