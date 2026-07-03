@@ -380,17 +380,7 @@ export default function PublicBookingSystem() {
   }
 
   const handleBookingSubmit = async () => {
-    // Validate password for manual signups
-    if (!session?.user && (!password || password.trim().length < 6)) {
-      if (!password) {
-        setPasswordError('Password is required')
-      } else {
-        setPasswordError('Password must be at least 6 characters')
-      }
-      toast.error("Please enter a secure password of at least 6 characters.")
-      return
-    }
-    setPasswordError('')
+    setSubmitting(true)
     
     setSubmitting(true)
     setSubmitStage(0)
@@ -1141,60 +1131,6 @@ export default function PublicBookingSystem() {
                     {t.secureProcess}
                   </div>
                 </div>
-
-                {/* Choose Account Password Card (Only for manual registrants) */}
-                {!session?.user && (
-                  <div className={`border bg-void/50 p-5 rounded-2xl flex flex-col gap-3 shadow-[0_0_15px_rgba(var(--color-primary),0.04)] transition-all duration-300 ${
-                    passwordError ? 'border-rose-500/50 shadow-[0_0_15px_rgba(239,68,68,0.08)]' : 'border-border/60'
-                  }`}>
-                    <div className="flex items-center justify-between border-b border-border/40 pb-2">
-                      <span className="text-[10px] font-mono text-text-3 uppercase tracking-wider font-bold flex items-center gap-1.5">
-                        <Lock className={`w-3.5 h-3.5 animate-pulse ${passwordError ? 'text-rose-500' : 'text-accent'}`} />
-                        Choose Account Password
-                      </span>
-                      <span className={`text-[8px] font-mono border px-2 py-0.5 rounded uppercase font-bold transition-colors ${
-                        passwordError 
-                          ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' 
-                          : 'bg-primary/20 text-primary border-primary/30'
-                      }`}>
-                        Required
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-text-3 leading-relaxed">
-                      Choose a secure password. You will use this password to immediately log in to your interactive Sri Guru student dashboard after booking submission.
-                    </p>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter at least 6 characters"
-                        value={password}
-                        onChange={(e) => {
-                          setPassword(e.target.value)
-                          if (e.target.value.trim().length >= 6) {
-                            setPasswordError('')
-                          }
-                        }}
-                        className={`w-full bg-void/70 pl-4 pr-10 py-3 rounded-xl text-xs text-text-1 placeholder-text-3 outline-none transition-all duration-200 border ${
-                          passwordError 
-                            ? 'border-rose-500/60 focus:border-rose-500 ring-1 ring-rose-500/20' 
-                            : 'border-border/60 focus:border-primary'
-                        }`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-text-3 hover:text-text-2 transition-colors"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    {passwordError && (
-                      <span className="text-[9px] text-rose-400 font-mono font-bold mt-1">
-                        ⚠️ {passwordError}
-                      </span>
-                    )}
-                  </div>
-                )}
 
                 {/* PROMO VOUCHER CONSOLE */}
                 <div className="border border-border/60 bg-void/50 p-5 rounded-2xl flex flex-col gap-3.5 shadow-[0_0_15px_rgba(var(--color-primary),0.04)]">
