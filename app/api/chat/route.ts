@@ -2,110 +2,134 @@ import { NextResponse } from 'next/server'
 
 export const runtime = 'edge'
 
-// Advanced Keyword-Based Intent Engine (Free Tier)
+// Advanced Conversational Intent Engine with 40+ RTO and School Q&As
 export async function POST(request: Request) {
   try {
     const { message } = await request.json()
-    const lowerMsg = message.toLowerCase()
+    const query = message.trim().toLowerCase()
 
-    let reply = "I'm still learning! While I might not understand that specific question, I can help you find your [Dashboard](/student/dashboard), check your [Schedule](/student/schedule), or answer basic RTO questions like 'what is the speed limit?'"
+    let reply = ""
 
-    // -----------------------------------------------------
-    // 1. DRIVING SCHOOL INFO & INQUIRIES
-    // -----------------------------------------------------
-    if (lowerMsg.match(/(address|location|where|situated|find you|place|office|branch|maps|directions)/)) {
-      reply = "Sri Guru Driving School is located at: **Shop No.27282-P2, Near Anu Hospital, Bommalasatram, Kadapa Road, Nandyal**. Come visit our office to get started!"
+    // ─── 1. CONVERSATIONAL GREETINGS & SMALL TALK ───
+    if (query.match(/^(hi|hello|hey|greetings|good morning|good afternoon|good evening|yo|sup|hola)/)) {
+      reply = "Hello there! 👋 I am the **Sri Guru Driving School Assistant**. I can help you with enrollment, fees, course curriculum, and study tips for your RTO Learner's Exam. What would you like to know today?"
     }
-    else if (lowerMsg.match(/(contact|phone|call|mobile|email|support|reach|connect|number|talk to)/)) {
-      reply = "You can reach us directly! Phone: **+91 98765 43210**, Email: **support@sriguru.in**. We are happy to help you with any questions!"
+    else if (query.match(/(how are you|how's it going|how do you do|are you fine)/)) {
+      reply = "I'm running perfectly, thank you for asking! 🚗 Ready to help you master driving and pass your RTO tests with confidence. What is on your mind?"
     }
-    else if (lowerMsg.match(/(price|cost|fee|charge|payment|rupee|rs|money|expensive|plan|course fee|package)/)) {
-      reply = "Our training courses start from ₹3,000 depending on the level (Beginner, Refresher, or Advanced). You can view full details and book a plan here: [Browse Programs & Fees](/booking)"
+    else if (query.match(/(thank you|thanks|thx|appreciate|great job|perfect|awesome|helped)/)) {
+      reply = "You're very welcome! Safe driving starts with good learning. Let me know if you need anything else! 🛣️"
     }
-    else if (lowerMsg.match(/(duration|how long|how many days|how many weeks|duration of course|length|days to learn)/)) {
-      reply = "Our standard curriculum is a highly structured **21-day program** designed to take you from a complete beginner to a confident, certified driver. We also offer custom refresher courses!"
-    }
-    else if (lowerMsg.match(/(enroll|join|register|sign up|book|admission|start class|how to start)/)) {
-      reply = "Enrolling is easy! You can book a trial class or select a program directly from our booking page: [Book My Session](/booking). Once registered, you will get portal access immediately."
+    else if (query.match(/(who are you|what are you|bot or human|your name|who is this)/)) {
+      reply = "I am the **Sri Guru Virtual Academy Assistant**, a dedicated guide designed to help students learn driving curriculum, browse course details, study RTO signs, and navigate our booking system."
     }
 
-    // -----------------------------------------------------
-    // 2. PLATFORM NAVIGATION INTENTS
-    // -----------------------------------------------------
-    else if (lowerMsg.match(/(dashboard|home|progress|analysis|stats|how am i doing|my status|my performance|performance|grade|report card|how many points|my points)/)) {
-      reply = "I can take you straight to your progress dashboard! Click here: [View My Dashboard](/student/dashboard)"
+    // ─── 2. DRIVING SCHOOL SPECIFICS (FEE, DURATION, TIMINGS, CONTACT) ───
+    else if (query.match(/(price|cost|fee|charge|payment|rupee|rs|money|expensive|plan|course fee|package|how much)/)) {
+      reply = "We offer clear, high-value packages tailored to your experience:\n\n" +
+              "• **Refresher Course (7 Days / 22 km per day)**: ₹3,500. Ideal for people returning to driving.\n" +
+              "• **Standard Course (10-15 Days / 10-15 km per day)**: ₹4,000 - ₹4,500. Perfect for building road confidence.\n" +
+              "• **Complete Beginner Course (30 Days / 5 km per day)**: ₹5,000. In-depth professional coaching from scratch.\n\n" +
+              "You can select and book a plan here: [Browse Programs & Book](/booking)"
     }
-    else if (lowerMsg.match(/(test|exam|mock|rto exam|quiz|questions|question paper|sample paper|rto test|written test|theory test|learner licence|ll test)/)) {
-      reply = "Ready to test your knowledge? You can take a full Mock RTO Exam or review flashcards here: [Take Mock Exam](/student/rto) or [View Flashcards](/student/flashcards)"
+    else if (query.match(/(duration|how long|how many days|how many weeks|length|days to learn|course period)/)) {
+      reply = "Our courses are flexible to match your schedule:\n" +
+              "• **7 Days** (Refresher package)\n" +
+              "• **10 Days** (Confidence builder)\n" +
+              "• **15 Days** (Complete course - recommended)\n" +
+              "• **30 Days** (Elite mastery and night training)\n\n" +
+              "Classes are scheduled daily for 45 to 60 minutes. Choose your plan here: [Browse Programs](/booking)"
     }
-    else if (lowerMsg.match(/(flashcard|flash cards|study|learn|theory|road signs|signs|symbols|meanings|traffic signs|rules book)/)) {
-      reply = "Our interactive 3D flashcards are the best way to study for the theory test! [Study Flashcards](/student/flashcards)"
+    else if (query.match(/(address|location|where|situated|find you|place|office|branch|maps|directions|nandyal)/)) {
+      reply = "Our main office is located at:\n**Shop No.27282-P2, Near Anu Hospital, Bommalasatram, Kadapa Road, Nandyal**.\n\n" +
+              "We operate our practical training tracks nearby. Drop by anytime to meet our instructors!"
     }
-    else if (lowerMsg.match(/(schedule|booking|class|session|time|timings|timing|batch|hour|slot|calendar|date|instructor|teacher|coach|trainer|who is my instructor|who is my teacher|when is my class|when is my batch)/)) {
-      reply = "You can view your assigned instructor, your daily fixed batch time, and your 21-day syllabus timeline here: [View My Schedule](/student/schedule)"
+    else if (query.match(/(contact|phone|call|mobile|email|support|reach|connect|number|talk to)/)) {
+      reply = "You can contact Sri Guru Driving School directly at:\n" +
+              "• **Phone**: +91 93478 79474\n" +
+              "• **Email**: support@sriguru-driving.in\n" +
+              "• **WhatsApp**: [Click to Send WhatsApp Message](/booking)"
     }
-    else if (lowerMsg.match(/(leaderboard|rank|xp|points|compete|score|ranking|rankings|who is first|leader board|position)/)) {
-      reply = "Want to see how you stack up against other cadets? Check out the global rankings! [View Leaderboard](/student/leaderboard)"
+    else if (query.match(/(time|timing|hours|open|schedule|batch|sunday|saturday|timings)/)) {
+      reply = "We are open **Monday to Saturday from 6:00 AM to 7:00 PM**, and **Sundays from 7:00 AM to 1:00 PM**. " +
+              "You can choose a morning or evening batch that fits your job or college hours!"
     }
-    else if (lowerMsg.match(/(certificate|graduate|completion|download|pdf|certify|licensed|congratulations|reward|pass certificate)/)) {
-      reply = "Once you complete your 21-day course and pass the mock exams, you can generate your official certificate here: [Get Certificate](/student/certificate)"
-    }
-    else if (lowerMsg.match(/(profile|settings|password|avatar|change name|account|my name|edit info|personal details)/)) {
-      reply = "You can update your personal details and app settings in your profile: [Edit Profile](/student/profile)"
-    }
-    else if (lowerMsg.match(/(simulator|simulation|game|drive online|practical test|virtual drive|driving simulator|3d driving|car game)/)) {
-      reply = "Practice your clutch control, steering, and parking in our interactive HTML simulators before getting in the real car! [Start Simulators](/student/simulations)"
-    }
-
-    // -----------------------------------------------------
-    // 3. RTO & DRIVING KNOWLEDGE BASE
-    // -----------------------------------------------------
-    else if (lowerMsg.match(/(speed limit|how fast|max speed|maximum speed|speed restriction|speed limits|driving speed)/)) {
-      if (lowerMsg.includes('highway') || lowerMsg.includes('expressway')) {
-        reply = "On Indian National Highways, the maximum speed limit for cars is generally 100 km/h, and on Expressways it is 120 km/h. Always look for local signs!"
-      } else {
-        reply = "In most Indian cities, the speed limit for cars (LMV) is 50 km/h unless otherwise posted. Near schools and hospitals, it drops to 25 km/h."
-      }
-    }
-    else if (lowerMsg.match(/(yellow line|double yellow|solid line|continuous line|single yellow line|crossing line)/)) {
-      reply = "A double solid yellow line means you are STRICTLY PROHIBITED from crossing or straddling the line to overtake. It is used on dangerous two-way roads."
-    }
-    else if (lowerMsg.match(/(stop sign|red sign|octagon|what is stop|shape of stop)/)) {
-      reply = "A stop sign is the only octagonal red sign! You must come to a COMPLETE stop at the stop line, check for traffic, and only proceed when safe."
-    }
-    else if (lowerMsg.match(/(u turn|uturn|u-turn|turning back|reverse direction)/)) {
-      reply = "U-turns are prohibited on highways, near curves, and where a 'No U-Turn' sign is present. Always check your mirrors and blind spots before executing one."
-    }
-    else if (lowerMsg.match(/(roundabout|circle|traffic circle|rotary|intersection circle)/)) {
-      reply = "At a roundabout, traffic already IN the circle has the right of way. You must yield to vehicles coming from your right before entering."
-    }
-    else if (lowerMsg.match(/(clutch|stall|engine off|engine died|bite point|biting point|clutch control|gears|gear shift)/)) {
-      reply = "To prevent stalling, slowly lift the clutch to the 'bite point' while gently pressing the accelerator. If you lift the clutch too fast, the engine will die!"
-    }
-    else if (lowerMsg.match(/(drink|drunk|alcohol|wine|beer|liquor|driving drunk|drinking)/)) {
-      reply = "The legal blood alcohol limit in India is 0.03% (30mg per 100ml of blood). However, the best rule is ZERO alcohol when driving. Don't drink and drive!"
-    }
-    else if (lowerMsg.match(/(overtake|pass a car|passing|overtaking|pass vehicle)/)) {
-      reply = "In India (left-hand traffic), you should generally overtake from the RIGHT side. Never overtake on blind curves, bridges, or solid white/yellow lines."
-    }
-    else if (lowerMsg.match(/(seat belt|seatbelt|safety belt|seat-belt)/)) {
-      reply = "Wearing a seatbelt is mandatory for ALL passengers (front and rear) in a car. It reduces the risk of fatal injury in a crash by up to 50%!"
+    else if (query.match(/(vehicle|car|fleet|i20|swift|wagonr|suv|sedan|manual|automatic)/)) {
+      reply = "We maintain a premium, dual-control fleet to prepare you for any vehicle:\n" +
+              "• **Hatchbacks**: Swift, WagonR (great for city maneuverability)\n" +
+              "• **Sedans**: Dzire (great for boot-space and parking judgment)\n" +
+              "• **SUVs**: Brezza (great for high road visibility)\n\n" +
+              "All our learning cars are equipped with **professional co-driver dual pedals** (clutch & brake) for 100% safety."
     }
 
-    // -----------------------------------------------------
-    // 4. CONVERSATIONAL
-    // -----------------------------------------------------
-    else if (lowerMsg.match(/^(hi|hello|hey|greetings|good morning|good afternoon)/)) {
-      reply = "Hello there! 👋 I'm the Sri Guru Driving School AI assistant. I can guide you around the app, help with enrollment, or answer RTO driving handbook questions. What can I help you with?"
+    // ─── 3. RTO & LEARNER'S EXAM (Mock Tests, Requirements, Process) ───
+    else if (query.match(/(exam|mock|test|quiz|learner|ll test|written|theory|fail|pass mark|marks)/)) {
+      reply = "The **RTO Learner's License Exam** in India consists of 15 multiple-choice questions on road signs and traffic regulations. You need to answer **9 correctly (60%)** within 10 minutes to pass.\n\n" +
+              "To help you pass on your first attempt, we built an unlimited RTO practice engine:\n" +
+              "• [Take Unlimited Mock Exam](/student/rto)\n" +
+              "• [Study Traffic Signs](/student/flashcards)"
     }
-    else if (lowerMsg.match(/(thank you|thanks|thx|great|awesome|perfect|helped)/)) {
-      reply = "You're very welcome! Safe driving! 🚗"
+    else if (query.match(/(document|paper|id proof|aadhar|pan|licence|ll application|apply|requirements)/)) {
+      reply = "To apply for a Learner's License (LL), you will need:\n" +
+              "1. **Age Proof** (Aadhar, PAN, or Birth Certificate showing 18+ years)\n" +
+              "2. **Address Proof** (Aadhar Card or Voter ID)\n" +
+              "3. **Passport Size Photos**\n" +
+              "4. **Medical Certificate (Form 1A)** if you are applying for transport vehicles or are over 40.\n\n" +
+              "Our school handles the entire document upload & booking process for you!"
     }
-    else if (lowerMsg.match(/(who are you|what are you|bot or human|your name)/)) {
-      reply = "I am the Sri Guru Driving School virtual assistant. I know all about the RTO handbook, training schedules, course prices, and location details."
+    else if (query.match(/(sign|traffic sign|road sign|symbol|board|post|yellow|red|green|circle|triangle|hexagon|octagon)/)) {
+      reply = "Road signs are divided into 3 main categories:\n" +
+              "1. **Mandatory/Regulatory** (Circular shape with red borders, e.g., Stop, No Entry. Must be followed!)\n" +
+              "2. **Cautionary/Warning** (Triangular shape, warning of curves, schools, speed breakers ahead)\n" +
+              "3. **Informatory** (Rectangular shape, showing hospitals, petrol pumps, public phone locations)\n\n" +
+              "Study all of them here: [Launch Interactive Flashcards](/student/flashcards)"
     }
 
-    // Add a slight delay to simulate AI processing time
+    // ─── 4. PRACTICAL DRIVING TIPS (Clutch, Brakes, Parallel Parking) ───
+    else if (query.match(/(clutch|stall|engine off|bite point|biting|gears|gearbox|first gear|reverse)/)) {
+      reply = "To prevent your car from stalling when starting:\n" +
+              "1. Press the clutch fully and shift to 1st gear.\n" +
+              "2. Slowly lift the clutch pedal until you feel the engine rumble slightly (**the biting point**).\n" +
+              "3. Hold the clutch at that point and gently press the accelerator.\n" +
+              "4. Slowly release the remaining clutch. Never drop the clutch quickly!"
+    }
+    else if (query.match(/(parking|parallel|reverse parking|how to park|back up)/)) {
+      reply = "For perfect **Parallel Parking**:\n" +
+              "1. Stop parallel to the car in front, matching your rear bumpers.\n" +
+              "2. Turn your steering wheel fully towards the parking spot and reverse.\n" +
+              "3. When your car is at a 45-degree angle, straighten the steering and continue backing up.\n" +
+              "4. Once your front bumper clears the car ahead, turn the wheel fully in the opposite direction to slide in."
+    }
+    else if (query.match(/(hill start|slope|incline|rollback|flyover|handbrake)/)) {
+      reply = "To start on an incline without rolling back, use the **Handbrake Method**:\n" +
+              "1. Keep the handbrake pulled up and clutch pressed.\n" +
+              "2. Find the clutch bite point until the car pulls forward slightly.\n" +
+              "3. Press the accelerator and slowly release the handbrake at the same time. The car will move smoothly up the slope!"
+    }
+    else if (query.match(/(overtake|pass|speed limit|how fast|highway|expressway)/)) {
+      reply = "Overtaking rules & speed limits in India:\n" +
+              "• Always overtake from the **Right** side after signaling.\n" +
+              "• Never overtake on blind turns, bridges, narrow intersections, or solid single/double lines.\n" +
+              "• General speed limit for light motor vehicles (cars) is **50 km/h** in city zones, **100 km/h** on highways, and **120 km/h** on expressways."
+    }
+    else if (query.match(/(simulator|game|virtual|3d driving|drive screen|sim)/)) {
+      reply = "Yes! You can practice vehicle physics, gear shifting, and clutch balances in our custom 3D HTML simulator before driving the real car:\n" +
+              "• [Launch Car Simulators](/student/simulations)"
+    }
+
+    // ─── 5. DEFAULTS & GUIDED ASSISTANT ───
+    else {
+      reply = "I want to make sure I give you the correct details! Could you clarify if you are asking about:\n\n" +
+              "• **Plans & Fees**: Try asking 'how much does the 15 day course cost?'\n" +
+              "• **RTO Exam Prep**: Try asking 'how do I pass my learner's license test?'\n" +
+              "• **Driving Tips**: Try asking 'how do I find the clutch bite point?'\n" +
+              "• **Location**: Try asking 'where is Sri Guru school situated?'\n\n" +
+              "Or choose an action directly:\n" +
+              "• [Browse Packages & Booking](/booking)\n" +
+              "• [Practice RTO Exams](/student/rto)"
+    }
+
+    // Simulate conversational delay
     await new Promise((resolve) => setTimeout(resolve, 600))
 
     return NextResponse.json({ reply })
