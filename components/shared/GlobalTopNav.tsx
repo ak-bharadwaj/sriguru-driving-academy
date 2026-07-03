@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User, LayoutDashboard, LogIn, Download, GraduationCap, Car } from "lucide-react";
+import { User, LayoutDashboard, LogIn, Download, GraduationCap, Car, Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { LanguageToggle } from "@/components/shared/LanguageToggle";
 import { useSession } from "next-auth/react";
@@ -30,7 +30,12 @@ export function GlobalTopNav() {
   const { data: session } = useSession();
   const { t } = useTranslation();
   const { academyName, logoUrl } = useSettingsStore();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -115,7 +120,35 @@ export function GlobalTopNav() {
             <User className="w-4.5 h-4.5 sm:w-4 sm:h-4" />
           </Link>
         ) : null}
+
+        {/* Mobile menu trigger */}
+        {isLandingPage && (
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        )}
       </div>
+
+      {/* Mobile menu overlay */}
+      {mobileMenuOpen && isLandingPage && (
+        <div className="fixed inset-0 top-[64px] z-[999] md:hidden bg-void/95 backdrop-blur-3xl flex flex-col p-6 gap-6 border-t border-white/5 shadow-2xl">
+          <nav className="flex flex-col gap-4">
+            {PUBLIC_NAV_LINKS.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-4 py-3.5 text-base font-semibold text-white/80 hover:text-white rounded-xl hover:bg-white/5 transition-all duration-200 border border-white/5"
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      )}
     </div>
   );
 }

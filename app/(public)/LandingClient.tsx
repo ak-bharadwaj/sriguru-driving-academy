@@ -246,7 +246,7 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[160px] md:auto-rows-[220px]">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:auto-rows-[220px]">
             {/* Feature 1 */}
             <div className="md:col-span-2 md:row-span-2 bg-white/60 dark:bg-white/5 backdrop-blur-3xl rounded-[2rem] p-6 md:p-8 border border-white/40 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between group overflow-hidden relative">
               <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none" />
@@ -323,15 +323,37 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
                   <h3 className="font-display text-2xl md:text-3xl font-medium mb-2 md:mb-4 tracking-tight leading-none">
                     {(course.title as any)?.[lang] || (course.title as any)?.EN || course.category}
                   </h3>
-                  <div>
+                  <div className="flex flex-col gap-1">
                     <span className="text-4xl md:text-5xl font-medium tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400">
-                      ₹{course.price.toLocaleString()}
+                      ₹3,500 <span className="text-sm font-normal text-text-3">to</span> ₹5,000
                     </span>
+                    <span className="text-[9px] text-text-3 font-mono uppercase tracking-wider block mt-1">
+                      Flexible Duration Choices:
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 mt-4 bg-void/35 p-3 rounded-2xl border border-border/30">
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-text-1">7 Days</span>
+                      <span className="text-[9px] text-text-3 font-mono">154 Total km</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-text-1">10 Days</span>
+                      <span className="text-[9px] text-text-3 font-mono">150 Total km</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-text-1">15 Days</span>
+                      <span className="text-[9px] text-text-3 font-mono">150 Total km</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-text-1">30 Days</span>
+                      <span className="text-[9px] text-text-3 font-mono">150 Total km</span>
+                    </div>
                   </div>
                 </div>
                 
-                <p className="text-slate-600 dark:text-slate-300 mb-8 md:mb-12 flex-1 leading-relaxed font-light text-base md:text-lg relative z-10">
-                  {(course.desc as any)?.[lang] || (course.desc as any)?.EN || t('landing.course.desc')}
+                <p className="text-slate-600 dark:text-slate-300 mb-6 flex-1 leading-relaxed font-light text-sm md:text-base relative z-10">
+                  Select your program duration based on your comfort level. Optional RTO license processing (+₹1,500) covers all documentation and RTO exam prep support.
                 </p>
                 
                 <ul className="space-y-4 md:space-y-5 mb-8 md:mb-12 relative z-10">

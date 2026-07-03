@@ -902,6 +902,29 @@ export default function PublicBookingSystem() {
                       )
                     })}
                   </div>
+
+                  {/* Clarifying course duration guidelines */}
+                  <div className="mt-3 bg-void/50 border border-border/40 p-4 rounded-2xl flex flex-col gap-2.5 font-mono text-[10px] uppercase text-text-3">
+                    <span className="text-[8px] font-bold text-accent tracking-wider">💡 Course Selection Guide:</span>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[9px] leading-relaxed">
+                      <div className="flex gap-2">
+                        <span className="text-primary font-bold">7 Days:</span>
+                        <span>Crash course for people who already know basic driving but need a quick refresher.</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-primary font-bold">10 Days:</span>
+                        <span>Standard practice for semi-confident drivers to gain road confidence.</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-primary font-bold">15 Days:</span>
+                        <span>Beginner's ideal course. Recommended to learn everything from scratch.</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-primary font-bold">30 Days:</span>
+                        <span>Ultimate mastery course covering advanced highway, parking, and night driving.</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex justify-between border-t border-border mt-8 pt-5">
@@ -1283,7 +1306,7 @@ export default function PublicBookingSystem() {
 
                 <div className="w-full flex flex-col sm:flex-row gap-3 mt-4">
                   <a
-                    href="https://student-app-sooty-pi.vercel.app"
+                    href="https://srigururto.vercel.app"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex-1 px-5 py-3.5 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200 text-center"
