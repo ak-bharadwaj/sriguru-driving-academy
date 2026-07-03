@@ -38,9 +38,14 @@ export function GlobalTopNav() {
   }, [pathname]);
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handler, { passive: true });
-    return () => window.removeEventListener('scroll', handler);
+    const handler = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target && target.tagName === 'MAIN') {
+        setScrolled(target.scrollTop > 20);
+      }
+    };
+    window.addEventListener('scroll', handler, true);
+    return () => window.removeEventListener('scroll', handler, true);
   }, []);
 
   const shouldHide = HIDE_TOP_NAV_PREFIXES.some((prefix) => pathname.startsWith(prefix));
