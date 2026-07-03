@@ -199,16 +199,13 @@ export async function POST(request: Request) {
       `━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `👤 *Name:* ${name}\n` +
       `📱 *Phone:* ${phone}\n` +
-      `📧 *Email:* ${email}\n` +
-      `━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `📚 *Plan:* ${planLabel}\n` +
       `📅 *Duration:* ${durationLabel}${kmPerDay ? ` (${kmPerDay})` : ''}\n` +
-      `💰 *Price:* ${price} _(Price Negotiable)_\n` +
+      `💰 *Price:* ${price} _(Negotiable)_\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `🔖 *Booking Ref:* ${bookingRef}\n` +
-      `📍 *Location:* Shop No.27282-P2, Near Anu Hospital,\nBommalasatram, Kadapa Road, Nandyal\n` +
+      `🔖 *Ref:* ${bookingRef}\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `Please contact the student to confirm their booking.`
+      `Please contact the student to confirm booking.`
     )
     const whatsappUrl = `https://wa.me/919347879474?text=${waMessage}`
 

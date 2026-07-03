@@ -855,9 +855,9 @@ export default function PublicBookingSystem() {
                 </div>
 
                 {/* ─── DURATION PICKER ─── */}
-                <div className="flex flex-col gap-2">
-                  <span className="text-[9px] font-mono text-text-3 uppercase font-bold tracking-wider">Select Duration</span>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div className="flex flex-col gap-3">
+                  <span className="text-xs font-semibold text-text-2 uppercase tracking-wide">Select Duration</span>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {([
                       { days: 7,  kmPerDay: 22 },
                       { days: 10, kmPerDay: 15 },
@@ -871,57 +871,54 @@ export default function PublicBookingSystem() {
                           key={days}
                           type="button"
                           onClick={() => setSelectedDuration(days)}
-                          className={`flex flex-col items-center justify-center py-4 px-2 rounded-2xl border cursor-pointer transition-all duration-200 gap-0.5 ${
+                          className={`flex flex-col items-center justify-center py-5 px-3 rounded-2xl border cursor-pointer transition-all duration-300 gap-1 ${
                             isActive
-                              ? 'bg-primary/10 border-primary shadow-lg shadow-primary/10 scale-[1.02]'
-                              : 'bg-void/40 border-border hover:border-primary/40 hover:bg-white/[0.02]'
+                              ? 'bg-primary/10 border-primary shadow-xl shadow-primary/5 scale-[1.03]'
+                              : 'bg-void/40 border-border hover:border-primary/50 hover:bg-white/[0.03]'
                           }`}
                         >
-                          <span className={`text-2xl font-extrabold font-display leading-none ${
+                          <span className={`text-3xl font-bold font-display leading-none ${
                             isActive ? 'text-primary' : 'text-text-1'
                           }`}>{days}</span>
-                          <span className={`text-[9px] font-mono uppercase font-bold ${
-                            isActive ? 'text-primary/70' : 'text-text-3'
+                          <span className={`text-xs font-bold uppercase tracking-wider ${
+                            isActive ? 'text-primary/90' : 'text-text-3'
                           }`}>Days</span>
-                          <div className="w-full border-t border-border/30 my-1.5" />
-                          <span className={`text-[10px] font-bold font-display ${
+                          <div className="w-full border-t border-border/30 my-2" />
+                          <span className={`text-sm font-bold font-display ${
                             isActive ? 'text-primary' : 'text-text-2'
                           }`}>{kmPerDay} km</span>
-                          <span className={`text-[8px] font-mono ${
-                            isActive ? 'text-primary/60' : 'text-text-3'
+                          <span className={`text-xs font-medium ${
+                            isActive ? 'text-primary/80' : 'text-text-3'
                           }`}>per day</span>
-                          <span className={`text-[8px] font-mono mt-0.5 ${
-                            isActive ? 'text-primary/50' : 'text-text-3/60'
+                          <span className={`text-xs font-semibold mt-1 px-2 py-0.5 rounded-full ${
+                            isActive ? 'bg-primary/20 text-primary' : 'bg-white/5 text-text-3'
                           }`}>({totalKm} km total)</span>
-                          {isActive && (
-                            <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center mt-1">
-                              <Check className="w-2.5 h-2.5 text-white" />
-                            </div>
-                          )}
                         </button>
                       )
                     })}
                   </div>
 
                   {/* Clarifying course duration guidelines */}
-                  <div className="mt-3 bg-void/50 border border-border/40 p-4 rounded-2xl flex flex-col gap-2.5 font-mono text-[10px] uppercase text-text-3">
-                    <span className="text-[8px] font-bold text-accent tracking-wider">💡 Course Selection Guide:</span>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[9px] leading-relaxed">
-                      <div className="flex gap-2">
-                        <span className="text-primary font-bold">7 Days:</span>
-                        <span>Crash course for people who already know basic driving but need a quick refresher.</span>
+                  <div className="mt-4 bg-primary/5 border border-primary/20 p-5 rounded-2xl flex flex-col gap-3 font-sans text-sm text-text-2">
+                    <span className="text-sm font-bold text-primary tracking-wide flex items-center gap-1.5">
+                      💡 Course Selection Guide
+                    </span>
+                    <div className="grid grid-cols-1 gap-3 leading-relaxed">
+                      <div className="flex flex-col gap-0.5 border-l-2 border-primary/30 pl-3 text-left">
+                        <span className="font-bold text-text-1 text-sm">7 Days Refresher</span>
+                        <span className="text-xs text-text-3 font-sans normal-case">Crash course for people who already know basic driving but need a quick refresher.</span>
                       </div>
-                      <div className="flex gap-2">
-                        <span className="text-primary font-bold">10 Days:</span>
-                        <span>Standard practice for semi-confident drivers to gain road confidence.</span>
+                      <div className="flex flex-col gap-0.5 border-l-2 border-primary/30 pl-3 text-left">
+                        <span className="font-bold text-text-1 text-sm">10 Days Confidence Builder</span>
+                        <span className="text-xs text-text-3 font-sans normal-case">Standard practice for semi-confident drivers to gain road confidence.</span>
                       </div>
-                      <div className="flex gap-2">
-                        <span className="text-primary font-bold">15 Days:</span>
-                        <span>Beginner's ideal course. Recommended to learn everything from scratch.</span>
+                      <div className="flex flex-col gap-0.5 border-l-2 border-primary/30 pl-3 text-left">
+                        <span className="font-bold text-text-1 text-sm">15 Days Complete Beginner (Recommended)</span>
+                        <span className="text-xs text-text-3 font-sans normal-case">Beginner's ideal course. Recommended to learn driving from scratch.</span>
                       </div>
-                      <div className="flex gap-2">
-                        <span className="text-primary font-bold">30 Days:</span>
-                        <span>Ultimate mastery course covering advanced highway, parking, and night driving.</span>
+                      <div className="flex flex-col gap-0.5 border-l-2 border-primary/30 pl-3 text-left">
+                        <span className="font-bold text-text-1 text-sm">30 Days Elite Mastery</span>
+                        <span className="text-xs text-text-3 font-sans normal-case">Ultimate mastery course covering advanced highway, parking, and night driving.</span>
                       </div>
                     </div>
                   </div>
