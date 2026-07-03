@@ -33,8 +33,19 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sri Guru Driving School",
-  description: "Learn to drive with high-fidelity gamified instruction, analytics, and elite rewards.",
+  title: "Sri Guru Driving School | RTO Learning License Test & Driving Academy Nandyal",
+  description: "Sri Guru Driving School in Nandyal offers government-certified driving training. Practice RTO exam mock tests, road signs flashcards, and learn parallel parking online.",
+  keywords: [
+    "RTO learning license test",
+    "RTO exam preparation online",
+    "free RTO mock test AP",
+    "Sri Guru Driving School Nandyal",
+    "driving school near me Nandyal",
+    "road signs flashcards",
+    "learning license practice test",
+    "driving academy Nandyal",
+    "clutch control and parallel parking training"
+  ],
   manifest: "/manifest.json",
 };
 
