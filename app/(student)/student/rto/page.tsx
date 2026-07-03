@@ -242,7 +242,7 @@ export default function RTOLearningCenter() {
   })
 
   // requestAnimationFrame Timer Hook
-  const [timeLeft, setTimeLeft] = useState(15) // 15 seconds per question
+  const [timeLeft, setTimeLeft] = useState(30) // 30 seconds per question
   const timerRafRef = useRef<number | null>(null)
   const timerStartRef = useRef<number>(0)
 
@@ -277,7 +277,7 @@ export default function RTOLearningCenter() {
     timerStartRef.current = performance.now()
     const update = (now: number) => {
       const elapsed = (now - timerStartRef.current) / 1000
-      const remaining = Math.max(15 - Math.floor(elapsed), 0)
+      const remaining = Math.max(30 - Math.floor(elapsed), 0)
       setTimeLeft(remaining)
       
       if (remaining > 0) {
@@ -292,7 +292,7 @@ export default function RTOLearningCenter() {
 
   useEffect(() => {
     if (activeMode === 'quiz' && !quizFinished && !isAnswered && activeQuestions.length > 0) {
-      setTimeLeft(15)
+      setTimeLeft(30)
       startQuestionTimer()
     }
     return () => stopQuestionTimer()
@@ -348,12 +348,12 @@ export default function RTOLearningCenter() {
   }, [handleNextQuestion])
 
   const resetQuizSession = () => {
-    // Build mixed exam: 10 theory questions + 10 sign-identify questions
-    const shuffledTheory = [...QUIZ_QUESTIONS].sort(() => 0.5 - Math.random()).slice(0, 10)
+    // Build mixed exam: 7 theory questions + 8 sign-identify questions (Total 15 questions)
+    const shuffledTheory = [...QUIZ_QUESTIONS].sort(() => 0.5 - Math.random()).slice(0, 7)
     
     // Generate sign-identify questions from ROAD_SIGNS_DATA
     const signsWithImages = ROAD_SIGNS_DATA.filter(s => s.imagePath || s.signKey)
-    const shuffledSigns = [...signsWithImages].sort(() => 0.5 - Math.random()).slice(0, 10)
+    const shuffledSigns = [...signsWithImages].sort(() => 0.5 - Math.random()).slice(0, 8)
     
     const signQuestions: (QuizQuestionItem & { signImage?: string; signName?: string })[] = shuffledSigns.map((sign, i) => {
       // Pick 3 wrong answers from other signs
@@ -376,7 +376,7 @@ export default function RTOLearningCenter() {
     
     // Interleave theory and sign questions perfectly 1 to 1
     const mixed: any[] = []
-    for(let i = 0; i < 10; i++) {
+    for(let i = 0; i < 8; i++) {
       if (shuffledTheory[i]) mixed.push({ ...shuffledTheory[i], signImage: undefined, signName: undefined })
       if (signQuestions[i]) mixed.push(signQuestions[i])
     }
@@ -756,15 +756,15 @@ export default function RTOLearningCenter() {
                   <ul className="text-xs text-text-2 flex flex-col gap-2.5 font-body">
                     <li className="flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                      <span><strong>Total Questions:</strong> 20 (10 Signs, 10 Theory)</span>
+                      <span><strong>Total Questions:</strong> 15 (8 Signs, 7 Theory)</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                      <span><strong>Time Limit:</strong> 15 seconds per question</span>
+                      <span><strong>Time Limit:</strong> 30 seconds per question</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                      <span><strong>Passing Score:</strong> 12 / 20 correct answers (60%)</span>
+                      <span><strong>Passing Score:</strong> 9 / 15 correct answers (60%)</span>
                     </li>
                     <li className="flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-primary" />
@@ -884,16 +884,16 @@ export default function RTOLearningCenter() {
                   </div>
 
                   {/* PASS / FAIL BANNER */}
-                  <div className={`w-full p-4 rounded-2xl flex items-center gap-4 ${quizScore >= 12 ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-rose-500/10 border border-rose-500/30'}`}>
-                    <div className={`w-12 h-12 rounded-full flex flex-shrink-0 items-center justify-center ${quizScore >= 12 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-rose-500/20 text-rose-500'}`}>
-                      {quizScore >= 12 ? <Check className="w-6 h-6" /> : <XIcon className="w-6 h-6" />}
+                  <div className={`w-full p-4 rounded-2xl flex items-center gap-4 ${quizScore >= 9 ? 'bg-emerald-500/10 border border-emerald-500/30' : 'bg-rose-500/10 border border-rose-500/30'}`}>
+                    <div className={`w-12 h-12 rounded-full flex flex-shrink-0 items-center justify-center ${quizScore >= 9 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-rose-500/20 text-rose-500'}`}>
+                      {quizScore >= 9 ? <Check className="w-6 h-6" /> : <XIcon className="w-6 h-6" />}
                     </div>
                     <div>
-                      <h4 className={`text-xl font-bold font-display uppercase tracking-widest ${quizScore >= 12 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                        {quizScore >= 12 ? 'EXAM PASSED' : 'EXAM FAILED'}
+                      <h4 className={`text-xl font-bold font-display uppercase tracking-widest ${quizScore >= 9 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        {quizScore >= 9 ? 'EXAM PASSED' : 'EXAM FAILED'}
                       </h4>
                       <p className="text-sm font-medium text-text-2">
-                        {quizScore >= 12 ? 'Congratulations! You meet the RTO standard.' : 'You need at least 12 correct to pass.'}
+                        {quizScore >= 9 ? 'Congratulations! You meet the RTO standard.' : 'You need at least 9 correct to pass.'}
                       </p>
                     </div>
                   </div>
