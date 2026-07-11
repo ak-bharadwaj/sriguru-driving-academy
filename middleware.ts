@@ -12,11 +12,18 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
+  if (pathname === '/login') {
+    const targetUrl = new URL('/admin-portal-login', request.url)
+    request.nextUrl.searchParams.forEach((value, key) => {
+      targetUrl.searchParams.set(key, value)
+    })
+    return NextResponse.redirect(targetUrl)
+  }
 
   // If there's no token, redirect to login
   if (!token) {
     if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    const loginUrl = new URL('/login', request.url)
+    const loginUrl = new URL('/admin-portal-login', request.url)
     // Save the original intended destination
     loginUrl.searchParams.set('callbackUrl', pathname)
     return NextResponse.redirect(loginUrl)

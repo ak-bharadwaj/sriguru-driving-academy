@@ -264,8 +264,8 @@ export const authOptions: NextAuthOptions = {
     }
   },
   pages: {
-    signIn: '/login',
-    error: '/login'
+    signIn: '/admin-portal-login',
+    error: '/admin-portal-login'
   },
   secret: process.env.NEXTAUTH_SECRET || 'srigurusecretkey1234567890'
 }
