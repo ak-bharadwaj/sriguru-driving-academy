@@ -260,7 +260,13 @@ export default function CentralLoginHub() {
               <span className="text-[13px] text-text-3 font-medium">{t('auth.signupPrompt')}</span>
               <button 
                 type="button" 
-                onClick={() => router.push('/booking')}
+                onClick={() => {
+                  if (Capacitor.isNativePlatform()) {
+                    window.open('https://sriguru-driving-academy-two.vercel.app/booking', '_system')
+                  } else {
+                    window.open('https://sriguru-driving-academy-two.vercel.app/booking', '_blank')
+                  }
+                }}
                 className="mt-1 text-[13px] text-primary font-bold hover:underline transition-all"
               >
                 {t('auth.signupBtn')}

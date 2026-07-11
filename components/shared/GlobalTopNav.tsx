@@ -15,7 +15,8 @@ const HIDE_TOP_NAV_PREFIXES = [
   "/instructor",
   "/admin",
   "/student",
-  "/dashboard"
+  "/dashboard",
+  "/admin-portal-login"
 ];
 
 const PUBLIC_NAV_LINKS = [

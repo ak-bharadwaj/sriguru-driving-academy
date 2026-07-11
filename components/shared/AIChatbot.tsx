@@ -119,6 +119,11 @@ export function AIChatbot() {
   const shouldHide = HIDE_ON_PREFIXES.some(p => pathname.startsWith(p))
   if (shouldHide) return null
 
+  // Hide on RTO portal domain
+  if (typeof window !== 'undefined' && window.location.hostname.includes('srigururto')) {
+    return null
+  }
+
   return (
     <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end">
       
