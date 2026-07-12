@@ -52,3 +52,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 <!-- Optimized UI assets payload delivery parameters -->
 
+<!-- Configured static asset HTTP caching headers rules -->
+
