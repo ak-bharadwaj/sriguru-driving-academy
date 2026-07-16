@@ -501,19 +501,6 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
         <div className="mt-8 mb-4">
           <h3 className="text-xl font-bold font-display text-[rgb(var(--color-text-1))] mb-4 px-1">{t.interactivePractice}</h3>
           <div className="flex flex-col gap-4">
-            <Link href="/student/simulator" className="group relative block overflow-hidden rounded-[32px] bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] shadow-app hover:shadow-app-hover transition-all duration-300 hover:-translate-y-1">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="p-6 sm:p-8 flex items-center gap-6">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform duration-500 shrink-0">
-                  <Gamepad2 className="w-8 h-8 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-xl font-display font-bold text-[rgb(var(--color-text-1))] mb-1 group-hover:text-emerald-600 transition-colors">{t.simTitle}</h4>
-                  <p className="text-sm text-[rgb(var(--color-text-2))]">{t.simDesc}</p>
-                </div>
-              </div>
-            </Link>
-
             <Link href="/student/flashcards" className="group relative block overflow-hidden rounded-[32px] bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] shadow-app hover:shadow-app-hover transition-all duration-300 hover:-translate-y-1">
               <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="p-6 sm:p-8 flex items-center gap-6">
@@ -536,19 +523,6 @@ export default function DashboardClient({ initialDbData }: StudentDashboardProps
                 <div className="flex-1">
                   <h4 className="text-xl font-display font-bold text-[rgb(var(--color-text-1))] mb-1 group-hover:text-amber-600 transition-colors">RTO Mock Exam</h4>
                   <p className="text-sm text-[rgb(var(--color-text-2))]">Test your knowledge with official theory questions.</p>
-                </div>
-              </div>
-            </Link>
-
-            <Link href="/student/simulations" className="group relative block overflow-hidden rounded-[32px] bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] shadow-app hover:shadow-app-hover transition-all duration-300 hover:-translate-y-1">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="p-6 sm:p-8 flex items-center gap-6">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-500 shrink-0">
-                  <Gamepad2 className="w-8 h-8 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-xl font-display font-bold text-[rgb(var(--color-text-1))] mb-1 group-hover:text-blue-600 transition-colors">{t.gameTitle}</h4>
-                  <p className="text-sm text-[rgb(var(--color-text-2))]">{t.gameDesc}</p>
                 </div>
               </div>
             </Link>

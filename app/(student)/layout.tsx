@@ -30,12 +30,11 @@ type NavTab = {
 const BOTTOM_NAV: NavTab[] = [
   { label: 'Home',     labelHI: 'होम',        labelTE: 'హోమ్',       path: '/student/dashboard',    icon: Home },
   { label: 'Learn',    labelHI: 'सीखें',      labelTE: 'నేర్చుకో',   path: '/student/learn',        icon: BookOpen },
-  { label: 'Practice', labelHI: 'अभ्यास',     labelTE: 'సాధన',       path: '/student/simulator',    icon: Gamepad2, isCenter: true },
   { label: 'Analysis', labelHI: 'विश्लेषण',   labelTE: 'విశ్లేషణ',   path: '/student/leaderboard',  icon: BarChart2 },
   { label: 'Profile',  labelHI: 'प्रोफ़ाइल', labelTE: 'ప్రొఫైల్',   path: '/student/profile',      icon: User },
 ]
 
-const HIDDEN_NAV_PATHS = ['/student/onboarding', '/student/simulator']
+const HIDDEN_NAV_PATHS = ['/student/onboarding']
 
 export default function StudentPortalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -197,15 +196,11 @@ export default function StudentPortalLayout({ children }: { children: React.Reac
       )}
 
       {/* Gamification Overlays */}
-      {pathname !== '/student/simulator' && (
-        <>
-          <XPToast />
-          <LevelUpOverlay />
-          <BadgeReveal />
-          <StreakReminder />
-          <GuidedTour />
-        </>
-      )}
+      <XPToast />
+      <LevelUpOverlay />
+      <BadgeReveal />
+      <StreakReminder />
+      <GuidedTour />
     </div>
   )
 }

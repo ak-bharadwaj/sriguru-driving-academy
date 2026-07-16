@@ -27,7 +27,7 @@ export const XPToast: React.FC = () => {
   }, [pendingToasts, dismissToast, reconcileXP])
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none max-w-sm w-full">
+    <div className="fixed bottom-[76px] md:bottom-6 right-4 md:right-6 z-[9999] flex flex-col gap-3 pointer-events-none max-w-[calc(100%-2rem)] md:max-w-sm w-full">
       <AnimatePresence>
         {pendingToasts.map((toast) => {
           const isXP = toast.type === 'xp'
