@@ -108,7 +108,26 @@ export default function CentralLoginHub() {
 
     // WEB BROWSER FLOW
     try {
-      // signIn with Google will redirect; role-based redirect handled in middleware
+      // If running locally, bypass with mock google credentials login for instant local verification
+      if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        const res = await signIn('credentials', {
+          redirect: false,
+          email: 'student.google@sriguru.com',
+          name: 'Gaurav Singh (Google Demo)',
+          avatarUrl: '',
+          isGoogleNative: 'true',
+          password: 'google-auth-bypass-secure'
+        })
+        if (res?.error) {
+          setErrorMsg('Authentication failed on local server.')
+          setIsAuthenticating(false)
+        } else {
+          router.push('/dashboard')
+        }
+        return
+      }
+
+      // Real Google OAuth redirect in production
       await signIn('google', { callbackUrl: '/dashboard' })
     } catch {
       setErrorMsg('Google sign-in failed. Please try again.')
