@@ -138,7 +138,7 @@ const TelemetryBar = ({
 }
 
 // Side Profile representation for inclines
-export const SideProfileInclineSVG = ({ speed = 0, isRollingBack = false }: { speed?: number, isRollingBack?: boolean }) => (
+export const SideProfileInclineSVG = ({ speed = 0 }: { speed?: number }) => (
   <div className="relative w-[120px] h-[45px]">
     <svg width="120" height="45" viewBox="0 0 120 45" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-xl absolute inset-0">
       <rect x="15" y="10" width="90" height="22" rx="6" fill="#64748b" stroke="#334155" strokeWidth="1.5" />
@@ -221,7 +221,7 @@ export const SteeringControlSimulation: React.FC<SimulationProps> = ({ onComplet
   const [step, setStep] = useState(0)
   const [speed, setSpeed] = useState(0)
   const [carX, setCarX] = useState(40)
-  const [carY, setCarY] = useState(130)
+  const [carY, setCarY] = useState(90)
   const [wheelAngle, setWheelAngle] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
 
@@ -242,18 +242,18 @@ export const SteeringControlSimulation: React.FC<SimulationProps> = ({ onComplet
         setSpeed(20)
         setWheelAngle(-30)
         setCarX(180)
-        setCarY(80)
+        setCarY(50)
       } else if (nextStep === 2) {
         setWheelAngle(30)
         setCarX(340)
-        setCarY(180)
+        setCarY(110)
       } else if (nextStep === 3) {
         setWheelAngle(0)
-        setCarX(480)
-        setCarY(130)
+        setCarX(460)
+        setCarY(90)
       } else if (nextStep === 4) {
         setSpeed(0)
-        setCarX(560)
+        setCarX(520)
         if (onComplete) onComplete()
       }
       setTimeout(() => setIsAnimating(false), 1200)
@@ -264,13 +264,13 @@ export const SteeringControlSimulation: React.FC<SimulationProps> = ({ onComplet
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
       <div className="flex-1 relative w-full bg-[#2a2d3a] border-b border-white/5 overflow-hidden">
         <ScaledCanvas canvasWidth={600}>
-          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '220px' }}>
             <div className="absolute inset-0 opacity-15 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
-            <div className="absolute top-[130px] left-0 right-0 h-0.5 border-t border-dashed border-white/30" />
+            <div className="absolute top-[90px] left-0 right-0 h-0.5 border-t border-dashed border-white/30" />
             
             {/* Cones */}
-            <div className="absolute left-[240px] top-[100px] w-6 h-8 bg-amber-500 rounded-t-lg border-b-4 border-amber-700" />
-            <div className="absolute left-[400px] top-[160px] w-6 h-8 bg-amber-500 rounded-t-lg border-b-4 border-amber-700" />
+            <div className="absolute left-[240px] top-[60px] w-6 h-8 bg-amber-500 rounded-t-lg border-b-4 border-amber-700" />
+            <div className="absolute left-[400px] top-[110px] w-6 h-8 bg-amber-500 rounded-t-lg border-b-4 border-amber-700" />
             
             {/* Player Car */}
             <div className="absolute transition-all duration-[1200ms] ease-in-out" style={{ left: `${carX}px`, top: `${carY}px`, transform: `rotate(${wheelAngle / 2}deg)` }}>
@@ -288,7 +288,7 @@ export const SteeringControlSimulation: React.FC<SimulationProps> = ({ onComplet
         desc={step === 0 ? "Prepare to steer around road cones." : steps[step - 1].d} 
         isAnimating={isAnimating} 
         onNext={handleNext} 
-        onReset={() => { setStep(0); setCarX(40); setCarY(130); setWheelAngle(0); setSpeed(0); }} 
+        onReset={() => { setStep(0); setCarX(40); setCarY(90); setWheelAngle(0); setSpeed(0); }} 
         successText="Passed"
       />
     </div>
@@ -378,10 +378,10 @@ export const BrakingSimulation: React.FC<SimulationProps> = ({ onComplete }) => 
         setCarX(320)
       } else if (nextStep === 3) {
         setSpeed(15)
-        setCarX(440)
+        setCarX(420)
       } else if (nextStep === 4) {
         setSpeed(0)
-        setCarX(500)
+        setCarX(480)
         if (onComplete) onComplete()
       }
       setTimeout(() => setIsAnimating(false), 1200)
@@ -392,19 +392,17 @@ export const BrakingSimulation: React.FC<SimulationProps> = ({ onComplete }) => 
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
       <div className="flex-1 relative w-full bg-[#1b2230] border-b border-white/5 overflow-hidden">
         <ScaledCanvas canvasWidth={600}>
-          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '220px' }}>
             <div className="absolute inset-0 opacity-15 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
             
             {/* Horizontal Road - Driving on the Left (Bottom Lane is Left-to-Right) */}
-            <div className="absolute top-[100px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#2a2d3a] border-y-4 border-slate-500 flex flex-col justify-center">
-              <div className="w-full h-0.5 border-t border-dashed border-white/40" />
-            </div>
+            <div className="absolute top-[50px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#2a2d3a] border-y-4 border-slate-500 flex flex-col justify-center" />
 
             {/* Stop Line in Bottom Lane */}
-            <div className="absolute left-[510px] top-[144px] bottom-[20px] w-3 bg-white" />
+            <div className="absolute left-[500px] top-[95px] bottom-[20px] w-3 bg-white" />
             
             {/* Player Car in Bottom Lane (driving left to right) */}
-            <div className="absolute top-[148px] transition-all duration-[1200ms] ease-in-out" style={{ left: `${carX}px` }}>
+            <div className="absolute top-[98px] transition-all duration-[1200ms] ease-in-out" style={{ left: `${carX}px` }}>
               <RealisticCarSVG colorClass="slate" step={step} showLights={step >= 3} activeGear="D" />
             </div>
           </div>
@@ -534,7 +532,7 @@ export const HillStartsSimulation: React.FC<SimulationProps> = ({ onComplete }) 
 export const LaneChangingSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
   const [step, setStep] = useState(0)
   const [carX, setCarX] = useState(40)
-  const [carY, setCarY] = useState(150)
+  const [carY, setCarY] = useState(98)
   const [wheelAngle, setWheelAngle] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
 
@@ -548,11 +546,11 @@ export const LaneChangingSimulation: React.FC<SimulationProps> = ({ onComplete }
       } else if (nextStep === 2) {
         setWheelAngle(-15)
         setCarX(320)
-        setCarY(90)
+        setCarY(48)
       } else if (nextStep === 3) {
         setWheelAngle(0)
         setCarX(440)
-        setCarY(80)
+        setCarY(48)
       } else if (nextStep === 4) {
         setCarX(520)
         if (onComplete) onComplete()
@@ -565,9 +563,9 @@ export const LaneChangingSimulation: React.FC<SimulationProps> = ({ onComplete }
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
       <div className="flex-1 relative w-full bg-[#1b2230] border-b border-white/5 overflow-hidden">
         <ScaledCanvas canvasWidth={600}>
-          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '220px' }}>
             <div className="absolute inset-0 opacity-15 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
-            <div className="absolute top-[80px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#2a2d3a] border-y-4 border-slate-500">
+            <div className="absolute top-[50px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#2a2d3a] border-y-4 border-slate-500">
               <div className="absolute top-1/2 left-0 right-0 h-0.5 border-t border-dashed border-white/40" />
             </div>
             <div className="absolute transition-all duration-[1200ms] ease-in-out" style={{ left: `${carX}px`, top: `${carY}px`, transform: `rotate(${wheelAngle}deg)` }}>
@@ -585,7 +583,7 @@ export const LaneChangingSimulation: React.FC<SimulationProps> = ({ onComplete }
         desc={step === 0 ? "Initiate lane change on highway. Press Begin." : "Glide safely across lane markings."} 
         isAnimating={isAnimating} 
         onNext={handleNext} 
-        onReset={() => { setStep(0); setCarX(40); setCarY(150); setWheelAngle(0); }} 
+        onReset={() => { setStep(0); setCarX(40); setCarY(98); setWheelAngle(0); }} 
         successText="Merged"
       />
     </div>
@@ -630,18 +628,18 @@ export const TrafficSignalsSimulation: React.FC<SimulationProps> = ({ onComplete
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
       <div className="flex-1 relative w-full bg-[#1b2230] border-b border-white/5 overflow-hidden">
         <ScaledCanvas canvasWidth={600}>
-          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '220px' }}>
             <div className="absolute inset-0 opacity-15 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
-            <div className="absolute top-[100px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#2a2d3a] border-y-4 border-slate-500" />
-            <div className="absolute left-[500px] top-[100px] bottom-[20px] w-3 bg-white" />
+            <div className="absolute top-[50px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#2a2d3a] border-y-4 border-slate-500" />
+            <div className="absolute left-[500px] top-[50px] bottom-[20px] w-3 bg-white" />
             
-            <div className="absolute left-[520px] top-[20px] w-8 h-20 bg-black border-2 border-slate-700 rounded flex flex-col items-center justify-around py-1">
+            <div className="absolute left-[520px] top-[10px] w-8 h-20 bg-black border-2 border-slate-700 rounded flex flex-col items-center justify-around py-1">
               <div className={`w-4 h-4 rounded-full ${lightColor === 'red' ? 'bg-red-500 shadow-[0_0_8px_red]' : 'bg-red-950'}`} />
               <div className={`w-4 h-4 rounded-full ${lightColor === 'amber' ? 'bg-amber-500 shadow-[0_0_8px_orange]' : 'bg-amber-950'}`} />
               <div className={`w-4 h-4 rounded-full ${lightColor === 'green' ? 'bg-green-500 shadow-[0_0_8px_green]' : 'bg-green-950'}`} />
             </div>
 
-            <div className="absolute top-[120px] transition-all duration-[1200ms] ease-in-out" style={{ left: `${carX}px` }}>
+            <div className="absolute top-[70px] transition-all duration-[1200ms] ease-in-out" style={{ left: `${carX}px` }}>
               <RealisticCarSVG colorClass="slate" step={step} showLights={step >= 3} activeGear="D" />
             </div>
           </div>
@@ -669,7 +667,7 @@ export const TrafficSignalsSimulation: React.FC<SimulationProps> = ({ onComplete
 export const HighwayMergingSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
   const [step, setStep] = useState(0)
   const [carX, setCarX] = useState(40)
-  const [carY, setCarY] = useState(160)
+  const [carY, setCarY] = useState(110)
   const [speed, setSpeed] = useState(0)
   const [wheelAngle, setWheelAngle] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
@@ -686,11 +684,11 @@ export const HighwayMergingSimulation: React.FC<SimulationProps> = ({ onComplete
         setSpeed(70)
         setWheelAngle(-15)
         setCarX(320)
-        setCarY(100)
+        setCarY(60)
       } else if (nextStep === 3) {
         setWheelAngle(0)
         setCarX(450)
-        setCarY(90)
+        setCarY(50)
       } else if (nextStep === 4) {
         setSpeed(80)
         setCarX(530)
@@ -704,9 +702,9 @@ export const HighwayMergingSimulation: React.FC<SimulationProps> = ({ onComplete
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
       <div className="flex-1 relative w-full bg-[#1b2230] border-b border-white/5 overflow-hidden">
         <ScaledCanvas canvasWidth={600}>
-          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '220px' }}>
             <div className="absolute inset-0 opacity-15 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
-            <div className="absolute top-[80px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#2a2d3a] border-y-4 border-slate-500 shadow-inner" />
+            <div className="absolute top-[50px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#2a2d3a] border-y-4 border-slate-500 shadow-inner" />
             <div className="absolute transition-all duration-[1200ms] ease-in-out" style={{ left: `${carX}px`, top: `${carY}px`, transform: `rotate(${wheelAngle}deg)` }}>
               <RealisticCarSVG colorClass="slate" step={step} showLights={true} activeGear="D" leftBlinker={step === 2} />
             </div>
@@ -722,7 +720,7 @@ export const HighwayMergingSimulation: React.FC<SimulationProps> = ({ onComplete
         desc={step === 0 ? "Accelerate on slip road to match speed flow. Press Begin." : "Merge safely with cruising highway traffic."} 
         isAnimating={isAnimating} 
         onNext={handleNext} 
-        onReset={() => { setStep(0); setCarX(40); setCarY(160); setSpeed(0); setWheelAngle(0); }} 
+        onReset={() => { setStep(0); setCarX(40); setCarY(110); setSpeed(0); setWheelAngle(0); }} 
         successText="Merged"
       />
     </div>
@@ -735,7 +733,7 @@ export const HighwayMergingSimulation: React.FC<SimulationProps> = ({ onComplete
 export const OvertakingSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
   const [step, setStep] = useState(0)
   const [carX, setCarX] = useState(40)
-  const [carY, setCarY] = useState(150)
+  const [carY, setCarY] = useState(98)
   const [speed, setSpeed] = useState(50)
   const [wheelAngle, setWheelAngle] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
@@ -748,7 +746,7 @@ export const OvertakingSimulation: React.FC<SimulationProps> = ({ onComplete }) 
       if (nextStep === 1) {
         setWheelAngle(-15)
         setCarX(160)
-        setCarY(90)
+        setCarY(48)
       } else if (nextStep === 2) {
         setWheelAngle(0)
         setSpeed(80)
@@ -756,7 +754,7 @@ export const OvertakingSimulation: React.FC<SimulationProps> = ({ onComplete }) 
       } else if (nextStep === 3) {
         setWheelAngle(15)
         setCarX(460)
-        setCarY(150)
+        setCarY(98)
       } else if (nextStep === 4) {
         setWheelAngle(0)
         setSpeed(60)
@@ -771,12 +769,12 @@ export const OvertakingSimulation: React.FC<SimulationProps> = ({ onComplete }) 
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
       <div className="flex-1 relative w-full bg-[#1b2230] border-b border-white/5 overflow-hidden">
         <ScaledCanvas canvasWidth={600}>
-          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '220px' }}>
             <div className="absolute inset-0 opacity-15 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
-            <div className="absolute top-[80px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#2a2d3a] border-y-4 border-slate-500 shadow-inner" />
+            <div className="absolute top-[50px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#2a2d3a] border-y-4 border-slate-500 shadow-inner" />
             
             {/* Cargo Truck */}
-            <div className="absolute left-[240px] top-[140px] w-32 h-[55px] bg-blue-900 rounded border border-slate-600 flex items-center justify-center text-white text-[8px] font-bold">CARGO TRUCK</div>
+            <div className="absolute left-[240px] top-[90px] w-32 h-[45px] bg-blue-900 rounded border border-slate-600 flex items-center justify-center text-white text-[8px] font-bold">CARGO TRUCK</div>
             
             <div className="absolute transition-all duration-[1200ms] ease-in-out" style={{ left: `${carX}px`, top: `${carY}px`, transform: `rotate(${wheelAngle}deg)` }}>
               <RealisticCarSVG colorClass="slate" step={step} showLights={true} activeGear="D" leftBlinker={step === 1} rightBlinker={step === 3} />
@@ -793,7 +791,7 @@ export const OvertakingSimulation: React.FC<SimulationProps> = ({ onComplete }) 
         desc={step === 0 ? "Prepare to pass a slow moving truck ahead. Press Begin." : "Accelerate, shift lanes, pass, and return."} 
         isAnimating={isAnimating} 
         onNext={handleNext} 
-        onReset={() => { setStep(0); setCarX(40); setCarY(150); setSpeed(50); setWheelAngle(0); }} 
+        onReset={() => { setStep(0); setCarX(40); setCarY(98); setSpeed(50); setWheelAngle(0); }} 
         successText="Complete"
       />
     </div>
@@ -801,7 +799,7 @@ export const OvertakingSimulation: React.FC<SimulationProps> = ({ onComplete }) 
 }
 
 // ============================================================================
-// 13. EMERGENCY BRAKING SIMULATION (Correct RTO Travel Direction)
+// 13. EMERGENCY BRAKING SIMULATION (Correct RTO Travel Direction and Heights)
 // ============================================================================
 export const EmergencyBrakingSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
   const [step, setStep] = useState(0)
@@ -816,13 +814,12 @@ export const EmergencyBrakingSimulation: React.FC<SimulationProps> = ({ onComple
       setStep(nextStep)
       if (nextStep === 1) {
         setSpeed(50)
-        setCarX(220)
+        setCarX(200)
       } else if (nextStep === 2) {
-        setCarX(360)
+        setCarX(340)
       } else if (nextStep === 3) {
         setSpeed(0)
-        setCarX(430)
-      } else if (nextStep === 4) {
+        setCarX(410)
         if (onComplete) onComplete()
       }
       setTimeout(() => setIsAnimating(false), 1000)
@@ -833,23 +830,23 @@ export const EmergencyBrakingSimulation: React.FC<SimulationProps> = ({ onComple
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
       <div className="flex-1 relative w-full bg-[#353839] border-b border-white/5 overflow-hidden">
         <ScaledCanvas canvasWidth={600}>
-          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '220px' }}>
             <div className="absolute inset-0 opacity-15 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
             
             {/* Horizontal Road - Driving on the Left (Bottom Lane is Left-to-Right) */}
-            <div className="absolute top-[100px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#2a2d3a] border-y-4 border-slate-500 flex flex-col justify-center" />
+            <div className="absolute top-[50px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#2a2d3a] border-y-4 border-slate-500 flex flex-col justify-center" />
             
-            {/* Obstacle/STOP Sign on Left (Bottom right side of road) */}
+            {/* Obstacle/STOP Sign on Left (Bottom right side of road, positioned at Y=90px to prevent clipping) */}
             {step >= 2 && (
-              <div className="absolute left-[480px] top-[140px] z-10 flex flex-col items-center gap-1">
+              <div className="absolute left-[470px] top-[90px] z-10 flex flex-col items-center gap-1">
                 <div className="w-10 h-10 rounded bg-red-600 border-2 border-white flex items-center justify-center animate-pulse shadow-lg">
                   <span className="text-white font-bold text-[10px]">STOP</span>
                 </div>
               </div>
             )}
 
-            {/* Player Car in Bottom Lane (driving left to right) */}
-            <div className="absolute top-[148px] transition-all duration-[1000ms] ease-in-out" style={{ left: `${carX}px` }}>
+            {/* Player Car in Bottom Lane (driving left to right, shifted up to Y=98px to prevent clipping) */}
+            <div className="absolute top-[98px] transition-all duration-[1000ms] ease-in-out" style={{ left: `${carX}px` }}>
               <RealisticCarSVG colorClass="slate" step={step} showLights={step >= 3} activeGear="D" />
             </div>
           </div>
@@ -1068,10 +1065,10 @@ export const ParkingAlignmentSimulation: React.FC<SimulationProps> = ({ onComple
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
       <div className="flex-1 relative w-full bg-[#1b2230] border-b border-white/5 overflow-hidden">
         <ScaledCanvas canvasWidth={600}>
-          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '220px' }}>
             <div className="absolute inset-0 opacity-15 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
             <div className="absolute left-[80px] top-0 bottom-0 w-6 bg-slate-500 shadow" />
-            <div className="absolute top-[120px] transition-all duration-[1000ms] ease-in-out" style={{ left: `${carX}px` }}>
+            <div className="absolute top-[80px] transition-all duration-[1000ms] ease-in-out" style={{ left: `${carX}px` }}>
               <div className="w-[110px] h-[48px] origin-center -rotate-90 scale-75">
                 <RealisticCarSVG colorClass="slate" step={step} showLights={true} />
               </div>
