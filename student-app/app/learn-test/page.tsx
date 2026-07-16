@@ -376,7 +376,7 @@ function StagingLearnTestContent() {
                 </button>
 
                 {/* Simulation Canvas */}
-                <div className="w-full bg-void border-b border-border/40 flex items-stretch justify-center relative overflow-hidden shrink-0" style={{ height: '360px' }}>
+                <div className="w-full bg-void border-b border-border/40 flex items-stretch justify-center relative overflow-hidden shrink-0" style={{ height: 'max(420px, 60vh)' }}>
                   {slug === 'vehicle-startup' && <VehicleStartupSimulation onComplete={() => setSimCompleted(true)} />}
                   {slug === 'steering-control' && <SteeringControlSimulation onComplete={() => setSimCompleted(true)} />}
                   {slug === 'clutch-control' && <ClutchControlSimulation onComplete={() => setSimCompleted(true)} />}
