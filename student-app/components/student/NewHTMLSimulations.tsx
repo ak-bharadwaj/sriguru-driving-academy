@@ -181,7 +181,7 @@ const SIM_T = {
         { t: "1. సీట్‌బెల్ట్", d: "మీ సీట్‌బెల్ట్‌ను సురక్షితంగా కట్టుకోండి." },
         { t: "2. గేర్ న్యూట్రల్", d: "ట్రాన్స్‌మిషన్ న్యూట్రల్‌లో ఉందని నిర్ధారించుకోండి." },
         { t: "3. క్లచ్ నొక్కండి", d: "క్లచ్ పెడల్‌ను పూర్తిగా ఫ్లోర్‌కు నొక్కండి." },
-        { t: "4. ఇగ్నిషన్", d: "キーని తిప్పండి. టాకోమీటర్ స్వీప్‌ను గమనించండి." }
+        { t: "4. ఇగ్నిషన్", d: "కీని తిప్పండి. టాకోమీటర్ స్వీప్‌ను గమనించండి." }
       ]
     },
     steering: {
@@ -202,7 +202,7 @@ const SIM_T = {
       steps: [
         { t: "1. హ్యాండ్‌బ్రేక్", d: "వెనుకకు రోల్ అవ్వకుండా హ్యాండ్‌బ్రేక్ లాగబడింది." },
         { t: "2. గ్యాస్", d: "ఇంజిన్‌ను ~1500 RPM కు పెంచడానికి తేలికపాటి ఒత్తిడిని వర్తించండి." },
-        { t: "3. బైట్ పాయింట్", d: "కారు లాగే వరకు క్లచ్‌ను నెమ్మదా వదలండి." },
+        { t: "3. బైట్ పాయింట్", d: "కారు లాగే వరకు క్లచ్‌ను నెమ్మదిగా వదలండి." },
         { t: "4. వదిలి వెళ్ళండి", d: "హ్యాండ్‌బ్రేక్‌ను వదిలి కొండపై సున్నితంగా వేగవంతం చేయండి." }
       ]
     },
@@ -221,7 +221,7 @@ const SIM_T = {
 }
 
 // ============================================================================
-// VEHICLE RENDERERS (SVG BASED)
+// VEHICLE RENDERING HELPERS
 // ============================================================================
 
 export const RealisticCarSVG = ({ colorClass, showLights = false, activeGear = 'D', rightBlinker = false, leftBlinker = false, step = 0 }: { colorClass: string, showLights?: boolean, activeGear?: string, rightBlinker?: boolean, leftBlinker?: boolean, step?: number }) => {
@@ -522,7 +522,7 @@ export const SteeringControlSimulation: React.FC<SimulationProps> = ({ onComplet
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
       <div className="flex-1 relative w-full bg-[#353839] border-b border-white/5 overflow-hidden">
         <ScaledCanvas canvasWidth={700}>
-          <div className="w-[700px] h-full relative animate-pulse" style={{ minHeight: '280px' }}>
+          <div className="w-[700px] h-full relative" style={{ minHeight: '280px' }}>
             <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
             <div className="absolute top-[150px] left-[-1000px] right-[-1000px] h-0 border-t border-dashed border-white/40" />
             <div className="absolute z-10" style={{top:'90px', left:'280px'}}>
@@ -557,8 +557,8 @@ export const SteeringControlSimulation: React.FC<SimulationProps> = ({ onComplet
               <RotateCcw className="w-4 h-4" />
             </button>
           )}
-          <button onClick={handleNext} disabled={isAnimating || step === 4} className="px-4 py-2 text-[10px] sm:text-xs font-bold bg-primary text-white rounded-xl">
-            {step === 0 ? <span>{t.begin}</span> : step === 4 ? <span>{tMod.passed}</span> : <span>{t.next}</span>}
+          <button onClick={handleNext} disabled={isAnimating || step === 4} className="px-4 py-2 bg-primary text-white text-xs rounded-xl font-bold uppercase">
+            {step === 0 ? t.begin : step === 4 ? tMod.passed : t.next}
           </button>
         </div>
       </div>
@@ -667,67 +667,104 @@ export const ClutchControlSimulation: React.FC<SimulationProps> = ({ onComplete 
 }
 
 // ============================================================================
-// 4. [NEW] BRAKING TECHNIQUES SIMULATION (Pedal Coordination)
+// 4. BRAKING TECHNIQUES SIMULATION (Road Canvas stop-line)
 // ============================================================================
 export const BrakingSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
   const [step, setStep] = useState(0)
+  const [carY, setCarY] = useState(220)
   const [speed, setSpeed] = useState(0)
   const [clutchPressed, setClutchPressed] = useState(false)
-  const [brakePressed, setBrakePressed] = useState(false)
-  const [statusText, setStatusText] = useState("Click Begin to start driving.")
+  const [isBraking, setIsBraking] = useState(false)
+  const [status, setStatus] = useState("Click Begin to start driving up the lane.")
 
   useEffect(() => {
+    if (step === 0) return
     if (step === 1) {
       setSpeed(40)
-      setStatusText("Cruising at 40 km/h. Click next to prepare for deceleration.")
-    } else if (step === 2) {
-      setStatusText("Start applying gradual brake. Press the Brake Pedal below!")
-    } else if (step === 3) {
-      setStatusText("Speed is low! Tap Clutch Pedal to avoid stalling before stopping.")
-    } else if (step === 4) {
-      if (clutchPressed && brakePressed) {
-        setSpeed(0)
-        setStatusText("Perfect Stop! Engine running smoothly in Neutral.")
-        if (onComplete) onComplete()
-      } else {
-        setSpeed(0)
-        setStatusText("Harsh Stop! Engine stalled because you forgot the clutch.")
-      }
+      setStatus("Cruising at 40 km/h. Red stop line ahead. Tap Brake Pedal to decelerate!")
+      let interval = setInterval(() => {
+        setCarY(prev => {
+          const next = prev - 2
+          if (next <= 120) {
+            clearInterval(interval)
+            setStep(2)
+            return 120
+          }
+          return next
+        })
+      }, 50)
+      return () => clearInterval(interval)
     }
   }, [step])
 
+  const pressBrake = () => {
+    if (step === 1 || step === 2) {
+      setIsBraking(true)
+      let decel = setInterval(() => {
+        setSpeed(prev => {
+          if (prev <= 10 && !clutchPressed) {
+            setStatus("Engine Stalling! Press Clutch immediately to disengage engine!")
+          }
+          if (prev <= 0) {
+            clearInterval(decel)
+            setIsBraking(false)
+            if (clutchPressed) {
+              setStatus("Perfect deceleration! Vehicle safely halted at stop line.")
+              if (onComplete) onComplete()
+            } else {
+              setStatus("Engine Stalled! You stopped without holding down the clutch.")
+            }
+            return 0
+          }
+          return Math.max(0, prev - 5)
+        })
+        setCarY(prev => Math.max(70, prev - 1.5))
+      }, 80)
+    }
+  }
+
   return (
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
-      <div className="flex-1 relative w-full bg-[#1b202e] flex flex-col border-b border-white/5 p-4 justify-center items-center">
-        <h3 className="text-white text-sm font-bold mb-2">Pedal Coordination Dashboard</h3>
-        <div className="w-full max-w-sm bg-black/40 border border-border/50 rounded-2xl p-4 flex justify-around items-center mb-4">
+      <div className="flex-1 relative w-full bg-[#1b2230] overflow-hidden flex flex-col">
+        <div className="h-[220px] w-full relative bg-[#2a2d3a] shrink-0 border-b border-slate-700">
+          <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
+          {/* Lane markings */}
+          <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[80px] bg-[#374151] border-x-4 border-slate-500">
+            <div className="absolute top-[60px] left-0 right-0 h-2 bg-red-500 shadow-[0_0_10px_red]" /> {/* Stop line */}
+          </div>
+          {/* Moving car */}
+          <div className="absolute left-[245px] transition-all duration-75" style={{ top: `${carY}px` }}>
+            <div className="w-[110px] h-[48px] origin-center -rotate-90 scale-75">
+              <RealisticCarSVG colorClass="slate" showLights={isBraking} step={step} />
+            </div>
+          </div>
+        </div>
+
+        {/* Dashboard coordination panel */}
+        <div className="flex-1 bg-slate-900 flex justify-center items-center gap-6 p-4">
           <button 
-            onClick={() => {
-              if (step === 3) { setClutchPressed(true); setStep(4) }
-            }}
-            className={`w-16 h-24 rounded-lg flex flex-col justify-between items-center p-2 font-mono text-[10px] border-2 transition-all ${clutchPressed ? 'bg-indigo-600/30 border-indigo-400 text-indigo-300 scale-95 translate-y-2' : 'bg-slate-800 border-slate-700 text-slate-400'}`}
+            onClick={() => setClutchPressed(true)} 
+            className={`w-14 h-20 rounded border-2 font-mono text-[9px] flex flex-col justify-between items-center p-1.5 transition-all ${clutchPressed ? 'bg-indigo-600/30 border-indigo-400 text-indigo-300 scale-95 translate-y-1' : 'bg-slate-800 border-slate-700 text-slate-400'}`}
           >
             <span>CLUTCH</span>
-            <div className="w-10 h-2 bg-slate-900 rounded" />
+            <div className="w-10 h-2 bg-black rounded" />
           </button>
-
           <button 
-            onClick={() => {
-              if (step === 2) { setBrakePressed(true); setSpeed(15); setStep(3) }
-            }}
-            className={`w-20 h-20 rounded-lg flex flex-col justify-between items-center p-2 font-mono text-[10px] border-2 transition-all ${brakePressed ? 'bg-red-600/30 border-red-400 text-red-300 scale-95 translate-y-1.5' : 'bg-slate-800 border-slate-700 text-slate-400'}`}
+            onMouseDown={pressBrake} 
+            onTouchStart={pressBrake}
+            className="w-18 h-18 rounded-lg bg-red-600 border-2 border-red-500 text-white font-mono text-[9px] flex flex-col justify-between items-center p-1.5 active:scale-95"
           >
-            <span>BRAKE</span>
-            <div className="w-12 h-3 bg-slate-900 rounded" />
+            <span>HOLD BRAKE</span>
+            <div className="w-12 h-2.5 bg-black rounded" />
           </button>
-        </div>
-        <div className="text-center px-6">
-          <p className="text-xs font-mono text-accent">Speed: {speed} km/h</p>
-          <p className="text-[11px] text-text-2 mt-2 leading-relaxed">{statusText}</p>
+          <div className="flex flex-col text-left">
+            <span className="text-[10px] text-text-3 font-mono">SPEED DIAL</span>
+            <span className="text-sm font-bold font-mono text-white">{speed} km/h</span>
+          </div>
         </div>
       </div>
       <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 z-30">
-        <button onClick={() => { setStep(0); setSpeed(0); setClutchPressed(false); setBrakePressed(false); setStatusText("Click Begin to start driving.") }} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>
+        <button onClick={() => { setStep(0); setCarY(220); setSpeed(0); setClutchPressed(false); setStatus("Click Begin to start driving up the lane.") }} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>
         {step === 0 && <button onClick={() => setStep(1)} className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl text-xs uppercase">Begin</button>}
       </div>
     </div>
@@ -735,413 +772,313 @@ export const BrakingSimulation: React.FC<SimulationProps> = ({ onComplete }) => 
 }
 
 // ============================================================================
-// 5. [NEW] MIRROR CHECKING SIMULATION (Hazard Scanning Drill)
+// 5. MIRROR CHECKING SIMULATION (Real-time target check)
 // ============================================================================
 export const MirrorCheckingSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
-  const [activeMirror, setActiveMirror] = useState<string | null>(null)
-  const [hazardLocation, setHazardLocation] = useState<'rear' | 'left' | 'right' | null>('rear')
-  const [score, setScore] = useState(0)
-  const [status, setStatus] = useState("Tap the mirror that shows the green target car!")
+  const [checkedZone, setCheckedZone] = useState<string[]>([])
+  const [hazardLocation, setHazardLocation] = useState<'rear' | 'left' | 'right'>('rear')
+  const [status, setStatus] = useState("Look at the dashboard below. Tap the highlighted mirror frame showing the yellow caution indicator!")
 
-  const handleMirrorTap = (mirror: 'rear' | 'left' | 'right') => {
-    if (mirror === hazardLocation) {
-      const nextScore = score + 1
-      setScore(nextScore)
-      if (nextScore >= 3) {
-        setStatus("Excellent! All hazards scanned successfully.")
-        setHazardLocation(null)
+  const tapMirror = (zone: 'rear' | 'left' | 'right') => {
+    if (zone === hazardLocation) {
+      const updated = [...checkedZone, zone]
+      setCheckedZone(updated)
+      if (updated.length >= 3) {
+        setStatus("All mirrors scanned! Click off to verify complete safety clearance.")
         if (onComplete) onComplete()
       } else {
-        const locations: ('rear' | 'left' | 'right')[] = ['left', 'right', 'rear']
-        const nextLoc = locations[nextScore % locations.length]
+        const remaining: ('rear' | 'left' | 'right')[] = ['left', 'right', 'rear']
+        const nextLoc = remaining.find(l => !updated.includes(l)) || 'rear'
         setHazardLocation(nextLoc)
-        setStatus(`Good scan! Spot the next target in another mirror.`)
+        setStatus(`Perfect scan. Look for the next hazard in the ${nextLoc.toUpperCase()} mirror.`)
       }
-    } else {
-      setStatus("Wrong mirror! Check carefully for the highlighted vehicle.")
     }
   }
 
   return (
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
-      <div className="flex-1 relative w-full bg-[#111827] flex flex-col p-4 justify-around items-center">
-        <span className="text-white text-xs font-bold tracking-wider font-mono">Cockpit Mirror Array</span>
-        <div className="w-full flex flex-col gap-4 items-center">
+      <div className="flex-1 relative w-full bg-[#151c2a] flex flex-col border-b border-white/5 p-4 justify-around">
+        <div className="w-full flex justify-center">
           {/* Rearview mirror */}
           <button 
-            onClick={() => handleMirrorTap('rear')}
-            className={`w-64 h-12 rounded-full border-4 flex items-center justify-center relative overflow-hidden transition-all ${hazardLocation === 'rear' ? 'border-emerald-400 bg-emerald-950/20' : 'border-slate-700 bg-slate-900'}`}
+            onClick={() => tapMirror('rear')}
+            className={`w-[260px] h-12 rounded-xl border-3 flex items-center justify-around relative overflow-hidden transition-all ${hazardLocation === 'rear' ? 'border-amber-400 bg-amber-500/10 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'border-slate-700 bg-slate-900/60'}`}
           >
-            <span className="text-[10px] text-text-3 font-mono">REARVIEW MIRROR</span>
-            {hazardLocation === 'rear' && <div className="absolute right-4 w-4 h-4 bg-emerald-400 rounded-full animate-ping" />}
+            <div className="w-3 h-3 bg-red-400 rounded-full" />
+            <span className="text-[10px] text-slate-300 font-mono font-bold">REARVIEW MIRROR VIEW</span>
+            <div className="w-3 h-3 bg-red-400 rounded-full" />
+            {hazardLocation === 'rear' && <div className="absolute inset-0 border-2 border-amber-400 bg-amber-400/5 animate-pulse" />}
           </button>
+        </div>
 
-          <div className="w-full flex justify-between max-w-sm">
-            {/* Left mirror */}
-            <button 
-              onClick={() => handleMirrorTap('left')}
-              className={`w-28 h-16 rounded-l-3xl border-4 flex flex-col items-center justify-center relative transition-all ${hazardLocation === 'left' ? 'border-emerald-400 bg-emerald-950/20' : 'border-slate-700 bg-slate-900'}`}
-            >
-              <span className="text-[9px] text-text-3 font-mono">LEFT MIRROR</span>
-              {hazardLocation === 'left' && <div className="absolute top-2 left-2 w-3 h-3 bg-emerald-400 rounded-full animate-ping" />}
-            </button>
-            {/* Right mirror */}
-            <button 
-              onClick={() => handleMirrorTap('right')}
-              className={`w-28 h-16 rounded-r-3xl border-4 flex flex-col items-center justify-center relative transition-all ${hazardLocation === 'right' ? 'border-emerald-400 bg-emerald-950/20' : 'border-slate-700 bg-slate-900'}`}
-            >
-              <span className="text-[9px] text-text-3 font-mono">RIGHT MIRROR</span>
-              {hazardLocation === 'right' && <div className="absolute top-2 right-2 w-3 h-3 bg-emerald-400 rounded-full animate-ping" />}
-            </button>
-          </div>
+        <div className="w-full flex justify-between px-4">
+          {/* Left mirror */}
+          <button 
+            onClick={() => tapMirror('left')}
+            className={`w-[120px] h-20 rounded-l-[30px] border-3 flex flex-col items-center justify-center relative overflow-hidden transition-all ${hazardLocation === 'left' ? 'border-amber-400 bg-amber-500/10 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'border-slate-700 bg-slate-900/60'}`}
+          >
+            <span className="text-[9px] text-slate-300 font-mono">LEFT SIDE</span>
+            {hazardLocation === 'left' && <div className="absolute inset-0 border-2 border-amber-400 bg-amber-400/5 animate-pulse" />}
+          </button>
+          
+          {/* Right mirror */}
+          <button 
+            onClick={() => tapMirror('right')}
+            className={`w-[120px] h-20 rounded-r-[30px] border-3 flex flex-col items-center justify-center relative overflow-hidden transition-all ${hazardLocation === 'right' ? 'border-amber-400 bg-amber-500/10 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'border-slate-700 bg-slate-900/60'}`}
+          >
+            <span className="text-[9px] text-slate-300 font-mono">RIGHT SIDE</span>
+            {hazardLocation === 'right' && <div className="absolute inset-0 border-2 border-amber-400 bg-amber-400/5 animate-pulse" />}
+          </button>
         </div>
-        <div className="text-center px-4">
-          <p className="text-xs text-accent font-bold font-mono">Scanned: {score}/3</p>
-          <p className="text-[11px] text-text-2 mt-1">{status}</p>
-        </div>
+
+        <p className="text-[11px] text-text-2 text-center mt-2 px-6">{status}</p>
       </div>
-      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-end">
-        <button onClick={() => { setScore(0); setHazardLocation('rear'); setStatus("Tap the mirror that shows the green target car!") }} className="p-2 bg-void border border-border text-text-3 rounded-xl mr-2"><RotateCcw className="w-4 h-4" /></button>
+      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between">
+        <button onClick={() => { setCheckedZone([]); setHazardLocation('rear'); setStatus("Look at the dashboard below.") }} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>
       </div>
     </div>
   )
 }
 
 // ============================================================================
-// 6. PARALLEL PARKING SIMULATION
-// ============================================================================
-export const ParallelParkingSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
-  const [step, setStep] = useState(0)
-  const [speed, setSpeed] = useState(0)
-  const [isAnimating, setIsAnimating] = useState(false)
-
-  const stepsInfo = [
-    { gear: "D", wheelAngle: 0, targetSpeed: 10 },
-    { gear: "R", wheelAngle: -45, targetSpeed: 5 },
-    { gear: "R", wheelAngle: 45, targetSpeed: 5 },
-    { gear: "D", wheelAngle: 0, targetSpeed: 0 }
-  ]
-
-  useEffect(() => {
-    if (step === 0) { setSpeed(0); return; }
-    const targetSpeed = stepsInfo[step - 1].targetSpeed
-    setIsAnimating(true)
-    
-    let currentSpeed = speed
-    const interval = setInterval(() => {
-      if (currentSpeed < targetSpeed) { currentSpeed += 1; setSpeed(currentSpeed) }
-      else if (currentSpeed > targetSpeed) { currentSpeed -= 1; setSpeed(currentSpeed) }
-      else {
-        clearInterval(interval)
-        setTimeout(() => {
-          setIsAnimating(false)
-          if (step === 4 && onComplete) onComplete()
-        }, 1200)
-      }
-    }, 100)
-    return () => clearInterval(interval)
-  }, [step])
-
-  const handleNext = () => { if (!isAnimating && step < 4) setStep(prev => prev + 1) }
-  const handleReset = () => { if (!isAnimating) { setStep(0); setSpeed(0) } }
-
-  const activeGear = step === 0 ? "P" : stepsInfo[step - 1].gear
-  const activeWheelAngle = step === 0 ? 0 : stepsInfo[step - 1].wheelAngle
-
-  const getCarTransform = () => {
-    switch (step) {
-      case 1: return 'translate(180px, 130px) rotate(0deg)'
-      case 2: return 'translate(260px, 160px) rotate(-15deg)'
-      case 3: return 'translate(310px, 180px) rotate(0deg)'
-      case 4: return 'translate(330px, 185px) rotate(0deg)'
-      case 0: default: return 'translate(20px, 130px) rotate(0deg)'
-    }
-  }
-
-  return (
-    <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
-      <div className="flex-1 relative w-full bg-[#353839] border-b border-white/5 overflow-hidden">
-        <ScaledCanvas canvasWidth={600}>
-          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
-            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
-            <div className="absolute top-[80px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#2a2c2d] border-y-4 border-slate-500 shadow-inner" />
-            <div className="absolute top-[180px] left-[320px] z-10 opacity-70">
-              <RealisticCarSVG colorClass="blue" step={1} activeGear="P" />
-            </div>
-            <div className="absolute top-[180px] left-[120px] z-10 opacity-70">
-              <RealisticCarSVG colorClass="blue" step={1} activeGear="P" />
-            </div>
-            <div className="absolute z-20 transition-all duration-[1500ms] ease-in-out top-0 left-0" style={{ transform: getCarTransform() }}>
-               <RealisticCarSVG colorClass="slate" showLights={true} step={step} activeGear={activeGear} />
-            </div>
-          </div>
-        </ScaledCanvas>
-      </div>
-      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 z-30">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-bold font-mono text-text-1">{speed} <span className="text-[9px] text-text-3">km/h</span></span>
-        </div>
-        <div className="flex gap-2">
-          {step > 0 && <button onClick={handleReset} disabled={isAnimating} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>}
-          <button onClick={handleNext} disabled={isAnimating || step === 4} className="px-4 py-2 bg-primary text-white text-xs rounded-xl font-bold uppercase">
-            {step === 0 ? "Begin" : step === 4 ? "Complete" : "Next"}
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ============================================================================
-// 7. REVERSE BAY PARKING SIMULATION
-// ============================================================================
-export const ReverseBayParkingSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
-  const [step, setStep] = useState(0)
-  const [speed, setSpeed] = useState(0)
-  const [isAnimating, setIsAnimating] = useState(false)
-
-  const stepsInfo = [
-    { gear: "D", wheelAngle: 0, targetSpeed: 10 },
-    { gear: "R", wheelAngle: 90, targetSpeed: 5 },
-    { gear: "R", wheelAngle: 0, targetSpeed: 4 },
-    { gear: "P", wheelAngle: 0, targetSpeed: 0 }
-  ]
-
-  useEffect(() => {
-    if (step === 0) { setSpeed(0); return; }
-    const targetSpeed = stepsInfo[step - 1].targetSpeed
-    setIsAnimating(true)
-    
-    let currentSpeed = speed
-    const interval = setInterval(() => {
-      if (currentSpeed < targetSpeed) { currentSpeed += 1; setSpeed(currentSpeed) }
-      else if (currentSpeed > targetSpeed) { currentSpeed -= 1; setSpeed(currentSpeed) }
-      else {
-        clearInterval(interval)
-        setTimeout(() => {
-          setIsAnimating(false)
-          if (step === 4 && onComplete) onComplete()
-        }, 1200)
-      }
-    }, 100)
-    return () => clearInterval(interval)
-  }, [step])
-
-  const handleNext = () => { if (!isAnimating && step < 4) setStep(prev => prev + 1) }
-  const handleReset = () => { if (!isAnimating) { setStep(0); setSpeed(0) } }
-
-  const activeGear = step === 0 ? "P" : stepsInfo[step - 1].gear
-  const activeWheelAngle = step === 0 ? 0 : stepsInfo[step - 1].wheelAngle
-
-  const getCarTransform = () => {
-    switch (step) {
-      case 1: return 'translate(220px, 90px) rotate(0deg)'
-      case 2: return 'translate(310px, 150px) rotate(45deg)'
-      case 3: return 'translate(350px, 190px) rotate(90deg)'
-      case 4: return 'translate(350px, 210px) rotate(90deg)'
-      case 0: default: return 'translate(60px, 90px) rotate(0deg)'
-    }
-  }
-
-  return (
-    <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
-      <div className="flex-1 relative w-full bg-[#353839] border-b border-white/5 overflow-hidden">
-        <ScaledCanvas canvasWidth={600}>
-          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
-            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
-            <div className="absolute top-[80px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#2a2c2d] border-y-4 border-slate-500 shadow-inner" />
-            <div className="absolute top-[180px] left-[260px] w-20 h-28 bg-[#1f2937] border-2 border-dashed border-white/20" />
-            <div className="absolute top-[180px] left-[340px] w-20 h-28 bg-[#1f2937] border-2 border-dashed border-white/20" />
-            <div className="absolute z-20 transition-all duration-[1500ms] ease-in-out top-0 left-0" style={{ transform: getCarTransform(), transformOrigin: '20px 24px' }}>
-               <RealisticCarSVG colorClass="slate" showLights={true} step={step} activeGear={activeGear} />
-            </div>
-          </div>
-        </ScaledCanvas>
-      </div>
-      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 z-30">
-        <div className="flex gap-2 ml-auto">
-          {step > 0 && <button onClick={handleReset} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>}
-          <button onClick={handleNext} disabled={isAnimating || step === 4} className="px-4 py-2 bg-primary text-white text-xs rounded-xl font-bold uppercase">
-            {step === 0 ? "Begin" : step === 4 ? "Complete" : "Next"}
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ============================================================================
-// 8. [NEW] HILL STARTS SIMULATION (Handbrake coordination)
+// 8. HILL STARTS SIMULATION (Side profile incline move)
 // ============================================================================
 export const HillStartsSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
   const [step, setStep] = useState(0)
-  const [rpm, setRpm] = useState(800)
+  const [clutchValue, setClutchValue] = useState(0)
+  const [rpmValue, setRpmValue] = useState(800)
   const [handbrakeReleased, setHandbrakeReleased] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [status, setStatus] = useState("Hold vehicle with handbrake. Click Begin to power up.")
+  const [carX, setCarX] = useState(20)
+  const [status, setStatus] = useState("Steep incline. Apply Handbrake. Press gas to reach 1500 RPM.")
 
-  const triggerHandbrakeRelease = () => {
+  const adjustGas = () => {
+    if (step === 0) {
+      setRpmValue(1600)
+      setStep(1)
+      setStatus("RPM is 1600. Now slide the Clutch Pedal down to locate the biting point (approx. 60%).")
+    }
+  }
+
+  const adjustClutch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value)
+    setClutchValue(val)
+    if (step === 1 && val >= 55 && val <= 70) {
+      setRpmValue(1200)
+      setStep(2)
+      setStatus("Biting point reached! Hold clutch, click RELEASE HANDBRAKE to climb.")
+    }
+  }
+
+  const releaseHandbrake = () => {
     if (step === 2) {
-      if (rpm >= 1400 && rpm <= 1800) {
-        setHandbrakeReleased(true)
-        setSuccess(true)
-        setStatus("Perfect hill launch! Smooth acceleration up the slope.")
-        setStep(3)
+      setHandbrakeReleased(true)
+      setStatus("Climbing smoothly! Handbrake disengaged successfully.")
+      let interval = setInterval(() => {
+        setCarX(prev => {
+          if (prev >= 200) {
+            clearInterval(interval)
+            if (onComplete) onComplete()
+            return 200
+          }
+          return prev + 10
+        })
+      }, 80)
+    }
+  }
+
+  return (
+    <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
+      <div className="flex-1 relative w-full overflow-hidden flex flex-col border-b border-white/5">
+        {/* Hill Visual */}
+        <div className="h-[180px] w-full relative bg-blue-300 overflow-hidden shrink-0">
+          <div className="absolute left-[-20%] right-[-20%] h-[300px] bg-[#353839] border-t-8 border-slate-500 origin-top-left" style={{ transform: 'rotate(-12deg)', top: '120px' }} />
+          <div className="absolute transition-all duration-[1000ms]" style={{ left: `${carX}px`, top: 120 - (carX * Math.tan(12 * Math.PI / 180)) - 40, transform: `rotate(-12deg)` }}>
+            <RealisticSideProfileSVG speed={step === 3 ? 15 : 0} step={step} />
+          </div>
+        </div>
+
+        {/* Console coordinator */}
+        <div className="flex-1 bg-slate-900 flex justify-around items-center p-4">
+          <button onClick={adjustGas} className="px-3 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-[10px] font-bold font-mono">GAS (1500 RPM)</button>
+          
+          <div className="flex flex-col items-center">
+            <span className="text-[9px] text-slate-500 font-mono">CLUTCH BITE</span>
+            <input type="range" min="0" max="100" value={clutchValue} onChange={adjustClutch} className="w-24 mt-1" />
+          </div>
+
+          <button onClick={releaseHandbrake} className="px-3 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-[10px] font-bold font-mono">RELEASE HANDBRAKE</button>
+        </div>
+      </div>
+
+      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 z-30">
+        <button onClick={() => { setStep(0); setClutchValue(0); setRpmValue(800); setHandbrakeReleased(false); setCarX(20); setStatus("Steep incline.") }} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>
+        <span className="text-[10px] text-text-2 w-[280px] leading-snug">{status}</span>
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
+// 9. LANE CHANGING SIMULATION (Topdown highway glide)
+// ============================================================================
+export const LaneChangingSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
+  const [step, setStep] = useState(0)
+  const [carX, setCarX] = useState(150)
+  const [carY, setCarY] = useState(150)
+  const [signalActive, setSignalActive] = useState(false)
+  const [status, setStatus] = useState("Click Begin to approach target speed in left lane.")
+
+  useEffect(() => {
+    if (step === 1) {
+      let interval = setInterval(() => {
+        setCarX(prev => {
+          if (prev >= 280) {
+            clearInterval(interval)
+            setStep(2)
+            setStatus("Cruising at highway flow. Check side mirrors and ACTIVATE right indicator.")
+            return 280
+          }
+          return prev + 5
+        })
+      }, 50)
+      return () => clearInterval(interval)
+    }
+  }, [step])
+
+  const triggerSignal = () => {
+    if (step === 2) {
+      setSignalActive(true)
+      setStep(3)
+      setStatus("Indicator active. Check blind spots and click SLIDE to merge.")
+    }
+  }
+
+  const triggerMerge = () => {
+    if (step === 3 && signalActive) {
+      let interval = setInterval(() => {
+        setCarY(prev => {
+          if (prev <= 60) {
+            clearInterval(interval)
+            setStep(4)
+            setStatus("Merged safely into right lane! Cancel signal indicators.")
+            if (onComplete) onComplete()
+            return 60
+          }
+          return prev - 3
+        })
+      }, 50)
+      return () => clearInterval(interval)
+    }
+  }
+
+  return (
+    <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
+      <div className="flex-1 relative w-full bg-[#1b2230] border-b border-white/5 overflow-hidden">
+        <ScaledCanvas canvasWidth={600}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
+            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
+            {/* Highway lanes */}
+            <div className="absolute top-[40px] bottom-[40px] left-[-1000px] right-[-1000px] bg-[#2a2d3a] border-y-4 border-slate-500">
+              <div className="absolute top-1/2 left-0 right-0 h-0.5 border-t border-dashed border-white/60" />
+            </div>
+            {/* Student car */}
+            <div className="absolute transition-all duration-75" style={{ left: `${carX}px`, top: `${carY}px` }}>
+              <RealisticCarSVG colorClass="slate" showLights={true} step={step} rightBlinker={signalActive} />
+            </div>
+          </div>
+        </ScaledCanvas>
+      </div>
+
+      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 z-30">
+        <button onClick={() => { setStep(0); setCarX(150); setCarY(150); setSignalActive(false); setStatus("Click Begin.") }} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>
+        <span className="text-[10px] text-text-2 w-[240px]">{status}</span>
+        <div className="flex gap-2">
+          {step === 0 && <button onClick={() => setStep(1)} className="px-3 py-1.5 bg-primary text-white font-bold rounded-xl text-xs">Begin</button>}
+          {step === 2 && <button onClick={triggerSignal} className="px-3 py-1.5 bg-amber-600 text-white font-bold rounded-xl text-xs">SIGNAL</button>}
+          {step === 3 && <button onClick={triggerMerge} className="px-3 py-1.5 bg-blue-600 text-white font-bold rounded-xl text-xs">SLIDE</button>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
+// 10. TRAFFIC SIGNALS SIMULATION (Visual light stop line)
+// ============================================================================
+export const TrafficSignalsSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
+  const [step, setStep] = useState(0)
+  const [carX, setCarX] = useState(20)
+  const [lightColor, setLightColor] = useState<'green' | 'amber' | 'red'>('green')
+  const [status, setStatus] = useState("Cruising forward. Click Begin to approach junction.")
+
+  useEffect(() => {
+    if (step === 1) {
+      let interval = setInterval(() => {
+        setCarX(prev => {
+          const next = prev + 5
+          if (next >= 120 && lightColor === 'green') {
+            setLightColor('amber')
+            setStatus("Amber light active! Click BRAKE button below immediately to stop before line.")
+          }
+          if (next >= 180 && lightColor === 'amber') {
+            setLightColor('red')
+          }
+          if (next >= 220) {
+            clearInterval(interval)
+            setStatus("Failed! You jumped the red signal without stopping.")
+            setStep(3)
+            return 220
+          }
+          return next
+        })
+      }, 80)
+      return () => clearInterval(interval)
+    }
+  }, [step, lightColor])
+
+  const triggerStop = () => {
+    if (step === 1) {
+      setStep(2)
+      if (lightColor === 'amber' || lightColor === 'red') {
+        setStatus("Perfect stop! Vehicle safely halted before the solid white junction line.")
         if (onComplete) onComplete()
       } else {
-        setHandbrakeReleased(true)
-        setSuccess(false)
-        setStatus("Rollback alert! Released handbrake without matching engine torque.")
-        setStep(3)
+        setStatus("Failed! Halted too early on green signal pattern.")
       }
     }
   }
 
   return (
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
-      <div className="flex-1 relative w-full bg-[#1b202e] flex flex-col p-4 justify-around items-center">
-        <span className="text-white text-xs font-mono uppercase">slope incline coordinator</span>
-        
-        <div className="w-full max-w-xs flex flex-col gap-4 items-center">
-          <div className="flex gap-4">
-            <button 
-              onClick={() => {
-                if (step === 1) { setRpm(1500); setStep(2); setStatus("Biting point reached! Hold RPM and release Handbrake.") }
-              }}
-              className="px-4 py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-mono font-bold"
-            >
-              Raise RPM to 1500
-            </button>
-            <button 
-              onClick={triggerHandbrakeRelease}
-              className={`px-4 py-3 text-white rounded-xl text-xs font-mono font-bold transition-all ${handbrakeReleased ? 'bg-slate-700' : 'bg-red-600 hover:bg-red-500 animate-pulse'}`}
-            >
-              RELEASE HANDBRAKE
-            </button>
-          </div>
-          <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden">
-            <div className="h-full bg-amber-500 transition-all duration-300" style={{ width: `${(rpm / 3000) * 100}%` }} />
-          </div>
-        </div>
+      <div className="flex-1 relative w-full bg-[#1b2230] border-b border-white/5 overflow-hidden">
+        <ScaledCanvas canvasWidth={600}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
+            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
+            <div className="absolute top-[80px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#2a2c2d] border-y-4 border-slate-500 shadow-inner" />
+            <div className="absolute top-[80px] bottom-[20px] left-[260px] w-4 bg-white" /> {/* Stop line */}
+            
+            {/* Traffic Light pole */}
+            <div className="absolute left-[290px] top-[20px] w-8 h-20 bg-black border-2 border-slate-600 rounded flex flex-col items-center justify-around py-1 shadow-xl z-20">
+              <div className={`w-4 h-4 rounded-full ${lightColor === 'red' ? 'bg-red-500 shadow-[0_0_10px_red]' : 'bg-red-950'}`} />
+              <div className={`w-4 h-4 rounded-full ${lightColor === 'amber' ? 'bg-amber-500 shadow-[0_0_10px_orange]' : 'bg-amber-950'}`} />
+              <div className={`w-4 h-4 rounded-full ${lightColor === 'green' ? 'bg-green-500 shadow-[0_0_10px_green]' : 'bg-green-950'}`} />
+            </div>
 
-        <div className="text-center px-4">
-          <p className="text-xs text-accent font-bold font-mono">Engine: {rpm} RPM</p>
-          <p className="text-[11px] text-text-2 mt-1">{status}</p>
-        </div>
+            {/* Car */}
+            <div className="absolute top-[120px]" style={{ left: `${carX}px` }}>
+              <RealisticCarSVG colorClass="slate" showLights={step === 2} step={step} />
+            </div>
+          </div>
+        </ScaledCanvas>
       </div>
+
       <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 z-30">
-        <button onClick={() => { setStep(0); setRpm(800); setHandbrakeReleased(false); setSuccess(false); setStatus("Hold vehicle with handbrake. Click Begin to power up.") }} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>
-        {step === 0 && <button onClick={() => setStep(1)} className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl text-xs uppercase">Begin</button>}
-      </div>
-    </div>
-  )
-}
-
-// ============================================================================
-// 9. [NEW] LANE CHANGING SIMULATION (Topdown highway glide)
-// ============================================================================
-export const LaneChangingSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
-  const [step, setStep] = useState(0)
-  const [signalActive, setSignalActive] = useState(false)
-  const [lane, setLane] = useState<'left' | 'right'>('left')
-  const [status, setStatus] = useState("Click Begin to prepare for lane change.")
-
-  const triggerChange = () => {
-    if (step === 2 && signalActive) {
-      setLane('right')
-      setStatus("Smooth lane change completed! Turn off signal indicator.")
-      setStep(3)
-      if (onComplete) onComplete()
-    }
-  }
-
-  return (
-    <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
-      <div className="flex-1 relative w-full bg-[#202430] flex flex-col p-4 justify-around items-center">
-        <div className="w-full max-w-sm flex justify-around mb-4">
-          <button 
-            onClick={() => {
-              if (step === 1) { setSignalActive(true); setStep(2); setStatus("Indicator active. Clear to slide lane. Click Slide to target lane.") }
-            }}
-            className={`px-4 py-3 rounded-xl text-xs font-mono font-bold transition-all ${signalActive ? 'bg-orange-500/20 border-orange-400 text-orange-400 border-2' : 'bg-slate-800 border-slate-700 text-slate-400 border'}`}
-          >
-            ACTIVATE INDICATOR
-          </button>
-          <button 
-            onClick={triggerChange}
-            className={`px-4 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-mono font-bold`}
-          >
-            SLIDE TO RIGHT LANE
-          </button>
+        <button onClick={() => { setStep(0); setCarX(20); setLightColor('green'); setStatus("Cruising forward.") }} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>
+        <span className="text-[10px] text-text-2 w-[240px]">{status}</span>
+        <div className="flex gap-2">
+          {step === 0 && <button onClick={() => setStep(1)} className="px-3 py-1.5 bg-primary text-white font-bold rounded-xl text-xs">Begin</button>}
+          {step === 1 && <button onClick={triggerStop} className="px-3 py-1.5 bg-red-600 text-white font-bold rounded-xl text-xs">BRAKE</button>}
         </div>
-        <div className="text-center px-4">
-          <p className="text-xs text-accent font-bold font-mono">Current Lane: {lane.toUpperCase()}</p>
-          <p className="text-[11px] text-text-2 mt-1">{status}</p>
-        </div>
-      </div>
-      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 z-30">
-        <button onClick={() => { setStep(0); setSignalActive(false); setLane('left'); setStatus("Click Begin to prepare for lane change.") }} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>
-        {step === 0 && <button onClick={() => setStep(1)} className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl text-xs uppercase">Begin</button>}
-      </div>
-    </div>
-  )
-}
-
-// ============================================================================
-// 10. [NEW] TRAFFIC SIGNALS SIMULATION (Junction stop line)
-// ============================================================================
-export const TrafficSignalsSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
-  const [lightColor, setLightColor] = useState<'green' | 'amber' | 'red'>('green')
-  const [stopped, setStopped] = useState(false)
-  const [status, setStatus] = useState("Cruising forward. Light is Green.")
-
-  useEffect(() => {
-    let t1 = setTimeout(() => {
-      setLightColor('amber')
-      setStatus("Amber light warning! Prepare to stop if safe.")
-    }, 2000)
-
-    let t2 = setTimeout(() => {
-      setLightColor('red')
-      setStatus("Red light active! Apply emergency brakes immediately.")
-    }, 4500)
-
-    return () => {
-      clearTimeout(t1)
-      clearTimeout(t2)
-    }
-  }, [])
-
-  const triggerBrake = () => {
-    setStopped(true)
-    if (lightColor === 'red' || lightColor === 'amber') {
-      setStatus("Successful Stop! Correctly halted before the solid white junction line.")
-      if (onComplete) onComplete()
-    } else {
-      setStatus("Premature Stop! Road block on green light pattern.")
-    }
-  }
-
-  return (
-    <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
-      <div className="flex-1 relative w-full bg-[#1e2230] flex flex-col p-4 justify-around items-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 bg-black border-2 border-slate-700 rounded-3xl p-2 flex flex-col gap-2 shadow-2xl">
-            <div className={`w-8 h-8 rounded-full ${lightColor === 'red' ? 'bg-red-500 shadow-[0_0_15px_red]' : 'bg-red-950'}`} />
-            <div className={`w-8 h-8 rounded-full ${lightColor === 'amber' ? 'bg-amber-500 shadow-[0_0_15px_orange]' : 'bg-amber-950'}`} />
-            <div className={`w-8 h-8 rounded-full ${lightColor === 'green' ? 'bg-green-500 shadow-[0_0_15px_green]' : 'bg-green-950'}`} />
-          </div>
-          <button 
-            onClick={triggerBrake}
-            className="px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs font-mono"
-          >
-            APPLY BRAKES
-          </button>
-        </div>
-        <p className="text-[11px] text-text-2 px-4 text-center mt-2 leading-relaxed">{status}</p>
-      </div>
-      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-end">
-        <button onClick={() => { setLightColor('green'); setStopped(false); setStatus("Cruising forward. Light is Green.") }} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>
       </div>
     </div>
   )
@@ -1202,7 +1139,7 @@ export const HighwayMergingSimulation: React.FC<SimulationProps> = ({ onComplete
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
       <div className="flex-1 relative w-full bg-[#2a2c2d] border-b border-white/5 overflow-hidden">
         <ScaledCanvas canvasWidth={600}>
-          <div className="w-[600px] h-full relative animate-pulse" style={{ minHeight: '280px' }}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
             <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
             <div className="absolute top-[80px] bottom-[20px] left-[-1000px] right-[-1000px] bg-[#353839] border-y-4 border-slate-500 shadow-inner" />
             <div className="absolute z-20 transition-all duration-[1500ms] ease-in-out top-0 left-0" style={{ transform: getCarTransform() }}>
@@ -1231,35 +1168,84 @@ export const HighwayMergingSimulation: React.FC<SimulationProps> = ({ onComplete
 // ============================================================================
 export const OvertakingSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
   const [step, setStep] = useState(0)
-  const [status, setStatus] = useState("Approaching slow cargo vehicle. Click Begin to start pass maneuver.")
+  const [carX, setCarX] = useState(20)
+  const [carY, setCarY] = useState(150)
+  const [signalActive, setSignalActive] = useState(false)
+  const [status, setStatus] = useState("Slow truck ahead. Click Begin to signal and pull out.")
 
-  const handleAction = () => {
+  const nextStep = () => {
     if (step === 0) {
       setStep(1)
-      setStatus("Step 1: Check mirrors, signal right, and pull out to outer lane.")
-    } else if (step === 1) {
-      setStep(2)
-      setStatus("Step 2: Accelerate past the slow vehicle swiftly. Keep speed matched.")
+      setSignalActive(true)
+      setStatus("Step 1: Shift right and pull into overtaking lane.")
+      let interval = setInterval(() => {
+        setCarY(prev => {
+          if (prev <= 60) {
+            clearInterval(interval)
+            setStep(2)
+            setCarX(120)
+            setStatus("Step 2: Accelerate past the cargo truck. Press pass button.")
+            return 60
+          }
+          return prev - 10
+        })
+      }, 50)
     } else if (step === 2) {
-      setStep(3)
-      setStatus("Step 3: Signal left and return to main lane with room to spare.")
-      if (onComplete) onComplete()
+      setStatus("Accelerating past truck...")
+      let interval = setInterval(() => {
+        setCarX(prev => {
+          if (prev >= 360) {
+            clearInterval(interval)
+            setStep(3)
+            setStatus("Step 3: Clear ahead! Signal left and slide back into left lane.")
+            return 360
+          }
+          return prev + 20
+        })
+      }, 50)
+    } else if (step === 3) {
+      let interval = setInterval(() => {
+        setCarY(prev => {
+          if (prev >= 150) {
+            clearInterval(interval)
+            setStep(4)
+            setStatus("Maneuver complete! You overtook the vehicle safely.")
+            if (onComplete) onComplete()
+            return 150
+          }
+          return prev + 10
+        })
+      }, 50)
     }
   }
 
   return (
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
-      <div className="flex-1 relative w-full bg-[#1b2230] flex flex-col p-4 justify-around items-center">
-        <div className="text-center px-4">
-          <p className="text-xs text-accent font-bold font-mono">Stage: {step}/3</p>
-          <p className="text-[11px] text-text-2 mt-1 leading-relaxed">{status}</p>
-        </div>
+      <div className="flex-1 relative w-full bg-[#1b2230] border-b border-white/5 overflow-hidden">
+        <ScaledCanvas canvasWidth={600}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
+            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
+            <div className="absolute top-[40px] bottom-[40px] left-[-1000px] right-[-1000px] bg-[#2a2d3a] border-y-4 border-slate-500">
+              <div className="absolute top-1/2 left-0 right-0 h-0.5 border-t border-dashed border-white/60" />
+            </div>
+            
+            {/* Cargo Truck */}
+            <div className="absolute left-[200px] top-[140px] opacity-75">
+              <div className="w-[120px] h-[55px] bg-blue-900 border-2 border-slate-500 rounded flex items-center justify-center text-white text-[8px] font-bold font-mono">CARGO TRUCK</div>
+            </div>
+
+            {/* Student Car */}
+            <div className="absolute transition-all duration-75" style={{ left: `${carX}px`, top: `${carY}px` }}>
+              <RealisticCarSVG colorClass="slate" showLights={true} step={step} rightBlinker={signalActive} />
+            </div>
+          </div>
+        </ScaledCanvas>
       </div>
+
       <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 z-30">
-        <button onClick={() => { setStep(0); setStatus("Approaching slow cargo vehicle. Click Begin to start pass maneuver.") }} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>
-        <button onClick={handleAction} className="px-6 py-2.5 bg-primary text-white font-bold rounded-xl text-xs uppercase">
-          {step === 0 ? "Begin" : step === 3 ? "Complete" : "Next Step"}
-        </button>
+        <button onClick={() => { setStep(0); setCarX(20); setCarY(150); setSignalActive(false); setStatus("Slow truck ahead.") }} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>
+        <span className="text-[10px] text-text-2 w-[240px]">{status}</span>
+        <button onClick={nextStep} className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl">{step === 0 ? "Begin" : step === 4 ? "Complete" : "Next"}</button>
       </div>
     </div>
   )
@@ -1333,58 +1319,54 @@ export const EmergencyBrakingSimulation: React.FC<SimulationProps> = ({ onComple
 }
 
 // ============================================================================
-// 14. [NEW] DRIVING IN RAIN SIMULATION (Windshield Wipers & Slip-limit)
+// 14. [NEW] DRIVING IN RAIN SIMULATION (Wiper visual movement)
 // ============================================================================
 export const RainDrivingSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
-  const [wiperSpeed, setWiperSpeed] = useState<'off' | 'slow' | 'fast'>('off')
-  const [speed, setSpeed] = useState(30)
-  const [status, setStatus] = useState("Heavy downpour active! Reduce cruising speed by 30% and toggle Wipers ON.")
+  const [wiperActive, setWiperActive] = useState(false)
+  const [speed, setSpeed] = useState(50)
+  const [status, setStatus] = useState("Heavy downpour active! Reduce speed below 30 km/h and turn on windshield wipers.")
 
-  const adjustWiper = () => {
-    if (wiperSpeed === 'off') {
-      setWiperSpeed('slow')
-      setStatus("Wipers set to Slow. Clearer windshield visibility. Ensure speed is below 35 km/h.")
-    } else if (wiperSpeed === 'slow') {
-      setWiperSpeed('fast')
-      setStatus("Wipers set to Fast. Ideal view. Match 30 km/h rain velocity limits.")
-      if (speed <= 30) {
-        if (onComplete) onComplete()
-      }
+  const adjustSpeed = () => {
+    setSpeed(30)
+    if (wiperActive) {
+      setStatus("Traction stable. Safe rain speed limit matching wiper visibility.")
+      if (onComplete) onComplete()
     } else {
-      setWiperSpeed('off')
+      setStatus("Speed is safe, but wipers are still OFF. Activate wipers to clear screen.")
+    }
+  }
+
+  const toggleWiper = () => {
+    setWiperActive(!wiperActive)
+    if (speed <= 30) {
+      setStatus("Safe rain setup achieved! Traction stable.")
+      if (onComplete) onComplete()
+    } else {
+      setStatus("Wipers ON. Now adjust speed to 30 km/h.")
     }
   }
 
   return (
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
-      <div className="flex-1 relative w-full bg-[#1b2230] flex flex-col p-4 justify-around items-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="flex gap-4">
-            <button 
-              onClick={adjustWiper}
-              className={`px-4 py-2 rounded-xl text-xs font-mono font-bold border-2 transition-all ${wiperSpeed !== 'off' ? 'bg-blue-600/30 border-blue-400 text-blue-300' : 'bg-slate-800 border-slate-700 text-slate-400'}`}
-            >
-              TOGGLE WIPERS: {wiperSpeed.toUpperCase()}
-            </button>
-            <button 
-              onClick={() => {
-                setSpeed(30)
-                setStatus("Cruising speed adjusted to 30 km/h. Safe driving profile matching rain limit.")
-                if (wiperSpeed === 'fast' && onComplete) onComplete()
-              }}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-mono font-bold"
-            >
-              SET SPEED 30 KM/H
-            </button>
-          </div>
-          <div className="text-center">
-            <p className="text-xs text-accent font-bold font-mono">Current Velocity: {speed} km/h</p>
-            <p className="text-[11px] text-text-2 mt-1 leading-relaxed">{status}</p>
-          </div>
+      <div className="flex-1 relative w-full bg-[#1b2230] flex flex-col border-b border-white/5 p-4 justify-around items-center">
+        {/* Visual Wipers wind screen representation */}
+        <div className="w-64 h-32 border-2 border-slate-700 bg-slate-900 rounded-xl relative overflow-hidden flex items-center justify-center">
+          {/* Rain backdrop drops */}
+          <div className="absolute inset-0 bg-blue-900/10 pointer-events-none" />
+          <div className="absolute text-slate-500 font-mono text-[9px]">WINDSHIELD</div>
+          {/* Wiper arm */}
+          <div className={`absolute bottom-0 left-1/2 w-1.5 h-24 bg-slate-400 origin-bottom transition-all ${wiperActive ? 'animate-bounce' : 'rotate-[-60deg]'}`} />
+        </div>
+
+        <div className="flex gap-4">
+          <button onClick={toggleWiper} className={`px-4 py-2 text-xs font-mono font-bold rounded-xl transition-all ${wiperActive ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>WIPERS: {wiperActive ? "ON" : "OFF"}</button>
+          <button onClick={adjustSpeed} className="px-4 py-2 bg-indigo-600 text-white text-xs font-mono font-bold rounded-xl">SET SPEED 30 KM/H</button>
         </div>
       </div>
-      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-end">
-        <button onClick={() => { setWiperSpeed('off'); setSpeed(30); setStatus("Heavy downpour active!") }} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>
+
+      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 z-30">
+        <button onClick={() => { setWiperActive(false); setSpeed(50); setStatus("Heavy downpour active!") }} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>
+        <span className="text-[10px] text-text-2 w-[280px] leading-snug">{status}</span>
       </div>
     </div>
   )
@@ -1455,19 +1437,20 @@ export const RoundaboutSimulation: React.FC<SimulationProps> = ({ onComplete }) 
 }
 
 // ============================================================================
-// 17. [NEW] PARKING ALIGNMENT SIMULATION (Kerb distance calibrator)
+// 17. [NEW] PARKING ALIGNMENT SIMULATION (Kerb distance visual adjustment)
 // ============================================================================
 export const ParkingAlignmentSimulation: React.FC<SimulationProps> = ({ onComplete }) => {
-  const [distance, setDistance] = useState(60)
-  const [status, setStatus] = useState("Position is too far from the kerb. Click Adjust buttons to align within 15-30cm.")
+  const [carX, setCarX] = useState(180)
+  const [status, setStatus] = useState("Position is too far from the kerb. Click Adjust buttons below to align the car within 15-30cm.")
 
-  const adjustDistance = (amt: number) => {
-    const next = Math.max(0, distance + amt)
-    setDistance(next)
-    if (next >= 15 && next <= 30) {
+  const adjustPosition = (offset: number) => {
+    const nextX = Math.max(80, Math.min(300, carX + offset))
+    setCarX(nextX)
+    const distance = nextX - 100 // Scale kerb gap
+    if (distance >= 15 && distance <= 30) {
       setStatus("Perfect distance! Kerb clearance is ideal (15-30cm). Straighten wheels.")
       if (onComplete) onComplete()
-    } else if (next < 15) {
+    } else if (distance < 15) {
       setStatus("Too close! Risk of scraping tyres or climbing the kerb.")
     } else {
       setStatus("Too far! Obstruction to road traffic flow.")
@@ -1476,28 +1459,27 @@ export const ParkingAlignmentSimulation: React.FC<SimulationProps> = ({ onComple
 
   return (
     <div className="w-full h-full flex flex-col justify-between bg-void/90 relative overflow-hidden select-none">
-      <div className="flex-1 relative w-full bg-[#1e2230] flex flex-col p-4 justify-around items-center">
-        <div className="flex gap-4">
-          <button 
-            onClick={() => adjustDistance(-10)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-mono font-bold"
-          >
-            ADJUST CLOSER
-          </button>
-          <button 
-            onClick={() => adjustDistance(10)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-mono font-bold"
-          >
-            ADJUST AWAY
-          </button>
-        </div>
-        <div className="text-center">
-          <p className="text-xs text-accent font-bold font-mono">Distance to Kerb: {distance} cm</p>
-          <p className="text-[11px] text-text-2 mt-1 leading-relaxed">{status}</p>
-        </div>
+      <div className="flex-1 relative w-full bg-[#1b2230] border-b border-white/5 overflow-hidden">
+        <ScaledCanvas canvasWidth={600}>
+          <div className="w-[600px] h-full relative" style={{ minHeight: '280px' }}>
+            <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/asphalt-pattern.png')]" />
+            <div className="absolute left-[80px] top-0 bottom-0 w-6 bg-slate-500" /> {/* Kerb line */}
+            <div className="absolute top-[120px] transition-all duration-100" style={{ left: `${carX}px` }}>
+              <div className="w-[110px] h-[48px] origin-center -rotate-90 scale-75">
+                <RealisticCarSVG colorClass="slate" showLights={true} step={1} />
+              </div>
+            </div>
+          </div>
+        </ScaledCanvas>
       </div>
-      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-end">
-        <button onClick={() => { setDistance(60); setStatus("Position is too far.") }} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>
+
+      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 z-30">
+        <button onClick={() => { setCarX(180); setStatus("Position is too far.") }} className="p-2 bg-void border border-border text-text-3 rounded-xl"><RotateCcw className="w-4 h-4" /></button>
+        <span className="text-[10px] text-text-2 w-[240px]">{status}</span>
+        <div className="flex gap-2">
+          <button onClick={() => adjustPosition(-10)} className="px-3 py-1.5 bg-blue-600 text-white font-bold rounded-xl text-xs">CLOSER</button>
+          <button onClick={() => adjustPosition(10)} className="px-3 py-1.5 bg-blue-600 text-white font-bold rounded-xl text-xs">AWAY</button>
+        </div>
       </div>
     </div>
   )
@@ -1536,3 +1518,9 @@ export const BlindSpotAwarenessSimulation: React.FC<SimulationProps> = ({ onComp
     </div>
   )
 }
+
+// Re-export original high-fidelity simulations
+export { ParallelParkingSimulation } from './ParallelParkingSimulation'
+export { ReverseBayParkingSimulation } from './ReverseBayParkingSimulation'
+export { ThreePointTurnSimulation } from './DynamicHTMLSimulations'
+
