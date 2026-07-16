@@ -221,7 +221,10 @@ import {
   ThreePointTurnSimulation,
   EmergencyBrakingSimulation,
   RoundaboutSimulation,
-  NightDrivingSimulation
+  NightDrivingSimulation,
+  RainDrivingSimulation,
+  ParkingAlignmentSimulation,
+  BlindSpotAwarenessSimulation
 } from '@/components/student/NewHTMLSimulations'
 import { SignCard } from '@/components/student/SignCard'
 
@@ -714,7 +717,7 @@ export default function StudentLearnPortal() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                   {cards.map((card) => {
                     const isCompleted = completedIds.includes(card.id)
-                    const hasSim = ['parallel-parking', 'reverse-parking', 'vehicle-startup', 'steering-control', 'clutch-control', 'highway-merging', 'three-point-turn', 'emergency-braking', 'roundabout', 'night-driving'].includes(card.slug)
+                    const hasSim = ['parallel-parking', 'reverse-parking', 'vehicle-startup', 'steering-control', 'clutch-control', 'highway-merging', 'three-point-turn', 'emergency-braking', 'roundabout', 'night-driving', 'rain-driving', 'parking-alignment', 'blind-spots'].includes(card.slug)
                     
                     return (
                       <motion.div
@@ -1009,7 +1012,7 @@ export default function StudentLearnPortal() {
         {selectedCard && (() => {
           const parsed = parseCardContent(selectedCard)
           const isCompleted = completedIds.includes(selectedCard.id)
-          const hasSim = ['parallel-parking', 'reverse-parking', 'vehicle-startup', 'steering-control', 'clutch-control', 'highway-merging', 'three-point-turn', 'emergency-braking', 'roundabout', 'night-driving'].includes(selectedCard.slug)
+          const hasSim = ['parallel-parking', 'reverse-parking', 'vehicle-startup', 'steering-control', 'clutch-control', 'highway-merging', 'three-point-turn', 'emergency-braking', 'roundabout', 'night-driving', 'rain-driving', 'parking-alignment', 'blind-spots'].includes(selectedCard.slug)
           
           return (
             <div className="fixed inset-0 z-[500] flex flex-col">
@@ -1052,6 +1055,9 @@ export default function StudentLearnPortal() {
                     {selectedCard.slug === 'steering-control' && <SteeringControlSimulation onComplete={() => setSimCompleted(true)} />}
                     {selectedCard.slug === 'clutch-control' && <ClutchControlSimulation onComplete={() => setSimCompleted(true)} />}
                     {selectedCard.slug === 'highway-merging' && <HighwayMergingSimulation onComplete={() => setSimCompleted(true)} />}
+                    {selectedCard.slug === 'rain-driving' && <RainDrivingSimulation onComplete={() => setSimCompleted(true)} />}
+                    {selectedCard.slug === 'parking-alignment' && <ParkingAlignmentSimulation onComplete={() => setSimCompleted(true)} />}
+                    {selectedCard.slug === 'blind-spots' && <BlindSpotAwarenessSimulation onComplete={() => setSimCompleted(true)} />}
                   </div>
                 ) : (
                   /* Top spacer for non-sim cards */
