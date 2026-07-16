@@ -61,14 +61,14 @@ export function GlobalTopNav() {
   else if (session?.user?.role === "INSTRUCTOR") dashboardRoute = "/instructor/schedule";
 
   return (
-    <div className={`fixed top-0 left-0 right-0 z-[1000] flex items-center justify-between px-3 sm:px-8 py-3 transition-all duration-500 ${
+    <div className={`fixed top-0 left-0 right-0 z-[1000] flex items-center justify-between px-2 min-[360px]:px-4 sm:px-8 py-3 transition-all duration-500 ${
       scrolled
         ? 'bg-void/90 backdrop-blur-2xl border-b border-white/8 shadow-[0_1px_30px_rgba(0,0,0,0.3)]'
         : 'bg-transparent'
     }`}>
       {/* Logo */}
-      <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink-0 min-w-0">
-        <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shadow-md shadow-black/10 group-hover:scale-105 transition-transform duration-300 overflow-hidden bg-white border border-slate-200 shrink-0">
+      <Link href="/" className="flex items-center gap-1.5 min-[360px]:gap-2 sm:gap-3 group shrink-0 min-w-0">
+        <div className="w-8.5 h-8.5 min-[360px]:w-10 min-[360px]:h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shadow-md shadow-black/10 group-hover:scale-105 transition-transform duration-300 overflow-hidden bg-white border border-slate-200 shrink-0">
           {logoUrl ? (
             <NextImage 
               src={logoUrl} 
@@ -84,7 +84,7 @@ export function GlobalTopNav() {
             </div>
           )}
         </div>
-        <span className="font-display font-bold text-[15px] min-[390px]:text-[17px] md:text-xl leading-tight text-text-1 group-hover:text-violet-400 transition-colors duration-300 truncate max-w-[160px] min-[390px]:max-w-[220px] md:max-w-none">
+        <span className="font-display font-bold text-[11.5px] min-[360px]:text-[14.5px] min-[390px]:text-[17px] md:text-xl leading-tight text-text-1 group-hover:text-violet-400 transition-colors duration-300 truncate max-w-[95px] min-[360px]:max-w-[155px] min-[390px]:max-w-[220px] md:max-w-none">
           {academyName}
         </span>
       </Link>
@@ -104,7 +104,7 @@ export function GlobalTopNav() {
         </nav>
       )}
 
-      <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
+      <div className="flex items-center gap-1 min-[360px]:gap-1.5 md:gap-3 shrink-0">
         <LanguageToggle dropdownDirection="down" />
         <ThemeToggle />
         {isLoggedIn && (

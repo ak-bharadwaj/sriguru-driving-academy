@@ -85,7 +85,39 @@ const BOOKING_DICT = {
     viewDash: "View Dashboard",
     dailyPolicyTitle: "📅 Daily Recurrence Policy",
     dailyPolicyDesc: "Selecting a slot reserves your daily seat at this exact hour every day for the entire course duration.",
-    summaryNote: "Note: Your selection implies daily attendance at this exact hour every single day for the entire program duration."
+    summaryNote: "Note: Your selection implies daily attendance at this exact hour every single day for the entire program duration.",
+    courseTitle: "Driving Course",
+    licenseAddon: " + License",
+    days: "Days",
+    drivingTips: [
+      {
+        title: "The Parallel Parking Formula",
+        desc: "Line up your rear bumper with the adjacent car's bumper, turn your steering wheel fully toward the curb, and reverse at a 45-degree angle until clear."
+      },
+      {
+        title: "The Clutch Friction Zone",
+        desc: "When moving from a standstill on a hill, slowly release the clutch until you feel the car vibrate slightly (the friction point) before letting go of the handbrake."
+      },
+      {
+        title: "RTO Track '8' Rule",
+        desc: "When driving in an '8' shape track, keep your steering wheel steady under 10 km/h and steer smoothly without using jerky movements."
+      },
+      {
+        title: "Defensive Braking Rule",
+        desc: "Always scan 12 seconds ahead on the road. It gives you enough reaction time to brake smoothly without locking the wheels."
+      },
+      {
+        title: "Traffic Sign Priority",
+        desc: "Remember: Stop signs demand a complete halt behind the white line, not just a slow rolling check."
+      }
+    ],
+    submitStages: [
+      { label: "Establishing secure tunnel", iconKey: "Lock" },
+      { label: "Creating student profile", iconKey: "User" },
+      { label: "Allocating learning roadmap", iconKey: "BookOpen" },
+      { label: "Preparing sandbox environment", iconKey: "Award" },
+      { label: "Finalizing booking confirmation", iconKey: "CheckCircle" }
+    ]
   },
   HI: {
     scheduleTrial: "ट्रायल सत्र अनुसूची करें",
@@ -139,7 +171,39 @@ const BOOKING_DICT = {
     viewDash: "डैशबोर्ड देखें",
     dailyPolicyTitle: "📅 दैनिक पुनरावृत्ति नीति",
     dailyPolicyDesc: "एक स्लॉट चुनने से पाठ्यक्रम की पूरी अवधि के लिए हर दिन इसी सटीक समय पर आपकी दैनिक सीट सुरक्षित हो जाती है।",
-    summaryNote: "नोट: आपके चयन का अर्थ है कि कार्यक्रम की पूरी अवधि के लिए हर दिन इसी सटीक समय पर दैनिक उपस्थिति आवश्यक है।"
+    summaryNote: "नोट: आपके चयन का अर्थ है कि कार्यक्रम की पूरी अवधि के लिए हर दिन इसी सटीक समय पर दैनिक उपस्थिति आवश्यक है।",
+    courseTitle: "प्रशिक्षण पाठ्यक्रम",
+    licenseAddon: " + लाइसेंस",
+    days: "दिन",
+    drivingTips: [
+      {
+        title: "समानांतर पार्किंग फॉर्मूला",
+        desc: "अपने पिछले बम्पर को पास की कार के बम्पर के साथ संरेखित करें, स्टीयरिंग को पूरी तरह से घुमाएं और 45-डिग्री कोण पर रिवर्स करें।"
+      },
+      {
+        title: "क्लच घर्षण क्षेत्र",
+        desc: "पहाड़ी पर रुकने के बाद चलते समय, क्लच को धीरे-धीरे तब तक छोड़ें जब तक कि आप कार का कंपन (घर्षण बिंदु) महसूस न करें।"
+      },
+      {
+        title: "आरटीओ ट्रैक '8' नियम",
+        desc: "एक '8' आकार के ट्रैक में ड्राइविंग करते समय, स्टीयरिंग को 10 किमी/घंटा से नीचे स्थिर रखें और सुचारू रूप से स्टीयर करें।"
+      },
+      {
+        title: "रक्षात्मक ब्रेकिंग नियम",
+        desc: "हमेशा सड़क पर 12 सेकंड आगे देखें। यह आपको बिना पहियों को लॉक किए सुचारू रूप से ब्रेक लगाने की अनुमति देता है।"
+      },
+      {
+        title: "यातायात संकेत प्राथमिकता",
+        desc: "याद रखें: स्टॉप संकेत सफेद रेखा के पीछे पूरी तरह से रुकने की मांग करते हैं, न कि केवल धीमी गति से रोलिंग की।"
+      }
+    ],
+    submitStages: [
+      { label: "सुरक्षित टनल स्थापित किया जा रहा है", iconKey: "Lock" },
+      { label: "छात्र प्रोफ़ाइल बनाई जा रही है", iconKey: "User" },
+      { label: "लर्निंग रोडमैप आवंटित किया जा रहा है", iconKey: "BookOpen" },
+      { label: "सैंडबॉक्स वातावरण तैयार किया जा रहा है", iconKey: "Award" },
+      { label: "बुकिंग पुष्टि को अंतिम रूप दिया जा रहा है", iconKey: "CheckCircle" }
+    ]
   },
   TE: {
     scheduleTrial: "ట్రయల్ సెషన్‌ను షెడ్యూల్ చేయండి",
@@ -193,40 +257,42 @@ const BOOKING_DICT = {
     viewDash: "డాష్‌బోర్డ్ చూడండి",
     dailyPolicyTitle: "📅 రోజువారీ పునరావృత విధానం",
     dailyPolicyDesc: "ఒక స్లాట్‌ను ఎంచుకోవడం ద్వారా కోర్సు యొక్క మొత్తం వ్యవధిలో ప్రతిరోజూ ఇదే ఖచ్చితమైన సమయానికి మీ రోజువారీ సీటు రిజర్వ్ చేయబడుతుంది.",
-    summaryNote: "గమనిక: మీరు ఎంచుకున్న సమయం అంటే ప్రోగ్రామ్ యొక్క మొత్తం వ్యవధిలో ప్రతిరోజూ ఇదే ఖచ్చితమైన గంటకు రోజువారీ హాజరు కావాలి."
+    summaryNote: "గమనిక: మీరు ఎంచుకున్న సమయం అంటే ప్రోగ్రామ్ యొక్క మొత్తం వ్యవధిలో ప్రతిరోజూ ఇదే ఖచ్చితమైన గంటకు రోజువారీ హాజరు కావాలి.",
+    courseTitle: "డ్రైవింగ్ కోర్సు",
+    licenseAddon: " + లైసెన్స్",
+    days: "రోజులు",
+    drivingTips: [
+      {
+        title: "సమాంతర పార్కింగ్ ఫార్ములా",
+        desc: "మీ వెనుక బంపర్‌ను ప్రక్కనే ఉన్న కారు బంపర్‌తో సమలేఖనం చేయండి, స్టీరింగ్‌ను పూర్తిగా తిప్పండి మరియు 45-డిగ్రీల కోణంలో రివర్స్ చేయండి."
+      },
+      {
+        title: "క్లచ్ ఘర్షణ జోన్",
+        desc: "కొండపై ఆగిపోయిన తర్వాత కదిలేటప్పుడు, హ్యాండ్‌బ్రేక్ వదిలే ముందు కారు కొద్దిగా కంపించడాన్ని మీరు భావించే వరకు క్లచ్‌ను నెమ్మదిగా విడుదల చేయండి."
+      },
+      {
+        title: "RTO ట్రాక్ '8' రూల్",
+        desc: "'8' ఆకారపు ట్రాక్‌లో డ్రైవింగ్ చేస్తున్నప్పుడు, మీ స్టీరింగ్ వీల్‌ను 10 కిమీ/గం లోపు స్థిరంగా ఉంచండి మరియు సజావుగా నడపండి."
+      },
+      {
+        title: "డిఫెన్సివ్ బ్రేకింగ్ రూల్",
+        desc: "ఎల్లప్పుడూ రహదారిపై 12 సెకన్ల ముందు స్కాన్ చేయండి. చక్రాలు లాక్ అవ్వకుండా సజావుగా బ్రేక్ వేయడానికి ఇది మీకు తగినంత ప్రతిచర్య సమయాన్ని ఇస్తుంది."
+      },
+      {
+        title: "ట్రాఫిక్ సైన్ ప్రాధాన్యత",
+        desc: "గుర్తుంచుకోండి: స్టాప్ సంకేతాలు తెల్లటి గీత వెనుక పూర్తిగా ఆగిపోవాలని డిమాండ్ చేస్తాయి, కేవలం నెమ్మదిగా వెళ్లడం కాదు."
+      }
+    ],
+    submitStages: [
+      { label: "సురక్షితమైన టన్నెల్‌ను ఏర్పాటు చేస్తోంది", iconKey: "Lock" },
+      { label: "విద్యార్థి ప్రొఫైల్‌ను సృష్టిస్తోంది", iconKey: "User" },
+      { label: "అభ్యాస రోడ్‌మ్యాప్‌ను కేటాయిస్తోంది", iconKey: "BookOpen" },
+      { label: "శాండ్‌బాక్స్ వాతావరణాన్ని సిద్ధం చేస్తోంది", iconKey: "Award" },
+      { label: "బుకింగ్ నిర్ధారణను ఖరారు చేస్తోంది", iconKey: "CheckCircle" }
+    ]
   }
 }
 
-const DRIVING_TIPS = [
-  {
-    title: "The Parallel Parking Formula",
-    desc: "Line up your rear bumper with the adjacent car's bumper, turn your steering wheel fully toward the curb, and reverse at a 45-degree angle until clear."
-  },
-  {
-    title: "The Clutch Friction Zone",
-    desc: "When moving from a standstill on a hill, slowly release the clutch until you feel the car vibrate slightly (the friction point) before letting go of the handbrake."
-  },
-  {
-    title: "RTO Track '8' Rule",
-    desc: "When driving in an '8' shape track, keep your steering wheel steady under 10 km/h and steer smoothly without using jerky movements."
-  },
-  {
-    title: "Defensive Braking Rule",
-    desc: "Always scan 12 seconds ahead on the road. It gives you enough reaction time to brake smoothly without locking the wheels."
-  },
-  {
-    title: "Traffic Sign Priority",
-    desc: "Remember: Stop signs demand a complete halt behind the white line, not just a slow rolling check."
-  }
-]
-
-const SUBMIT_STAGES = [
-  { label: "Establishing secure tunnel", iconKey: "Lock" },
-  { label: "Creating student profile", iconKey: "User" },
-  { label: "Allocating learning roadmap", iconKey: "BookOpen" },
-  { label: "Preparing sandbox environment", iconKey: "Award" },
-  { label: "Finalizing booking confirmation", iconKey: "CheckCircle" }
-]
 
 const getStageIcon = (key: string) => {
   switch (key) {
@@ -288,6 +354,8 @@ export default function PublicBookingSystem() {
   const { language } = useLanguageStore()
   const activeLang = language.toUpperCase() as keyof typeof BOOKING_DICT
   const t = BOOKING_DICT[activeLang] || BOOKING_DICT.EN
+  const DRIVING_TIPS = t.drivingTips || []
+  const SUBMIT_STAGES = t.submitStages || []
 
   const [offers, setOffers] = useState<Offer[]>([])
   const [promoCodeInput, setPromoCodeInput] = useState('')
@@ -296,7 +364,7 @@ export default function PublicBookingSystem() {
 
   const BASE_DRIVING_PRICE = 3500
   const LICENSE_ADDON_PRICE = 1500
-  const courseTitle = `Driving Course (${selectedDuration} Days)${includeLicense ? ' + License' : ''}`
+  const courseTitle = `${t.courseTitle || 'Driving Course'} (${selectedDuration} ${t.days || 'Days'})${includeLicense ? (t.licenseAddon || ' + License') : ''}`
 
   const basePrice = BASE_DRIVING_PRICE + (includeLicense ? LICENSE_ADDON_PRICE : 0)
   const discountPercent = appliedPromo ? appliedPromo.discountPercent : 0
