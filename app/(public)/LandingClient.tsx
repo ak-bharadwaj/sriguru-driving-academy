@@ -638,7 +638,7 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
                 </div>
                 <div>
                   <h4 className="font-bold text-base sm:text-lg text-slate-900 dark:text-white">Call Us Directly</h4>
-                  <p className="text-slate-800 dark:text-slate-200 text-sm sm:text-base font-semibold mt-1">+91 98765 43210</p>
+                  <p className="text-slate-800 dark:text-slate-200 text-sm sm:text-base font-semibold mt-1">+91 96425 89121</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -647,7 +647,7 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
                 </div>
                 <div>
                   <h4 className="font-bold text-base sm:text-lg text-slate-900 dark:text-white">Email Support</h4>
-                  <p className="text-slate-800 dark:text-slate-200 text-sm sm:text-base font-semibold mt-1">support@sriguru.in</p>
+                  <p className="text-slate-800 dark:text-slate-200 text-sm sm:text-base font-semibold mt-1">gurudrivingschool264@gmail.com</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">

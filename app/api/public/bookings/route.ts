@@ -205,7 +205,7 @@ export async function POST(request: Request) {
       `━━━━━━━━━━━━━━━━━━━━━━━\n` +
       `🔖 *Ref:* ${bookingRef}`
     )
-    const whatsappUrl = `https://wa.me/919347879474?text=${waMessage}`
+    const whatsappUrl = `https://wa.me/919642589121?text=${waMessage}`
 
     return NextResponse.json({
       success: true,

@@ -175,8 +175,8 @@ const DEFAULT_STUDENT_STATE: StudentState = {
 
 const DEFAULT_BRANDING: BrandingState = {
   logoUrl: '/logo.png',
-  contactPhone: '+919347879474',
-  contactUrl: 'https://wa.me/919347879474',
+  contactPhone: '+919642589121',
+  contactUrl: 'https://wa.me/919642589121',
   academyName: 'Sri Guru Driving School'
 }
 
