@@ -55,7 +55,7 @@ export function StudentLayoutWrapper({ children }: { children: React.ReactNode }
     <div className="w-full flex flex-col bg-[rgb(var(--color-void))] relative font-body text-[rgb(var(--color-text-1))] transition-colors duration-300">
 
       {/* Main Content — padded bottom to clear nav bar */}
-      <div className={`flex-1 relative z-10 ${hideNav ? '' : 'pb-24'}`}>
+      <div className={`flex-1 ${hideNav ? '' : 'pb-24'}`}>
         {children}
       </div>
 
