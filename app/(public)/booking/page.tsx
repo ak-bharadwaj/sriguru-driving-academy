@@ -262,9 +262,11 @@ export default function PublicBookingSystem() {
   // Auto-fill from active Google/OAuth session
   useEffect(() => {
     if (session?.user && !autoFilled) {
-      if (session.user.email) setEmail(session.user.email)
-      if (session.user.name) setName(session.user.name)
-      setStep1SubPhase('DETAILS')
+      if ((session.user as any).role === 'STUDENT') {
+        if (session.user.email) setEmail(session.user.email)
+        if (session.user.name) setName(session.user.name)
+        setStep1SubPhase('DETAILS')
+      }
       setAutoFilled(true)
     }
   }, [session, autoFilled])
