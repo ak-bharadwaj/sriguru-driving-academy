@@ -33,41 +33,17 @@ async function main() {
   console.log('Seeding Admin user...')
   await prisma.user.create({
     data: {
-      email: 'admin@sriguru.in',
-      passwordHash: hash('admin123'),
+      email: 'gurudrivingschool264@gmail.com',
+      phone: '9642589121',
+      passwordHash: hash('sriguru123'),
       role: Role.ADMIN,
-      name: 'Academy Administrator',
+      name: 'Sri Guru Driving School Admin',
       admin: { create: {} }
     }
   })
 
-  // Students
-  console.log('Seeding Students...')
-  const studentNames = ['Arjun Reddy']
-  
+  // No students seeded initially to keep it clean of mock data
   const createdStudents: any[] = []
-  for (let i = 0; i < studentNames.length; i++) {
-    const name = studentNames[i]
-    const slug = name.toLowerCase().replace(' ', '.')
-    const user = await prisma.user.create({
-      data: {
-        email: `${slug}@student.sriguru.in`,
-        passwordHash: hash('student123'),
-        role: Role.STUDENT,
-        name,
-        student: {
-          create: {
-            trainingType: TrainingType.BEGINNER,
-            xp: 500,
-            level: 3,
-            streakDays: 5,
-          }
-        }
-      },
-      include: { student: true }
-    })
-    createdStudents.push(user.student)
-  }
 
   // Load JSON Data files
   const dataDir = path.join(__dirname, 'data')

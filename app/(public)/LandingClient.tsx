@@ -110,9 +110,9 @@ export default function LandingClient({ courses, branding, gallery = [] }: Landi
   ]
 
   const TESTIMONIALS = [
-    { name: "Amanpreet Kaur", role: "Student", rating: 5, quote: t('test.1.q' as any) },
-    { name: "Rohan Malhotra", role: "Student", rating: 5, quote: t('test.2.q' as any) },
-    { name: "Priya Sharma", role: "Student", rating: 5, quote: t('test.3.q' as any) }
+    { name: "K. Venkata Rao", role: "Student", rating: 5, quote: t('test.1.q' as any) },
+    { name: "G. Rajesh Reddy", role: "Student", rating: 5, quote: t('test.2.q' as any) },
+    { name: "M. Lakshmi Pavani", role: "Student", rating: 5, quote: t('test.3.q' as any) }
   ]
 
   const QUIZ_QUESTIONS = [
