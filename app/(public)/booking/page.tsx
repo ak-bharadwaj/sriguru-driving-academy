@@ -34,22 +34,22 @@ interface SlotItem {
 
 const BOOKING_DICT = {
   EN: {
-    scheduleTrial: "Schedule Trial Session",
-    reviewCal: "Review calendar hours, lock coaching specialties, and kickstart advanced license drills.",
-    step1Title: "Step 1: Student Personal Details",
-    step1Desc: "Provide baseline contact registries",
+    scheduleTrial: "Book a Trial Session",
+    reviewCal: "Choose your preferred date, time, and training type to schedule your driving trial.",
+    step1Title: "Step 1: Contact Details",
+    step1Desc: "Enter your name, email, and phone number",
     fullName: "Full Name",
     indianContact: "Indian Contact Number",
     emailAddr: "Email Address",
     selectProgram: "Select Program",
-    step2Title: "Step 2: Coaching Curriculum Option",
-    step2Desc: "Select a specific training category",
+    step2Title: "Step 2: Choose Program",
+    step2Desc: "Select the program you wish to join",
     loadingProg: "LOADING PROGRAMS...",
     back: "Back",
     skipCreate: "Skip & Create Account",
     selectSlot: "Select Trial Slot",
-    step3Title: "Step 3: Schedule Calendar Grid",
-    step3Desc: "Click an active slot below (Amber highlight = Selected)",
+    step3Title: "Step 3: Select Time Slot",
+    step3Desc: "Choose your preferred daily slot hour (Amber highlight = Selected)",
     fetching: "FETCHING ACTIVE ACADEMY HOURS...",
     full: "FULL",
     selected: "SELECTED",
@@ -57,18 +57,18 @@ const BOOKING_DICT = {
     active: "ACTIVE",
     skipSlot: "Skip Slot Selection",
     validateSum: "Validate Summary",
-    step4Title: "Step 4: Booking Summary Review",
-    step4Desc: "Confirm your training specifications",
-    yourName: "YOUR NAME",
-    phoneReg: "PHONE REGISTER",
-    emailReg: "EMAIL REGISTER",
-    trainingMod: "TRAINING MODULE",
+    step4Title: "Step 4: Review Summary",
+    step4Desc: "Confirm details before final booking",
+    yourName: "Name",
+    phoneReg: "Phone",
+    emailReg: "Email",
+    trainingMod: "Program",
     scheduledSlot: "SCHEDULED SLOT:",
     maxCap: "Max Capacity",
-    receiptLedger: "🧾 Tuition Receipt Ledger",
-    baseFee: "Base tuition fee",
+    receiptLedger: "🧾 Fees Summary",
+    baseFee: "Base fee",
     promoDed: "Promo deduction",
-    totalDue: "Total tuition due",
+    totalDue: "Total fee to pay",
     secureProcess: "🔒 Registration securely processed via Sri Guru Driving School.",
     promoDesk: "Promo Voucher Desk",
     deductionApp: "Deduction Applied",
@@ -78,7 +78,7 @@ const BOOKING_DICT = {
     availVouchers: "Available Vouchers:",
     submitBooking: "Submit Booking",
     confirming: "Confirming...",
-    slotAcquired: "SLOT REGISTRATION ACQUIRED",
+    slotAcquired: "Booking Confirmed!",
     bookingConf: "Booking Confirmed!",
     trialVerified: "Your trial slot registration has been verified by the Sri Guru dashboard.",
     refId: "REFERENCE ID:",
@@ -89,6 +89,13 @@ const BOOKING_DICT = {
     courseTitle: "Driving Course",
     licenseAddon: " + License",
     days: "Days",
+    letsGetStarted: "Let's Get Started",
+    emailSsoDesc: "Provide your email or continue with one click via Google",
+    continueWithGoogle: "Continue with Google",
+    orRegisterManually: "or register manually",
+    nextBtn: "Next",
+    rosterContactDetails: "Contact Details",
+    rosterContactDesc: "Please enter your contact details below to continue",
     drivingTips: [
       {
         title: "The Parallel Parking Formula",
@@ -120,22 +127,22 @@ const BOOKING_DICT = {
     ]
   },
   HI: {
-    scheduleTrial: "ट्रायल सत्र अनुसूची करें",
-    reviewCal: "कैलेंडर घंटे की समीक्षा करें, कोचिंग विशिष्टताओं को लॉक करें, और उन्नत लाइसेंस अभ्यास शुरू करें।",
-    step1Title: "चरण 1: छात्र व्यक्तिगत विवरण",
-    step1Desc: "बेसलाइन संपर्क रजिस्ट्रियां प्रदान करें",
+    scheduleTrial: "ट्रायल क्लास बुक करें",
+    reviewCal: "अपनी ड्राइविंग ट्रायल को निर्धारित करने के लिए अपनी पसंदीदा तारीख, समय और प्रशिक्षण प्रकार चुनें।",
+    step1Title: "चरण 1: संपर्क विवरण",
+    step1Desc: "अपना नाम, ईमेल और फोन नंबर दर्ज करें",
     fullName: "पूरा नाम",
     indianContact: "भारतीय संपर्क नंबर",
     emailAddr: "ईमेल पता",
     selectProgram: "कार्यक्रम चुनें",
-    step2Title: "चरण 2: कोचिंग पाठ्यक्रम विकल्प",
-    step2Desc: "एक विशिष्ट प्रशिक्षण श्रेणी चुनें",
+    step2Title: "चरण 2: कार्यक्रम चुनें",
+    step2Desc: "वह कार्यक्रम चुनें जिसमें आप शामिल होना चाहते हैं",
     loadingProg: "प्रोग्राम लोड हो रहे हैं...",
     back: "पीछे",
     skipCreate: "छोड़ें और खाता बनाएं",
     selectSlot: "ट्रायल स्लॉट चुनें",
-    step3Title: "चरण 3: अनुसूची कैलेंडर ग्रिड",
-    step3Desc: "नीचे एक सक्रिय स्लॉट पर क्लिक करें (एम्बर हाइलाइट = चयनित)",
+    step3Title: "चरण 3: समय स्लॉट चुनें",
+    step3Desc: "अपना पसंदीदा दैनिक समय स्लॉट चुनें (एम्बर हाइलाइट = चयनित)",
     fetching: "सक्रिय अकादमी घंटे प्राप्त कर रहा है...",
     full: "पूर्ण",
     selected: "चयनित",
@@ -143,18 +150,18 @@ const BOOKING_DICT = {
     active: "सक्रिय",
     skipSlot: "स्लॉट चयन छोड़ें",
     validateSum: "सारांश मान्य करें",
-    step4Title: "चरण 4: बुकिंग सारांश समीक्षा",
-    step4Desc: "अपने प्रशिक्षण विनिर्देशों की पुष्टि करें",
-    yourName: "आपका नाम",
-    phoneReg: "फ़ोन रजिस्टर",
-    emailReg: "ईमेल रजिस्टर",
-    trainingMod: "प्रशिक्षण मॉड्यूल",
+    step4Title: "चरण 4: सारांश की समीक्षा करें",
+    step4Desc: "अंतिम बुकिंग से पहले विवरण की पुष्टि करें",
+    yourName: "नाम",
+    phoneReg: "फ़ोन",
+    emailReg: "ईमेल",
+    trainingMod: "प्रोग्राम",
     scheduledSlot: "निर्धारित स्लॉट:",
     maxCap: "अधिकतम क्षमता",
-    receiptLedger: "🧾 ट्यूशन रसीद बहीखाता",
-    baseFee: "बेस ट्यूशन शुल्क",
+    receiptLedger: "🧾 शुल्क का सारांश",
+    baseFee: "मूल शुल्क",
     promoDed: "प्रोमो कटौती",
-    totalDue: "कुल ट्यूशन देय",
+    totalDue: "कुल देय शुल्क",
     secureProcess: "🔒 श्री गुरु ड्राइविंग अकादमी के माध्यम से पंजीकरण सुरक्षित रूप से संसाधित किया गया।",
     promoDesk: "प्रोमो वाउचर डेस्क",
     deductionApp: "कटौती लागू",
@@ -164,7 +171,7 @@ const BOOKING_DICT = {
     availVouchers: "उपलब्ध वाउचर:",
     submitBooking: "बुकिंग सबमिट करें",
     confirming: "पुष्टि की जा रही है...",
-    slotAcquired: "स्लॉट पंजीकरण प्राप्त हुआ",
+    slotAcquired: "बुकिंग की पुष्टि हो गई!",
     bookingConf: "बुकिंग की पुष्टि हो गई!",
     trialVerified: "आपके ट्रायल स्लॉट पंजीकरण को श्री गुरु डैशबोर्ड द्वारा सत्यापित किया गया है।",
     refId: "संदर्भ आईडी:",
@@ -175,6 +182,13 @@ const BOOKING_DICT = {
     courseTitle: "प्रशिक्षण पाठ्यक्रम",
     licenseAddon: " + लाइसेंस",
     days: "दिन",
+    letsGetStarted: "आइए शुरू करें",
+    emailSsoDesc: "अपना ईमेल दर्ज करें या Google के माध्यम से एक क्लिक में आगे बढ़ें",
+    continueWithGoogle: "Google के साथ आगे बढ़ें",
+    orRegisterManually: "या मैन्युअल रूप से पंजीकरण करें",
+    nextBtn: "आगे बढ़ें",
+    rosterContactDetails: "संपर्क विवरण",
+    rosterContactDesc: "आगे बढ़ने के लिए कृपया नीचे अपना संपर्क विवरण दर्ज करें",
     drivingTips: [
       {
         title: "समानांतर पार्किंग फॉर्मूला",
@@ -206,22 +220,22 @@ const BOOKING_DICT = {
     ]
   },
   TE: {
-    scheduleTrial: "ట్రయల్ సెషన్‌ను షెడ్యూల్ చేయండి",
-    reviewCal: "క్యాలెండర్ గంటలను సమీక్షించండి, కోచింగ్ స్పెషాలిటీలను లాక్ చేయండి మరియు అధునాతన లైసెన్స్ డ్రిల్స్‌ను ప్రారంభించండి.",
-    step1Title: "దశ 1: విద్యార్థి వ్యక్తిగత వివరాలు",
-    step1Desc: "బేస్‌లైన్ పరిచయ రిజిస్ట్రీలను అందించండి",
+    scheduleTrial: "ట్రయల్ క్లాస్ బుక్ చేసుకోండి",
+    reviewCal: "మీ డ్రైవింగ్ ట్రయల్‌ను షెడ్యూల్ చేయడానికి మీ ప్రాధాన్య తేదీ, సమయం మరియు శిక్షణ రకాన్ని ఎంచుకోండి.",
+    step1Title: "దశ 1: సంప్రదింపు వివరాలు",
+    step1Desc: "మీ పేరు, ఇమెయిల్ మరియు ఫోన్ నంబర్ నమోదు చేయండి",
     fullName: "పూర్తి పేరు",
     indianContact: "భారతీయ సంప్రదింపు సంఖ్య",
     emailAddr: "ఇమెయిల్ చిరునామా",
     selectProgram: "ప్రోగ్రామ్‌ను ఎంచుకోండి",
-    step2Title: "దశ 2: కోచింగ్ కరికులం ఎంపిక",
-    step2Desc: "నిర్దిష్ట శిక్షణ వర్గాన్ని ఎంచుకోండి",
+    step2Title: "దశ 2: ప్రోగ్రామ్‌ను ఎంచుకోండి",
+    step2Desc: "మీరు చేరాలనుకుంటున్న ప్రోగ్రామ్‌ను ఎంచుకోండి",
     loadingProg: "ప్రోగ్రామ్‌లు లోడ్ అవుతున్నాయి...",
     back: "వెనుకకు",
     skipCreate: "వదిలేయండి & ఖాతాను సృష్టించండి",
     selectSlot: "ట్రయల్ స్లాట్‌ను ఎంచుకోండి",
-    step3Title: "దశ 3: షెడ్యూల్ క్యాలెండర్ గ్రిడ్",
-    step3Desc: "క్రింద యాక్టివ్ స్లాట్‌పై క్లిక్ చేయండి (అంబర్ హైలైట్ = ఎంచుకోబడింది)",
+    step3Title: "దశ 3: టైమ్ స్లాట్‌ను ఎంచుకోండి",
+    step3Desc: "మీకు కావలసిన రోజువారీ స్లాట్ సమయాన్ని ఎంచుకోండి (అంబర్ హైలైట్ = ఎంచుకోబడింది)",
     fetching: "యాక్టివ్ అకాడమీ గంటలను పొందుతోంది...",
     full: "పూర్తి",
     selected: "ఎంచుకోబడింది",
@@ -229,18 +243,18 @@ const BOOKING_DICT = {
     active: "యాక్టివ్",
     skipSlot: "స్లాట్ ఎంపికను వదిలేయండి",
     validateSum: "సారాంశాన్ని ధృవీకరించండి",
-    step4Title: "దశ 4: బుకింగ్ సారాంశం సమీక్ష",
-    step4Desc: "మీ శిక్షణ వివరాలను నిర్ధారించండి",
-    yourName: "మీ పేరు",
-    phoneReg: "ఫోన్ రిజిస్టర్",
-    emailReg: "ఇమెయిల్ రిజిస్టర్",
-    trainingMod: "శిక్షణ మాడ్యూల్",
+    step4Title: "దశ 4: సారాంశాన్ని సమీక్షించండి",
+    step4Desc: "చివరి బుకింగ్‌కు ముందు వివరాలను నిర్ధారించండి",
+    yourName: "పేరు",
+    phoneReg: "ఫోన్",
+    emailReg: "ఇమెయిల్",
+    trainingMod: "ప్రోగ్రామ్",
     scheduledSlot: "షెడ్యూల్ చేయబడిన స్లాట్:",
     maxCap: "గరిష్ట సామర్థ్యం",
-    receiptLedger: "🧾 ట్యూషన్ రసీదు లెడ్జర్",
-    baseFee: "బేస్ ట్యూషన్ ఫీజు",
+    receiptLedger: "🧾 ఫీజు సారాంశం",
+    baseFee: "బేస్ ఫీజు",
     promoDed: "ప్రోమో తగ్గింపు",
-    totalDue: "మొత్తం ట్యూషన్ బకాయి",
+    totalDue: "మొత్తం చెల్లించాల్సిన ఫీజు",
     secureProcess: "🔒 రిజిస్ట్రేషన్ శ్రీ గురు డ్రైవింగ్ అకాడమీ ద్వారా సురక్షితంగా ప్రాసెస్ చేయబడింది.",
     promoDesk: "ప్రోమో వోచర్ డెస్క్",
     deductionApp: "తగ్గింపు వర్తించబడింది",
@@ -250,7 +264,7 @@ const BOOKING_DICT = {
     availVouchers: "అందుబాటులో ఉన్న వోచర్లు:",
     submitBooking: "బుకింగ్ సమర్పించండి",
     confirming: "నిర్ధారిస్తోంది...",
-    slotAcquired: "స్లాట్ రిజిస్ట్రేషన్ పొందబడింది",
+    slotAcquired: "బుకింగ్ నిర్ధారించబడింది!",
     bookingConf: "బుకింగ్ నిర్ధారించబడింది!",
     trialVerified: "మీ ట్రయల్ స్లాట్ రిజిస్ట్రేషన్ శ్రీ గురు డాష్‌బోర్డ్ ద్వారా ధృవీకరించబడింది.",
     refId: "రిఫరెన్స్ ID:",
@@ -261,6 +275,13 @@ const BOOKING_DICT = {
     courseTitle: "డ్రైవింగ్ కోర్సు",
     licenseAddon: " + లైసెన్స్",
     days: "రోజులు",
+    letsGetStarted: "మొదలు పెడదాం",
+    emailSsoDesc: "మీ ఇమెయిల్ అందించండి లేదా Google ద్వారా ఒకే క్లిక్‌తో కొనసాగండి",
+    continueWithGoogle: "Google తో కొనసాగండి",
+    orRegisterManually: "లేదా మాన్యువల్‌గా నమోదు చేసుకోండి",
+    nextBtn: "తరువాత",
+    rosterContactDetails: "సంప్రదింపు వివరాలు",
+    rosterContactDesc: "కొనసాగడానికి దయచేసి క్రింద మీ సంప్రదింపు వివరాలను నమోదు చేయండి",
     drivingTips: [
       {
         title: "సమాంతర పార్కింగ్ ఫార్ములా",
@@ -702,8 +723,8 @@ export default function PublicBookingSystem() {
                 {step1SubPhase === 'EMAIL' ? (
                   <>
                     <div>
-                      <h3 className="text-lg font-bold text-text-1 uppercase font-display">Let's Get Started</h3>
-                      <p className="text-[10px] text-text-3 mt-1 font-mono uppercase">Provide your email or continue with one click via Google SSO</p>
+                      <h3 className="text-lg font-bold text-text-1 uppercase font-display">{t.letsGetStarted}</h3>
+                      <p className="text-[10px] text-text-3 mt-1 font-mono uppercase">{t.emailSsoDesc}</p>
                     </div>
 
                     <div className="flex flex-col gap-5">
@@ -719,13 +740,13 @@ export default function PublicBookingSystem() {
                           <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
                           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
                         </svg>
-                        Continue with Google
+                        {t.continueWithGoogle}
                       </button>
 
                       {/* Premium Divider */}
                       <div className="flex items-center gap-3">
                         <div className="flex-1 h-px bg-border/50" />
-                        <span className="text-[9px] font-mono text-text-3 uppercase tracking-wider">or register manually</span>
+                        <span className="text-[9px] font-mono text-text-3 uppercase tracking-wider">{t.orRegisterManually}</span>
                         <div className="flex-1 h-px bg-border/50" />
                       </div>
 
@@ -758,7 +779,7 @@ export default function PublicBookingSystem() {
                         }}
                         className="px-6 py-3 bg-primary hover:bg-primary/95 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-lg shadow-primary/10 transition-all duration-200"
                       >
-                        Next
+                        {t.nextBtn}
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -766,8 +787,8 @@ export default function PublicBookingSystem() {
                 ) : (
                   <>
                     <div>
-                      <h3 className="text-lg font-bold text-text-1 uppercase font-display">Roster Contact Details</h3>
-                      <p className="text-[10px] text-text-3 mt-1 font-mono uppercase">Provide personal registries to finalize operational mapping</p>
+                      <h3 className="text-lg font-bold text-text-1 uppercase font-display">{t.rosterContactDetails}</h3>
+                      <p className="text-[10px] text-text-3 mt-1 font-mono uppercase">{t.rosterContactDesc}</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
