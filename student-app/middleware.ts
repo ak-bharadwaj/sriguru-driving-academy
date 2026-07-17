@@ -13,11 +13,13 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Define public paths
-  const isPublicPath = pathname === '/login' || 
+  const isPublicPath = pathname === '/' ||
+                       pathname === '/login' || 
                        pathname === '/forgot-password' || 
                        pathname === '/unauthorized' ||
                        pathname.startsWith('/api/auth') ||
-                       pathname.startsWith('/api/public')
+                       pathname.startsWith('/api/public') ||
+                       pathname.startsWith('/downloads')
 
   if (!token && !isPublicPath) {
     if (pathname.startsWith('/api/')) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -26,8 +28,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  // Redirect root path to dashboard
-  if (pathname === '/') {
+  // Redirect root path to dashboard only if user is already logged in
+  if (pathname === '/' && token) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
