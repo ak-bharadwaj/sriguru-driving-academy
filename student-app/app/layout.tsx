@@ -34,9 +34,42 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sri Guru Driving School",
-  description: "Learn to drive with high-fidelity gamified instruction, analytics, and elite rewards.",
+  title: {
+    default: "Sri Guru RTO Exam & Driving License Practice Portal",
+    template: "%s | Sri Guru RTO Study"
+  },
+  description: "Pass your RTO Learning License Test on the first try! Practice real RTO mock exams, traffic sign questions, and interactive driving rules simulations designed for Andhra Pradesh (Nandyal) & India.",
+  keywords: [
+    "RTO exam prep",
+    "RTO mock test",
+    "Learning license test practice",
+    "Andhra Pradesh RTO test",
+    "Nandyal driving school RTO",
+    "RTO sign questions",
+    "driving test online practice",
+    "Sri Guru RTO study portal"
+  ],
+  authors: [{ name: "Sri Guru Driving Academy" }],
+  creator: "Sri Guru Driving Academy",
+  publisher: "Sri Guru Driving Academy",
+  robots: {
+    index: true,
+    follow: true,
+  },
   manifest: "/manifest.json",
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: "https://srigururto.vercel.app",
+    title: "Sri Guru RTO Exam & Driving Practice Portal",
+    description: "Free online RTO learning license mock tests, traffic signs practice, and driving rules simulators. Boost your confidence and pass first attempt!",
+    siteName: "Sri Guru RTO Study",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sri Guru RTO Exam & Driving Practice Portal",
+    description: "Free RTO learning license mock tests and traffic sign training.",
+  }
 };
 
 export default function RootLayout({
