@@ -35,23 +35,23 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Sri Guru RTO Exam & Driving License Practice Portal",
-    template: "%s | Sri Guru RTO Study"
+    default: "RTO Exam Prep: Online Learning License Mock Test",
+    template: "%s | RTO Practice Exam"
   },
-  description: "Pass your RTO Learning License Test on the first try! Practice real RTO mock exams, traffic sign questions, and interactive driving rules simulations designed for Andhra Pradesh (Nandyal) & India.",
+  description: "Pass your RTO Learning License Test on the first try! Practice real RTO mock exams, traffic sign questions, and interactive driving rules simulations designed for India.",
   keywords: [
     "RTO exam prep",
     "RTO mock test",
     "Learning license test practice",
-    "Andhra Pradesh RTO test",
-    "Nandyal driving school RTO",
+    "Indian RTO test online",
     "RTO sign questions",
     "driving test online practice",
-    "Sri Guru RTO study portal"
+    "online learning license test",
+    "RTO practice exam portal"
   ],
-  authors: [{ name: "Sri Guru Driving Academy" }],
-  creator: "Sri Guru Driving Academy",
-  publisher: "Sri Guru Driving Academy",
+  authors: [{ name: "RTO Exam Prep Academy" }],
+  creator: "RTO Exam Prep Academy",
+  publisher: "RTO Exam Prep",
   robots: {
     index: true,
     follow: true,
@@ -61,13 +61,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_IN",
     url: "https://srigururto.vercel.app",
-    title: "Sri Guru RTO Exam & Driving Practice Portal",
+    title: "RTO Exam Prep: Online Learning License Mock Test",
     description: "Free online RTO learning license mock tests, traffic signs practice, and driving rules simulators. Boost your confidence and pass first attempt!",
-    siteName: "Sri Guru RTO Study",
+    siteName: "RTO Practice Exam",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sri Guru RTO Exam & Driving Practice Portal",
+    title: "RTO Exam Prep: Online Learning License Mock Test",
     description: "Free RTO learning license mock tests and traffic sign training.",
   }
 };
