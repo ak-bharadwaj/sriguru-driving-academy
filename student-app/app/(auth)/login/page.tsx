@@ -71,42 +71,6 @@ export default function CentralLoginHub() {
     setIsAuthenticating(true)
     setErrorMsg('')
     
-    // NATIVE CAPACITOR APP FLOW
-    if (Capacitor.isNativePlatform()) {
-      try {
-        const result = await GoogleSignIn.signIn()
-        if (result.email) {
-          const res = await signIn('credentials', {
-            redirect: false,
-            email: result.email,
-            name: result.displayName || '',
-            avatarUrl: result.imageUrl || '',
-            isGoogleNative: 'true',
-            password: 'google-auth-bypass-secure'
-          })
-          
-          if (res?.error) {
-            setErrorMsg('Authentication failed on server.')
-            setIsAuthenticating(false)
-          } else {
-            const session = await getSession()
-            const role = (session?.user as { role?: string })?.role
-            if (role === 'ADMIN') router.push('/admin/students')
-            else router.push('/dashboard')
-          }
-        } else {
-          setErrorMsg('No email associated with this Google account.')
-          setIsAuthenticating(false)
-        }
-      } catch (e: any) {
-        console.error("Native Google sign-in failed", e)
-        setErrorMsg('Google native sign-in is currently unavailable on this device. Please sign in using your Email & Password instead.')
-        setIsAuthenticating(false)
-      }
-      return
-    }
-
-    // WEB BROWSER FLOW
     try {
       // If running locally, bypass with mock google credentials login for instant local verification
       if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
