@@ -1044,7 +1044,7 @@ export default function StudentLearnPortal() {
 
                 {/* === SIMULATION PANEL === visual (300px min) + 90px control bar = 420px min */}
                 {hasSim ? (
-                  <div className="w-full bg-void border-b border-border/40 flex items-stretch justify-center relative overflow-hidden shrink-0" style={{ height: 'max(420px, 60vh)' }}>
+                  <div className="w-full bg-void border-b border-border/40 flex items-stretch justify-center relative overflow-hidden shrink-0 h-[280px] min-[380px]:h-[320px] sm:h-[400px] md:h-[450px] lg:h-[50vh]">
                     {selectedCard.slug === 'parallel-parking' && <ParallelParkingSimulation onComplete={() => setSimCompleted(true)} />}
                     {selectedCard.slug === 'reverse-parking' && <ReverseBayParkingSimulation onComplete={() => setSimCompleted(true)} />}
                     {selectedCard.slug === 'three-point-turn' && <ThreePointTurnSimulation onComplete={() => setSimCompleted(true)} />}

@@ -15,7 +15,11 @@ const HIDE_TOP_NAV_PREFIXES = [
   "/instructor",
   "/admin",
   "/student",
-  "/dashboard"
+  "/dashboard",
+  "/learn",
+  "/leaderboard",
+  "/profile",
+  "/rto"
 ];
 
 const PUBLIC_NAV_LINKS = [
@@ -37,7 +41,7 @@ export function GlobalTopNav() {
     return () => window.removeEventListener('scroll', handler);
   }, []);
 
-  const shouldHide = HIDE_TOP_NAV_PREFIXES.some((prefix) => pathname.startsWith(prefix)) || pathname === '/login' || pathname === '/admin-portal-login';
+  const shouldHide = HIDE_TOP_NAV_PREFIXES.some((prefix) => pathname.startsWith(prefix)) || pathname === '/' || pathname === '/login' || pathname === '/admin-portal-login';
   if (shouldHide) return null;
 
   const isLoginPage = pathname === '/login';
