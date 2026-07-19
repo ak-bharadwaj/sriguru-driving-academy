@@ -3,7 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.sriguru.rto',
   appName: 'Sri Guru RTO Study',
-  webDir: 'public',
+  webDir: 'cap-web',
   server: {
     // Points directly to your production Vercel deployment
     url: 'https://srigururto.vercel.app',
