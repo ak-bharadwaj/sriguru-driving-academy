@@ -22,6 +22,7 @@ import {
   Info
 } from 'lucide-react'
 import { signIn } from 'next-auth/react'
+import { Capacitor } from '@capacitor/core'
 
 interface Question {
   q: string
@@ -113,50 +114,44 @@ export default function RTOExamLanding() {
       <div className="absolute top-[40%] right-[-15%] w-[55vw] h-[55vw] rounded-full bg-blue-500/5 blur-[130px] pointer-events-none" />
       <div className="absolute bottom-[-10%] left-[20%] w-[50vw] h-[50vw] rounded-full bg-emerald-500/5 blur-[130px] pointer-events-none" />
 
-      {/* Header Navigation */}
-      <header className="w-full border-b border-border/40 bg-surface/30 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-primary to-blue-500 flex items-center justify-center text-white font-black text-lg shadow-md shadow-primary/20">
+      {/* Premium RTO Header */}
+      <header className="w-full bg-slate-900/60 backdrop-blur-md border-b border-white/10 py-4.5 px-6 relative z-50">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8.5 h-8.5 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-white font-black text-sm shadow-md shadow-orange-500/20">
               R
             </div>
-            <span className="font-display font-black text-sm sm:text-base tracking-wider uppercase text-white">
+            <span className="font-display font-extrabold text-sm sm:text-base tracking-wider uppercase text-white">
               RTO Exam Prep
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <a 
               href="https://srigurudrivingschool.in" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="hidden md:flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold text-text-2 hover:text-white transition-colors"
+              className="text-xs font-bold text-slate-300 hover:text-white transition-colors flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10"
             >
-              Learn Practical Driving <ExternalLink className="w-3.5 h-3.5" />
+              Practical Academy <ExternalLink className="w-3 h-3" />
             </a>
             <button
               onClick={() => router.push('/login')}
-              className="px-4 py-2 sm:px-5 sm:py-2.5 bg-white/5 hover:bg-white/10 border border-border/80 text-white rounded-xl font-bold text-xs sm:text-sm transition-all duration-200"
+              className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/15 text-white rounded-xl font-bold text-xs transition-all duration-200"
             >
               Sign In
-            </button>
-            <button
-              onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
-              className="px-4 py-2 sm:px-5 sm:py-2.5 bg-primary hover:bg-primary-hover text-white rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-primary/20 transition-all duration-200 hover:-translate-y-0.5"
-            >
-              Get Started
             </button>
           </div>
         </div>
       </header>
 
-      {/* Practical Driving Notice Banner for Mobile / Smaller Screens */}
-      <div className="max-w-4xl mx-auto px-4 mt-6 md:hidden">
+      {/* Practical Driving Notice Banner (Funnel traffic to Practical Driving website) */}
+      <div className="max-w-4xl mx-auto px-4 pt-8">
         <a
           href="https://srigurudrivingschool.in"
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full p-4 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-between gap-4 text-xs font-bold text-primary group"
+          className="w-full p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-between gap-4 text-xs font-bold text-amber-300 hover:border-amber-500/40 transition-colors group"
         >
           <span className="flex items-center gap-2">
             🚗 Want to learn physical driving locally? Visit Sri Guru Driving School!
@@ -170,9 +165,9 @@ export default function RTOExamLanding() {
         <motion.div
           initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/15 border border-primary/20 text-[10px] sm:text-xs font-mono text-primary uppercase tracking-widest mb-6"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-[10px] sm:text-xs font-mono text-emerald-400 uppercase tracking-wider font-bold mb-6 shadow-sm shadow-emerald-500/5"
         >
-          <Sparkles className="w-3.5 h-3.5 text-primary" />
+          <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
           <span>100% Free RTO Learning License Preparation Portal</span>
         </motion.div>
 
@@ -182,14 +177,14 @@ export default function RTOExamLanding() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="text-4xl sm:text-6xl font-display font-black tracking-tight text-white max-w-4xl mx-auto leading-tight"
         >
-          Pass Your RTO Learning License Test on the <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">First Attempt</span>
+          Pass Your RTO Learning License Test on the <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-300 bg-clip-text text-transparent font-extrabold">First Attempt</span>
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-text-3 text-sm sm:text-lg max-w-2xl mx-auto mt-6 leading-relaxed"
+          className="text-slate-300 text-sm sm:text-lg max-w-2xl mx-auto mt-6 leading-relaxed"
         >
           Stop memorizing boring question PDFs. Boost your road confidence with real interactive mock exams, official road signs, and simulator-based practice.
         </motion.p>
@@ -201,7 +196,7 @@ export default function RTOExamLanding() {
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="bg-surface/60 backdrop-blur-xl border border-border/60 shadow-app-hover rounded-[32px] overflow-hidden"
+          className="bg-slate-950/60 backdrop-blur-2xl border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.5)] rounded-[32px] overflow-hidden"
         >
           <AnimatePresence mode="wait">
             {/* Step 0: Intro to Mock Test */}
@@ -249,11 +244,11 @@ export default function RTOExamLanding() {
                 className="p-6 sm:p-10"
               >
                 {/* Progress bar */}
-                <div className="flex justify-between items-center mb-6 text-[10px] font-mono text-text-3">
+                <div className="flex justify-between items-center mb-6 text-[10px] font-mono text-slate-400">
                   <span>SAMPLE TEST: QUESTION {qIndex + 1} OF {SAMPLE_QUESTIONS.length}</span>
                   <span>{Math.round(((qIndex + 1) / SAMPLE_QUESTIONS.length) * 100)}% COMPLETE</span>
                 </div>
-                <div className="w-full h-1.5 bg-border/40 rounded-full mb-8 overflow-hidden">
+                <div className="w-full h-1.5 bg-white/10 rounded-full mb-8 overflow-hidden">
                   <div 
                     className="h-full bg-primary transition-all duration-300"
                     style={{ width: `${((qIndex + 1) / SAMPLE_QUESTIONS.length) * 100}%` }}
@@ -268,22 +263,22 @@ export default function RTOExamLanding() {
                 {/* Options */}
                 <div className="flex flex-col gap-3">
                   {activeQuestion.options.map((opt, idx) => {
-                    let btnStyle = "bg-white/5 border-border hover:bg-white/10 hover:border-text-3"
+                    let btnStyle = "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/30 text-slate-200"
                     let badge = null
 
                     if (selectedOpt === idx) {
-                      btnStyle = "bg-primary/10 border-primary text-primary"
+                      btnStyle = "bg-primary/20 border-primary text-white font-semibold"
                     }
 
                     if (isAnswered) {
                       if (idx === activeQuestion.ans) {
-                        btnStyle = "bg-success/15 border-success text-success"
-                        badge = <CheckCircle2 className="w-5 h-5 shrink-0 text-success" />
+                        btnStyle = "bg-emerald-500/10 border-emerald-500 text-emerald-400 font-semibold"
+                        badge = <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
                       } else if (selectedOpt === idx) {
-                        btnStyle = "bg-danger/15 border-danger/40 text-danger"
-                        badge = <XCircle className="w-5 h-5 shrink-0 text-danger" />
+                        btnStyle = "bg-red-500/10 border-red-500 text-red-400 font-semibold"
+                        badge = <XCircle className="w-5 h-5 shrink-0 text-red-400" />
                       } else {
-                        btnStyle = "bg-white/2 opacity-40 border-border/40 cursor-default"
+                        btnStyle = "bg-white/2 opacity-30 border-white/5 cursor-default text-slate-400"
                       }
                     }
 
@@ -302,7 +297,7 @@ export default function RTOExamLanding() {
                 </div>
 
                 {/* Action panel & Explanation */}
-                <div className="mt-8 pt-6 border-t border-border/60">
+                <div className="mt-8 pt-6 border-t border-white/10">
                   <AnimatePresence mode="wait">
                     {!isAnswered ? (
                       <div className="flex justify-end">
@@ -320,9 +315,9 @@ export default function RTOExamLanding() {
                         animate={{ opacity: 1, height: 'auto' }}
                         className="flex flex-col gap-5"
                       >
-                        <div className="p-4 bg-white/5 rounded-2xl border border-border/40 text-sm leading-relaxed">
-                          <p className="text-xs font-mono text-text-3 mb-1 uppercase tracking-widest">EXPLANATION</p>
-                          <p className="text-text-2">{activeQuestion.exp}</p>
+                        <div className="p-4 bg-white/5 rounded-2xl border border-white/10 text-sm leading-relaxed">
+                          <p className="text-xs font-mono text-slate-400 mb-1 uppercase tracking-widest">EXPLANATION</p>
+                          <p className="text-slate-200">{activeQuestion.exp}</p>
                         </div>
                         <div className="flex justify-end">
                           <button
@@ -385,7 +380,13 @@ export default function RTOExamLanding() {
 
                 <div className="flex flex-col gap-3 max-w-md mx-auto">
                   <button
-                    onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+                    onClick={() => {
+                      if (Capacitor.isNativePlatform()) {
+                        router.push('/login')
+                      } else {
+                        signIn('google', { callbackUrl: '/dashboard' })
+                      }
+                    }}
                     className="w-full py-4 bg-primary hover:bg-primary-hover text-white rounded-2xl font-bold text-sm transition-all duration-300 shadow-lg shadow-primary/25 flex items-center justify-center gap-2 hover:-translate-y-0.5"
                   >
                     Start Full Practice (Login with Google) <ArrowRight className="w-4 h-4" />
@@ -407,33 +408,33 @@ export default function RTOExamLanding() {
       <div className="max-w-5xl mx-auto px-4 mt-24">
         <h4 className="text-center text-xs font-mono uppercase tracking-widest text-primary mb-12">FEATURES BUILT FOR SUCCESS</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 bg-surface/40 border border-border/40 rounded-3xl">
+          <div className="p-6 bg-slate-900/40 border border-white/10 rounded-3xl hover:border-white/20 transition-all duration-300">
             <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mb-4">
               <BookOpen className="w-5 h-5" />
             </div>
             <h5 className="text-base font-bold text-white mb-2">Interactive Syllabus</h5>
-            <p className="text-text-3 text-xs leading-relaxed">Step-by-step modular cards detailing clutch control, gear changes, intersection rules, and hazard identification.</p>
+            <p className="text-slate-300 text-xs leading-relaxed">Step-by-step modular cards detailing clutch control, gear changes, intersection rules, and hazard identification.</p>
           </div>
-          <div className="p-6 bg-surface/40 border border-border/40 rounded-3xl">
+          <div className="p-6 bg-slate-900/40 border border-white/10 rounded-3xl hover:border-white/20 transition-all duration-300">
             <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-4">
               <FileCheck className="w-5 h-5" />
             </div>
             <h5 className="text-base font-bold text-white mb-2">Official RTO Mock Exam</h5>
-            <p className="text-text-3 text-xs leading-relaxed">Timed mock tests mimicking real state RTO criteria. Instantly tracks weak categories for targeted review.</p>
+            <p className="text-slate-300 text-xs leading-relaxed">Timed mock tests mimicking real state RTO criteria. Instantly tracks weak categories for targeted review.</p>
           </div>
-          <div className="p-6 bg-surface/40 border border-border/40 rounded-3xl">
+          <div className="p-6 bg-slate-900/40 border border-white/10 rounded-3xl hover:border-white/20 transition-all duration-300">
             <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400 flex items-center justify-center mb-4">
               <Flame className="w-5 h-5" />
             </div>
             <h5 className="text-base font-bold text-white mb-2">3D & HTML Simulations</h5>
-            <p className="text-text-3 text-xs leading-relaxed">Interactive parking, rain driving, and blind-spot visualizers designed to build muscle memory and instincts.</p>
+            <p className="text-slate-300 text-xs leading-relaxed">Interactive parking, rain driving, and blind-spot visualizers designed to build muscle memory and instincts.</p>
           </div>
         </div>
       </div>
 
       {/* APK Android App Trust Banner & Direct Download Section */}
       <div className="max-w-4xl mx-auto px-4 mt-28">
-        <div className="bg-surface/50 border border-border/60 rounded-[32px] p-8 sm:p-10 relative overflow-hidden">
+        <div className="bg-slate-900/40 border border-white/10 rounded-[32px] p-8 sm:p-10 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
           
           <div className="flex flex-col md:flex-row gap-8 items-start md:items-center justify-between">
@@ -443,7 +444,7 @@ export default function RTOExamLanding() {
                 <span>OFFICIAL ANDROID APP</span>
               </div>
               <h4 className="text-2xl font-display font-bold text-white">Practice Offline Anywhere</h4>
-              <p className="text-text-3 text-xs sm:text-sm leading-relaxed max-w-xl">
+              <p className="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-xl">
                 Get our official Android app for instant offline mock tests and quick revisions. Works directly without an internet connection.
               </p>
             </div>
@@ -456,30 +457,30 @@ export default function RTOExamLanding() {
               >
                 <Download className="w-4.5 h-4.5" /> Download App APK (7.7 MB)
               </a>
-              <span className="text-[10px] text-center font-mono text-text-3">v1.0.0 Stable Build | Signed Release</span>
+              <span className="text-[10px] text-center font-mono text-slate-400">v1.0.0 Stable Build | Signed Release</span>
             </div>
           </div>
 
           {/* Sideload APK Security Guidance block to prevent virus concerns */}
-          <div className="mt-8 pt-6 border-t border-border/40 flex flex-col gap-4">
-            <div className="flex gap-3 items-start p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+          <div className="mt-8 pt-6 border-t border-white/10 flex flex-col gap-4">
+            <div className="flex gap-3 items-start p-4 bg-emerald-500/5 border border-emerald-500/15 rounded-2xl">
               <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
               <div className="flex flex-col gap-1">
-                <h5 className="text-xs font-bold text-white uppercase tracking-wider font-mono">100% Safe & Ad-Free Certification</h5>
-                <p className="text-[11px] text-text-3 leading-relaxed">
+                <h5 className="text-xs font-bold text-emerald-300 uppercase tracking-wider font-mono">100% Safe & Ad-Free Certification</h5>
+                <p className="text-[11px] text-slate-300 leading-relaxed">
                   Our application is certified clean. It requires zero dangerous permissions (no contact reading, no camera access, no location tracking) and is completely free of tracking scripts or third-party ads.
                 </p>
               </div>
             </div>
 
-            <div className="flex gap-3 items-start p-4 bg-blue-500/5 border border-blue-500/10 rounded-2xl">
-              <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+            <div className="flex gap-3 items-start p-4 bg-amber-500/5 border border-amber-500/15 rounded-2xl">
+              <Info className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
               <div className="flex flex-col gap-1">
-                <h5 className="text-xs font-bold text-white uppercase tracking-wider font-mono">Why does my phone say "Play Protect / Unknown Source Warning"?</h5>
-                <p className="text-[11px] text-text-3 leading-relaxed">
+                <h5 className="text-xs font-bold text-amber-300 uppercase tracking-wider font-mono">Why does my phone say "Play Protect / Unknown Source Warning"?</h5>
+                <p className="text-[11px] text-slate-300 leading-relaxed">
                   Because this app is installed directly from our website (sideloaded) rather than the Google Play Store, Android shows a generic caution warning. This is standard security for all developer apps. To install:
                 </p>
-                <ol className="text-[11px] text-text-3 list-decimal list-inside pl-1 mt-1.5 flex flex-col gap-1 font-medium">
+                <ol className="text-[11px] text-slate-300 list-decimal list-inside pl-1 mt-1.5 flex flex-col gap-1 font-medium">
                   <li>Tap the downloaded file to start installation.</li>
                   <li>When the warning popup appears, tap <span className="text-white font-bold">"More details"</span> (or the small arrow).</li>
                   <li>Tap <span className="text-emerald-400 font-bold">"Install anyway"</span> to complete setup securely.</li>
