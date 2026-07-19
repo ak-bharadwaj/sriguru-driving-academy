@@ -9,7 +9,6 @@ import { Home, BookOpen, BarChart2, User } from 'lucide-react'
 import { XPToast } from '@/components/shared/XPToast'
 import { LevelUpOverlay } from '@/components/shared/LevelUpOverlay'
 import { BadgeReveal } from '@/components/shared/BadgeReveal'
-import { StreakReminder } from '@/components/shared/StreakReminder'
 import { useLanguageStore } from '@/store/languageStore'
 import { GuidedTour } from '@/components/shared/GuidedTour'
 
@@ -28,7 +27,7 @@ const BOTTOM_NAV: NavTab[] = [
   { label: 'Profile',  labelHI: 'प्रोफ़ाइल', labelTE: 'ప్రొఫైల్',   path: '/profile',      icon: User },
 ]
 
-const HIDDEN_NAV_PATHS = ['/onboarding', '/login', '/forgot-password', '/unauthorized']
+const HIDDEN_NAV_PATHS = ['/', '/onboarding', '/login', '/forgot-password', '/unauthorized']
 
 export function StudentLayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -110,7 +109,6 @@ export function StudentLayoutWrapper({ children }: { children: React.ReactNode }
       <XPToast />
       <LevelUpOverlay />
       <BadgeReveal />
-      <StreakReminder />
       <GuidedTour />
     </div>
   )

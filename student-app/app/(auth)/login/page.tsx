@@ -121,9 +121,9 @@ export default function CentralLoginHub() {
 
       // Real Google OAuth redirect in production
       await signIn('google', { callbackUrl: '/dashboard' })
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
-      setErrorMsg('Google sign-in failed. Please try again.')
+      setErrorMsg(`Google sign-in failed: ${err?.message || JSON.stringify(err) || err}`)
       setIsAuthenticating(false)
     }
   }
