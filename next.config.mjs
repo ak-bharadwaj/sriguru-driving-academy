@@ -5,9 +5,14 @@ const withPWA = withPWAInit({
   disable: process.env.NODE_ENV === "development",
   register: true,
   skipWaiting: true,
+  publicExcludes: ["!downloads/**/*"],
   workboxOptions: {
     navigateFallbackDenylist: [/^\/admin/, /^\/instructor/, /^\/student/, /^\/api/],
     runtimeCaching: [
+      {
+        urlPattern: /^\/downloads(\/.*)?$/,
+        handler: 'NetworkOnly',
+      },
       {
         urlPattern: /^\/api(\/.*)?$/,
         handler: 'NetworkOnly',
@@ -84,6 +89,23 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/downloads/:path*',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/vnd.android.package-archive',
+          },
+          {
+            key: 'Content-Disposition',
+            value: 'attachment; filename="sriguru-rto-app.apk"',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
           },
         ],
       },

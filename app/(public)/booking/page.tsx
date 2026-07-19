@@ -1401,7 +1401,7 @@ export default function PublicBookingSystem() {
                   
                   <a
                     href="/downloads/sriguru-rto-app.apk"
-                    download
+                    download="sriguru-rto-app.apk"
                     className="flex-1 px-5 py-3.5 bg-void border border-border text-text-1 hover:border-primary/50 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200 text-center"
                   >
                     Download Android App (APK)
