@@ -1290,7 +1290,7 @@ export default function StudentLearnPortal() {
                           key="details-actions" 
                           initial={{ opacity: 0 }} 
                           animate={{ opacity: 1 }} 
-                          className="flex gap-3"
+                          className="flex gap-3 pb-8 sm:pb-0 pr-12 sm:pr-0"
                         >
                           <button
                             onClick={() => setSelectedCard(null)}

@@ -75,61 +75,69 @@ const TelemetryBar = ({
   const t = COMMON_SIM_T[language] || COMMON_SIM_T.EN
 
   return (
-    <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 relative z-30 w-full shrink-0">
-      <div className="flex items-center gap-3">
-        <div className="relative w-12 h-12 flex-shrink-0 bg-void border border-white/10 rounded-full flex items-center justify-center shadow-inner">
-          <svg className="w-9 h-9 text-text-2 transition-transform duration-[1000ms] ease-in-out" style={{ transform: `rotate(${activeWheelAngle}deg)` }} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div className="h-[90px] min-[400px]:h-[80px] bg-[#07090e] border-t border-white/10 px-2.5 min-[380px]:px-4 py-2 flex items-center justify-between gap-1.5 min-[380px]:gap-3 relative z-30 w-full shrink-0 overflow-x-hidden">
+      {/* Left: Telemetry Data */}
+      <div className="flex items-center gap-1.5 min-[380px]:gap-2 shrink-0">
+        <div className="relative w-8 h-8 min-[380px]:w-10 min-[380px]:h-10 shrink-0 bg-void border border-white/10 rounded-full flex items-center justify-center shadow-inner">
+          <svg className="w-6 h-6 min-[380px]:w-8 min-[380px]:h-8 text-text-2 transition-transform duration-[1000ms] ease-in-out" style={{ transform: `rotate(${activeWheelAngle}deg)` }} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" />
             <line x1="50" y1="10" x2="50" y2="50" stroke="currentColor" strokeWidth="8" />
             <line x1="18" y1="68" x2="50" y2="50" stroke="currentColor" strokeWidth="8" />
             <line x1="82" y1="68" x2="50" y2="50" stroke="currentColor" strokeWidth="8" />
             <circle cx="50" cy="50" r="10" fill="currentColor" />
           </svg>
-          <span className="absolute -bottom-1 right-[-4px] text-[9px] font-mono bg-void border border-white/10 px-0.5 rounded text-accent">
+          <span className="absolute -bottom-1 right-[-4px] text-[8px] font-mono bg-void border border-white/10 px-0.5 rounded text-accent">
             {activeWheelAngle}°
           </span>
         </div>
 
         <div className="flex flex-col justify-center">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold font-mono text-text-1 w-8">{speed} <span className="text-[9px] text-text-3">{t.kmh}</span></span>
-            <div className="flex gap-1 bg-void border border-white/5 p-1 rounded text-[10px] font-mono font-bold">
+          <div className="flex items-center gap-1">
+            <span className="text-xs min-[380px]:text-sm font-bold font-mono text-text-1">{speed}<span className="text-[8px] text-text-3 font-normal"> km/h</span></span>
+            
+            {/* Gear display: Full strip on desktop, compact badge on mobile */}
+            <div className="hidden min-[480px]:flex gap-0.5 bg-void border border-white/5 p-0.5 rounded text-[9px] font-mono font-bold">
               {["P", "R", "N", "D", "1", "2"].map(g => (
-                <span key={g} className={`w-4 h-4 rounded-sm flex items-center justify-center transition-colors ${activeGear === g ? 'bg-primary text-white' : 'text-text-3 opacity-40'}`}>
+                <span key={g} className={`w-3.5 h-3.5 rounded-xs flex items-center justify-center transition-colors ${activeGear === g ? 'bg-primary text-white' : 'text-text-3 opacity-40'}`}>
                   {g}
                 </span>
               ))}
             </div>
+            <span className="flex min-[480px]:hidden px-1.5 py-0.5 bg-primary/20 border border-primary/40 text-primary font-mono text-[9px] font-bold rounded">
+              {activeGear}
+            </span>
           </div>
-          <span className="text-[10px] font-mono text-text-3 uppercase tracking-wider mt-1">
+          <span className="text-[8px] min-[380px]:text-[9px] font-mono text-text-3 uppercase tracking-wider mt-0.5">
             {t.telemetry}
           </span>
         </div>
       </div>
 
-      <div className="flex-1 max-w-[280px]">
-        <h4 className="text-[11px] sm:text-xs font-bold text-accent font-display uppercase tracking-wider leading-none">
+      {/* Middle: Title */}
+      <div className="flex-1 min-w-0 px-1">
+        <h4 className="text-[10px] min-[380px]:text-[11px] sm:text-xs font-bold text-accent font-display uppercase tracking-wider leading-tight truncate">
           {title}
         </h4>
-        <p className="text-[10px] sm:text-xs text-text-2 font-body mt-1 leading-snug line-clamp-2">
+        <p className="hidden sm:block text-[10px] sm:text-xs text-text-2 font-body mt-0.5 leading-snug line-clamp-2">
           {desc}
         </p>
       </div>
 
-      <div className="flex gap-2">
+      {/* Right: Action Buttons (Reset & Next) */}
+      <div className="flex items-center gap-1 min-[380px]:gap-2 shrink-0 z-40">
         {step > 0 && (
-          <button onClick={onReset} disabled={isAnimating} className="p-2 bg-void hover:bg-white/[0.02] border border-border text-text-3 hover:text-text-1 rounded-xl transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none" title="Reset">
-            <RotateCcw className="w-4 h-4" />
+          <button onClick={onReset} disabled={isAnimating} className="p-1.5 min-[380px]:p-2 bg-void hover:bg-white/[0.02] border border-border text-text-3 hover:text-text-1 rounded-xl transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none" title="Reset">
+            <RotateCcw className="w-3.5 h-3.5 min-[380px]:w-4 min-[380px]:h-4" />
           </button>
         )}
 
-        <button onClick={onNext} disabled={isAnimating || step === maxSteps} className={`px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5 shadow-lg transition-all active:scale-95 disabled:pointer-events-none ${step === maxSteps ? 'bg-success/20 border border-success/30 text-success' : 'bg-primary hover:bg-primary/95 text-white shadow-primary/10 disabled:opacity-40'}`}>
+        <button onClick={onNext} disabled={isAnimating || step === maxSteps} className={`px-3 min-[380px]:px-4 py-1.5 min-[380px]:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5 shadow-lg transition-all active:scale-95 disabled:pointer-events-none shrink-0 ${step === maxSteps ? 'bg-success/20 border border-success/30 text-success' : 'bg-primary hover:bg-primary/95 text-white shadow-primary/10 disabled:opacity-40'}`}>
           {step === 0 ? (
-            <><Play className="w-3 h-3 fill-current" /><span>{t.begin}</span></>
+            <><Play className="w-3 h-3 fill-current shrink-0" /><span className="whitespace-nowrap">{t.begin}</span></>
           ) : step === maxSteps ? (
-            <><Check className="w-3 h-3" /><span>{successText}</span></>
+            <><Check className="w-3 h-3 shrink-0" /><span className="whitespace-nowrap">{successText}</span></>
           ) : (
-            <><span>{t.next}</span><ArrowRight className="w-3 h-3" /></>
+            <><span className="whitespace-nowrap">{t.next}</span><ArrowRight className="w-3 h-3 shrink-0" /></>
           )}
         </button>
       </div>
@@ -424,32 +432,32 @@ export const VehicleStartupSimulation: React.FC<SimulationProps> = ({ onComplete
       </div>
 
       {/* BOTTOM CONTROLS PANE */}
-      <div className="h-[90px] bg-[#07090e] border-t border-white/10 px-4 py-2 flex items-center justify-between gap-4 relative z-50">
-        <div className="flex items-center gap-3">
-          <div className={`relative w-12 h-12 flex-shrink-0 bg-void border border-white/10 rounded-full flex items-center justify-center shadow-inner transition-colors duration-1000 ${step === 4 ? 'text-primary border-primary/30 shadow-[0_0_15px_rgba(56,189,248,0.2)]' : 'text-text-3'}`}>
-            <Key className={`w-6 h-6 transition-transform duration-500 ${step === 4 ? 'rotate-90' : 'rotate-0'}`} />
+      <div className="h-[90px] min-[400px]:h-[80px] bg-[#07090e] border-t border-white/10 px-2.5 min-[380px]:px-4 py-2 flex items-center justify-between gap-1.5 min-[380px]:gap-3 relative z-30 w-full shrink-0 overflow-x-hidden">
+        <div className="flex items-center gap-1.5 min-[380px]:gap-2 shrink-0">
+          <div className={`relative w-8 h-8 min-[380px]:w-10 min-[380px]:h-10 shrink-0 bg-void border border-white/10 rounded-full flex items-center justify-center shadow-inner transition-colors duration-1000 ${step === 4 ? 'text-primary border-primary/30 shadow-[0_0_15px_rgba(56,189,248,0.2)]' : 'text-text-3'}`}>
+            <Key className={`w-4 h-4 min-[380px]:w-5 min-[380px]:h-5 transition-transform duration-500 ${step === 4 ? 'rotate-90' : 'rotate-0'}`} />
           </div>
           <div className="flex flex-col justify-center">
-            <span className="text-sm font-bold font-mono text-text-1 w-10">{rpm} <span className="text-[9px] text-text-3">{t.rpm}</span></span>
-            <span className="text-[10px] font-mono text-text-3 uppercase tracking-wider mt-1">{t.telemetry}</span>
+            <span className="text-xs min-[380px]:text-sm font-bold font-mono text-text-1">{rpm} <span className="text-[8px] text-text-3">{t.rpm}</span></span>
+            <span className="text-[8px] min-[380px]:text-[9px] font-mono text-text-3 uppercase tracking-wider mt-0.5">{t.telemetry}</span>
           </div>
         </div>
-        <div className="flex-1 max-w-[280px]">
-          <h4 className="text-[11px] sm:text-xs font-bold text-accent font-display uppercase tracking-wider leading-none">
+        <div className="flex-1 min-w-0 px-1">
+          <h4 className="text-[10px] min-[380px]:text-[11px] sm:text-xs font-bold text-accent font-display uppercase tracking-wider leading-tight truncate">
             {step === 0 ? tMod.initialTitle : tMod.steps[step - 1].t}
           </h4>
-          <p className="text-[10px] sm:text-xs text-text-2 font-body mt-1 leading-snug line-clamp-2">
+          <p className="hidden sm:block text-[10px] sm:text-xs text-text-2 font-body mt-0.5 leading-snug line-clamp-2">
             {step === 0 ? tMod.initialDesc : tMod.steps[step - 1].d}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-1 min-[380px]:gap-2 shrink-0 z-40">
           {step > 0 && (
-            <button onClick={handleReset} disabled={isAnimating} className="p-2 bg-void hover:bg-white/[0.02] border border-border text-text-3 hover:text-text-1 rounded-xl transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none">
-              <RotateCcw className="w-4 h-4" />
+            <button onClick={handleReset} disabled={isAnimating} className="p-1.5 min-[380px]:p-2 bg-void hover:bg-white/[0.02] border border-border text-text-3 hover:text-text-1 rounded-xl transition-all active:scale-95 disabled:opacity-30 disabled:pointer-events-none">
+              <RotateCcw className="w-3.5 h-3.5 min-[380px]:w-4 min-[380px]:h-4" />
             </button>
           )}
-          <button onClick={handleNext} disabled={isAnimating || step === 4} className={`px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5 shadow-lg transition-all active:scale-95 disabled:pointer-events-none ${step === 4 ? 'bg-success/20 border border-success/30 text-success' : 'bg-primary hover:bg-primary/95 text-white shadow-primary/10 disabled:opacity-40'}`}>
-            {step === 0 ? <><Play className="w-3 h-3 fill-current" /><span>{t.begin}</span></> : step === 4 ? <><Check className="w-3 h-3" /><span>{tMod.engineOn}</span></> : <><span>{t.next}</span><ArrowRight className="w-3 h-3" /></>}
+          <button onClick={handleNext} disabled={isAnimating || step === 4} className={`px-3 min-[380px]:px-4 py-1.5 min-[380px]:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-xl flex items-center gap-1.5 shadow-lg transition-all active:scale-95 disabled:pointer-events-none shrink-0 ${step === 4 ? 'bg-success/20 border border-success/30 text-success' : 'bg-primary hover:bg-primary/95 text-white shadow-primary/10 disabled:opacity-40'}`}>
+            {step === 0 ? <><Play className="w-3 h-3 fill-current shrink-0" /><span className="whitespace-nowrap">{t.begin}</span></> : step === 4 ? <><Check className="w-3 h-3 shrink-0" /><span className="whitespace-nowrap">{tMod.engineOn}</span></> : <><span className="whitespace-nowrap">{t.next}</span><ArrowRight className="w-3 h-3 shrink-0" /></>}
           </button>
         </div>
       </div>
