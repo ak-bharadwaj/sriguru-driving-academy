@@ -300,7 +300,9 @@ export default function AdminStudentsPage() {
   const activeLang = language.toUpperCase() as keyof typeof PAGE_DICT
   const t = PAGE_DICT[activeLang] || PAGE_DICT.EN
 
+  const [viewTab, setViewTab] = useState<'ACADEMY' | 'RTO'>('ACADEMY')
   const [students, setStudents] = useState<StudentData[]>([])
+  const [rtoLeads, setRtoLeads] = useState<StudentData[]>([])
   const [instructors, setInstructors] = useState<InstructorOption[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -326,6 +328,7 @@ export default function AdminStudentsPage() {
       if (res.ok) {
         const data = await res.json()
         setStudents(data.students || [])
+        setRtoLeads(data.rtoLeads || [])
         setInstructors(data.instructors || [])
       }
     } catch (e) {
@@ -343,12 +346,14 @@ export default function AdminStudentsPage() {
   }, [])
 
   // Filter logic
-  const filtered = students.filter(s => {
+  const activeList = viewTab === 'ACADEMY' ? students : rtoLeads
+  const filtered = activeList.filter(s => {
     const matchesSearch = (s.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (s.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (s.phone && s.phone.includes(searchTerm))
 
     if (!matchesSearch) return false
+    if (viewTab === 'RTO') return true
 
     switch (filterMode) {
       case 'UNPAID': return s.feeStatus !== 'PAID'
@@ -557,7 +562,6 @@ export default function AdminStudentsPage() {
     { label: t.all, mode: 'ALL', count: totalStudents },
     { label: t.unpaid, mode: 'UNPAID', count: unpaidCount },
     { label: t.testSched, mode: 'TEST_UPCOMING', count: testUpcoming },
-    { label: t.noInst, mode: 'NO_INSTRUCTOR', count: students.filter(s => !s.instructorId).length },
   ]
 
   return (
@@ -576,45 +580,62 @@ export default function AdminStudentsPage() {
           </div>
         </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
-                <Users className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-semibold text-[rgb(var(--color-text-3))]">{t.total}</span>
-            </div>
-            <span className="text-2xl font-bold">{totalStudents}</span>
-          </div>
-          <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-semibold text-[rgb(var(--color-text-3))]">{t.feePaid}</span>
-            </div>
-            <span className="text-2xl font-bold text-emerald-600">{paidCount}</span>
-          </div>
-          <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-600 flex items-center justify-center">
-                <AlertTriangle className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-semibold text-[rgb(var(--color-text-3))]">{t.unpaid}</span>
-            </div>
-            <span className="text-2xl font-bold text-red-600">{unpaidCount}</span>
-          </div>
-          <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center">
-                <Calendar className="w-5 h-5" />
-              </div>
-              <span className="text-sm font-semibold text-[rgb(var(--color-text-3))]">{t.testSched}</span>
-            </div>
-            <span className="text-2xl font-bold text-amber-600">{testUpcoming}</span>
-          </div>
+        {/* Tab Toggle Navigation */}
+        <div className="flex border-b border-[rgb(var(--color-border))] gap-6">
+          <button
+            onClick={() => { setViewTab('ACADEMY'); setFilterMode('ALL'); }}
+            className={`pb-3 font-bold text-sm transition-colors relative ${
+              viewTab === 'ACADEMY' 
+                ? 'text-[rgb(var(--color-primary))]' 
+                : 'text-[rgb(var(--color-text-3))] hover:text-[rgb(var(--color-text-1))]'
+            }`}
+          >
+            📋 Driving Academy Students ({students.length})
+            {viewTab === 'ACADEMY' && (
+              <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[rgb(var(--color-primary))] rounded-full" />
+            )}
+          </button>
+          <button
+            onClick={() => { setViewTab('RTO'); setFilterMode('ALL'); }}
+            className={`pb-3 font-bold text-sm transition-colors relative ${
+              viewTab === 'RTO' 
+                ? 'text-[rgb(var(--color-primary))]' 
+                : 'text-[rgb(var(--color-text-3))] hover:text-[rgb(var(--color-text-1))]'
+            }`}
+          >
+            🚦 RTO Web Portal Leads ({rtoLeads.length})
+            {viewTab === 'RTO' && (
+              <span className="absolute bottom-0 inset-x-0 h-0.5 bg-[rgb(var(--color-primary))] rounded-full" />
+            )}
+          </button>
         </div>
+
+        {/* Stats Row */}
+        {viewTab === 'ACADEMY' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
+                  <Users className="w-5 h-5" />
+                </div>
+                <span className="text-sm font-semibold text-[rgb(var(--color-text-3))]">Total Enrolled Students</span>
+              </div>
+              <span className="text-2xl font-bold">{totalStudents}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-[rgb(var(--color-surface))] border border-[rgb(var(--color-border))] rounded-2xl p-5 shadow-sm">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center">
+                  <Users className="w-5 h-5" />
+                </div>
+                <span className="text-sm font-semibold text-[rgb(var(--color-text-3))]">Total Registered RTO Users</span>
+              </div>
+              <span className="text-2xl font-bold text-orange-500">{rtoLeads.length}</span>
+            </div>
+          </div>
+        )}
 
         {/* Toolbar */}
         <div className="flex flex-col md:flex-row gap-4 bg-[rgb(var(--color-surface))] p-4 rounded-2xl border border-[rgb(var(--color-border))] shadow-sm">
@@ -628,27 +649,14 @@ export default function AdminStudentsPage() {
               className="w-full bg-[rgb(var(--color-void))] border border-[rgb(var(--color-border))] rounded-xl py-2.5 pl-11 pr-4 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm font-medium"
             />
           </div>
-          <button 
-            onClick={() => openModal('create', '')}
-            className="px-4 py-2 bg-[rgb(var(--color-primary))] text-white font-bold rounded-xl flex items-center gap-2 text-sm shadow-sm hover:bg-[rgb(var(--color-primary))]/90 transition shrink-0"
-          >
-            <Plus className="w-4 h-4" /> {t.createStudent}
-          </button>
-          <div className="flex gap-2 flex-wrap">
-            {filterPills.map(pill => (
-              <button
-                key={pill.mode}
-                onClick={() => setFilterMode(pill.mode)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                  filterMode === pill.mode
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'bg-[rgb(var(--color-border))] text-[rgb(var(--color-text-2))] hover:bg-[rgb(var(--color-border))]'
-                }`}
-              >
-                {pill.label} ({pill.count})
-              </button>
-            ))}
-          </div>
+          {viewTab === 'ACADEMY' && (
+            <button 
+              onClick={() => openModal('create', '')}
+              className="px-4 py-2 bg-[rgb(var(--color-primary))] text-white font-bold rounded-xl flex items-center gap-2 text-sm shadow-sm hover:bg-[rgb(var(--color-primary))]/90 transition shrink-0"
+            >
+              <Plus className="w-4 h-4" /> {t.createStudent}
+            </button>
+          )}
         </div>
 
         {/* Student List */}
@@ -691,35 +699,41 @@ export default function AdminStudentsPage() {
                     </div>
 
                     <div className="flex items-center gap-3 flex-wrap">
-                      {trainingBadge(stu.trainingType)}
-                      {feeStatusBadge(stu.feeStatus)}
+                      {viewTab === 'ACADEMY' ? (
+                        <>
+                          {trainingBadge(stu.trainingType)}
+                          {feeStatusBadge(stu.feeStatus)}
 
-                      {stu.courseFee ? (
-                        <span className="text-xs font-bold text-[rgb(var(--color-text-2))] bg-[rgb(var(--color-border))] px-2.5 py-1 rounded-lg flex items-center gap-1">
-                          <IndianRupee className="w-3 h-3" />
-                          {stu.totalPaid.toLocaleString()} / {stu.courseFee.toLocaleString()}
-                        </span>
+                          {stu.courseFee ? (
+                            <span className="text-xs font-bold text-[rgb(var(--color-text-2))] bg-[rgb(var(--color-border))] px-2.5 py-1 rounded-lg flex items-center gap-1">
+                              <IndianRupee className="w-3 h-3" />
+                              {stu.totalPaid.toLocaleString()} / {stu.courseFee.toLocaleString()}
+                            </span>
+                          ) : (
+                            <span className="text-xs font-medium text-slate-400 italic">{t.noFeeSet}</span>
+                          )}
+
+                          <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
+                            stu.status === 'ACTIVE' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' :
+                            stu.status === 'COMPLETED' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400' :
+                            'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400'
+                          }`}>
+                            {stu.status === 'ACTIVE' ? t.active : stu.status === 'COMPLETED' ? t.completed : t.dropped}
+                          </span>
+
+                          {isExpanded ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
+                        </>
                       ) : (
-                        <span className="text-xs font-medium text-slate-400 italic">{t.noFeeSet}</span>
+                        <span className="text-xs text-[rgb(var(--color-text-3))] font-bold bg-[rgb(var(--color-border))] px-2.5 py-1 rounded-lg">
+                          Registered: {new Date(stu.enrolledAt).toLocaleDateString()}
+                        </span>
                       )}
-
-                      <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
-                        stu.status === 'ACTIVE' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400' :
-                        stu.status === 'COMPLETED' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400' :
-                        'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400'
-                      }`}>
-                        {stu.status === 'ACTIVE' ? t.active : stu.status === 'COMPLETED' ? t.completed : t.dropped}
-                      </span>
-
-
-
-                      {isExpanded ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
                     </div>
                   </div>
 
                   {/* Expanded Details */}
                   <AnimatePresence>
-                    {isExpanded && (
+                    {isExpanded && viewTab === 'ACADEMY' && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
@@ -756,12 +770,6 @@ export default function AdminStudentsPage() {
                                 <Award className="w-3.5 h-3.5" /> {t.recordResult}
                               </button>
                             )}
-                            <button
-                              onClick={(e) => { e.stopPropagation(); openModal('assign', stu.id) }}
-                              className="px-4 py-2 bg-[rgb(var(--color-border))] text-[rgb(var(--color-text-2))] rounded-xl text-xs font-bold hover:bg-[rgb(var(--color-border))] transition-colors flex items-center gap-1.5"
-                            >
-                              <UserCheck className="w-3.5 h-3.5" /> {stu.instructorId ? t.changeInst : t.assignInst}
-                            </button>
                             
                             {stu.status === 'ACTIVE' ? (
                               <button

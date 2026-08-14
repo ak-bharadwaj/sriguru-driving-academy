@@ -48,8 +48,9 @@ export const authOptions: NextAuthOptions = {
               await prisma.student.create({
                 data: {
                   userId: dbUser.id,
-                  trainingType: 'BEGINNER',
-                  status: 'ACTIVE'
+                  trainingType: 'RTO_FAST_TRACK',
+                  status: 'ACTIVE',
+                  regNo: `RTO-LEAD-${dbUser.id}`
                 }
               })
             }
@@ -158,8 +159,9 @@ export const authOptions: NextAuthOptions = {
                 await prisma.student.create({
                   data: {
                     userId: dbUser.id,
-                    trainingType: 'BEGINNER',
-                    status: 'ACTIVE'
+                    trainingType: 'RTO_FAST_TRACK',
+                    status: 'ACTIVE',
+                    regNo: `RTO-LEAD-${dbUser.id}`
                   }
                 })
               }
@@ -212,14 +214,15 @@ export const authOptions: NextAuthOptions = {
                 avatarUrl: user.image || null,
               }
             })
-            // Auto-create a Student record linked to this user
-            await prisma.student.create({
-              data: {
-                userId: dbUser.id,
-                trainingType: 'BEGINNER',
-                status: 'ACTIVE',
-              }
-            })
+             // Auto-create a Student record linked to this user
+             await prisma.student.create({
+               data: {
+                 userId: dbUser.id,
+                 trainingType: 'RTO_FAST_TRACK',
+                 status: 'ACTIVE',
+                 regNo: `RTO-LEAD-${dbUser.id}`
+               }
+             })
           }
 
           // Attach db id and role to the user object for the jwt callback

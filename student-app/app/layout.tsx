@@ -57,6 +57,12 @@ export const metadata: Metadata = {
     follow: true,
   },
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/logo.png",
+  },
   openGraph: {
     type: "website",
     locale: "en_IN",

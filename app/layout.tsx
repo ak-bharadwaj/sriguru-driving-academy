@@ -47,6 +47,12 @@ export const metadata: Metadata = {
     "clutch control and parallel parking training"
   ],
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

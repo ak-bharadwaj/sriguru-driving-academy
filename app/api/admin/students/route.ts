@@ -28,6 +28,7 @@ export async function GET() {
       return {
         id: s.id,
         userId: s.userId,
+        regNo: s.regNo,
         name: s.user.name,
         email: s.user.email,
         phone: s.user.phone,
@@ -47,8 +48,12 @@ export async function GET() {
       }
     })
 
+    const academyStudents = formatted.filter(s => !s.regNo?.startsWith('RTO-LEAD-'))
+    const rtoLeads = formatted.filter(s => s.regNo?.startsWith('RTO-LEAD-'))
+
     return NextResponse.json({
-      students: formatted,
+      students: academyStudents,
+      rtoLeads: rtoLeads,
       instructors: []
     }, {
       headers: { 'Cache-Control': 'private, max-age=15, stale-while-revalidate=60' }
